@@ -1,72 +1,247 @@
 VERSION 10
-INCLUDE _std_small
-SYNCHRONOUS_ONLY
-HELP hlp1, view("help nwsaom_estat")
-OK ok1, label("OK")
-CANCEL can1, label("Cancel")
-SUBMIT sub1, label("Submit")
-RESET res1
-POSITION 10 10 760 470
 
-DIALOG main, title("nwsaom postestimation - estat gof (RSiena-style goodness of fit)")
+
+SYNCHRONOUS_ONLY
+INCLUDE _std_mlarge
+DEFINE _dlgwd 940
+DEFINE _dlght 480
+INCLUDE header
+
+HELP hlp1, view("help nwsaom_estat")
+RESET res1
+
+DIALOG statistic, tabtitle("Statistic")
 BEGIN
-  TEXT tx_note 20 20 720 30, label("Operates on the nwsaom fit currently in memory - no network is selected here.")
-  GROUPBOX gb_stats 20 56 340 190, label("Auxiliary statistics (stats()); default outdegree/indegree/geodesic")
-  CHECKBOX cx_stat_outdegree 36 80 280 ., label("outdegree - out-degree distribution")
-  CHECKBOX cx_stat_indegree 36 106 280 ., label("indegree - in-degree distribution")
-  CHECKBOX cx_stat_geodesic 36 132 280 ., label("geodesic - geodesic-distance distribution")
-  CHECKBOX cx_stat_triad 36 158 280 ., label("triad - full 16-category MAN triad census")
-  CHECKBOX cx_stat_behavior 36 184 280 ., label("behavior - co-evolution fits only, added automatically")
-  TEXT tx_stats_note 36 210 300 30, label("Leave all unchecked for the default trio.")
-  GROUPBOX gb_settings 380 56 360 190, label("Simulation settings")
-  TEXT tx_nsim 392 80 140 ., label("nsim() - replicates")
-  SPINNER sp_nsim 545 80 70 ., default(50) min(5) max(999999) nomem option(nsim)
-  TEXT tx_seed 392 108 140 ., label("seed()")
-  SPINNER sp_seed 545 108 70 ., default(-1) min(-999999) max(999999) nomem option(seed)
-  TEXT tx_maxdeg 392 136 140 ., label("maxdeg() - degree cap")
-  SPINNER sp_maxdeg 545 136 70 ., default(15) min(1) max(999999) nomem option(maxdeg)
-  TEXT tx_maxdist 392 164 140 ., label("maxdist() - geodesic cap")
-  SPINNER sp_maxdist 545 164 70 ., default(6) min(1) max(999999) nomem option(maxdist)
-  TEXT tx_name 392 192 140 ., label("name() - graph name stub")
-  EDIT ed_name 545 192 145 ., nomem option(name)
-  GROUPBOX gb_test 20 254 720 100, label("Test options")
-  CHECKBOX cx_twotailed 36 278 340 ., label("twotailed - two-tailed test (default one-tailed)") option(twotailed)
-  CHECKBOX cx_joinoff 36 304 340 ., label("join(off) - separate test per wave-period (default pooled)")
-  TEXT tx_footer 36 330 660 20, label("estat gof reads the fit left behind by nwsaom; see help nwsaom_estat for full details.")
+  RADIO rb_estat_gof 10 10 290 ., label("gof - goodness of fit") first default(1)
+  RADIO rb_estat_mems 310 10 290 ., label("mems - Mahalanobis/moment contributions") middle
+  RADIO rb_estat_score 610 10 290 ., label("score - score-type test") middle
+  RADIO rb_estat_timetest 10 31 290 ., label("timetest - time heterogeneity") middle
+  RADIO rb_estat_importance 310 31 290 ., label("importance - effect importance") middle
+  RADIO rb_estat_simulate 610 31 290 ., label("simulate - simulate at given coefficients") last
+  TEXT tx_n6_1 10 58 910 ., label("Operates on the nwsaom fit currently in memory - no network is selected here. Choose the statistic on the first tab.")
+  TEXT tx_h7_1 10 85 900 ., label("-- Auxiliary statistics (stats(); default outdegree indegree geodesic) --")
+  CHECKBOX cx_estat_stat_outdegree 10 106 301 ., label("outdegree - out-degree distribution") tooltip("RSiena: density")
+  CHECKBOX cx_estat_stat_indegree 316 106 301 ., label("indegree - in-degree distribution")
+  CHECKBOX cx_estat_stat_geodesic 622 106 301 ., label("geodesic - geodesic distances")
+  CHECKBOX cx_estat_stat_triad 10 127 301 ., label("triad - 16-category triad census")
+  CHECKBOX cx_estat_stat_behavior 316 127 301 ., label("behavior - co-evolution fits only")
+  TEXT tx_estat_gof_nsim 10 148 215 ., label("nsim() - replicates (default 50)")
+  EDIT ed_estat_gof_nsim 230 148 225 ., nomem
+  TEXT tx_estat_gof_seed 470 148 215 ., label("seed()")
+  EDIT ed_estat_gof_seed 690 148 225 ., nomem
+  TEXT tx_estat_gof_maxdeg 10 169 430 ., label("maxdeg() - degree cap (default 15)")
+  EDIT ed_estat_gof_maxdeg 450 169 470 ., nomem
+  TEXT tx_estat_gof_maxdist 10 190 430 ., label("maxdist() - geodesic cap (default 6)")
+  EDIT ed_estat_gof_maxdist 450 190 470 ., nomem
+  TEXT tx_estat_gof_name 10 211 215 ., label("name() - graph name stub")
+  EDIT ed_estat_gof_name 230 211 225 ., nomem
+  CHECKBOX cx_estat_gof_twotailed 10 232 301 ., label("twotailed - two-tailed test")
+  CHECKBOX cx_estat_joinoff 316 232 301 ., label("join(off) - separate test per wave-period")
+END
+
+DIALOG mems_sim, tabtitle("Mems, sim")
+BEGIN
+  TEXT tx_h0_2 10 10 900 ., label("-- estat mems: effect() and macro() are required --")
+  TEXT tx_estat_mems_effect 10 31 215 ., label("effect() - coefficient name")
+  EDIT ed_estat_mems_effect 230 31 225 ., nomem
+  TEXT tx_estat_mems_macro 10 52 430 ., label("macro() - name of the macro receiving the result")
+  EDIT ed_estat_mems_macro 450 52 470 ., nomem
+  TEXT tx_estat_mems_nsim 10 73 215 ., label("nsim() - replicates (default 500)")
+  EDIT ed_estat_mems_nsim 230 73 225 ., nomem
+  TEXT tx_estat_mems_seed 470 73 215 ., label("seed()")
+  EDIT ed_estat_mems_seed 690 73 225 ., nomem
+  TEXT tx_estat_mems_interval 10 94 215 ., label("interval() - numlist")
+  EDIT ed_estat_mems_interval 230 94 225 ., nomem
+  CHECKBOX cx_estat_mems_nodots 10 115 301 ., label("nodots - suppress progress dots")
+  TEXT tx_h12_2 10 142 900 ., label("-- estat simulate (at the coefficients of a stored matrix theta(); rates() required for a plain network model) --")
+  TEXT tx_estat_sim_nsim 10 163 215 ., label("nsim() - replicates (default 100)")
+  EDIT ed_estat_sim_nsim 230 163 225 ., nomem
+  TEXT tx_estat_sim_seed 470 163 215 ., label("seed()")
+  EDIT ed_estat_sim_seed 690 163 225 ., nomem
+  TEXT tx_estat_sim_theta 10 184 215 ., label("theta() - matrix of coefficients")
+  EDIT ed_estat_sim_theta 230 184 225 ., nomem
+  TEXT tx_estat_sim_rates 470 184 215 ., label("rates() - rate of each period")
+  EDIT ed_estat_sim_rates 690 184 225 ., nomem
+  TEXT tx_estat_sim_ratesbeh 10 205 215 ., label("ratesbeh() - behavior rates")
+  EDIT ed_estat_sim_ratesbeh 230 205 225 ., nomem
+  TEXT tx_estat_sim_generate 470 205 215 ., label("generate() - stub of new networks")
+  EDIT ed_estat_sim_generate 690 205 225 ., nomem
+END
+
+DIALOG score_tt, tabtitle("Score, tt")
+BEGIN
+  TEXT tx_h0_3 10 10 900 ., label("-- estat score --")
+  TEXT tx_estat_score_tested 10 31 430 ., label("tested() - effects of the full model to test")
+  EDIT ed_estat_score_tested 450 31 470 ., nomem
+  TEXT tx_h3_3 10 58 900 ., label("-- estat timetest --")
+  TEXT tx_estat_tt_effects 10 79 430 ., label("effects() - effects to test (default all)")
+  EDIT ed_estat_tt_effects 450 79 470 ., nomem
+  CHECKBOX cx_estat_tt_fixrates 10 100 301 ., label("fixrates - keep the rates fixed")
+  TEXT tx_h7_3 10 127 900 ., label("-- estat importance has no options --")
 END
 
 PROGRAM command
 BEGIN
-	put "estat gof"
+	if statistic.rb_estat_gof {
+		put "estat gof"
+	}
+	if statistic.rb_estat_mems {
+		put "estat mems"
+	}
+	if statistic.rb_estat_score {
+		put "estat score"
+	}
+	if statistic.rb_estat_timetest {
+		put "estat timetest"
+	}
+	if statistic.rb_estat_importance {
+		put "estat importance"
+	}
+	if statistic.rb_estat_simulate {
+		put "estat simulate"
+	}
 	beginoptions
-		optionarg main.sp_nsim
-		optionarg main.sp_seed
-		optionarg main.sp_maxdeg
-		optionarg main.sp_maxdist
-		optionarg main.ed_name
-		option main.cx_twotailed
+		put /program opt_part1
+		put /program opt_part2
 	endoptions
-	if main.cx_stat_outdegree | main.cx_stat_indegree | main.cx_stat_geodesic | main.cx_stat_triad | main.cx_stat_behavior {
-		put " stats("
-		if main.cx_stat_outdegree {
-			put "outdegree "
-		}
-		if main.cx_stat_indegree {
-			put "indegree "
-		}
-		if main.cx_stat_geodesic {
-			put "geodesic "
-		}
-		if main.cx_stat_triad {
-			put "triad "
-		}
-		if main.cx_stat_behavior {
-			put "behavior "
-		}
-		put ")"
-	}
-	if main.cx_joinoff {
-		put " join(off)"
-	}
 	stata
+END
+
+PROGRAM opt_part1
+BEGIN
+			if statistic.rb_estat_gof {
+				if statistic.ed_estat_gof_nsim.isneq("") {
+					put " nsim(" statistic.ed_estat_gof_nsim ")"
+				}
+			}
+			if statistic.rb_estat_gof {
+				if statistic.ed_estat_gof_seed.isneq("") {
+					put " seed(" statistic.ed_estat_gof_seed ")"
+				}
+			}
+			if statistic.rb_estat_gof {
+				if statistic.ed_estat_gof_maxdeg.isneq("") {
+					put " maxdeg(" statistic.ed_estat_gof_maxdeg ")"
+				}
+			}
+			if statistic.rb_estat_gof {
+				if statistic.ed_estat_gof_maxdist.isneq("") {
+					put " maxdist(" statistic.ed_estat_gof_maxdist ")"
+				}
+			}
+			if statistic.rb_estat_gof {
+				if statistic.ed_estat_gof_name.isneq("") {
+					put " name(" statistic.ed_estat_gof_name ")"
+				}
+			}
+			if statistic.rb_estat_gof {
+				if statistic.cx_estat_gof_twotailed {
+					put " twotailed"
+				}
+			}
+			if statistic.rb_estat_gof {
+				if statistic.cx_estat_joinoff {
+					put " join(off)"
+				}
+			}
+			if statistic.rb_estat_mems {
+				if mems_sim.ed_estat_mems_effect.isneq("") {
+					put " effect(" mems_sim.ed_estat_mems_effect ")"
+				}
+			}
+			if statistic.rb_estat_mems {
+				if mems_sim.ed_estat_mems_macro.isneq("") {
+					put " macro(" mems_sim.ed_estat_mems_macro ")"
+				}
+			}
+			if statistic.rb_estat_mems {
+				if mems_sim.ed_estat_mems_nsim.isneq("") {
+					put " nsim(" mems_sim.ed_estat_mems_nsim ")"
+				}
+			}
+			if statistic.rb_estat_mems {
+				if mems_sim.ed_estat_mems_seed.isneq("") {
+					put " seed(" mems_sim.ed_estat_mems_seed ")"
+				}
+			}
+			if statistic.rb_estat_mems {
+				if mems_sim.ed_estat_mems_interval.isneq("") {
+					put " interval(" mems_sim.ed_estat_mems_interval ")"
+				}
+			}
+			if statistic.rb_estat_mems {
+				if mems_sim.cx_estat_mems_nodots {
+					put " nodots"
+				}
+			}
+			if statistic.rb_estat_simulate {
+				if mems_sim.ed_estat_sim_nsim.isneq("") {
+					put " nsim(" mems_sim.ed_estat_sim_nsim ")"
+				}
+			}
+			if statistic.rb_estat_simulate {
+				if mems_sim.ed_estat_sim_seed.isneq("") {
+					put " seed(" mems_sim.ed_estat_sim_seed ")"
+				}
+			}
+			if statistic.rb_estat_simulate {
+				if mems_sim.ed_estat_sim_theta.isneq("") {
+					put " theta(" mems_sim.ed_estat_sim_theta ")"
+				}
+			}
+			if statistic.rb_estat_simulate {
+				if mems_sim.ed_estat_sim_rates.isneq("") {
+					put " rates(" mems_sim.ed_estat_sim_rates ")"
+				}
+			}
+			if statistic.rb_estat_simulate {
+				if mems_sim.ed_estat_sim_ratesbeh.isneq("") {
+					put " ratesbeh(" mems_sim.ed_estat_sim_ratesbeh ")"
+				}
+			}
+			if statistic.rb_estat_simulate {
+				if mems_sim.ed_estat_sim_generate.isneq("") {
+					put " generate(" mems_sim.ed_estat_sim_generate ")"
+				}
+			}
+			if statistic.rb_estat_score {
+				if score_tt.ed_estat_score_tested.isneq("") {
+					put " tested(" score_tt.ed_estat_score_tested ")"
+				}
+			}
+END
+
+PROGRAM opt_part2
+BEGIN
+			if statistic.rb_estat_timetest {
+				if score_tt.ed_estat_tt_effects.isneq("") {
+					put " effects(" score_tt.ed_estat_tt_effects ")"
+				}
+			}
+			if statistic.rb_estat_timetest {
+				if score_tt.cx_estat_tt_fixrates {
+					put " fixrates"
+				}
+			}
+			if statistic.rb_estat_gof {
+				if statistic.cx_estat_stat_outdegree | statistic.cx_estat_stat_indegree | statistic.cx_estat_stat_geodesic | statistic.cx_estat_stat_triad | statistic.cx_estat_stat_behavior {
+					put " stats("
+					if statistic.cx_estat_stat_outdegree {
+						put "outdegree "
+					}
+					if statistic.cx_estat_stat_indegree {
+						put "indegree "
+					}
+					if statistic.cx_estat_stat_geodesic {
+						put "geodesic "
+					}
+					if statistic.cx_estat_stat_triad {
+						put "triad "
+					}
+					if statistic.cx_estat_stat_behavior {
+						put "behavior "
+					}
+					put ")"
+				}
+			}
 END

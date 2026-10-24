@@ -577,3 +577,11 @@ Build the fixed-dummy model by hand: a varCovar `cbind(0,1)` + `includeEffects(e
 ## One ado program cannot be larger than about 133 KB of code: "system limit exceeded - see manual" at load (2026-10-24)
 
 After the nwsaom branches were merged, `nwsaom.ado` (208 KB on disk) failed to load with `system limit exceeded - see manual (error occurred while loading nwsaom.ado)` and nearly every test failed. The limit counts CODE, not comments: stripping all comment lines and even all indentation did not help, but each of the branches alone (up to 132.5 KB of non-comment, non-blank code, measured as the sum of the stripped line lengths) loaded and the merge (134.3 KB) did not; adding 3 KB to a loading file made it fail, 20 short lines did not. Remedy used: the internal local macros that no other file uses were renamed `__nwsaom_x` -> `__ns_x` (about 5 KB). Headroom is a few KB: **put all new Stata-side code of nwsaom into helper ado files** (`nwsaom_*.ado`, `_nwsaom_*.ado`; the main program only dispatches with a few lines, as for `meta`, `bayes`, `describe`). Measure with: sum of `len(stripped line)+1` over lines that are neither blank nor start with `//`, `*` or `/*`. nwergm.ado is at about 107 KB by the same measure.
+
+## The .dlg files are generated; Stata rejects a long PROGRAM (r(1001)) (found 2026-10-25)
+
+`nwsaom*.dlg` are written by `dlg/gen_dialogs.py` from `dlg/nwsaom_dialog_spec.py`; never edit them by hand (the checker fails if a
+`.dlg` differs from what the generator writes). Stata's dialog engine silently refuses (`db name` returns r(1001); a missing dialog
+looks the same) a `PROGRAM command` of a few hundred lines, so the generator splits the option code into sub-programs
+(`put /program opt_partN` inside `beginoptions`). A dialog can be tested in batch: `capture db nwsaom_multinet` and display `_rc`
+(0 = loads; run `NWCORE=... dlg/db_load_check.sh`). A dialog window cannot be opened in batch mode, so its looks must be checked by hand.

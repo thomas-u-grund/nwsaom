@@ -33,6 +33,11 @@ f nwsaom_estat.sthlp
 f nwsaom_meta.sthlp
 f nwsaom_remarks.sthlp
 f nwsaom.dlg
+f nwsaom_multinet.dlg
+f nwsaom_bayes.dlg
+f nwsaom_meta.dlg
+f nwsaom_describe.dlg
+f nwsaom_multiplex.dlg
 f nwsaom_estat.dlg
 f lib/lnwsaom1.mlib
 f lib/lnwsaom2.mlib

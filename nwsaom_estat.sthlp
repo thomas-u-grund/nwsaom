@@ -8,6 +8,11 @@
 {p2colreset}{...}
 {pstd}{it:nwsaom version 1.0.2, 24 October 2026}{p_end}{* nwversion}
 
+{title:Dialog box}
+
+{pstd}
+{cmd:db nwsaom_estat} sets the options of {cmd:estat gof}, {cmd:mems}, {cmd:score}, {cmd:timetest}, {cmd:importance} and {cmd:simulate} and runs the one you choose.
+
 {title:Description}
 
 {pstd}

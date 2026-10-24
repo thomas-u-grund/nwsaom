@@ -1,0 +1,157 @@
+VERSION 10
+
+
+SYNCHRONOUS_ONLY
+INCLUDE _std_mlarge
+DEFINE _dlgwd 940
+DEFINE _dlght 480
+INCLUDE header
+
+HELP hlp1, view("help nwsaom_bayes")
+RESET res1
+
+DIALOG sampler, tabtitle("Sampler")
+BEGIN
+  TEXT tx_bayes_nprewarm 10 10 430 ., label("nprewarm() - pre-warming steps (default 50)")
+  EDIT ed_bayes_nprewarm 450 10 470 ., nomem
+  TEXT tx_bayes_nwarm 10 31 430 ., label("nwarm() - warming steps (default 50)")
+  EDIT ed_bayes_nwarm 450 31 470 ., nomem
+  TEXT tx_bayes_nmain 10 52 430 ., label("nmain() - main sampling steps (default 250)")
+  EDIT ed_bayes_nmain 450 52 470 ., nomem
+  TEXT tx_bayes_nrunmh 10 73 430 ., label("nrunmh() - MH tuning runs (default 20)")
+  EDIT ed_bayes_nrunmh 450 73 470 ., nomem
+  TEXT tx_bayes_nimprovemh 10 94 430 ., label("nimprovemh() - steps per MH tuning (default 100)")
+  EDIT ed_bayes_nimprovemh 450 94 470 ., nomem
+  TEXT tx_bayes_mhgeom 10 115 215 ., label("mhgeom() (default 0)")
+  EDIT ed_bayes_mhgeom 230 115 225 ., nomem
+  TEXT tx_bayes_mult 470 115 215 ., label("mult() (default 5)")
+  EDIT ed_bayes_mult 690 115 225 ., nomem
+  TEXT tx_bayes_targetmh 10 136 430 ., label("targetmh() - target MH acceptance (0.25)")
+  EDIT ed_bayes_targetmh 450 136 470 ., nomem
+  TEXT tx_bayes_nmh 10 157 215 ., label("nmh() (default 0)")
+  EDIT ed_bayes_nmh 230 157 225 ., nomem
+  TEXT tx_bayes_nsampconst 470 157 215 ., label("nsampconst() (default 1)")
+  EDIT ed_bayes_nsampconst 690 157 225 ., nomem
+  TEXT tx_bayes_nsamprates 10 178 215 ., label("nsamprates() (default 0)")
+  EDIT ed_bayes_nsamprates 230 178 225 ., nomem
+END
+
+DIALOG priors, tabtitle("Priors")
+BEGIN
+  TEXT tx_bayes_theta0 10 10 215 ., label("theta0()")
+  EDIT ed_bayes_theta0 230 10 225 ., nomem
+  TEXT tx_bayes_rate0 470 10 215 ., label("rate0()")
+  EDIT ed_bayes_rate0 690 10 225 ., nomem
+  CHECKBOX cx_bayes_fixrates 10 31 301 ., label("fixrates")
+  TEXT tx_bayes_priormeaneta 10 52 430 ., label("priormeaneta() - prior means of the effects")
+  EDIT ed_bayes_priormeaneta 450 52 470 ., nomem
+  TEXT tx_bayes_priorsigeta 10 73 430 ., label("priorsigeta() - prior sd of the effects")
+  EDIT ed_bayes_priorsigeta 450 73 470 ., nomem
+  TEXT tx_bayes_ratepriormean 10 94 430 ., label("ratepriormean() - prior means of the rates")
+  EDIT ed_bayes_ratepriormean 450 94 470 ., nomem
+  TEXT tx_bayes_ratepriorsd 10 115 430 ., label("ratepriorsd() - prior sd of the rates (default 1)")
+  EDIT ed_bayes_ratepriorsd 450 115 470 ., nomem
+  CHECKBOX cx_bayes_gibbsrates 10 136 301 ., label("gibbsrates")
+  TEXT tx_bayes_priorrate 10 157 430 ., label("priorrate() - gamma prior of the rates: shape rate")
+  EDIT ed_bayes_priorrate 450 157 470 ., nomem
+END
+
+DIALOG output, tabtitle("Output")
+BEGIN
+  TEXT tx_bayes_seed 10 10 215 ., label("seed() (default -1)")
+  EDIT ed_bayes_seed 230 10 225 ., nomem
+  TEXT tx_bayes_frame 10 31 430 ., label("frame() - frame for the posterior draws")
+  EDIT ed_bayes_frame 450 31 470 ., nomem
+  TEXT tx_bayes_level 10 52 430 ., label("level() - confidence level (default 95)")
+  EDIT ed_bayes_level 450 52 470 ., nomem
+  CHECKBOX cx_bayes_notable 10 73 301 ., label("notable")
+  CHECKBOX cx_bayes_noheader 316 73 301 ., label("noheader")
+END
+
+PROGRAM command
+BEGIN
+	put "nwsaom bayes"
+	beginoptions
+		put /program opt_part1
+	endoptions
+	stata
+END
+
+PROGRAM opt_part1
+BEGIN
+			if sampler.ed_bayes_nprewarm.isneq("") {
+				put " nprewarm(" sampler.ed_bayes_nprewarm ")"
+			}
+			if sampler.ed_bayes_nwarm.isneq("") {
+				put " nwarm(" sampler.ed_bayes_nwarm ")"
+			}
+			if sampler.ed_bayes_nmain.isneq("") {
+				put " nmain(" sampler.ed_bayes_nmain ")"
+			}
+			if sampler.ed_bayes_nrunmh.isneq("") {
+				put " nrunmh(" sampler.ed_bayes_nrunmh ")"
+			}
+			if sampler.ed_bayes_nimprovemh.isneq("") {
+				put " nimprovemh(" sampler.ed_bayes_nimprovemh ")"
+			}
+			if sampler.ed_bayes_mhgeom.isneq("") {
+				put " mhgeom(" sampler.ed_bayes_mhgeom ")"
+			}
+			if sampler.ed_bayes_mult.isneq("") {
+				put " mult(" sampler.ed_bayes_mult ")"
+			}
+			if sampler.ed_bayes_targetmh.isneq("") {
+				put " targetmh(" sampler.ed_bayes_targetmh ")"
+			}
+			if sampler.ed_bayes_nmh.isneq("") {
+				put " nmh(" sampler.ed_bayes_nmh ")"
+			}
+			if sampler.ed_bayes_nsampconst.isneq("") {
+				put " nsampconst(" sampler.ed_bayes_nsampconst ")"
+			}
+			if sampler.ed_bayes_nsamprates.isneq("") {
+				put " nsamprates(" sampler.ed_bayes_nsamprates ")"
+			}
+			if priors.ed_bayes_theta0.isneq("") {
+				put " theta0(" priors.ed_bayes_theta0 ")"
+			}
+			if priors.ed_bayes_rate0.isneq("") {
+				put " rate0(" priors.ed_bayes_rate0 ")"
+			}
+			if priors.cx_bayes_fixrates {
+				put " fixrates"
+			}
+			if priors.ed_bayes_priormeaneta.isneq("") {
+				put " priormeaneta(" priors.ed_bayes_priormeaneta ")"
+			}
+			if priors.ed_bayes_priorsigeta.isneq("") {
+				put " priorsigeta(" priors.ed_bayes_priorsigeta ")"
+			}
+			if priors.ed_bayes_ratepriormean.isneq("") {
+				put " ratepriormean(" priors.ed_bayes_ratepriormean ")"
+			}
+			if priors.ed_bayes_ratepriorsd.isneq("") {
+				put " ratepriorsd(" priors.ed_bayes_ratepriorsd ")"
+			}
+			if priors.cx_bayes_gibbsrates {
+				put " gibbsrates"
+			}
+			if priors.ed_bayes_priorrate.isneq("") {
+				put " priorrate(" priors.ed_bayes_priorrate ")"
+			}
+			if output.ed_bayes_seed.isneq("") {
+				put " seed(" output.ed_bayes_seed ")"
+			}
+			if output.ed_bayes_frame.isneq("") {
+				put " frame(" output.ed_bayes_frame ")"
+			}
+			if output.ed_bayes_level.isneq("") {
+				put " level(" output.ed_bayes_level ")"
+			}
+			if output.cx_bayes_notable {
+				put " notable"
+			}
+			if output.cx_bayes_noheader {
+				put " noheader"
+			}
+END

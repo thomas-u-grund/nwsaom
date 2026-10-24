@@ -24,6 +24,11 @@
 {phang}{opt rates} also combines the rate parameters ({cmd:e(rates)}, one per period; the standard errors of conditional fits are not comparable).{p_end}
 {phang}{opt notable} suppresses the output; the results are in {cmd:r()}.{p_end}
 
+{title:Dialog box}
+
+{pstd}
+{cmd:db nwsaom_meta} asks for the stored estimates and the options of the command and runs it.
+
 {title:Description}
 
 {pstd}

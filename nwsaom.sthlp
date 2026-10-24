@@ -529,6 +529,14 @@ contrastcovnetnet alldifcovnetnet covnetnetin homcovnetnetin contrastcovnetnetin
 samexoutpopintn samexoutactintn altdist2w totdist2w simdist2w altindist2w totindist2w simegodist2w simegoindist2w} (RSiena sameWWClosure, diffWWClosure, jumpWWClosure, jumpFrom,
 jumpSharedIn, sameWXClosure, ..., covNetNet, homCovNetNet, ..., inPopIntnX, ..., altDist2W, ..., simEgoInDist2W; the number is RSiena's effect parameter).
 
+{title:Dialog boxes}
+
+{pstd}
+Every option and effect of {cmd:nwsaom} can be set in dialog boxes: {cmd:db nwsaom} (a network or co-evolution model, estimation or simulation), {cmd:db nwsaom_multinet}
+(several dependent networks, with or without a behavior), {cmd:db nwsaom_bayes}, {cmd:db nwsaom_meta}, {cmd:db nwsaom_describe} and {cmd:db nwsaom_estat} (the postestimation commands).
+Effects are listed with their {cmd:nwsaom} name and RSiena's name; families such as {opt netx()}, {opt behx()} or {opt cross1()} are chosen from lists. The dialog shows the command
+it builds in the Results window when you press Submit or OK.
+
 {title:Version}
 
 {p 8 17 2}

@@ -1,0 +1,54 @@
+VERSION 10
+
+
+SYNCHRONOUS_ONLY
+INCLUDE _std_mlarge
+DEFINE _dlgwd 940
+DEFINE _dlght 260
+INCLUDE header
+
+HELP hlp1, view("help nwsaom")
+RESET res1
+
+SCRIPT PREINIT
+BEGIN
+	program initialize
+END
+
+DIALOG data, tabtitle("Data")
+BEGIN
+  TEXT tx_describe_waves 10 10 215 ., label("waves() - networks in time order")
+  COMBOBOX cb_describe_waves 230 10 225 ., dropdown contents(netlist) append nomem
+  TEXT tx_describe_behavior 10 31 430 ., label("behavior() - behavior variable per wave")
+  VARLIST vl_describe_behavior 450 31 470 ., nomem
+END
+
+LIST netlist
+BEGIN
+	// populated at runtime by _nwdialog.ado
+END
+
+PROGRAM initialize
+BEGIN
+	put "_nwdialog nwsaom_describe"
+	stata hidden immediate
+END
+
+PROGRAM command
+BEGIN
+	put "nwsaom describe"
+	beginoptions
+		put /program opt_part1
+	endoptions
+	stata
+END
+
+PROGRAM opt_part1
+BEGIN
+			if data.cb_describe_waves.isneq("") {
+				put " waves(" data.cb_describe_waves ")"
+			}
+			if data.vl_describe_behavior.isneq("") {
+				put " behavior(" data.vl_describe_behavior ")"
+			}
+END
