@@ -185,7 +185,7 @@ Two networks on the same actors evolve together (RSiena's two dependent network 
   \item \opt{theta0()} and \opt{fix()} give the starting values and hold effects fixed; \texttt{estat score} and \texttt{estat timetest} are available afterwards.
 \end{itemize}
 
-\section{Postestimation commands}
+\section{Postestimation commands}\label{sec:postest}
 
 \begin{description}[nosep,style=nextline]
   \item[\texttt{estat gof}] Goodness of fit with RSiena's Mahalanobis-distance test for the outdegree, indegree and geodesic distributions. Options and the returned \texttt{r()} results are in \texttt{help nwsaom\_estat}.
@@ -194,6 +194,7 @@ Two networks on the same actors evolve together (RSiena's two dependent network 
   \item[\texttt{nwsaom bayes}] Bayesian estimation after a fit; Section~\ref{sec:bayes}.
   \item[\texttt{nwsaom describe}] Description of the waves before a fit; Section~\ref{sec:describe}.
   \item[\texttt{nwsaom meta}] Combines the same model fitted to several networks, the counterpart of RSiena's \texttt{siena08}; \texttt{help nwsaom\_meta}.
+  \item[\texttt{nwsaom version}] Displays the installed release of \nwsaom{}, the version of the \texttt{nwcommands} core, the native plugin in use, the version of RSiena that the results were compared with and the license. It returns \texttt{r(version)}, \texttt{r(date)}, \texttt{r(core)} and \texttt{r(license)}; after estimation by the method of moments, \texttt{e(version)} holds the release that produced the results. Quote it when reporting an analysis. \texttt{nwversion} lists the core and all installed model packages. A specific release is installed from its tag: \texttt{net install nwsaom, from(}\url{https://raw.githubusercontent.com/thomas-u-grund/nwsaom/v1.0.1/}\texttt{) replace}.
 \end{description}
 
 \section{Combinations that are not available}\label{sec:combinations}

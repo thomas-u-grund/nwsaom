@@ -13,13 +13,24 @@
 \input{gen_counts.tex}
 \newcommand{\pkgversion}{1.0.1}
 \newcommand{\pkgdate}{24 October 2026}
+% DOI of the archived manual (Zenodo). PLACEHOLDER: replace XXXXXXX with the real record number; this is the only place it is defined.
+\newcommand{\manualdoi}{10.5281/zenodo.XXXXXXX}
 \title{\textbf{nwsaom}\\[4pt]\large Stochastic actor-oriented models in Stata\\ (a package that builds on \texttt{nwcommands})\\[6pt]\normalsize User manual and reference}
 \author{Thomas U. Grund}
 \date{Version \pkgversion, \pkgdate}
 \begin{document}
 \maketitle
-\begin{quote}\noindent\textbf{How to cite.} This manual describes \texttt{nwsaom} version~\pkgversion{} (\pkgdate). Please cite this manual together with the book~\cite{grundbook}, which treats network analysis with the \texttt{nwcommands} package in Stata in full; its Chapter~23 introduces stochastic actor-oriented models. % TODO: add the DOI once the manual is archived
+\begin{quote}\noindent\textbf{How to cite.} This manual describes \texttt{nwsaom} version~\pkgversion{} (\pkgdate) and is the citable reference for the package. Please cite it as:\par\smallskip
+\noindent Grund, T.~U. (2026). \emph{nwsaom: Stochastic actor-oriented models in Stata. Manual for version \pkgversion.} Zenodo. \url{https://doi.org/\manualdoi}\par\smallskip
+\noindent Please also report the version of the program that produced your results, as printed by \texttt{nwsaom version}.
 \end{quote}
+\chapter*{Acknowledgments}\addcontentsline{toc}{chapter}{Acknowledgments}
+\nwsaom{} follows the Siena project closely and exists because of it. The model is due to Tom Snijders~\cite{snijders1996,snijders2001}. RSiena (Ripley, Snijders, B\'{o}da, V\"{o}r\"{o}s, Preciado and many contributors)~\cite{ripley} is the reference implementation on which the effects, the estimation algorithm, the defaults and the output of \nwsaom{} are modelled. The Bayesian estimator is based on multiSiena (Snijders, Koskinen and Ripley; version 1.2.40)~\cite{multisiena}, which implements the method of Koskinen and Snijders~\cite{koskinen2007}. The R source code and the manuals of these packages were the specification against which the Stata code was written and checked.
+
+\nwsaom{} is not affiliated with or endorsed by the Siena project, and its errors are the author's. It is meant for researchers who work in Stata or prefer it to R. It is not a replacement for RSiena, which remains the reference and the more complete program.
+
+\paragraph{Use of an AI coding assistant.} The software was developed with Claude Code (Anthropic), an AI coding assistant, working under the author's direction. It helped port algorithms from RSiena and multiSiena into Stata, Mata and C and helped write the tests. The author specified the scope, reviewed the code, and is responsible for the package. Its correctness rests on validation, not on the assistant: the results are compared numerically with RSiena, and the test suite reruns these comparisons.
+
 \tableofcontents
 \input{ch01_intro}
 \input{ch02_model}
@@ -42,7 +53,11 @@
 \bibliographystyle{plain}
 \begin{thebibliography}{9}
 \bibitem{snijders2010} Snijders, T.A.B., van de Bunt, G.G., Steglich, C.E.G. (2010). Introduction to stochastic actor-based models for network dynamics. \emph{Social Networks} 32, 44--60.
-\bibitem{ripley} Ripley, R.M., Snijders, T.A.B., Bo\'{o}da, Z., V\"{o}r\"{o}s, A., Preciado, P. RSiena: Simulation Investigation for Empirical Network Analysis. R package and manual.
+\bibitem{ripley} Ripley, R.M., Snijders, T.A.B., B\'{o}da, Z., V\"{o}r\"{o}s, A., Preciado, P. RSiena: Simulation Investigation for Empirical Network Analysis. R package and manual.
+\bibitem{snijders1996} Snijders, T.A.B. (1996). Stochastic actor-oriented models for network change. \emph{Journal of Mathematical Sociology} 21, 149--172.
+\bibitem{snijders2001} Snijders, T.A.B. (2001). The statistical evaluation of social network dynamics. \emph{Sociological Methodology} 31, 361--395.
+\bibitem{multisiena} Snijders, T.A.B., Koskinen, J.H., Ripley, R.M. multiSiena 1.2.40: multilevel and Bayesian extensions of RSiena. R package and manual.
+\bibitem{koskinen2007} Koskinen, J.H., Snijders, T.A.B. (2007). Bayesian inference for dynamic social network data. \emph{Journal of Statistical Planning and Inference} 137, 3930--3938.
 \bibitem{steglich2010} Steglich, C.E.G., Snijders, T.A.B., Pearson, M. (2010). Dynamic networks and behavior: separating selection from influence. \emph{Sociological Methodology} 40, 329--393.
 \bibitem{lospinoso2019} Lospinoso, J., Snijders, T.A.B. (2019). Goodness of fit for stochastic actor-oriented models. \emph{Methodology} 15.
 \bibitem{grundbook} Grund, T.U. (2027). \emph{Network Analysis with Stata: Concepts, Methods, and Applications}. College Station, TX: Stata Press (forthcoming).
