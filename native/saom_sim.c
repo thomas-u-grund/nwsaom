@@ -189,6 +189,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#if defined(_MSC_VER) && !defined(__thread)
+#define __thread __declspec(thread)
+#endif
 
 #define MAXTERMS 256
 #define MAXATTR 1024		/* one dyadic covariate takes n attribute columns (protocol 15) */
