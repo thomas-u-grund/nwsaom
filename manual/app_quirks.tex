@@ -39,8 +39,8 @@ Each was found by comparing the observed statistics (the targets) with those of
   to be 0.
 \item \textbf{\texttt{allDifCovNetNetIn} and \texttt{contrastCovNetNetIn}} are
   the same function in RSiena and give the same statistic.
-\item \textbf{Covariate stars.} \texttt{DifferentCovariateOutStar} tests the tie
-  from the alter to $k$, whereas \texttt{SameCovariateOutStar} tests the tie from
+\item \textbf{Covariate stars.} \opt{DifferentCovariateOutStar} tests the tie
+  from the alter to $k$, whereas \opt{SameCovariateOutStar} tests the tie from
   $k$ to the alter. Both are reproduced as they are.
 \item \textbf{Average versions of the same-covariate effects} divide by the number
   of actors with the ego's covariate value, not by the number of alters.
@@ -63,8 +63,8 @@ Each was found by comparing the observed statistics (the targets) with those of
   \texttt{outOutActIntn}/\texttt{outOutAvIntn} of a one-mode network that depends on a
   two-mode one, index the other network by the node number of the \emph{event}. \nwsaom{}
   copies this and refuses these effects when the events outnumber the actors.
-\item \texttt{netbeh(totgroupegox)}, \texttt{netbeh(avgroupegox)} and
-  \texttt{netbeh(crossxoutact)} in a two-mode network use the behavior of the actors for
+\item \opt{netbeh(totgroupegox)}, \texttt{netbeh(avgroupegox)} and
+  \opt{netbeh(crossxoutact)} in a two-mode network use the behavior of the actors for
   the events as well (the events mirror the actors' behavior), which needs at least as many actors
   as events.
 \end{itemize}

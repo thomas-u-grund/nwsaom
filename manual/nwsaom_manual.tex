@@ -8,8 +8,21 @@
 \hypersetup{colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black}
 \lstdefinestyle{stata}{basicstyle=\ttfamily\small,backgroundcolor=\color{black!4},frame=single,rulecolor=\color{black!20},breaklines=true,columns=fullflexible,keepspaces=true,xleftmargin=2pt,xrightmargin=2pt,aboveskip=8pt,belowskip=8pt}
 \lstset{style=stata}
+\setlength{\emergencystretch}{3em}
 \newcommand{\nwsaom}{\texttt{nwsaom}}
-\newcommand{\opt}[1]{\texttt{#1}}
+% \opt sets an option name in typewriter type and lets long names break after ( : , and _ so that they do not run into the next table column
+\ExplSyntaxOn
+\tl_new:N \l__nwsaom_opt_tl
+\NewDocumentCommand{\opt}{m}
+  {
+    \tl_set:Nn \l__nwsaom_opt_tl {#1}
+    \regex_replace_all:nnN { ([\:\,]) } { \1 \c{allowbreak}\cB\{\cE\} } \l__nwsaom_opt_tl
+    \regex_replace_all:nnN { \c{\_} } { \c{\_} \c{allowbreak}\cB\{\cE\} } \l__nwsaom_opt_tl
+    \regex_replace_all:nnN { ([a-z])([A-Z]) } { \1 \c{allowbreak}\cB\{\cE\} \2 } \l__nwsaom_opt_tl
+    \regex_replace_all:nnN { (/) } { \1 \c{allowbreak}\cB\{\cE\} } \l__nwsaom_opt_tl
+    \texttt{ \tl_use:N \l__nwsaom_opt_tl }
+  }
+\ExplSyntaxOff
 \input{gen_counts.tex}
 \newcommand{\pkgversion}{1.0.2}
 \newcommand{\pkgdate}{24 October 2026}

@@ -87,7 +87,7 @@ One-step estimates (restricted estimate plus the one-step correction):
 \end{lstlisting}
 The joint statistic $c$ is chi-squared with as many degrees of freedom as tested effects. The one-sided variate is a normal variate with the sign changed, as in RSiena, so that it is positive when the effect is expected to be positive. The one-step estimates give the value each coefficient would approximately take if the tested effects were freed, which is a quick way to see the size of the effects before fitting the larger model. \opt{tested(\emph{effects})} restricts the test to some of the fixed effects; the others stay fixed and are treated as redundant. The test works for network effects and for the effects of a co-evolving behavior.
 
-\paragraph{After \texttt{nwsaom multinet}.} The restricted model of a multinet fit is specified with \opt{theta0()} and \opt{fix()} of that command, with the coefficient names of the table (for example \texttt{fix(net1\_x\_crprod)}); the rates of all networks and of the behavior are estimated along. The example fixes the cross-network effect \texttt{crprod} at 0 (the data are those of Section~\ref{sec:multinet}).
+\paragraph{After \texttt{nwsaom multinet}.} The restricted model of a multinet fit is specified with \opt{theta0()} and \opt{fix()} of that command, with the coefficient names of the table (for example \opt{fix(net1\_x\_crprod)}); the rates of all networks and of the behavior are estimated along. The example fixes the cross-network effect \texttt{crprod} at 0 (the data are those of Section~\ref{sec:multinet}).
 \begin{lstlisting}
 . nwsaom multinet, net1(glasgow1 glasgow2 glasgow3) net2(advice1 advice2 advice3) eff1(outdegree reciprocity transtrip) eff2(outdegree reciprocity) cross1(crprod) cross2(from) theta0(-2.6 2.5 0.6 0 -1.9 1 0) fix(net1_x_crprod) seed(1) k3(300)
 . estat score
@@ -133,7 +133,7 @@ transtrip                      2      0.0683     0.485    0.4861
 \end{lstlisting}
 With $P$ periods there are $P-1$ deviations per effect. In this example there is no evidence that the effects change between the two periods. The tests are most informative when the deviation of an effect is the question: the deviation is reported as the one-step estimate of the difference between the period and the first period. \opt{effects(\emph{names})} restricts the test to some effects.
 
-\paragraph{Treatment of the rates.} By default the rate parameters are treated as estimated, so that the test equals the score test of a model that adds one fixed period dummy to the fit (what RSiena's \texttt{score.Test} gives after such a fit). The option \opt{fixrates} treats the rates as known, which is what RSiena's \texttt{sienaTimeTest} does. The two agree closely except for effects whose statistic is strongly correlated with the rate, typically the outdegree effect of a network whose changes are close to random; there the default gives the larger value. In the example above they are identical to four decimals; \texttt{estat timetest, fixrates} gives the same table.
+\paragraph{Treatment of the rates.} By default the rate parameters are treated as estimated, so that the test equals the score test of a model that adds one fixed period dummy to the fit (what RSiena's \texttt{score.Test} gives after such a fit). The option \opt{fixrates} treats the rates as known, which is what RSiena's \texttt{sienaTimeTest} does. The two agree closely except for effects whose statistic is strongly correlated with the rate, typically the outdegree effect of a network whose changes are close to random; there the default gives the larger value. In the example above they are identical to four decimals; \opt{estat timetest, fixrates} gives the same table.
 
 \paragraph{After \texttt{nwsaom multinet}.} The test is also available for the effects of all networks and of the behavior of a multinet fit.
 \begin{lstlisting}
@@ -177,7 +177,7 @@ nodeocov_age              0.0167   0.0868    0.7709      0.0128   0.0163   0.015
 cycle4                    0.0550   0.0358    2.6018      0.1430   0.0940   0.1371
 Certainty R_H of the actors' choices:   0.0772   0.0734
 \end{lstlisting}
-\paragraph{Co-evolution.} After a co-evolution fit a second table gives the behavior effects. The options of an actor are to change the behavior by $-1$, $0$ or $+1$; the importance of a behavior effect is again the $L^1$ distance of these choice probabilities with and without the effect. The results are \texttt{r(ri\_beh)}, \texttt{r(importance\_beh)}, \texttt{r(sigma\_beh)}, \texttt{r(sigma\_period\_beh)} and \texttt{r(certainty\_beh)}.
+\paragraph{Co-evolution.} After a co-evolution fit a second table gives the behavior effects. The options of an actor are to change the behavior by $-1$, $0$ or $+1$; the importance of a behavior effect is again the $L^1$ distance of these choice probabilities with and without the effect. The results are \texttt{r(ri\_beh)}, \texttt{r(importance\_beh)}, \texttt{r(sigma\_beh)}, \opt{r(sigma\_period\_beh)} and \texttt{r(certainty\_beh)}.
 \begin{lstlisting}
 . nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip behavior(smoke1 smoke2 smoke3 : linear quadratic avalt) k0(100) k3(500) seed(1)
 . estat importance

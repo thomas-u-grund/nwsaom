@@ -111,7 +111,7 @@ The explanations rest on the profile of RSiena's R and C++ time shares given abo
 \section{Using several cores}
 
 RSiena can spread a fit over several R processes only on request
-(\texttt{useCluster = TRUE, nbrNodes = $k$}); \nwsaom{} uses threads by default.
+(\opt{useCluster = TRUE, nbrNodes = $k$}); \nwsaom{} uses threads by default.
 
 \input{bench/bench_cores.tex}
 
@@ -119,7 +119,7 @@ More threads help, less than proportionally: ten threads make R1 and R4 about
 \coresRone{} and \coresRfour{} times as fast and the co-evolution model R5
 \coresRfive{} times as fast. Phase~2 cannot be split across threads because each
 Robbins--Monro step needs the previous estimate; only Phases~1 and~3 run fully in parallel.
-Against single-threaded RSiena, \nwsaom{} with \texttt{cores(\coresmaxthreads)} is
+Against single-threaded RSiena, \nwsaom{} with \opt{cores(\coresmaxthreads)} is
 \coresvsrsmin{} to \coresvsrsmax{} times as fast on these three models. The
 estimates are identical for every number of threads, because each simulation's
 random numbers depend only on the seed and the simulation's position.

@@ -23,7 +23,7 @@ def clean(s):
     s = re.sub(r"DECISIONS( \d+)?", "the project notes", s)
     return s.strip()
 def tt(s):
-    return "\\texttt{" + tex(s) + "}" if s else ""
+    return "\\opt{" + tex(s) + "}" if s else ""
 def shorten(s, n):
     s = (s or "").strip()
     return s if len(s) <= n else s[:n - 1] + "\u2026"
@@ -46,7 +46,7 @@ with open("gen_effects.tex", "w") as f:
         if not done:
             continue
         f.write("\\subsection*{%s}\n" % tex(sec))
-        f.write("\\footnotesize\n\\begin{longtable}{@{}p{2.6cm}p{3.2cm}p{2.9cm}p{5.4cm}@{}}\n\\toprule\nRSiena name & Network / context & Validated & nwsaom option\\\\\n\\midrule\n\\endhead\n")
+        f.write("\\footnotesize\n\\begin{longtable}{@{}p{3.3cm}p{3.0cm}p{2.6cm}p{5.0cm}@{}}\n\\toprule\nRSiena name & Network / context & Validated & nwsaom option\\\\\n\\midrule\n\\endhead\n")
         for x in done:
             ctx = x["variable_type"] + ((" + " + x["interaction_context"]) if x["interaction_context"] else "")
             opt = re.sub(r"^IMPLEMENTED \(as (.*)\)$", r"\1", x["nwsaom_status"])
@@ -86,7 +86,7 @@ for x in miss:
 with open("gen_missing.tex", "w") as f:
     for g, xs in sorted(groups.items(), key=lambda kv: -len(kv[1])):
         f.write("\\subsection*{%s (%d %s)}\n" % (tex(g[0].upper() + g[1:]), len(xs), "row" if len(xs) == 1 else "rows"))
-        f.write("\\footnotesize\n\\begin{longtable}{@{}p{2.8cm}p{4.6cm}p{6.5cm}@{}}\n\\toprule\nRSiena name & Network / context & Note\\\\\n\\midrule\n\\endhead\n")
+        f.write("\\footnotesize\n\\begin{longtable}{@{}p{3.4cm}p{4.2cm}p{6.3cm}@{}}\n\\toprule\nRSiena name & Network / context & Note\\\\\n\\midrule\n\\endhead\n")
         for x in xs:
             ctx = x["variable_type"] + ((" + " + x["interaction_context"]) if x["interaction_context"] else "")
             f.write("%s & %s & %s\\\\\n" % (tt(x["RSiena_shortName"]), tex(shorten(ctx, 70)), tex(shorten(clean(x["notes"]), 160))))

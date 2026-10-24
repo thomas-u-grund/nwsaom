@@ -8,7 +8,7 @@ This chapter is for users who fit large models, who run \nwsaom{} on several pla
 \begin{enumerate}[nosep]
   \item The \textbf{ado layer} (\texttt{nwsaom.ado} and a few helper files) parses the options, checks the data and the combinations of options, builds the model description, calls the estimator and posts the results in \texttt{e()}.
   \item The \textbf{Mata core} (\texttt{unw\_saom.do}, compiled into the library \texttt{lnwcommands.mlib}) contains the model description, the observed statistics, the Robbins--Monro estimator for all phases, the calculation of the covariance matrix and a reference simulator, written in Mata, for the core effects.
-  \item {\sloppy The \textbf{native plugin} (\texttt{native/saom\_sim.c}, compiled for each platform into \texttt{lib/plugins/<platform>/}\allowbreak\texttt{saom\_sim\_<platform>.plugin}) simulates the ministeps. Almost all of the computing time of a fit is spent in it.\par}
+  \item {\sloppy The \textbf{native plugin} (\texttt{native/saom\_sim.c}, compiled for each platform into \opt{lib/plugins/<platform>/}\allowbreak\opt{saom\_sim\_<platform>.plugin}) simulates the ministeps. Almost all of the computing time of a fit is spent in it.\par}
 \end{enumerate}
 The Mata layer talks to the plugin through Stata frames. The calls are made once per batch of simulations and not once per ministep: in phases 1 and 3 all replicates of a fit are run in one call, on worker threads. The ministep sampler itself is the multinomial-logit rule of Chapter~\ref{ch:model}: for the acting actor the contribution of every alternative to the objective function is computed, the alternatives are given the choice probabilities, and one is drawn.
 
@@ -18,7 +18,7 @@ The Mata layer talks to the plugin through Stata frames. The calls are made once
 
 The plugin and the Mata layer communicate through a versioned interface. The plugin reports its version, and the Mata layer checks it before it uses a feature that needs a newer plugin. New effects, and new ways of combining existing ones, make the plugin newer.
 
-A plugin that is older than the \texttt{.ado} files cannot run models that need a newer one. This happens most often on Linux and Windows: those two binaries are built by continuous integration (a workflow on GitHub), whereas the macOS binary is compiled on the development machine, so that the three can differ for a while after a commit. If you install from a repository checkout, \nwsaom{} looks for the plugin first in \texttt{lib/plugins/<platform>/} next to the \texttt{nwsaom.ado} that is being run and only then with \texttt{findfile}. After a \texttt{net install} there is no \texttt{lib/plugins/} next to \texttt{nwsaom.ado}, and the copy in the PLUS directory is used.
+A plugin that is older than the \texttt{.ado} files cannot run models that need a newer one. This happens most often on Linux and Windows: those two binaries are built by continuous integration (a workflow on GitHub), whereas the macOS binary is compiled on the development machine, so that the three can differ for a while after a commit. If you install from a repository checkout, \nwsaom{} looks for the plugin first in \opt{lib/plugins/<platform>/} next to the \texttt{nwsaom.ado} that is being run and only then with \texttt{findfile}. After a \texttt{net install} there is no \texttt{lib/plugins/} next to \texttt{nwsaom.ado}, and the copy in the PLUS directory is used.
 
 \subsection{Native-only effects}
 
@@ -140,15 +140,15 @@ File & Content \\
 \midrule
 \texttt{nwsaom.ado} & The command: parsing, checks, model description, estimation dispatch, results. \\
 \texttt{\_nwsaom\_nx.ado} & The native-only network options \opt{netx()}, \opt{ownx()}, \opt{dyadx()}, \opt{tvdyadcov()}, \opt{tvdyadcovrecip()}, \opt{tvdyadx()}, moved out of \texttt{nwsaom.ado} because of the size limit. \\
-\texttt{nwsaom\_multinet.ado} & \texttt{nwsaom multinet}: several dependent networks. \\
-\texttt{nwsaom\_multiplex.ado} & \texttt{nwsaom multiplex}: the earlier two-network subcommand with outdegree, reciprocity and the cross-network product. \\
-\texttt{\_nwsaom\_postengine.ado}, \texttt{\_nwsaom\_rsnotes.ado}, \texttt{\_nwsaom\_tconvtable.ado} & Posting of \texttt{e(engine)}, the notes with RSiena's effect names, and the printing of the convergence table. \\
+\opt{nwsaom\_multinet.ado} & \texttt{nwsaom multinet}: several dependent networks. \\
+\opt{nwsaom\_multiplex.ado} & \texttt{nwsaom multiplex}: the earlier two-network subcommand with outdegree, reciprocity and the cross-network product. \\
+\opt{\_nwsaom\_postengine.ado}, \opt{\_nwsaom\_rsnotes.ado}, \opt{\_nwsaom\_tconvtable.ado} & Posting of \texttt{e(engine)}, the notes with RSiena's effect names, and the printing of the convergence table. \\
 \texttt{nwsaom\_estat.ado}, \texttt{nwsaom\_meta.ado} & \texttt{estat gof} and \texttt{estat mems}; the meta-analysis. \\
 \texttt{unw\_saom.do} & The Mata core: model, estimator, reference simulator, interface to the plugin. \\
 \texttt{native/saom\_sim.c} & The C plugin source; \texttt{native/Makefile} builds it. \\
-\texttt{lib/plugins/<platform>/} & The compiled plugins for \texttt{macos}, \texttt{unix} and \texttt{windows}. \\
-\texttt{nwsaom.sthlp}, \texttt{nwsaom\_remarks.sthlp} & The help file and its remarks. The help file was split in two because Stata's help Viewer fails on a very long file. \\
-\texttt{cscripts/test\_nwsaom\_*.do} & The regression tests, one file per feature, and \texttt{cscripts/run\_nwsaom\_tests.sh}, which runs them (\texttt{quick} or \texttt{full}) and accepts the directory of a freshly built plugin. \\
+\opt{lib/plugins/<platform>/} & The compiled plugins for \texttt{macos}, \texttt{unix} and \texttt{windows}. \\
+\texttt{nwsaom.sthlp}, \opt{nwsaom\_remarks.sthlp} & The help file and its remarks. The help file was split in two because Stata's help Viewer fails on a very long file. \\
+\opt{cscripts/test\_nwsaom\_*.do} & The regression tests, one file per feature, and \opt{cscripts/run\_nwsaom\_tests.sh}, which runs them (\texttt{quick} or \texttt{full}) and accepts the directory of a freshly built plugin. \\
 \bottomrule
 \end{tabular}
 \end{center}
