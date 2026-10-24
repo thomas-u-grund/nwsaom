@@ -1,12 +1,12 @@
 {smcl}
-{* *! version 1.0.1  24oct2026 author: Thomas Grund}{...}
+{* *! version 1.0.2  24oct2026 author: Thomas Grund}{...}
 
 {title:Title}
 
 {p2colset 9 25 26 2}{...}
 {p2col :nwsaom postestimation {hline 2}}Postestimation tools for {cmd:nwsaom}{p_end}
 {p2colreset}{...}
-{pstd}{it:nwsaom version 1.0.1, 24 October 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.0.2, 24 October 2026}{p_end}{* nwversion}
 
 {title:Description}
 

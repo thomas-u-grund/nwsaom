@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.0.1  24oct2026 author: Thomas Grund}{...}
+{* *! version 1.0.2  24oct2026 author: Thomas Grund}{...}
 {marker topic}
 {helpb nwtopical##analysis_statmodels:[NW-2.6.6] Statistical Estimation of Networks}
 
@@ -8,7 +8,7 @@
 {p2colset 9 21 22 2}{...}
 {p2col :nwsaom {hline 2}}Stochastic actor-oriented model (SAOM) estimation between observed network waves{p_end}
 {p2colreset}{...}
-{pstd}{it:nwsaom version 1.0.1, 24 October 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.0.2, 24 October 2026}{p_end}{* nwversion}
 
 {title:Syntax}
 

@@ -6,17 +6,17 @@ authors:
   - family-names: Grund
     given-names: Thomas U.
     affiliation: RWTH Aachen University
-version: 1.0.1
+version: 1.0.2
 date-released: '2026-10-24'
 license: GPL-3.0-only
 repository-code: "https://github.com/thomas-u-grund/nwsaom"
 preferred-citation:
   type: manual
-  title: "nwsaom: Stochastic actor-oriented models in Stata. Manual for version 1.0.1"
+  title: "nwsaom: Stochastic actor-oriented models in Stata. Manual for version 1.0.2"
   authors:
     - family-names: Grund
       given-names: Thomas U.
   year: 2026
   publisher:
     name: Zenodo
-  doi: 10.5281/zenodo.23623808
+  doi: 10.5281/zenodo.23623807
