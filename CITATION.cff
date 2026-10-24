@@ -10,4 +10,13 @@ version: 1.0.1
 date-released: '2026-10-24'
 license: GPL-3.0-only
 repository-code: "https://github.com/thomas-u-grund/nwsaom"
-# doi: 10.5281/zenodo.XXXXXXX   (placeholder: replace when the Zenodo record exists)
+preferred-citation:
+  type: manual
+  title: "nwsaom: Stochastic actor-oriented models in Stata. Manual for version 1.0.1"
+  authors:
+    - family-names: Grund
+      given-names: Thomas U.
+  year: 2026
+  publisher:
+    name: Zenodo
+  doi: 10.5281/zenodo.23623808

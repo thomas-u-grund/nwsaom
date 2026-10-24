@@ -24,6 +24,5 @@ The software was developed with Claude Code (Anthropic), an AI coding assistant,
 
 ## How to cite
 
-Grund, T. U. (2026). nwsaom: a Stata package (version 1.0.1). Zenodo. https://doi.org/10.5281/zenodo.XXXXXXX
-(placeholder DOI; the owner replaces it when the Zenodo record exists).
+Grund, T. U. (2026). nwsaom: Stochastic actor-oriented models in Stata. Manual for version 1.0.1. Zenodo. https://doi.org/10.5281/zenodo.23623808
 Please also cite the core package (Grund, T. U., nwcommands) and the work this package is derived from (see above).
