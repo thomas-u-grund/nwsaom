@@ -1,7 +1,15 @@
 * network effects with the dependent behavior as the covariate in a NON-DIRECTED network (netbeh(), behegox/behaltx/behegoplusalt) and samex: estimates equal
 * siena07 (symmetric s50 waves + alcohol, dev/saom_rsiena_symnetbeh.R/.do); here: every effect fits natively
 cscript
-do unw_core.do
+* The core package nwcommands is found through the environment variable NWCORE (path of the core checkout).
+local nwcore : env NWCORE
+if `"`nwcore'"' == "" {
+	di as error "set the environment variable NWCORE to the directory of the nwcommands (core) package"
+	exit 198
+}
+adopath ++ `"`nwcore'"'
+adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
 do unw_saom.do
 nwclear
 clear

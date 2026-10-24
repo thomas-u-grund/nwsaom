@@ -2,7 +2,15 @@
 * Real-data agreement with RSiena 1.6.6 (s50, alcohol; targets -10, 122.5, 327.587, 303.187, 52, 13.655 identical,
 * estimates within noise): dev/saom_rsiena_cov2.{R,do}.
 cscript
-do unw_core.do
+* The core package nwcommands is found through the environment variable NWCORE (path of the core checkout).
+local nwcore : env NWCORE
+if `"`nwcore'"' == "" {
+	di as error "set the environment variable NWCORE to the directory of the nwcommands (core) package"
+	exit 198
+}
+adopath ++ `"`nwcore'"'
+adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
 do unw_saom.do
 nwclear
 clear

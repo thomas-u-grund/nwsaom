@@ -1,7 +1,15 @@
 * nwsaom counterpart of dev/saom_rsiena_r1614_dyadx.R (RSiena 1.6.14: WXX / XWX / XWX1 / XWX2 / WXZX in a two-mode network, WXZX in a one-mode network):
 * the observed statistics (sum over the periods) and the estimates of two seeds
-do unw_core.do
-do unw_ergm.do
+* The core package nwcommands is found through the environment variable NWCORE (path of the core checkout).
+local nwcore : env NWCORE
+if `"`nwcore'"' == "" {
+	di as error "set the environment variable NWCORE to the directory of the nwcommands (core) package"
+	exit 198
+}
+adopath ++ `"`nwcore'"'
+adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
+* (not needed here: unw_ergm.do belongs to another package)
 do unw_saom.do
 nwclear
 forvalues w = 1/3 {

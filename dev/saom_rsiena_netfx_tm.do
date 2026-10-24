@@ -1,7 +1,15 @@
 * nwsaom counterpart of dev/saom_rsiena_netfx_tm.R (40 actors x 20 events): bipartite dyadic covariate and interactions
-qui do unw_core.do
-qui do unw_ergm.do
-qui do unw_saom.do
+* The core package nwcommands is found through the environment variable NWCORE (path of the core checkout).
+local nwcore : env NWCORE
+if `"`nwcore'"' == "" {
+	di as error "set the environment variable NWCORE to the directory of the nwcommands (core) package"
+	exit 198
+}
+adopath ++ `"`nwcore'"'
+adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
+* (not needed here: unw_ergm.do belongs to another package)
+do unw_saom.do
 nwclear
 forvalues w = 1/3 {
 	import delimited "dev/saom_twomode_w`w'.csv", clear varnames(1)

@@ -1,4 +1,10 @@
 *! version 0.1.0 23oct2026 nwcommands: estat importance after nwsaom
+* Copyright (C) 2026 Thomas U. Grund
+* This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
+* nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
+* Public License, version 3, as published by the Free Software Foundation. It is distributed in the hope
+* that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+* or FITNESS FOR A PARTICULAR PURPOSE. See the file LICENSE for the full text.
 /*
 	estat importance: the relative importance of the effects (RSiena's sienaRI()
 	/ interpret_size()). At the start network of every inter-wave period, the

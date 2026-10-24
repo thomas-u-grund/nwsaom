@@ -1,7 +1,13 @@
 *! nwsaom multiplex (split out of nwsaom.ado: the programs of one ado-file all count towards Stata's 1000 KB adosize while loaded)
+* Copyright (C) 2026 Thomas U. Grund
+* This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
+* nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
+* Public License, version 3, as published by the Free Software Foundation. It is distributed in the hope
+* that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+* or FITNESS FOR A PARTICULAR PURPOSE. See the file LICENSE for the full text.
 /* ===================================================================
    nwsaom multiplex: Stage 1 of multiplex/multi-relation SAOM support
-   (docs/SAOM_ROADMAP.md's own "v1-scope exclusions" entry) - two
+   (the development notes' own "v1-scope exclusions" entry) - two
    networks co-evolving, WITHIN-network effects only (outdegree +
    reciprocity on each), no cross-network effects yet. A separate,
    self-contained subcommand (matching nwergm's own `nwergm simulate'
@@ -22,7 +28,7 @@
    network+behavior and network+network co-evolution are the SAME
    underlying RSiena process, just different variable types).
 
-   Stage 2 (docs/SAOM_ROADMAP.md): adds the first real cross-network
+   Stage 2 (the development notes): adds the first real cross-network
    effect, `crprod()` - RSiena's own real "netA: netB" term (verified
    from real RSiena 1.6.6 source - see stat_crprod()/change_crprod()'s
    own header comment in unw_saom.do for the full account). `crprod`

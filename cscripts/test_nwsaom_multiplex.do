@@ -1,5 +1,5 @@
 * Multiplex SAOM, Stage 1 certification (two co-evolving networks, no
-* cross-network effects) - see docs/SAOM_ROADMAP.md's own multiplex
+* cross-network effects) - see the development notes' own multiplex
 * entry for the full scoping account. Direct Mata-level test, following
 * this project's own established convention (cscripts/test_nwsaom_mata.do)
 * of certifying new estimator machinery via SaomSimulateInterval-generated
@@ -8,7 +8,15 @@
 clear all
 * run from the repository root, like the other cscripts (a hardcoded cd to
 * the main checkout here used to test that checkout's Mata code instead)
-do unw_core.do
+* The core package nwcommands is found through the environment variable NWCORE (path of the core checkout).
+local nwcore : env NWCORE
+if `"`nwcore'"' == "" {
+	di as error "set the environment variable NWCORE to the directory of the nwcommands (core) package"
+	exit 198
+}
+adopath ++ `"`nwcore'"'
+adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
 do unw_saom.do
 
 mata:

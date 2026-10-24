@@ -1,7 +1,15 @@
 * structural rate effects (protocol 42, native only): outrate inrate reciprate outrateinv inrateinv reciprateinv outratelog inratelog recipratelog
 * (RSiena outRate ... recipRateLog). Rate covariates that follow the network: estimates agree with siena07 (conditional, s50; dev/saom_rsiena_strate.R).
 cscript
-do unw_core.do
+* The core package nwcommands is found through the environment variable NWCORE (path of the core checkout).
+local nwcore : env NWCORE
+if `"`nwcore'"' == "" {
+	di as error "set the environment variable NWCORE to the directory of the nwcommands (core) package"
+	exit 198
+}
+adopath ++ `"`nwcore'"'
+adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
 do unw_saom.do
 nwclear
 clear

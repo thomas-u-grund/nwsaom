@@ -2,7 +2,15 @@
 * The networks are given by formulas (no random numbers) and built identically by dev/saom_rsiena_mnnet.R, which printed the reference values below (siena07, RSiena 1.6.6, and 1.6.14 for the toU rows (RSiena 1.6.12 corrected the order of the two networks in toU);
 * the targets of the cross effect, summed over the periods). Estimates against siena07 (two seeds): dev/saom_rsiena_mn2m.R / .do (two-mode) and dev/saom_rsiena_mn1m.R / .do.
 cscript
-do unw_core.do
+* The core package nwcommands is found through the environment variable NWCORE (path of the core checkout).
+local nwcore : env NWCORE
+if `"`nwcore'"' == "" {
+	di as error "set the environment variable NWCORE to the directory of the nwcommands (core) package"
+	exit 198
+}
+adopath ++ `"`nwcore'"'
+adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
 do unw_saom.do
 nwclear
 clear

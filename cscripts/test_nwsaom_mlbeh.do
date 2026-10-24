@@ -3,7 +3,15 @@
 * against exact enumeration of the 1728 states (dev/saom_ml_exact_coev.R); then the estimators run on the Glasgow data with the behavior.
 cscript
 adopath ++ "."
-do unw_core.do
+* The core package nwcommands is found through the environment variable NWCORE (path of the core checkout).
+local nwcore : env NWCORE
+if `"`nwcore'"' == "" {
+	di as error "set the environment variable NWCORE to the directory of the nwcommands (core) package"
+	exit 198
+}
+adopath ++ `"`nwcore'"'
+adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
 do unw_saom.do
 
 nwwebuse glasgow, nwclear

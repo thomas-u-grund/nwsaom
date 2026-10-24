@@ -1,7 +1,15 @@
 * behavior effects of the network x a constant dyadic covariate (behw(): avAltW ... totSimW, parameters 1 and 2; RSiena's default is 2): all observed statistics and
 * the estimates equal siena07 (s50 + alcohol, dev/saom_rsiena_behw.{R,do}); here: every family fits natively, names, refusals
 cscript
-do unw_core.do
+* The core package nwcommands is found through the environment variable NWCORE (path of the core checkout).
+local nwcore : env NWCORE
+if `"`nwcore'"' == "" {
+	di as error "set the environment variable NWCORE to the directory of the nwcommands (core) package"
+	exit 198
+}
+adopath ++ `"`nwcore'"'
+adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
 do unw_saom.do
 nwclear
 clear

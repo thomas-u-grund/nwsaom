@@ -3,7 +3,15 @@
 * The observed statistics (e(target), summed over the periods) equal siena07's targets (dev/saom_rsiena_mnbeh*.R, s50 + a second network + alcohol; the numbers
 * below are siena07's); estimates agree with siena07 in dev/saom_rsiena_mnbeh.R/.do.
 cscript
-do unw_core.do
+* The core package nwcommands is found through the environment variable NWCORE (path of the core checkout).
+local nwcore : env NWCORE
+if `"`nwcore'"' == "" {
+	di as error "set the environment variable NWCORE to the directory of the nwcommands (core) package"
+	exit 198
+}
+adopath ++ `"`nwcore'"'
+adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
 do unw_saom.do
 nwclear
 * the data (siena07's s50 friendship waves, a second network, a non-directed network, alcohol, smoking): cscripts/mnbeh_ties.csv (net: 1 friendship, 2 second, 3 non-directed; wave; i; j)

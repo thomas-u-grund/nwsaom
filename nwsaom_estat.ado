@@ -1,10 +1,16 @@
 *! version 0.3.1 28aug2026 nwcommands: post-estimation for nwsaom (harmonisation units 21+26, RSiena-faithful GOF + co-evolution, N-wave)
+* Copyright (C) 2026 Thomas U. Grund
+* This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
+* nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
+* Public License, version 3, as published by the Free Software Foundation. It is distributed in the hope
+* that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+* or FITNESS FOR A PARTICULAR PURPOSE. See the file LICENSE for the full text.
 /*
 	nwsaom_estat.ado -- post-estimation commands for nwsaom (SAOM/
 	Method-of-Moments). v1: `estat gof` only.
 
-	See docs/SAOM_ROADMAP.md ("GOF (estat gof)" and "Co-evolution
-	(network + behavior)") and docs/SAOM_ARCHITECTURE.md for the design
+	See the development notes ("GOF (estat gof)" and "Co-evolution
+	(network + behavior)") and the development notes for the design
 	account.
 
 	HARMONISATION UNIT 26 (co-evolution) added a fourth default auxiliary
@@ -285,7 +291,7 @@ program define nwsaom_estat_gof, rclass
 	capture mata: mata drop __nwsaom_gof_cfg
 	if `__gof_coev' {
 		// harmonisation unit 26: co-evolution is Mata-only in v1 (no
-		// native port yet, docs/SAOM_ROADMAP.md's own unit-26 entry) -
+		// native port yet, the development notes' own unit-26 entry) -
 		// SaomNativeSetup() only knows about the NETWORK model and would
 		// silently ignore the co-evolving behavior's own influence on
 		// the network if used here, so it is not even attempted.
@@ -583,7 +589,7 @@ end
 // difference from this file's other three auxiliary statistics, not an
 // oversight (matches this whole effort's own standing instruction: when
 // in doubt, mimic what R/RSiena actually does). SAOM networks are always
-// directed (docs/SAOM_ROADMAP.md: "SAOM's own ministep formulation is
+// directed (the development notes: "SAOM's own ministep formulation is
 // inherently directed" - undirected relations remain unimplemented, and
 // nwsaom's own e()-space never stores a directedness flag at all, unlike
 // nwergm), so this always requests the full 16-category census, matching

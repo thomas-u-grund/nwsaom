@@ -1,4 +1,10 @@
 *! version 0.1.0 23oct2026 nwcommands: Bayesian estimation of a SAOM (data augmentation, Metropolis-Hastings) after nwsaom
+* Copyright (C) 2026 Thomas U. Grund
+* This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
+* nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
+* Public License, version 3, as published by the Free Software Foundation. It is distributed in the hope
+* that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+* or FITNESS FOR A PARTICULAR PURPOSE. See the file LICENSE for the full text.
 /*
 	nwsaom bayes -- Bayesian estimation of the model of the last nwsaom fit. The unobserved sequence of ministeps between each pair
 	of waves is a parameter of the sampler (Koskinen & Snijders 2007; Snijders, Koskinen & Schweinberger 2010); given it, the effects

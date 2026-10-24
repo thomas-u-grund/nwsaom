@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2026 Thomas U. Grund
+ * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
+ * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
+ * Public License, version 3, as published by the Free Software Foundation. It is distributed in the hope
+ * that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the file LICENSE for the full text.
+ */
 /* ===================================================================
    saom_ml.c -- maximum likelihood estimation of a SAOM (nwsaom, option ml): the Robbins-Monro algorithm on the score
    function of the augmented data (the chain of ministeps), as RSiena's siena07(maxlike = TRUE) (Snijders, Koskinen &

@@ -1,9 +1,18 @@
 cscript
 
+* The core package nwcommands is found through the environment variable NWCORE (path of the core checkout).
+local nwcore : env NWCORE
+if `"`nwcore'"' == "" {
+	di as error "set the environment variable NWCORE to the directory of the nwcommands (core) package"
+	exit 198
+}
+adopath ++ `"`nwcore'"'
+adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
 do unw_saom.do
 
 * Certifies the native (C) SAOM backend (native/saom_sim.c, harmonisation
-* unit 6, docs/SAOM_ROADMAP.md "Native (C) backend") against its own Mata
+* unit 6, the development notes "Native (C) backend") against its own Mata
 * reference implementation (SaomSimulateInterval(), already certified in
 * cscripts/test_nwsaom_mata.do). Like nwergm's own native MCMC backend
 * (cscripts/test_nwergm_native.do), this is a STOCHASTIC simulator, so the
@@ -1184,7 +1193,7 @@ void saom_test_native_isoiso_equiv(real scalar n, real scalar nruns) {
    transrectrip/outoutass/ininass (harmonisation unit 37 native port):
    the three effects harmonisation unit 37 added Mata-only, closing the
    80x-290x-slower-than-RSiena gap that unit's own real RSiena benchmark
-   disclosed (see docs/SAOM_ROADMAP.md's own account) - termcodes
+   disclosed (see the development notes' own account) - termcodes
    16/17/18. Same two-sample z-test methodology as
    saom_test_native_isoiso_equiv() above, but at a MODERATE density
    (unlike isolatenet/outiso's own deliberately-sparse setup) - all

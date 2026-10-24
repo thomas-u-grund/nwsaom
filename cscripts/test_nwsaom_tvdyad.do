@@ -1,7 +1,15 @@
 * changing dyadic covariates (tvdyadcov(), tvdyadcovrecip(), tvdyadx()): the matrices stem1 .. stem`P' travel as time-varying attribute columns. siena07 agreement
 * (statistics and estimates, directed s50 and symmetric s50 waves): dev/saom_rsiena_tvdyad.{R,do}, dev/saom_rsiena_symdyad.{R,do}; here: every effect fits natively
 cscript
-do unw_core.do
+* The core package nwcommands is found through the environment variable NWCORE (path of the core checkout).
+local nwcore : env NWCORE
+if `"`nwcore'"' == "" {
+	di as error "set the environment variable NWCORE to the directory of the nwcommands (core) package"
+	exit 198
+}
+adopath ++ `"`nwcore'"'
+adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
 do unw_saom.do
 nwclear
 clear

@@ -1,7 +1,15 @@
 * nwsaom with several co-evolving behaviors: behavior(a1 a2 a3 : linear quadratic avalt | b1 b2 b3 : linear avalt)
 * Real-data agreement with RSiena (s50 + alcohol + smoking): dev/saom_rsiena_multibeh.{R,do}.
 cscript
-do unw_core.do
+* The core package nwcommands is found through the environment variable NWCORE (path of the core checkout).
+local nwcore : env NWCORE
+if `"`nwcore'"' == "" {
+	di as error "set the environment variable NWCORE to the directory of the nwcommands (core) package"
+	exit 198
+}
+adopath ++ `"`nwcore'"'
+adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
 do unw_saom.do
 
 nwclear

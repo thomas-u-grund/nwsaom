@@ -1,7 +1,15 @@
 /*
+ * Copyright (C) 2026 Thomas U. Grund
+ * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
+ * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
+ * Public License, version 3, as published by the Free Software Foundation. It is distributed in the hope
+ * that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the file LICENSE for the full text.
+ */
+/*
 	saom_sim.c -- native (C) SAOM ministep/interval simulation kernel for
-	nwcommands (nwsaom). See docs/SAOM_ROADMAP.md ("Native (C) backend")
-	and docs/SAOM_ARCHITECTURE.md for the full design account.
+	nwcommands (nwsaom). See the development notes ("Native (C) backend")
+	and the development notes for the full design account.
 
 	SCOPE (harmonisation unit 10 - "learn lessons that help for all
 	other effects", per explicit user instruction after a real, measured
@@ -23,7 +31,7 @@
 	lists for the OTP/OSP shared-partner terms) is a direct structural
 	port of native/ergm_mcmc.c's own graph_t/dyadht_t/adjlist_t (read-only
 	reference, not included/linked - this file is fully self-contained,
-	per the coordination note in docs/SAOM_ROADMAP.md: this initiative
+	per the coordination note in the development notes: this initiative
 	never edits native/ergm_mcmc.c, which a concurrent session is
 	actively working on).
 
@@ -35,11 +43,11 @@
 	that file's own reproducibility contract: same Stata `set seed` ->
 	same native run, every time, but NOT the same sample path as the
 	Mata backend (independent RNG streams - see
-	docs/SAOM_ARCHITECTURE.md's "Native backend" section, "Certification
+	the development notes' "Native backend" section, "Certification
 	standard").
 
 	WIRE PROTOCOL: one `plugin call` per SIMULATED INTERVAL (never per
-	ministep - see docs/SAOM_ARCHITECTURE.md's own "cross the boundary
+	ministep - see the development notes' own "cross the boundary
 	once per simulated interval" contract). Args string: "n directed
 	nties_in rate rngseed nattr nterms [termcode attridx p1]*nterms
 	[theta]*nterms" - extended this unit with a per-term `p1` generic
@@ -130,7 +138,7 @@
 	direction "Move to native backend with it" after a direct benchmark
 	found missing-data fits ~50x slower than a native-eligible fit,
 	root-caused entirely to native being force-disabled, not to the
-	masking computation itself - see docs/SAOM_ROADMAP.md's own unit-35
+	masking computation itself - see the development notes' own unit-35
 	entry). TWO more brand-new trailing fields, after `condmode
 	targetChange`: `hasmiss nmissdyads` - every existing caller simply
 	appends " 0 0" (matching the "known-length trailer" convention
@@ -571,7 +579,7 @@ static void adj_remove(adjlist_t *a, long j) {
 
 /* ===================================================================
    Graph state - directed only (SAOM's ministep formulation is
-   inherently directed, see docs/SAOM_ROADMAP.md's v1 scope), so unlike
+   inherently directed, see the development notes' v1 scope), so unlike
    ergm_mcmc.c's graph_t this never needs an undirected-symmetric
    dyadkey() branch. `dout'/`din' (new this unit) give O(1) degree
    lookups for the popularity/activity terms; `outadj'/`inadj' (new
@@ -641,7 +649,7 @@ static void toggle(graph_t *g, long i, long j) {
 
 /* ===================================================================
    Batch OTP/OSP precompute (harmonisation unit 13 - performance pass,
-   see docs/SAOM_ROADMAP.md's own "Native backend performance" entries
+   see the development notes' own "Native backend performance" entries
    for units 11/12 and the controlled A/B that motivated this one: the
    per-alternative shared_partners_otp()/osp() calls this unit REPLACES
    each independently re-walked `actor's own neighborhood once PER
@@ -958,7 +966,7 @@ static double saom_cycle4sqrt_change(graph_t *g, long i, long j, int tied) {
 
 /* ===================================================================
    Aggregate (full-network) statistic per term - harmonisation unit 14
-   (performance pass, see docs/SAOM_ROADMAP.md's own "Native backend
+   (performance pass, see the development notes' own "Native backend
    performance" entry). Direct C ports of unw_saom.do's/unw_ergm.do's
    own stat_X() Mata functions (see this codebase's own established
    "certify every port against the ego-level/algebraic original"
@@ -2387,7 +2395,7 @@ static double saom_stat_term(graph_t *g, int termcode, double *a, double p1) {
 /* `ij_exists' (harmonisation unit 11 - performance pass) is has_edge(g,i,j)
    PRECOMPUTED ONCE by the caller before the per-term loop, not
    recomputed by each term that needs it - a direct before/after
-   benchmark (docs/SAOM_ROADMAP.md's "Native backend performance" entry)
+   benchmark (the development notes' "Native backend performance" entry)
    motivated this: every one of these 13 terms except reciprocity's own
    OWN reverse-direction check needs exactly this one lookup, so a
    model with several active terms was paying for the identical hash
@@ -4030,7 +4038,7 @@ static void free_graph(graph_t *gm) {
 /* wire_parse_error: set the moment strtok(NULL, " \t") runs out of
    tokens (a wire-protocol field-count desync between a Mata caller and
    this parser - a real, recurring bug class in this project, see
-   docs/SAOM_ROADMAP.md). Previously next_long()/next_double() fed a NULL
+   the development notes). Previously next_long()/next_double() fed a NULL
    pointer straight into atof()/strtod_l(), crashing the whole Stata
    process (confirmed via a real macOS crash report, SIGABRT inside
    strtod_l, no repro command available) instead of failing cleanly.

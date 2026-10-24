@@ -1,7 +1,15 @@
 * network effects of a constant dyadic covariate (dyadx(): WWX cyWWX InWWX OutWWX WXX XWX XWX1 XWX2 XXW): the observed statistics and the estimates
 * equal siena07 (s50, dev/saom_rsiena_dyadx.{R,do}); here: every effect fits natively, names, refusals
 cscript
-do unw_core.do
+* The core package nwcommands is found through the environment variable NWCORE (path of the core checkout).
+local nwcore : env NWCORE
+if `"`nwcore'"' == "" {
+	di as error "set the environment variable NWCORE to the directory of the nwcommands (core) package"
+	exit 198
+}
+adopath ++ `"`nwcore'"'
+adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
 do unw_saom.do
 nwclear
 clear

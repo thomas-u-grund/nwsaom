@@ -3,7 +3,15 @@
 * (Reference: Glasgow friend network + random second network, 3 waves, RSiena 1.6.14 fixed-dummy score.Test for the second network's outdegree
 *  1.16 / 1.26 / 1.10 (seeds 1-3), sienaTimeTest 0.29 / 0.28 / 0.33; nwsaom 1.23 / 1.30 / 1.12 and, with fixrates, in the sienaTimeTest range.)
 cscript
-do unw_core.do
+* The core package nwcommands is found through the environment variable NWCORE (path of the core checkout).
+local nwcore : env NWCORE
+if `"`nwcore'"' == "" {
+	di as error "set the environment variable NWCORE to the directory of the nwcommands (core) package"
+	exit 198
+}
+adopath ++ `"`nwcore'"'
+adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
 do unw_saom.do
 nwclear
 clear

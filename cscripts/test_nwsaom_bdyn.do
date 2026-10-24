@@ -1,7 +1,15 @@
 * behavior effects with ANOTHER co-evolving behavior as the covariate (behx(family:beh2), behfrom(beh2), behavxalt(beh2) ...; plugin protocol 53): siena07
 * agreement (alcohol effects with smoking as the covariate, s50): dev/saom_rsiena_bdyn.{R,do}; here: every family runs natively, refusals
 cscript
-do unw_core.do
+* The core package nwcommands is found through the environment variable NWCORE (path of the core checkout).
+local nwcore : env NWCORE
+if `"`nwcore'"' == "" {
+	di as error "set the environment variable NWCORE to the directory of the nwcommands (core) package"
+	exit 198
+}
+adopath ++ `"`nwcore'"'
+adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
 do unw_saom.do
 nwclear
 clear

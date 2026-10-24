@@ -1,4 +1,10 @@
 *! version 0.1.0 22oct2026 nwcommands: multi-group meta-analysis of separate nwsaom fits (RSiena's siena08)
+* Copyright (C) 2026 Thomas U. Grund
+* This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
+* nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
+* Public License, version 3, as published by the Free Software Foundation. It is distributed in the hope
+* that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+* or FITNESS FOR A PARTICULAR PURPOSE. See the file LICENSE for the full text.
 /*
 	nwsaom_meta -- combine the estimates of the same nwsaom model fitted to several networks (groups), as RSiena's siena08
 	(Snijders & Baerveldt 2003): for every effect the IWLS random-effects mean, the t test, Fisher's combination of one-sided tests, the

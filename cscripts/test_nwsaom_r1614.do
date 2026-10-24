@@ -2,7 +2,15 @@
 * References: siena07 of RSiena 1.6.14 (dev/saom_rsiena_r1614.R for the cross-network statistics on the deterministic networks of test_nwsaom_mnnet.do, dev/saom_rsiena_r1614_dyadx.R / .do for WXX, XWX, WXZX).
 * The statistics are the targets of the effect, summed over the periods.
 cscript
-do unw_core.do
+* The core package nwcommands is found through the environment variable NWCORE (path of the core checkout).
+local nwcore : env NWCORE
+if `"`nwcore'"' == "" {
+	di as error "set the environment variable NWCORE to the directory of the nwcommands (core) package"
+	exit 198
+}
+adopath ++ `"`nwcore'"'
+adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
 do unw_saom.do
 nwclear
 clear

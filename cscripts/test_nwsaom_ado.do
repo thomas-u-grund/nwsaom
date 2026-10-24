@@ -1,6 +1,14 @@
 cscript
 
-do unw_core.do
+* The core package nwcommands is found through the environment variable NWCORE (path of the core checkout).
+local nwcore : env NWCORE
+if `"`nwcore'"' == "" {
+	di as error "set the environment variable NWCORE to the directory of the nwcommands (core) package"
+	exit 198
+}
+adopath ++ `"`nwcore'"'
+adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
 do unw_saom.do
 
 * End-to-end smoke test for nwsaom.ado (harmonisation units 1-5):
@@ -183,7 +191,7 @@ capture graph drop gof_geodesic
 di as text "nwsaom.ado unit 21 (estat gof, waves() 3-wave path, pooled-across-periods) end-to-end smoke test PASS"
 
 * --- harmonisation unit 162: estat gof, stats(triad) + join(off) - closes
-* unit 21's own two disclosed GOF gaps (docs/SAOM_ROADMAP.md). First a
+* unit 21's own two disclosed GOF gaps (the development notes). First a
 * direct correctness check of nwsaom_gof_triadvec (nwsaom_estat.ado)
 * against nwtriads called directly on the identical network - must match
 * EXACTLY (both read the same underlying MAN-census machinery), and the
@@ -672,14 +680,14 @@ di as text "nwsaom.ado behtheta0() (behavior starting values, renamed from the n
 * harmonisation unit 33 (composition change - "joiners and leavers"):
 * present() end-to-end on real nwset-built networks, both the two-wave
 * and N-wave paths, network-only and co-evolution (per the explicit
-* "both from the start" scope decision, docs/SAOM_ROADMAP.md's own
+* "both from the start" scope decision, the development notes' own
 * unit-33 entry), plus validation.
 * -------------------------------------------------------------------
 nwclear
 * actor F (row/col 6) is marked absent from wave2 onward below - its own
 * row/column is therefore held FROZEN at wave1's own values across
 * wave2/wave3 (the "carry-forward" convention this package documents,
-* docs/SAOM_ROADMAP.md's own unit-33 entry), matching what a real
+* the development notes' own unit-33 entry), matching what a real
 * dataset prepared for composition change is expected to look like -
 * an inconsistently-coded absent actor's own row would inject spurious
 * target-statistic "activity" the simulator can never explain (F can no
@@ -876,7 +884,7 @@ di as text "nwsaom.ado unit 35 (network-only and co-evolution + missing data, gl
 * Harmonisation unit 167: network-side endowment/creation
 * (outdegreeendow/outdegreecreation, reciprocityendow/reciprocitycreation).
 * RSiena's own getEffects() confirms density/recip DO offer endow/
-* creation types - see docs/SAOM_ROADMAP.md's own unit-166/167 entries.
+* creation types - see the development notes' own unit-166/167 entries.
 * =====================================================================
 nwclear
 set seed 90210
@@ -1099,7 +1107,7 @@ di as text "nwsaom.ado non-directed relations recognized from the data PASS"
 * well-identified through this combined path (a real correctness
 * property, not just "runs without error"); the rate-covariate
 * coefficient's OWN standard error is disclosed as unreliably large
-* under symtype (see docs/SAOM_ROADMAP.md) - not chased further here,
+* under symtype (see the development notes) - not chased further here,
 * consistent with the already-flagged unverified phase-1 score-function
 * derivation for symmetric models generally.
 * (a covariate with a small range: with _n, 1-50, a modest coefficient
@@ -1193,7 +1201,7 @@ assert !missing(__symbf[1,1])
 
 * BAGREE's own formula was independently verified correct via a direct
 * hand-computed cross-check against printed u_actor/u_alter values
-* (docs/SAOM_ROADMAP.md); it converges cleanly on the 50-actor
+* (the development notes); it converges cleanly on the 50-actor
 * symmetrized s50 data.
 capture noisily nwsaom, wave1(saomsymw1) wave2(saomsymw2) outdegree symmetric symtype(agree) k0(20) k3(200) seed(777)
 assert _rc == 0

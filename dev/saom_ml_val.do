@@ -1,7 +1,15 @@
 * Validation of nwsaom ..., ml against RSiena siena07(maxlike = TRUE) (dev/saom_bayes_ml.R): Glasgow s501-s503. args: model (glas|cov) seed
 args model seed opts
-do unw_core.do
-do unw_ergm.do
+* The core package nwcommands is found through the environment variable NWCORE (path of the core checkout).
+local nwcore : env NWCORE
+if `"`nwcore'"' == "" {
+	di as error "set the environment variable NWCORE to the directory of the nwcommands (core) package"
+	exit 198
+}
+adopath ++ `"`nwcore'"'
+adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
+* (not needed here: unw_ergm.do belongs to another package)
 do unw_saom.do
 nwclear
 forvalues w = 1/3 {

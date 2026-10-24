@@ -1,9 +1,15 @@
 *! version 0.3.0 28aug2026 nwcommands: stochastic actor-oriented model (SAOM) estimation, v1 (+ harmonisation unit 26 co-evolution, N-wave, avsim, native backend)
+* Copyright (C) 2026 Thomas U. Grund
+* This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
+* nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
+* Public License, version 3, as published by the Free Software Foundation. It is distributed in the hope
+* that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+* or FITNESS FOR A PARTICULAR PURPOSE. See the file LICENSE for the full text.
 /*
 	nwsaom.ado -- user-facing layer for SAOM (Snijders-style stochastic
 	actor-oriented model) estimation between two observed network waves.
 
-	See docs/SAOM_ROADMAP.md (scope/status) and docs/SAOM_ARCHITECTURE.md
+	See the development notes (scope/status) and the development notes
 	(design). v1 scope: exactly two waves, fixed actor set, directed
 	relation, Method of Moments / Robbins-Monro estimation. Effect
 	family (harmonisation units 1-5, 9): outdegree, reciprocity,
@@ -31,7 +37,7 @@
 	in unw_saom.do (SaomMinistep()/SaomSimulateInterval()/SaomEstimateRM()),
 	which itself reuses nwergm's own SaomGraph/SaomModel/SaomTermData
 	classes and stat_X()/change_X() term functions - READ ONLY, never
-	edited by this initiative (see docs/SAOM_ROADMAP.md's coordination
+	edited by this initiative (see the development notes' coordination
 	note: a separate session works on nwergm concurrently).
 
 	The NWdef -> SaomGraph bridge below is this file's OWN copy of
@@ -190,7 +196,7 @@ program nwsaom, eclass
 	// nodeicov()=altX, nodematch()=sameX, simcov()=simX (confirmed via
 	// this file's own nodecov/nodeicov/nodeocov comment above, unit 2's
 	// header in unw_saom.do, and unit 9's simcov derivation). Pure
-	// naming/documentation, per docs/SAOM_ROADMAP.md's "egoX proper"
+	// naming/documentation, per the development notes' "egoX proper"
 	// entry - no new math, each alias resolves to the exact SAME
 	// addterm()/change_X() wiring as its Statnet-named counterpart.
 	// Specifying both a term and its RSiena alias is an error (ambiguous
@@ -239,7 +245,7 @@ program nwsaom, eclass
 	// behavior) OR waves(namelist) (harmonisation unit 17, "3+ wave
 	// chaining" - two or more waves, ordered, dispatches to
 	// SaomEstimateRMMulti()). Never both, never neither. See
-	// docs/SAOM_ROADMAP.md's own "Open design questions" entry on why
+	// the development notes' own "Open design questions" entry on why
 	// wave1()/wave2() was originally built as two distinct arguments
 	// rather than a list - that reasoning no longer applies now that
 	// chaining is actually implemented, but wave1()/wave2() is kept
@@ -284,7 +290,7 @@ program nwsaom, eclass
 	// SaomEstimateRMCoevMulti(), mirroring SaomEstimateRMMulti()'s own
 	// established "chain periods, pool theta, keep rate per-period"
 	// pattern - now for BOTH variables, unit 26's own DESIGN section,
-	// docs/SAOM_ROADMAP.md). One Stata variable per wave, same "one
+	// the development notes). One Stata variable per wave, same "one
 	// name per wave" convention as waves() itself - ONE behavior
 	// variable only (v1 scope; multiple co-evolving behaviors remain
 	// out of scope).
@@ -364,7 +370,7 @@ program nwsaom, eclass
 		// ALTERNATIVE baseline to plain linear (RSiena's own manual, "the
 		// model specifications of ... (creation & endowment) are
 		// equivalent" to evaluation alone, up to reparametrization -
-		// docs/SAOM_ROADMAP.md's own unit-28 entry has the full citation).
+		// the development notes' own unit-28 entry has the full citation).
 		// Combining `linear' with either is refused (all three roles for
 		// one effect together is exactly collinear - RSiena's own manual:
 		// "never in all three, because this leads to collinearity"), and
@@ -573,7 +579,7 @@ program nwsaom, eclass
 	// present (eligible to act or be tied to) at each wave. An actor
 	// present at BOTH endpoint waves of a given inter-wave period is
 	// treated as present for that WHOLE period (this package's own
-	// whole-period-only scope decision - see docs/SAOM_ROADMAP.md's own
+	// whole-period-only scope decision - see the development notes' own
 	// unit-33 entry); an actor absent from either endpoint is excluded
 	// from that period's own simulation entirely. Optional - omitting
 	// present() entirely is a true no-op (every actor present the whole
@@ -749,7 +755,7 @@ program nwsaom, eclass
 	// reciprocitycreation are a real, RSiena-native alternative role split
 	// for the two network effects RSiena's own getEffects() confirms offer
 	// endow/creation types (density=outdegree, recip=reciprocity - see
-	// docs/SAOM_ROADMAP.md's own unit-166 entry for the live-fetched
+	// the development notes' own unit-166 entry for the live-fetched
 	// evidence). Same "both roles together, not with the plain role"
 	// collinearity rule as the behavior-side splits (unit 28/166), applied
 	// per effect, ORTHOGONAL to every other effect's own choice - the
@@ -1364,7 +1370,7 @@ program nwsaom, eclass
 	// sn_stat_nodecov()/sn_change_nodecov() etc. (unw_ergm.do) - each a
 	// genuine single-actor-local SAOM effect (nodeocov = standard
 	// RSiena "ego" effect, nodeicov = standard "alter" effect, nodecov
-	// = their combined sum). See docs/SAOM_ROADMAP.md unit 2.
+	// = their combined sum). See the development notes unit 2.
 	if "`nodecov'" != "" {
 		unab nodecov : `nodecov'
 		foreach __v of local nodecov {
@@ -1753,7 +1759,7 @@ program nwsaom, eclass
 	// --- changing dyadic covariates (RSiena varDyadCovar), protocol 15/49 with time-varying attribute columns:
 	// --- indegpopularity/outactivity: freshly-derived SAOM-native
 	// effects (unw_saom.do's own "SAOM-native effect library" section) -
-	// NOT ports of any nwergm term. See docs/SAOM_ROADMAP.md unit 3.
+	// NOT ports of any nwergm term. See the development notes unit 3.
 	if "`indegpopularity'" != "" {
 		local __td_ip "__nstd_`++__ns_n'"
 		mata: `__td_ip' = SaomTermData()
@@ -1938,7 +1944,7 @@ program nwsaom, eclass
 	// comments on each for the full derivation. Default/base
 	// parameterization only (no sqrt-root variants) - v1 scope.
 	// (transties itself already exists - harmonisation unit 23, above -
-	// discovered mid-unit and NOT re-implemented here; see docs/SAOM_ROADMAP.md
+	// discovered mid-unit and NOT re-implemented here; see the development notes
 	// unit 37's own account of this near-duplication.)
 	if "`transrectrip'" != "" {
 		local __td_trt "__nstd_`++__ns_n'"
@@ -1984,7 +1990,7 @@ program nwsaom, eclass
 	// effects (harmonisation units 4-5), reusing SaomGraph's own
 	// already-certified shared_partners_otp()/_osp()/_isp() PRIMITIVES
 	// internally (see unw_saom.do's own header comments on each for the
-	// exact derivation). See docs/SAOM_ROADMAP.md units 4-5.
+	// exact derivation). See the development notes units 4-5.
 	if "`transtrip'" != "" {
 		local __td_tt "__nstd_`++__ns_n'"
 		mata: `__td_tt' = SaomTermData()
@@ -2210,7 +2216,7 @@ program nwsaom, eclass
 	// --- outpopularity/inactivity/simcov: harmonisation unit 9, each
 	// independently verified against the real RSiena C++ source (see
 	// unw_saom.do's own header comments) before implementation. See
-	// docs/SAOM_ROADMAP.md unit 9.
+	// the development notes unit 9.
 	if "`outpopularity'" != "" {
 		local __td_op "__nstd_`++__ns_n'"
 		mata: `__td_op' = SaomTermData()
@@ -2385,7 +2391,7 @@ program nwsaom, eclass
 	// --- behavior model: harmonisation unit 26. `linear'/`quadratic'/
 	// `avalt' independently verified against real RSiena source
 	// (LinearShapeEffect.cpp/QuadraticShapeEffect.cpp/
-	// AverageAlterEffect.cpp - docs/SAOM_ROADMAP.md's own unit-26
+	// AverageAlterEffect.cpp - the development notes' own unit-26
 	// DESIGN section has the full account) and certified via ego-level
 	// brute-force recomputation (cscripts/test_nwsaom_mata.do's own
 	// unit 26). Coefficient names prefixed `beh_' at the OUTPUT-NAMING
@@ -2435,7 +2441,7 @@ program nwsaom, eclass
 			// standard errors" - the same manual's own advice is to
 			// START without creation/endowment and add them only "if
 			// there is enough data". A ground-truth recovery test
-			// (docs/SAOM_ROADMAP.md's own unit-28/unit-29 entries) found
+			// (the development notes' own unit-28/unit-29 entries) found
 			// that even a MODEST true theta pair can, on a given finite
 			// dataset, push the Robbins-Monro update into a genuinely
 			// ill-conditioned direction (a near-singular phase-1 Jacobian
@@ -3192,7 +3198,7 @@ program nwsaom, eclass
 		// harmonisation unit 26 ("extend it to N waves"): joint
 		// network+behavior Method of Moments / Robbins-Monro, chained
 		// across every period - see SaomEstimateRMCoevMulti()'s own
-		// header comment (unw_saom.do) and docs/SAOM_ROADMAP.md's
+		// header comment (unw_saom.do) and the development notes'
 		// unit-26 entry for the full account.
 		capture mata: mata drop __nwsaom_fit_coevmulti
 		local __ns_cn_sym = 0
@@ -3244,7 +3250,7 @@ program nwsaom, eclass
 	else if `__nwsaom_coev' {
 		// harmonisation unit 26: joint network+behavior Method of
 		// Moments / Robbins-Monro - see SaomEstimateRMCoev()'s own
-		// header comment (unw_saom.do) and docs/SAOM_ROADMAP.md's
+		// header comment (unw_saom.do) and the development notes'
 		// unit-26 entry for the full three-phase account.
 		capture mata: mata drop __nwsaom_fit_coev
 		local __ns_cn_sym = 0
@@ -3757,7 +3763,7 @@ program nwsaom, eclass
 	else if `__nwsaom_coev' {
 		// harmonisation unit 26: TWO separate rate parameters, one per
 		// dependent variable - matching how each variable's own rate is
-		// independently targeted (docs/SAOM_ROADMAP.md's own unit-26
+		// independently targeted (the development notes' own unit-26
 		// entry). Both surfaced clearly (not just the network's own
 		// e(rate), per explicit user requirement), and the coefficient
 		// table already shows both variables' effects distinctly via

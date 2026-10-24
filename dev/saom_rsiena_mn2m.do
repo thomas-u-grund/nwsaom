@@ -3,9 +3,17 @@
 * shortNames in the same order, only for the log), DEP = B or F, MODE = targets | est, NSEEDS, EFF1/EFF2 (own effects, default outdegree / outdegree reciprocity).
 cscript
 set linesize 255
-quietly do unw_core.do
-quietly do unw_ergm.do
-quietly do unw_saom.do
+* The core package nwcommands is found through the environment variable NWCORE (path of the core checkout).
+local nwcore : env NWCORE
+if `"`nwcore'"' == "" {
+	di as error "set the environment variable NWCORE to the directory of the nwcommands (core) package"
+	exit 198
+}
+adopath ++ `"`nwcore'"'
+adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
+* (not needed here: unw_ergm.do belongs to another package)
+do unw_saom.do
 nwclear
 clear
 forvalues w = 1/3 {

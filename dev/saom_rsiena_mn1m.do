@@ -3,9 +3,17 @@
 * cross effect), EFF1/EFF2 (own effects of the dependent / the other network).
 cscript
 set linesize 255
-quietly do unw_core.do
-quietly do unw_ergm.do
-quietly do unw_saom.do
+* The core package nwcommands is found through the environment variable NWCORE (path of the core checkout).
+local nwcore : env NWCORE
+if `"`nwcore'"' == "" {
+	di as error "set the environment variable NWCORE to the directory of the nwcommands (core) package"
+	exit 198
+}
+adopath ++ `"`nwcore'"'
+adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
+* (not needed here: unw_ergm.do belongs to another package)
+do unw_saom.do
 nwclear
 clear
 foreach nm in F H S {

@@ -1,7 +1,15 @@
 * nwsaom multinet + behavior counterpart of dev/saom_rsiena_mnbeh.R. Globals: BEH12 BEH21 (behavior effects of both networks), XB1 (further behavior effects of net1), SEEDS, K3
-quietly do unw_core.do
-quietly do unw_ergm.do
-quietly do unw_saom.do
+* The core package nwcommands is found through the environment variable NWCORE (path of the core checkout).
+local nwcore : env NWCORE
+if `"`nwcore'"' == "" {
+	di as error "set the environment variable NWCORE to the directory of the nwcommands (core) package"
+	exit 198
+}
+adopath ++ `"`nwcore'"'
+adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
+* (not needed here: unw_ergm.do belongs to another package)
+do unw_saom.do
 nwclear
 forvalues w = 1/3 {
 	import delimited "dev/saom_rsiena_netendow_w`w'.csv", clear varnames(1)

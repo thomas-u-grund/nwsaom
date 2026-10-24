@@ -1,7 +1,15 @@
 * homXTransRecTrip sameXTransRecTrip diffXTransRecTrip egoXaltXRecip sameXCycle4 sameInXCycle4 avGroupEgoX totGroupEgoX (netx(), netbeh(), tvcov()), plugin protocol 50.
 * siena07 agreement (observed statistics and estimates): dev/saom_rsiena_nx2.{R,do} equivalents (s50 age, _tv, alcohol, symmetric waves)
 cscript
-do unw_core.do
+* The core package nwcommands is found through the environment variable NWCORE (path of the core checkout).
+local nwcore : env NWCORE
+if `"`nwcore'"' == "" {
+	di as error "set the environment variable NWCORE to the directory of the nwcommands (core) package"
+	exit 198
+}
+adopath ++ `"`nwcore'"'
+adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
 do unw_saom.do
 nwclear
 clear

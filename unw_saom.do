@@ -1,8 +1,16 @@
 /*
+ * Copyright (C) 2026 Thomas U. Grund
+ * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
+ * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
+ * Public License, version 3, as published by the Free Software Foundation. It is distributed in the hope
+ * that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the file LICENSE for the full text.
+ */
+/*
 	unw_saom.do -- native SAOM (stochastic actor-oriented model) estimation
 	core for nwcommands (nwsaom).
 
-	See docs/SAOM_ROADMAP.md (scope/status) and docs/SAOM_ARCHITECTURE.md
+	See the development notes (scope/status) and the development notes
 	(design reference) for the full account. Summary: this file contains its
 	own copy of the graph/model/term classes SaomGraph/SaomModel/SaomTermData
 	and the sn_stat_X/sn_change_X term functions (copied from nwergm's
@@ -61,7 +69,7 @@ class SaomGraph {
 					// with-last) so TNT's own tie-pick never has to
 					// rebuild the tie list from scratch - see
 					// ergm_propose_tnt()'s own header comment and
-					// docs/CERTIFICATION.md's harmonisation-unit-80
+					// the development notes' harmonisation-unit-80
 					// entry for the benchmarked payoff (this replaced
 					// an O(n+nties)-per-proposal cost measured at
 					// ~185x the uniform proposal's own cost).
@@ -90,7 +98,7 @@ class SaomGraph {
 					// nwset's own row/label order with no
 					// reordering anywhere, so this field is a
 					// general, non-contiguous per-node label
-					// instead (see docs/ERGM_ROADMAP.md's own
+					// instead (see the development notes' own
 					// bipartite-terms planning note for the full
 					// reasoning).
 	real colvector mode1nodes	// cached node indices with mode==1, built
@@ -101,7 +109,7 @@ class SaomGraph {
 					// `mode` itself.
 	real scalar has_dyadmask	// 0 (default) or 1 - set once via
 					// set_dyadmask() (constraints, first piece -
-					// docs/ERGM_ROADMAP.md's "Constraints beyond
+					// the development notes' "Constraints beyond
 					// v1's free binary dyad space" row), mirroring
 					// bipartite/sp_cache_enabled's own "opt-in flag,
 					// never touched by init() again" contract.
@@ -209,7 +217,7 @@ void SaomGraph::init(real scalar n0, real scalar directed0){
 
 /*
 	Opt-in bipartite marking (harmonisation unit 155 - see
-	docs/ERGM_ROADMAP.md's own bipartite-terms plan), called once
+	the development notes' own bipartite-terms plan), called once
 	right after init(), mirroring enable_sp_cache()'s own contract.
 	Deliberately does NOT reorder nodes or touch `directed` - a
 	bipartite network is always undirected (nwergm.ado's own caller
@@ -348,7 +356,7 @@ void SaomGraph::toggle(real scalar i, real scalar j){
 		}
 		asarray_remove(*edgepos, (ci,cj))
 		nties = nties - 1
-		// freedyads() follow-on (masked TNT, docs/ERGM_ROADMAP.md's
+		// freedyads() follow-on (masked TNT, the development notes'
 		// "Constraints beyond v1's free binary dyad space" row): mirror
 		// the SAME O(1) swap-removal into freeelist/freeedgepos, but
 		// ONLY for a free dyad - gated on has_dyadmask (a single cheap
@@ -468,7 +476,7 @@ real scalar SaomGraph::common_neighbors(real scalar i, real scalar j){
 
 /*
 	Enables the incremental shared-partner cache (Part XXV performance
-	work, docs/CERTIFICATION.md harmonisation unit 82): builds
+	work, the development notes harmonisation unit 82): builds
 	`sp_counts' from scratch in O(sum_i deg_i^2) = O(m*davg) - for each
 	node i, every UNORDERED PAIR of i's own neighbors gains i as exactly
 	one shared partner. This specific "iterate pairs of one node's own
@@ -824,7 +832,7 @@ real rowvector sn_change_mutual(class SaomGraph scalar G, real scalar i, real sc
 
 /*
 	Homophily on a single categorical node attribute (exact match,
-	v1 scope - see docs/ERGM_ARCHITECTURE.md for the diff=/levels
+	v1 scope - see the development notes for the diff=/levels
 	extension already anticipated by this same td.attr field). Counts
 	ties whose two endpoints share the same (already numeric-coded)
 	attribute value.
@@ -942,7 +950,7 @@ real scalar sn_gw_kernel(real scalar d, real scalar decay){
    inspection, harmonisation unit 133) - see
    cscripts/test_nwergm_curved.do for the exact transcribed reference
    values. That inspection resolved a real ambiguity left open in
-   docs/ERGM_STATNET_STUDY.md's own earlier transcription (which was
+   the development notes' own earlier transcription (which was
    unsure whether ergm_GWDECAY's second free parameter is the decay
    alpha itself or log(alpha)): confirmed directly, by matching
    ergm_GWDECAY$map() against the closed-form GWESP weighted-sum
@@ -1058,7 +1066,7 @@ real matrix sn_gwdecay_gradient(real scalar theta_w, real scalar alpha, real sca
 	deemed sufficient at v1's own target scale); a real R-vs-Stata
 	benchmark subsequently showed GWESP-involving models 40-68x slower
 	than Statnet's own ergm() where GWESP-free models of similar or
-	larger size were only ~3x slower (docs/CERTIFICATION.md harmonisation
+	larger size were only ~3x slower (the development notes harmonisation
 	unit 81), pinning the gap specifically on this shared-partner
 	machinery - both functions below now call SaomGraph::shared_partners()
 	instead, which is O(1) once a caller has enabled the incremental
@@ -1371,7 +1379,7 @@ class SaomModel {
 	real rowvector curved
 
 	// Fixed-coefficient (offset) support (harmonisation unit 183,
-	// docs/ERGM_ROADMAP.md's own "Offsets/fixed-coefficient terms" row) -
+	// the development notes' own "Offsets/fixed-coefficient terms" row) -
 	// PER COEFFICIENT/eta-column (length nparam(), same indexing as
 	// `coefnames' - NOT per term instance like `curved' above, since a
 	// single multi-column term instance, e.g. a 3-level `nodefactor()',
@@ -1838,7 +1846,7 @@ real rowvector SaomModel::full_change(class SaomGraph scalar G, real scalar i, r
 
 /* ===================================================================
    MPLE (maximum pseudolikelihood estimation; Hunter & Handcock 2006 -
-   see docs/ERGM_STATNET_STUDY.md Appendix A section 5). For every dyad
+   see the development notes Appendix A section 5). For every dyad
    (i,j), the change statistic "toward tie present" (NOT the raw
    change() value, which is signed by the dyad's CURRENT state - a tied
    dyad's own change() returns the REMOVAL effect, the negative of the
@@ -1850,7 +1858,7 @@ real rowvector SaomModel::full_change(class SaomGraph scalar G, real scalar i, r
    Stata's own logit rather than reimplementing IRLS) recovers the MPLE
    theta. This is exactly the MLE when every term is dyad-independent
    AND the sample space itself is unconstrained (the "MPLE_is_MLE"
-   shortcut Statnet itself also takes - see docs/ERGM_STATNET_STUDY.md
+   shortcut Statnet itself also takes - see the development notes
    section 1 step 5); it is the STARTING VALUE for MCMLE otherwise.
    =================================================================== */
 
@@ -1888,7 +1896,7 @@ real matrix SaomModel::build_mple_data(class SaomGraph scalar G){
 	p = nparam()
 	masked = G.has_dyadmask
 
-	// freedyads() (constraints, first piece - docs/ERGM_ROADMAP.md's
+	// freedyads() (constraints, first piece - the development notes'
 	// "Constraints beyond v1's free binary dyad space" row): a FIXED
 	// dyad's own likelihood contribution is a constant given theta under
 	// R ergm's own `constraints=~fixallbut(free)' (its tie state can
@@ -1907,7 +1915,7 @@ real matrix SaomModel::build_mple_data(class SaomGraph scalar G){
 	// solving to match, it just never appears as its own row in the
 	// per-dyad pseudolikelihood design matrix.
 
-	// harmonisation unit 155 (bipartite support, docs/ERGM_ROADMAP.md):
+	// harmonisation unit 155 (bipartite support, the development notes):
 	// a bipartite model's own valid dyad space is ONLY cross-mode pairs
 	// (mode1nodes x mode2nodes), never the full n(n-1)/2 undirected
 	// space - iterating the ordinary loop below would silently include
@@ -1990,7 +1998,7 @@ real scalar _sn_count_free_bipartite(class SaomGraph scalar G){
    change", via a multinomial logit over the objective-function delta
    theta . M.full_change(G,i,j) - the SAME dyad-local change-statistic
    machinery nwergm's own MCMC already uses (see this file's own header
-   and docs/SAOM_ARCHITECTURE.md). "No change" is the reference
+   and the development notes). "No change" is the reference
    alternative (utility normalized to 0, standard for a multinomial
    logit with one baseline category).
 
@@ -1999,7 +2007,7 @@ real scalar _sn_count_free_bipartite(class SaomGraph scalar G){
    that don't need this (e.g. SaomSimulateInterval) can discard it.
 
    `present' (harmonisation unit 33, composition change - "joiners and
-   leavers", Huisman and Snijders 2003; see docs/SAOM_ROADMAP.md's own
+   leavers", Huisman and Snijders 2003; see the development notes' own
    unit-33 entry for the full method/scope account) is an OPTIONAL
    trailing n x 1 real colvector, 1/0 per actor - when supplied, an
    ABSENT actor (present[j]==0) never acts (its rate is 0) but, as in
@@ -2156,7 +2164,7 @@ real scalar SaomMinistep(class SaomGraph scalar G, class SaomModel scalar M,
    [0,1) - so successive waiting times are i.i.d. Exponential(n*rate),
    and conditional on an opportunity occurring, the acting actor is
    uniform over 1..n (no Poisson-count generator needed). See
-   docs/SAOM_ARCHITECTURE.md's "The interval simulator" section.
+   the development notes' "The interval simulator" section.
 
    Mutates G in place. Returns the number of ministeps executed (used
    for rate re-estimation by the caller).
@@ -2252,7 +2260,7 @@ real scalar SaomSimulateConditionalTime(class SaomGraph scalar G, class SaomGrap
 /* ===================================================================
    SaomScoredResult / SaomSimulateIntervalScored: a SEPARATE interval
    simulator for the Mata path of SaomEstimateNet()'s phases 1 and 3
-   (Jacobian estimation) - see docs/SAOM_ARCHITECTURE.md's
+   (Jacobian estimation) - see the development notes'
    "Robbins-Monro estimation" section. Deliberately not a modification of SaomMinistep/
    SaomSimulateInterval above (those stay exactly as certified in
    harmonisation unit 1 and are still what phase 2/3 and the native
@@ -2800,7 +2808,7 @@ struct SaomScoredResult scalar SaomSimIntScoredRateCov(class SaomGraph scalar G,
    reciprocity, nodematch - and unit 2's nodecov/nodeicov/nodeocov,
    registered directly from nwsaom.ado using nwergm's own sn_stat_nodecov/
    sn_change_nodecov etc.), these two effects are NOT reused from
-   unw_ergm.do - see docs/SAOM_ARCHITECTURE.md's "The reuse is not a
+   unw_ergm.do - see the development notes' "The reuse is not a
    shortcut" section for why the reuse argument only holds for effects
    whose global ERGM statistic is a simple sum of single-actor-local
    contributions. Popularity/activity effects fail that test (a toggle
@@ -2844,7 +2852,7 @@ struct SaomScoredResult scalar SaomSimIntScoredRateCov(class SaomGraph scalar G,
        being removed) - so delta = -sqrt(d).
    Directed-graph indegree only (G.din) - undirected v1 out of scope,
    matching unit 1's own reciprocity/nodematch (both meaningful only on
-   a directed relation, per docs/SAOM_ROADMAP.md's v1 scope).
+   a directed relation, per the development notes' v1 scope).
 */
 real rowvector stat_saom_indegpop(class SaomGraph scalar G, class SaomTermData scalar td){
 	real scalar j, tot
@@ -3588,7 +3596,7 @@ real rowvector change_saom_outiso(class SaomGraph scalar G, real scalar i, real 
 /*
    antiIso/antiInIso/antiInIso2/isolatePop (harmonisation unit 36 - the
    alter-indexed isolate family deferred when isolateNet/outIso were
-   built, per docs/SAOM_ROADMAP.md's own "correctly scoped OUT, not
+   built, per the development notes' own "correctly scoped OUT, not
    attempted" note). Verified directly against RSiena 1.6.6's own real
    C++ source (fetched fresh from CRAN, not from memory or the general
    SAOM literature - this file's own established discipline):
@@ -3781,7 +3789,7 @@ real rowvector change_saom_isolatepop(class SaomGraph scalar G, real scalar i, r
    dependent variable, RSiena 1.6.6 - confirmed via direct inspection,
    not guessed from the SAOM literature), picked as a small, genuinely
    commonly-used batch rather than attempting the full 70+-effect
-   remaining catalog in one pass (docs/SAOM_ROADMAP.md's own framing).
+   remaining catalog in one pass (the development notes' own framing).
    All three verified against the REAL RSiena C++ source
    (github.com/stocnet/rsiena, src/model/effects, fetched fresh this
    unit) - default/base parameterization only in each case (v1 scope,
@@ -3800,7 +3808,7 @@ real rowvector change_saom_isolatepop(class SaomGraph scalar G, real scalar i, r
    into RSiena's own `Network`/`OneModeNetwork` class hierarchy (four-
    cycles are also a more naturally UNDIRECTED concept in the SAOM
    literature generally, and `nwsaom` does not support undirected
-   networks at all yet - see docs/SAOM_ROADMAP.md's own "Undirected
+   networks at all yet - see the development notes' own "Undirected
    relations" v1-exclusion). Implementing it with an unverified
    directedness assumption risks a silently wrong effect - left for a
    dedicated follow-on unit that can verify directedness empirically
@@ -4127,7 +4135,7 @@ real rowvector change_saom_inoutass(class SaomGraph scalar G, real scalar i, rea
      - as the "i->j" factor (summation index j itself): contributes
        x_ij * |{h in N_out(i): h->j}| = x_ij * OTP(i,j), reusing
        SaomGraph's own already-certified shared_partners_otp() (unit
-       91/93, docs/ERGM_ROADMAP.md) rather than a fresh traversal - OTP
+       91/93, the development notes) rather than a fresh traversal - OTP
        is EXACTLY "count of i's out-neighbors h with h->j" by its own
        definition (#{k: i->k, k->j}).
      - as the "i->h" factor (summation index h itself): contributes
@@ -4469,7 +4477,7 @@ real rowvector change_saom_cycle4(class SaomGraph scalar G, real scalar i, real 
 	return(G.has_edge(i,j) ? -delta : delta)
 }
 
-/* crprod (multiplex SAOM Stage 2, docs/SAOM_ROADMAP.md): the first
+/* crprod (multiplex SAOM Stage 2, the development notes): the first
    cross-network effect, RSiena's own real "netA: netB" term - verified
    directly from real RSiena 1.6.6 source (`getEffects()` on a genuine
    two-network dataset confirms "crprod" is the real shortName;
@@ -4513,7 +4521,7 @@ real rowvector change_crprod(class SaomGraph scalar G, real scalar i, real scala
 }
 
 /* ===================================================================
-   Harmonisation unit 9 (docs/SAOM_ROADMAP.md): three more effects,
+   Harmonisation unit 9 (the development notes): three more effects,
    each independently VERIFIED against the real RSiena C++ source
    (github.com/stocnet/rsiena, src/model/effects, per-effect .cpp files - read directly,
    per the user's own "always check against real R results and code"
@@ -6601,7 +6609,7 @@ real rowvector stat_saom_balance(class SaomGraph scalar G, class SaomTermData sc
    identification failure (a saturation ridge in a co-evolution
    behavior effect's own joint parameter space, root-caused via a
    direct response-surface sweep, not assumed - see
-   docs/SAOM_ROADMAP.md's own unit-28 entry for the full account) could
+   the development notes' own unit-28 entry for the full account) could
    previously run theta to +-100 or more before eventually crashing
    downstream with an opaque Mata conformability/missing-value error
    eventually. This does NOT fix any underlying identification problem
@@ -7293,7 +7301,7 @@ real rowvector SaomCovariateDifferingSum(class SaomGraph scalar G1, class SaomGr
 }
 
 /* ===================================================================
-   Missing data (harmonisation unit 35, docs/SAOM_ROADMAP.md's own
+   Missing data (harmonisation unit 35, the development notes' own
    unit-35 entry has the full RSiena Section 5.3.2 source account).
    Two independent mechanisms, matching RSiena's own real design:
 
@@ -7375,7 +7383,7 @@ real scalar SaomCountDifferingMasked(class SaomGraph scalar G1, class SaomGraph 
    purpose). Fixed by hoisting this conversion here, called once by each
    estimator right where `cfg = SaomNativeSetup(M)' is already decided
    once per fit (not per call) - the SAME `use_native'-gated, decide-
-   once-never-in-a-loop discipline docs/SAOM_ARCHITECTURE.md's own
+   once-never-in-a-loop discipline the development notes' own
    "Native backend" section already documents for every OTHER native
    dispatch decision in this file. */
 real matrix SaomMaskToDyadList(real matrix missMask) {
@@ -9233,7 +9241,7 @@ struct SaomFit scalar SaomEstimateRMMulti(pointer(class SaomGraph scalar) rowvec
 }
 
 /* ===================================================================
-   Co-evolution (harmonisation unit 26, docs/SAOM_ROADMAP.md "Co-evolution
+   Co-evolution (harmonisation unit 26, the development notes "Co-evolution
    (network + behavior)" - DESIGN section has the full source-verification
    account). This section adds a SECOND kind of dependent variable - a
    bounded integer-valued actor attribute ("behavior") that evolves
@@ -9241,7 +9249,7 @@ struct SaomFit scalar SaomEstimateRMMulti(pointer(class SaomGraph scalar) rowvec
    selection (network effects depending on the behavior, already
    implemented: simcov()/nodeicov()/nodeocov()) and influence (behavior
    effects depending on the network) can be estimated JOINTLY in one
-   model, the gap this codebase's own docs/book chapter explicitly
+   model, the gap this codebase's own the development notes chapter explicitly
    disclosed as not yet implemented.
 
    SaomBehavior: the behavior-side analogue of SaomGraph - owns the
@@ -9297,7 +9305,7 @@ real scalar SaomBehavior::centeredValue(real scalar i){
 
 /*
    Behavior effects (v1 scope: linear shape, quadratic shape, avAlt -
-   see docs/SAOM_ROADMAP.md's own unit-26 DESIGN section for exactly
+   see the development notes' own unit-26 DESIGN section for exactly
    which RSiena source file/formula each is verified against, and which
    are explicitly deferred - avSim, endowment/creation functions). Every
    stat/change function takes (Beh, G) uniformly, even though linear/
@@ -9652,7 +9660,7 @@ real rowvector SaomMaskedBehaviorStatistic(class SaomBehavior scalar Beh,
    `egoEndowmentStatistic()'/`egoStatistic()' pair for
    LinearShapeEffect.cpp uses the SAME raw `difference' formula in both
    the eval and endowment/creation cases, just restricted to one sign -
-   see docs/SAOM_ROADMAP.md's own unit-28 entry for the full
+   see the development notes' own unit-28 entry for the full
    derivation) - NOT a generic claim true of every possible effect,
    which is exactly why v1 scope is `linear' only (see nwsaom.ado's own
    validation). */
@@ -9828,7 +9836,7 @@ real colvector SaomMaskCoevEndowCreationValues(real colvector currentvals,
    (`this->lprobabilities = new double[3]', `nextIntWithProbabilities(3,
    ...)'), NOT up to n-1 alternatives the way a network ministep has -
    the same multinomial-logit/softmax construction Chapter 22's own
-   McFadden formula documents (docs/SAOM_ROADMAP.md's own DESIGN
+   McFadden formula documents (the development notes' own DESIGN
    section), now over 3 alternatives instead of n. Mutates Beh in place
    via Beh.setvalue() if a real change is drawn. Returns the chosen
    diff (-1, 0, or +1).
@@ -9891,7 +9899,7 @@ real scalar SaomBehaviorMinistep(class SaomBehavior scalar Beh, class SaomGraph 
    remains the certified reference/fallback, always available. Mirrors
    RSiena's own multi-variable race directly (confirmed from
    `EpochSimulation.cpp`'s own `chooseVariable()`/`drawTimeIncrement()`,
-   docs/SAOM_ROADMAP.md's own unit-26 DESIGN section): ONE pooled
+   the development notes' own unit-26 DESIGN section): ONE pooled
    exponential waiting time drawn from the GRAND total rate (network's
    own total rate + behavior's own total rate), then the acting
    VARIABLE is chosen with probability proportional to its own share of
@@ -9906,7 +9914,7 @@ real scalar SaomBehaviorMinistep(class SaomBehavior scalar Beh, class SaomGraph 
    (confirmed by direct search - no `behaviorRateEffects` function
    exists); real RSiena's own logic lives in `getBehaviorStartingVals()`
    (R/sienaDataCreate.r). v1 disclosed simplification (see
-   docs/SAOM_ROADMAP.md's own unit-26 DESIGN section): use that
+   the development notes' own unit-26 DESIGN section): use that
    function's own general (non-binary) branch core formula uniformly -
    `max(var(wave-to-wave differences), 0.1 + mean(|differences|))` -
    for both binary and multi-level behavior variables, skipping
@@ -10096,7 +10104,7 @@ struct SaomCoevResult scalar SaomSimulateIntervalCoev(
    plain ministep functions don't expose.
 
    Score-function identity, generalized to two competing variables
-   (verified algebraically, not assumed - see docs/SAOM_ROADMAP.md's
+   (verified algebraically, not assumed - see the development notes'
    own unit-26 DESIGN section): at any given ministep, only ONE
    variable acts (chosen via the constant, theta-independent rate
    race), and that variable's own choice probability depends ONLY on
@@ -10284,7 +10292,7 @@ struct SaomCoevScoredResult scalar SaomSimulateIntervalCoevScored(
 
 /* ===================================================================
    Multiplex SAOM, Stage 1 (two networks co-evolving, WITHIN-network
-   effects only - no cross-network effects yet, see docs/SAOM_ROADMAP.md's
+   effects only - no cross-network effects yet, see the development notes'
    own multiplex entry for the full scoping account and the concrete
    follow-on work this deliberately leaves open).
 
@@ -10323,7 +10331,7 @@ struct SaomCoevScoredResult scalar SaomSimulateIntervalCoevScored(
    later units added present()/missMask()/N-wave chaining incrementally:
    exactly two waves, no composition change, no missing data, no native
    (C) port (falls through to pure Mata unconditionally) - each a
-   disclosed, concretely-specified follow-on in docs/SAOM_ROADMAP.md,
+   disclosed, concretely-specified follow-on in the development notes,
    not a silent gap.
    =================================================================== */
 struct SaomCoevNetNetScoredResult {
@@ -12824,7 +12832,7 @@ struct SaomCoevFit scalar SaomEstimateRMCoev(
 }
 
 /* ===================================================================
-   Native (C) backend dispatch (harmonisation unit 6, docs/SAOM_ROADMAP.md
+   Native (C) backend dispatch (harmonisation unit 6, the development notes
    "Native (C) backend"). Mirrors unw_ergm.do's own ErgmNativeAvailable()/
    ErgmNativePluginPath()/ErgmNativeSetup() pattern exactly, but for
    `native/saom_sim.c` (a wholly separate plugin file/program name/frame
@@ -12842,7 +12850,7 @@ struct SaomCoevFit scalar SaomEstimateRMCoev(
    see its own header comment). Extended after a
    direct RSiena speed benchmark found the pure-Mata fallback 400x+
    slower than real RSiena for ANY model using a non-native term - see
-   docs/SAOM_ROADMAP.md's own account. A model using a term OUTSIDE this
+   the development notes' own account. A model using a term OUTSIDE this
    set (a future, not-yet-natively-ported effect) is simply not eligible
    - SaomNativeSetup() returns cfg.eligible=0 and the caller falls back
    to the pure-Mata SaomSimulateInterval()/SaomSimulateIntervalCounted(),
@@ -12851,7 +12859,7 @@ struct SaomCoevFit scalar SaomEstimateRMCoev(
 
 /*
 	TWO genuinely different lookup strategies are needed (harmonisation
-	2026-09-02, docs/CERTIFICATION.md - see unw_ergm.do's own
+	2026-09-02, the development notes - see unw_ergm.do's own
 	ErgmNativePluginPath() for the full account), tried in order:
 	 (1) `findfile()` on the platform-specific basename alone - what
 	     actually finds the plugin after a real `net install`, which
@@ -12944,7 +12952,7 @@ real scalar SaomNativeAvailable(){
    Harmonisation unit 10 ("learn lessons that help for all other
    effects", after a direct RSiena speed benchmark found the pure-Mata
    fallback 400x+ slower than real RSiena for ANY model using a
-   non-native term - docs/SAOM_ROADMAP.md): extended from the original
+   non-native term - the development notes): extended from the original
    3-term set to all 13 terms unw_saom.do currently implements -
    native/saom_sim.c's own termcode dispatch was extended in lockstep
    (see its own header comment). Every term needing an attribute array
@@ -13677,7 +13685,7 @@ struct SaomBehaviorNativeConfig scalar SaomBehaviorNativeSetup(class SaomBehavio
    - but the entire simulation loop runs inside ONE `plugin call` to
    native/saom_sim.c, never crossing
    the Mata/native boundary per ministep (see saom_sim.c's own header
-   and docs/SAOM_ARCHITECTURE.md's "Native backend" section). Callers
+   and the development notes' "Native backend" section). Callers
    MUST check cfg.eligible (from SaomNativeSetup()) first - this
    function does not re-derive eligibility itself, matching
    ErgmNativeSampleCore()'s own established contract.
@@ -13818,7 +13826,7 @@ struct SaomCountedResult scalar SaomSimulateIntervalNative(class SaomGraph scala
 	stata("capture frame create __saom_native")
 	st_framecurrent("__saom_native")
 
-	// harmonisation unit 12 (performance pass, see docs/SAOM_ROADMAP.md's
+	// harmonisation unit 12 (performance pass, see the development notes'
 	// "Native backend performance" entry): this frame is now REUSED across
 	// every call within one SaomEstimateRM() run instead of being dropped
 	// and recreated on EVERY plugin call - a direct controlled A/B
@@ -13944,7 +13952,7 @@ struct SaomCountedResult scalar SaomSimulateIntervalNative(class SaomGraph scala
 		for (k=1; k<=hasratecov; k++) res.rcscore[k] = st_numscalar("__saom_native_rcscore" + strofreal(k))
 	}
 
-	// harmonisation unit 15 (performance pass, see docs/SAOM_ROADMAP.md's
+	// harmonisation unit 15 (performance pass, see the development notes'
 	// own "Native backend performance" entry): `G' was read-only above
 	// (only G.n/G.all_ties()/G.directed) - reconstructing it into the
 	// FINAL simulated network is only needed by callers that actually
@@ -15142,7 +15150,7 @@ void SaomNativeCleanupFrame() {
 /* ===================================================================
    SEVERAL CO-EVOLVING BEHAVIORS (network + nb >= 2 behaviors; protocol 19 of the plugin).
 
-   Design (docs/SAOM_DESIGN_multibehavior.md): every behavior has its own SaomBehaviorModel (so every
+   Design (the development notes): every behavior has its own SaomBehaviorModel (so every
    per-behavior function above is reused unchanged), its own rate per period and its own constants. The behaviors
    interact only through the network (avalt/avsim read the network; behsim reads behavior 1). The single-behavior
    estimator SaomEstimateRMCoevMulti() is untouched; this one is built on SaomRMCore().
@@ -15791,7 +15799,7 @@ struct SaomCoevMBFit scalar SaomEstimateRMCoevMB(
 
 
 /* ===================================================================
-   RSiena's behavior effects of the network position and of the alters (priorities 3 and 4 of docs/SAOM_EFFECTS_TODO.md), copied from the C++ of
+   RSiena's behavior effects of the network position and of the alters (priorities 3 and 4 of the development notes), copied from the C++ of
    IndegreeEffect, OutdegreeEffect, ReciprocalDegreeBehaviorEffect, IsolateEffect, AverageAlterEffect, MaxAlterEffect, AverageReciprocatedAlterEffect and
    SimilarityEffect. The behavior values are centred by the overall mean in the statistics (currentValues) and in the alter sums (centeredValue()).
    RSiena quirks copied: the alter-popularity contribution of avAltPop/totAltPop adds the popularity sum to the plain alter sum and ignores the difference;

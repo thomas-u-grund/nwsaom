@@ -1,4 +1,10 @@
 *! _nwsaom_rates: helpers of nwsaom for the covariate, structural and diffusion rate effects of models with a behavior (kept out of nwsaom.ado, whose size is at Stata's limit)
+* Copyright (C) 2026 Thomas U. Grund
+* This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
+* nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
+* Public License, version 3, as published by the Free Software Foundation. It is distributed in the hope
+* that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+* or FITNESS FOR A PARTICULAR PURPOSE. See the file LICENSE for the full text.
 *   parse   expands ratecov(): tvcov() names and the name of the behavior stay, other names are variables
 *   check   the combinations that are not available
 *   prep    registers the changing covariates, the behavior as a rate covariate of the network and the rate effects of the behavior (behratecov(), behrate()) for the plugin

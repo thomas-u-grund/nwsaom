@@ -1,7 +1,15 @@
 * observed statistics (e(target), summed over the periods) of behavior effects in nwsaom multinet; counterpart of dev/saom_rsiena_mnbeh_targets.R. Globals: B1 B2 B12 B21 (the effect lists)
-quietly do unw_core.do
-quietly do unw_ergm.do
-quietly do unw_saom.do
+* The core package nwcommands is found through the environment variable NWCORE (path of the core checkout).
+local nwcore : env NWCORE
+if `"`nwcore'"' == "" {
+	di as error "set the environment variable NWCORE to the directory of the nwcommands (core) package"
+	exit 198
+}
+adopath ++ `"`nwcore'"'
+adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
+* (not needed here: unw_ergm.do belongs to another package)
+do unw_saom.do
 nwclear
 forvalues w = 1/3 {
 	import delimited "dev/saom_rsiena_netendow_w`w'.csv", clear varnames(1)

@@ -1,9 +1,18 @@
 cscript
 
+* The core package nwcommands is found through the environment variable NWCORE (path of the core checkout).
+local nwcore : env NWCORE
+if `"`nwcore'"' == "" {
+	di as error "set the environment variable NWCORE to the directory of the nwcommands (core) package"
+	exit 198
+}
+adopath ++ `"`nwcore'"'
+adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
 do unw_saom.do
 
 * Certifies unw_saom.do's ministep sampler, interval simulator, and
-* Robbins-Monro estimator (harmonisation unit 1, docs/SAOM_ROADMAP.md).
+* Robbins-Monro estimator (harmonisation unit 1, the development notes).
 * Pure-Mata, self-contained toy networks - same style as
 * cscripts/test_nwergm_changestat.do. Certification here is (a)
 * structural/boundary checks on the sampler itself, independent of
@@ -12,7 +21,7 @@ do unw_saom.do
 * recovers it from the same two waves. A SEPARATE, real cross-check
 * against actual RSiena (on RSiena's own s501/s502 tutorial dataset, not
 * a self-consistency check) lives in dev/saom_rsiena_crosscheck.R/.do -
-* see docs/SAOM_ROADMAP.md's "External validation" entry for the result
+* see the development notes' "External validation" entry for the result
 * (correct sign/magnitude, ~10-20% low vs RSiena, likely from v1's
 * simplified single-phase-2 gain schedule) and why this project's
 * earlier "no RSiena was available" claim was wrong (never verified).
@@ -122,7 +131,7 @@ void saom_test_unit1b(real scalar n, real colvector attr) {
    statistical certification (stochastic estimator, small toy network,
    modest phase-2/3 iteration counts for runtime), not a tight
    precision check; a real RSiena cross-check remains an open item (see
-   docs/SAOM_ROADMAP.md).
+   the development notes).
    ------------------------------------------------------------------- */
 void saom_test_unit1c(real scalar n, real colvector attr) {
 	class SaomGraph scalar Gwave1, Gwave2
@@ -172,7 +181,7 @@ void saom_test_unit1c(real scalar n, real colvector attr) {
 /* -------------------------------------------------------------------
    Unit 2: nodecov/nodeicov/nodeocov - direct reuse of nwergm's own
    sn_change_nodecov()/sn_change_nodeicov()/sn_change_nodeocov() (see
-   docs/SAOM_ARCHITECTURE.md's reuse argument - each is a genuine
+   the development notes' reuse argument - each is a genuine
    single-actor-local SAOM effect: nodeocov is the standard RSiena
    "ego" effect, nodeicov the standard "alter" effect, nodecov their
    combined sum). Certified here via the same boundary-check style as
@@ -734,7 +743,7 @@ void saom_test_unit18_cov(real scalar n) {
    (unw_ergm.do, td.sptype="OTP" - verified against real RSiena source
    to match RSiena's own `gwespFF' effect exactly by name, definition,
    and kernel formula before wiring this at all, see
-   docs/SAOM_ROADMAP.md's own account). Since change_gwesp() itself is
+   the development notes' own account). Since change_gwesp() itself is
    already certified by nwergm's own test suite, this test's own job is
    different: certifying the WIRING (does M.addterm()/M.full_change()
    correctly thread td.decay/td.sptype through in a SAOM context, not
@@ -1127,7 +1136,7 @@ void saom_test_unit25_direction(real scalar n) {
 
 /* -------------------------------------------------------------------
    Harmonisation unit 26: co-evolution (behavior side). See
-   docs/SAOM_ROADMAP.md's own "Co-evolution" DESIGN section for the
+   the development notes' own "Co-evolution" DESIGN section for the
    full RSiena source-verification account this test suite certifies
    against. Four checks: (1) linear shape's ministep delta against the
    RAW global statistic's own before/after difference (trivially
@@ -1804,7 +1813,7 @@ void saom_test_unit33_recover_multi(real scalar n, real scalar seed) {
 	SaomSimulateInterval(G2, M, thetaTrue, 4, present1)
 	// actor 1's own row/col frozen at wave1's own value going forward -
 	// wave2's own data must show that (matches the "carry-forward"
-	// convention this package documents, docs/SAOM_ROADMAP.md unit-33).
+	// convention this package documents, the development notes unit-33).
 
 	G3 = SaomGraph()
 	SaomCopyGraph(G2, G3)
@@ -1899,7 +1908,7 @@ void saom_test_unit33_coev_recover(real scalar n, real scalar seed) {
    change - completes the composition-change coverage across all four
    estimators (SaomEstimateRM/SaomEstimateRMMulti/SaomEstimateRMCoev/
    SaomEstimateRMCoevMulti, per the explicit "both from the start"
-   scope decision, docs/SAOM_ROADMAP.md's own unit-33 entry).
+   scope decision, the development notes' own unit-33 entry).
    ------------------------------------------------------------------- */
 void saom_test_unit33_coevmulti_rec(real scalar n, real scalar seed) {
 	class SaomGraph scalar G1, G2, G3

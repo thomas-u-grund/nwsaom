@@ -1,7 +1,15 @@
 * validation of nwsaom ..., ml and nwsaom bayes with a co-evolving behavior against RSiena (dev/saom_ml_coev.R). args: seed what (ml|bayes) opts
 args seed what opts
-do unw_core.do
-do unw_ergm.do
+* The core package nwcommands is found through the environment variable NWCORE (path of the core checkout).
+local nwcore : env NWCORE
+if `"`nwcore'"' == "" {
+	di as error "set the environment variable NWCORE to the directory of the nwcommands (core) package"
+	exit 198
+}
+adopath ++ `"`nwcore'"'
+adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
+* (not needed here: unw_ergm.do belongs to another package)
 do unw_saom.do
 nwwebuse glasgow, nwclear
 if "`what'" == "ml" {

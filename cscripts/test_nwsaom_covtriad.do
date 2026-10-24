@@ -1,7 +1,15 @@
 * covariate x triad / popularity / activity effects (protocol 39, native only): all 16 fit natively, the observed statistics equal siena07's
 * targets and the estimates agree (s50, dev/saom_rsiena_covtriad.{R,do}); here: every option fits natively on synthetic data, refusals
 cscript
-do unw_core.do
+* The core package nwcommands is found through the environment variable NWCORE (path of the core checkout).
+local nwcore : env NWCORE
+if `"`nwcore'"' == "" {
+	di as error "set the environment variable NWCORE to the directory of the nwcommands (core) package"
+	exit 198
+}
+adopath ++ `"`nwcore'"'
+adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
 do unw_saom.do
 nwclear
 clear
