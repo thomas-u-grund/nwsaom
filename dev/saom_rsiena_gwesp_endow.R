@@ -1,0 +1,15 @@
+library(RSiena)
+data(s501); data(s502); data(s503)
+net <- sienaDependent(array(c(s501, s502, s503), dim = c(50, 50, 3)))
+d <- sienaDataCreate(net)
+e <- getEffects(d)
+e <- includeEffects(e, recip)
+e <- includeEffects(e, gwespFF, type = "endow", parameter = 69)
+e <- includeEffects(e, gwespFF, type = "creation", parameter = 69)
+print(as.data.frame(e)[as.data.frame(e)$include, c("shortName", "type", "parm")])
+for (sd in 1:3) {
+	t0 <- Sys.time()
+	alg <- sienaAlgorithmCreate(projname = NULL, seed = sd, n3 = 1000, nsub = 4)
+	ans <- siena07(alg, data = d, effects = e, batch = TRUE, silent = TRUE)
+	cat(sprintf("RSIENA seed %d %.1f s targets: %s | est: %s\n", sd, as.numeric(Sys.time() - t0, units = "secs"), paste(round(ans$targets, 2), collapse = " "), paste(round(c(ans$rate, ans$theta), 3), collapse = " ")))
+}
