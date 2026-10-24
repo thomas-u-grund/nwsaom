@@ -1,0 +1,38 @@
+v 3
+d nwsaom. Stochastic actor-oriented models (SAOM; Snijders) for network and behavior panels declared with nwset
+d Thomas U. Grund, University College Dublin, www.grund.co.uk
+d email: thomas.u.grund@gmail.com
+d GPL-3. Requires the core package nwcommands.
+d Distribution-Date: 24oct2026
+f _nwsaom_getrates.ado
+f _nwsaom_mnbeh.ado
+f _nwsaom_nx.ado
+f _nwsaom_postengine.ado
+f _nwsaom_rates.ado
+f _nwsaom_rsnotes.ado
+f _nwsaom_tconvtable.ado
+f nwsaom.ado
+f nwsaom_bayes.ado
+f nwsaom_describe.ado
+f nwsaom_estat.ado
+f nwsaom_estat_importance.ado
+f nwsaom_estat_score.ado
+f nwsaom_estat_simulate.ado
+f nwsaom_estat_timetest.ado
+f nwsaom_meta.ado
+f nwsaom_ml.ado
+f nwsaom_multinet.ado
+f nwsaom_multiplex.ado
+f nwsaom_simulate.ado
+f nwsaom.sthlp
+f nwsaom_bayes.sthlp
+f nwsaom_estat.sthlp
+f nwsaom_meta.sthlp
+f nwsaom_remarks.sthlp
+f nwsaom.dlg
+f nwsaom_estat.dlg
+f lib/lnwsaom1.mlib
+f lib/lnwsaom2.mlib
+f lib/plugins/macos/saom_sim_macos.plugin
+f lib/plugins/windows/saom_sim_windows.plugin
+f lib/plugins/unix/saom_sim_unix.plugin
