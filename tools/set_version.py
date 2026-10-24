@@ -6,7 +6,8 @@ Usage (run from anywhere; the repo is the parent of the tools/ directory this fi
     python3 tools/set_version.py                     rewrite every display from the current VERSION
     python3 tools/set_version.py --check             change nothing, list displays that differ (exit 1)
 VERSION holds two lines: X.Y.Z and the release date in Stata format (e.g. 24oct2026).
-Displays kept in sync: first line of every .ado (*! version), .sthlp header + visible version line,
+Displays kept in sync: first line of every .ado (*! version), .sthlp header + visible version line
+(the last two lines of every .sthlp: {hline} and the {it:<pkg> version X.Y.Z, D Month YYYY} line; no version line near the top),
 <name>.pkg (Distribution-Date, Version), stata.toc, README.md / NOTICE.md (version markers),
 CITATION.cff, manual/*.tex (\\pkgversion, \\pkgdate), ereturn local version and local __pkgver/__pkgdate
 literals in .ado files. check also requires a matching CHANGELOG.md entry.
@@ -66,7 +67,29 @@ def sthlp(t, v, d, nm, fn):
     day, mo, lm, yr = dates(d)
     L = t.split('\n')
     hdr = '{* *! version %s  %s %%s}{...}' % (v, d)
-    L = [x for x in L if '{* nwversion}' not in x]
+    # drop every old visible version line (the standard position is the bottom of the file)
+    M = []
+    for x in L:
+        if '{* nwversion}' in x:
+            M.append(None)
+        else:
+            M.append(x)
+    while M and (M[-1] is None or M[-1].strip() == '') and (M[-1] is None or len(M) > 1):
+        if M[-1] is None and len(M) > 1 and M[-2] == '{hline}':
+            M.pop()  # the bottom line from an earlier run, with its rule: re-added below
+            M.pop()
+            break
+        if M[-1] is None:
+            M.pop()
+            break
+        M.pop()
+    L = []
+    for k, x in enumerate(M):
+        if x is None:
+            if L and L[-1].strip() == '' and k + 1 < len(M) and (M[k + 1] is None or M[k + 1].strip() == ''):
+                L.pop()  # no blank-line pile-up where the line was removed
+            continue
+        L.append(x)
     # header comment (line 2)
     m = re.match(r'\{\* \*! (?:version \S+\s+\d{1,2}[a-z]{3}\d{4}\s*)?(.*?)\}\{\.\.\.\}$', L[1]) if len(L) > 1 else None
     if m:
@@ -74,17 +97,9 @@ def sthlp(t, v, d, nm, fn):
     else:
         L.insert(1, hdr % 'author: Thomas Grund')
     vis = '{pstd}{it:%s version %s, %d %s %d}{p_end}{* nwversion}' % (nm, v, day, lm, yr)
-    # visible line after the title block ({title:Title} ... {p2colreset}{...}); else after the header
-    pos = 2
-    for i, x in enumerate(L):
-        if x.startswith('{title:'):
-            pos = i + 1
-            for j in range(i, min(i + 12, len(L))):
-                if L[j].startswith('{p2colreset}'):
-                    pos = j + 1
-                    break
-            break
-    L.insert(pos, vis)
+    while L and L[-1].strip() == '':
+        L.pop()
+    L += ['', '{hline}', vis, '']  # blank line (ends an open paragraph), then the last two lines of the file
     return '\n'.join(L)
 
 

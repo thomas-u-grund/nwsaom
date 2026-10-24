@@ -5,7 +5,7 @@ features that keep old do-files working, PATCH for bug fixes. The single source 
 version, line 2 the release date in Stata format, e.g. `24oct2026`).
 
 1. Edit `VERSION`, or run `python3 tools/set_version.py X.Y.Z [date]` (this writes `VERSION` and updates every display: the
-   first line of every .ado, the .sthlp headers and visible version lines, `nwsaom.pkg`, `stata.toc`, README, NOTICE,
+   first line of every .ado, the .sthlp headers and the version line at the bottom of every help file, `nwsaom.pkg`, `stata.toc`, README, NOTICE,
    CITATION.cff, the `e(version)`/`nwsaom version` literals).
 2. Add a section `## [X.Y.Z] - YYYY-MM-DD` to `CHANGELOG.md` (Added / Changed / Fixed / Removed).
 3. Run `python3 tools/check_version.py` (also the first step of `cscripts/run_tests.sh` and of CI) and the tests

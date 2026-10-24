@@ -4,7 +4,6 @@
 {vieweralsosee "nwsaom_estat" "help nwsaom_estat"}{...}
 {vieweralsosee "nwsaom_meta" "help nwsaom_meta"}{...}
 {title:Title}
-{pstd}{it:nwsaom version 1.0.2, 24 October 2026}{p_end}{* nwversion}
 
 {phang}
 {bf:nwsaom bayes} {hline 2} Bayesian estimation of a stochastic actor-oriented model, following multiSiena's {cmd:multi_siena()} (the successor of RSiena's {cmd:sienaBayes}) for a single group{p_end}
@@ -98,3 +97,6 @@ The estimates of {cmd:nwsaom} are replaced; use {cmd:estimates store} first to k
 
 {phang}Koskinen, J. H., and T. A. B. Snijders (2007). Bayesian inference for dynamic social network data. Journal of Statistical Planning and Inference 137: 3930-3938.{p_end}
 {phang}Snijders, T. A. B., J. H. Koskinen, and M. Schweinberger (2010). Maximum likelihood estimation for social network dynamics. Annals of Applied Statistics 4: 567-588.{p_end}
+
+{hline}
+{pstd}{it:nwsaom version 1.0.2, 24 October 2026}{p_end}{* nwversion}

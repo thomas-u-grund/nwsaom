@@ -3,7 +3,6 @@
 {vieweralsosee "nwsaom" "help nwsaom"}{...}
 {vieweralsosee "nwsaom_estat" "help nwsaom_estat"}{...}
 {title:Title}
-{pstd}{it:nwsaom version 1.0.2, 24 October 2026}{p_end}{* nwversion}
 
 {phang}
 {bf:nwsaom meta} {hline 2} Multi-group meta-analysis of separate {cmd:nwsaom} fits (RSiena's {cmd:siena08}){p_end}
@@ -79,3 +78,6 @@ heterogeneity test Q (a small p value means that the groups differ more than the
 {title:Reference}
 
 {pstd}Snijders, T.A.B. and Baerveldt, C. (2003). A multilevel network study of the effects of delinquent behavior on friendship evolution. {it:Journal of Mathematical Sociology} 27: 123-151.{p_end}
+
+{hline}
+{pstd}{it:nwsaom version 1.0.2, 24 October 2026}{p_end}{* nwversion}

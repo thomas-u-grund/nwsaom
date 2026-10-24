@@ -7,6 +7,7 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Changed
 - Dialog boxes: every option and every effect of `nwsaom` can be set from a dialog (`db nwsaom`, `db nwsaom_multinet`, `db nwsaom_bayes`, `db nwsaom_meta`, `db nwsaom_describe`, `db nwsaom_estat`); the dialogs are generated from a specification (`dlg/`).
+- The version is shown at the bottom of each help file.
 
 ## [1.0.2] - 2026-10-24
 
