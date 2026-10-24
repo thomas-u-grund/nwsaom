@@ -1,0 +1,93 @@
+name: Build native plugins
+
+# Builds the native plugin(s) of nwsaom (saom_sim) on macOS, Windows and Linux and commits the binaries
+# back into lib/plugins/ under per-platform-suffixed names (net install flattens all files into one folder).
+# A platform whose binary is missing simply has no native acceleration or the command stops with a message.
+
+on:
+  push:
+    branches: [main, master, develop]
+    paths:
+      - "native/**"
+      - ".github/workflows/build-plugins.yml"
+  pull_request:
+    paths:
+      - "native/**"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build universal macOS plugins
+        run: |
+          cd native
+          make macos
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plugins-macos
+          path: |
+            lib/plugins/macos/saom_sim_macos.plugin
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Build Windows plugins (cl /LD)
+        shell: cmd
+        run: |
+          mkdir lib\plugins\windows
+          cd native
+          cl /LD /DSYSTEM=STWIN32 /I spi saom_sim.c spi\stplugin.c /Fe:..\lib\plugins\windows\saom_sim_windows.plugin
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plugins-windows
+          path: |
+            lib/plugins/windows/saom_sim_windows.plugin
+
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Linux plugins
+        run: |
+          cd native
+          make unix
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plugins-linux
+          path: |
+            lib/plugins/unix/saom_sim_unix.plugin
+
+  commit-binaries:
+    needs: [macos, windows, linux]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: plugins-macos
+          path: lib/plugins/macos/
+      - uses: actions/download-artifact@v4
+        with:
+          name: plugins-linux
+          path: lib/plugins/unix/
+      - uses: actions/download-artifact@v4
+        with:
+          name: plugins-windows
+          path: lib/plugins/windows/
+      - name: Commit rebuilt plugins
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add lib/plugins/
+          git diff --cached --quiet || git commit -m "ci: rebuild native plugins [skip ci]"
+          git push

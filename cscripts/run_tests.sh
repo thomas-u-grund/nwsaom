@@ -1,5 +1,5 @@
 #!/bin/zsh
-# nwsaom test runner (macOS). Usage: cscripts/run_nwsaom_tests.sh quick|full [plugin_dir] [jobs]
+# nwsaom test runner (macOS). Usage: NWCORE=/path/to/nwcommands cscripts/run_tests.sh quick|full [plugin_dir] [jobs]
 #   quick: the tests of the newer features and the ado checks (about a minute) - run after every change
 #   full : everything, including the RSiena regression tests (35 minutes one after the other, about 10-15 in parallel)
 # plugin_dir: a directory with a freshly built saom_sim_macos.plugin (put on the adopath ahead of Stata's PLUS copy)
@@ -7,6 +7,8 @@
 #   Stata process has its own memory, frames and Mata); their logs are run_<test>.log. The threaded plugin batch uses all
 #   cores in every process, so more jobs than cores/3 stop paying off.
 cd "$(dirname "$0")/.." || exit 1
+if [[ -z $NWCORE || ! -f $NWCORE/unw_core.do ]]; then echo "set NWCORE to the nwcommands (core) directory"; exit 1; fi
+export NWCORE
 mode=${1:-quick}
 plug=${2:-}
 jobs=${3:-6}

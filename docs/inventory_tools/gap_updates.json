@@ -1,0 +1,1738 @@
+[
+ {
+  "match": {
+   "shortName": "outRate",
+   "varType": "rate (non-directed network)",
+   "context": "",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as outrate)",
+   "nwsaom_option": "outrate (with symmetric / tie-symmetric waves, symtype forcing, confirmation, force, agree, joint)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 1004 = siena07; modelType 2: coef 0.434/0.430 vs 0.445/0.440 (siena07 se 0.11-0.26), density -1.169/-1.175 vs -1.170/-1.203; modelType 6: 0.167 vs 0.168 (siena07 fails on seed 2)"
+  }
+ },
+ {
+  "match": {
+   "shortName": "outRateInv",
+   "varType": "rate (non-directed network)",
+   "context": "",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as outrateinv)",
+   "nwsaom_option": "outrateinv",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 64.493 = siena07; coef -12.52/-12.57 vs -12.48/-12.30 (modelType 2); joint -2.44/-2.47 vs -2.42/-2.42"
+  }
+ },
+ {
+  "match": {
+   "shortName": "outRateLog",
+   "varType": "rate (non-directed network)",
+   "context": "",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as outratelog)",
+   "nwsaom_option": "outratelog",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 398.158 = siena07; coef 2.258/2.244 vs 2.276/2.287 (modelType 2); joint 0.738/0.773 vs 0.749/0.733"
+  }
+ },
+ {
+  "match": {
+   "shortName": "outRate",
+   "varType": "rate (two-mode network)",
+   "context": "",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as outrate)",
+   "nwsaom_option": "outrate",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "40x20 3-wave data : target 691 = siena07; coef 0.155/0.158 vs 0.184/0.165 (se 0.12-0.15), density -1.690/-1.711 vs -1.677/-1.696; unconditional estimation: coef 0.161/0.158, se 0.114/0.118 vs siena07 0.147/0.115"
+  }
+ },
+ {
+  "match": {
+   "shortName": "outRateInv",
+   "varType": "rate (two-mode network)",
+   "context": "",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as outrateinv)",
+   "nwsaom_option": "outrateinv",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 78.355 = siena07; coef -1.40...-1.52 (7 of 8 nwsaom seeds converge) vs -1.549/-1.520 (siena07 se 1.1-1.4)"
+  }
+ },
+ {
+  "match": {
+   "shortName": "outRateLog",
+   "varType": "rate (two-mode network)",
+   "context": "",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as outratelog)",
+   "nwsaom_option": "outratelog",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 311.545 = siena07; coef 0.636/0.599 vs 0.621/0.601"
+  }
+ },
+ {
+  "match": {
+   "shortName": "RateX",
+   "varType": "rate (two-mode network)",
+   "context": "constant covariate",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as ratecov)",
+   "nwsaom_option": "ratecov(var) (covariate of the actors, centred by their mean; also together with outrate...)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 24.132 = siena07; coef 0.219/0.220 vs 0.221/0.228; with outRate: RateX 0.215/0.222 vs 0.223/0.215, outRate 0.170/0.169 vs 0.185/0.175"
+  }
+ },
+ {
+  "match": {
+   "shortName": "RateX",
+   "varType": "rate (two-mode network)",
+   "context": "changing covariate",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as tvcov)",
+   "nwsaom_option": "tvcov(t1 t2) ratecov(t)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 18.05 = siena07; coef 0.156/0.169 vs 0.160/0.167"
+  }
+ },
+ {
+  "match": {
+   "shortName": "RateX",
+   "varType": "rate (one-mode network)",
+   "context": "changing covariate",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as tvcov)",
+   "nwsaom_option": "tvcov(x1 x2 x3) ratecov(x) (period p uses wave p)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "s50-like directed waves, alcohol a1,a2: target 51.21 = siena07; coef 0.272/0.267 vs 0.272/0.278 (se 0.09)"
+  }
+ },
+ {
+  "match": {
+   "shortName": "RateX",
+   "varType": "rate (non-directed network)",
+   "context": "changing covariate",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as tvcov)",
+   "nwsaom_option": "tvcov(...) ratecov(x) with symmetric",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 58.66 = siena07; coef 0.299/0.299 vs 0.301/0.302"
+  }
+ },
+ {
+  "match": {
+   "shortName": "RateX",
+   "varType": "rate (one-mode network)",
+   "context": "a behavior variable",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as ratecov)",
+   "nwsaom_option": "ratecov(a) with behavior(a1 a2 a3 ...) and waves()",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 712 = siena07; coef 0.344/0.344 vs 0.315/0.319 (se 0.13)"
+  }
+ },
+ {
+  "match": {
+   "shortName": "RateX",
+   "varType": "rate (non-directed network)",
+   "context": "a behavior variable",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as ratecov)",
+   "nwsaom_option": "ratecov(a), symmetric, symtype forcing/confirmation",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 854 = siena07; coef 0.373/0.358 vs 0.481/0.384 (se 0.15-0.21)"
+  }
+ },
+ {
+  "match": {
+   "shortName": "RateX",
+   "varType": "rate (two-mode network)",
+   "context": "a behavior variable",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as ratecov)",
+   "nwsaom_option": "ratecov(z) with behavior(z1 z2 z3) of the actors",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 582 = siena07; coef -0.014/-0.009 vs -0.008/-0.012 (se 0.08)"
+  }
+ },
+ {
+  "match": {
+   "shortName": "RateX",
+   "varType": "rate (behavior)",
+   "context": "constant covariate",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as behratecov)",
+   "nwsaom_option": "behratecov(s1)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target -1.8 = siena07; coef -0.025/-0.026 vs -0.033/-0.026 (se 0.28); non-directed: -0.016/-0.021 vs -0.028/-0.010"
+  }
+ },
+ {
+  "match": {
+   "shortName": "RateX",
+   "varType": "rate (behavior)",
+   "context": "changing covariate",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as tvcov)",
+   "nwsaom_option": "tvcov(s1 s2 s3) behratecov(s)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target -2 = siena07; coef -0.021/-0.027 vs -0.025/-0.030"
+  }
+ },
+ {
+  "match": {
+   "shortName": "RateX",
+   "varType": "rate (behavior)",
+   "context": "a behavior variable",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as behratecov)",
+   "nwsaom_option": "behratecov(a) (the behavior itself)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 167 = siena07. siena07's own estimate does not converge for this model (tconv.max 1.0-1.3 over four seeds, RateX 0.16-0.24, se 0.35); with fixed parameters (nwsaom's estimates) siena07's simulated statistics have mean deviation 0 (RateX statistic -0.7 of sd 19.9), i.e. nwsaom's estimate is a root of siena07's own moment equations; nwsaom: RateX -0.023/-0.008"
+  }
+ },
+ {
+  "match": {
+   "shortName": "outRate",
+   "varType": "rate (behavior)",
+   "context": "another network",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as behrate)",
+   "nwsaom_option": "behrate(outrate)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 139 = siena07; coef 0.117/0.114 vs 0.109/0.109; non-directed (degree): target 194, 0.127/0.136 vs 0.129/0.126"
+  }
+ },
+ {
+  "match": {
+   "shortName": "inRate",
+   "varType": "rate (behavior)",
+   "context": "another network",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as behrate)",
+   "nwsaom_option": "behrate(inrate)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 140 = siena07; coef 0.080/0.069 vs 0.074/0.075"
+  }
+ },
+ {
+  "match": {
+   "shortName": "recipRate",
+   "varType": "rate (behavior)",
+   "context": "another network",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as behrate)",
+   "nwsaom_option": "behrate(reciprate)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 85 = siena07; coef -0.055/-0.062 vs -0.036/-0.071"
+  }
+ },
+ {
+  "match": {
+   "shortName": "avExposure",
+   "varType": "rate (behavior)",
+   "context": "another network",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as behrate)",
+   "nwsaom_option": "behrate(avexposure)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 184.25 = siena07; coef 0.447/0.440 vs 0.360/0.460 (se 0.5-1.3); non-directed: target 186.629, 0.405/0.381 vs 0.391/0.459; threshold avexposure=2: target 144.25, 0.302/0.304 vs 0.293/0.293"
+  }
+ },
+ {
+  "match": {
+   "shortName": "totExposure",
+   "varType": "rate (behavior)",
+   "context": "another network",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as behrate)",
+   "nwsaom_option": "behrate(totexposure)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 453 = siena07; coef 0.081/0.084 vs 0.076/0.082; non-directed: target 637, 0.059/0.061 vs 0.061/0.057; thresholds =3: target 292, 0.021/0.022 vs 0.021/0.023; =-3: target 72, -0.176/-0.175 vs -0.182/-0.171"
+  }
+ },
+ {
+  "match": {
+   "shortName": "susceptAvIn",
+   "varType": "rate (behavior)",
+   "context": "another network",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as behrate)",
+   "nwsaom_option": "behrate(susceptavin)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 451.417 = siena07; coef 0.049/0.048 vs 0.047/0.045"
+  }
+ },
+ {
+  "match": {
+   "shortName": "infectIn",
+   "varType": "rate (behavior)",
+   "context": "another network",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as behrate)",
+   "nwsaom_option": "behrate(infectin)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 1658 = siena07; coef 0.025/0.025 vs 0.025/0.025; threshold =2: target 1538, 0.020/0.021 vs 0.021/0.021"
+  }
+ },
+ {
+  "match": {
+   "shortName": "infectOut",
+   "varType": "rate (behavior)",
+   "context": "another network",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as behrate)",
+   "nwsaom_option": "behrate(infectout)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 1306 = siena07; coef 0.037/0.037 vs 0.038/0.037"
+  }
+ },
+ {
+  "match": {
+   "shortName": "avTinExposureDist2",
+   "varType": "rate (behavior)",
+   "context": "another network",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as behrate)",
+   "nwsaom_option": "behrate(avtinexposuredist2)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 400.75 = siena07; coef 0.027/0.033 vs 0.030/0.026"
+  }
+ },
+ {
+  "match": {
+   "shortName": "totInExposureDist2",
+   "varType": "rate (behavior)",
+   "context": "another network",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as behrate)",
+   "nwsaom_option": "behrate(totinexposuredist2)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 1058 = siena07; coef 0.014/0.017 vs 0.017/0.017"
+  }
+ },
+ {
+  "match": {
+   "shortName": "totAInExposureDist2",
+   "varType": "rate (behavior)",
+   "context": "another network",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as behrate)",
+   "nwsaom_option": "behrate(totainexposuredist2)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 398.402 = siena07; coef 0.038/0.041 vs 0.041/0.038"
+  }
+ },
+ {
+  "match": {
+   "shortName": "anyInExposureDist2",
+   "varType": "rate (behavior)",
+   "context": "another network",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as behrate)",
+   "nwsaom_option": "behrate(anyinexposuredist2)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 128 = siena07; coef 0.131/0.132 vs 0.148/0.134"
+  }
+ },
+ {
+  "match": {
+   "shortName": "susceptAvCovar",
+   "varType": "rate (behavior)",
+   "context": "another network + constant covariate",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as behrate)",
+   "nwsaom_option": "behrate(susceptavcovar(s1))",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 21.318 = siena07; coef -0.001/-0.001 vs -0.002/0.003; non-directed: target 15.081, -0.013/-0.014 vs -0.017/-0.012"
+  }
+ },
+ {
+  "match": {
+   "shortName": "infectCovar",
+   "varType": "rate (behavior)",
+   "context": "another network + constant covariate",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as behrate)",
+   "nwsaom_option": "behrate(infectcovar(s1))",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 38.86 = siena07; coef -0.001/-0.002 vs -0.002/0.000; non-directed: target 76.94, 0.002/0.002 vs 0.000/0.003"
+  }
+ },
+ {
+  "match": {
+   "shortName": "susceptAvCovar",
+   "varType": "rate (behavior)",
+   "context": "another network + changing covariate",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as tvcov)",
+   "nwsaom_option": "tvcov(s1 s2 s3) behrate(susceptavcovar(s))",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 18.254 = siena07; coef 0.003/-0.003 vs -0.004"
+  }
+ },
+ {
+  "match": {
+   "shortName": "infectCovar",
+   "varType": "rate (behavior)",
+   "context": "another network + changing covariate",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as tvcov)",
+   "nwsaom_option": "tvcov(s1 s2 s3) behrate(infectcovar(s))",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 106.15 = siena07; coef 0.064/0.058 vs 0.054/0.059 (se 0.06-0.1)"
+  }
+ },
+ {
+  "match": {
+   "shortName": "infectDeg",
+   "varType": "rate (behavior (non-directed network))",
+   "context": "another network",
+   "section": "T."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as behrate)",
+   "nwsaom_option": "behrate(infectdeg) with symmetric",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "target 2814 = siena07; coef 0.015/0.015 vs 0.015/0.015"
+  }
+ },
+ {
+  "match": {
+   "shortName": "X",
+   "varType": "two-mode network",
+   "context": "constant dyadic covariate",
+   "section": "J."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as dyadcov)",
+   "nwsaom_option": "dyadcov(matname) with a na x ne matrix (rows = actors, columns = events); centred by the mean of ALL cells (RSiena: no diagonal for bipartite); dyadcovrecip stays refused",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "observed statistic 176.77 = siena07 target; 40x20, 3 waves, estimates seeds 1,2: density -3.158/-3.171 vs RSiena -3.164/-3.156, inPopSqrt 1.219/1.221 vs 1.220/1.209, X -0.055/-0.064 vs -0.059/-0.049 (SE 0.09-0.28, differences < 0.1 SE)"
+  }
+ },
+ {
+  "match": {
+   "shortName": "unspInt",
+   "varType": "two-mode network",
+   "context": "",
+   "section": "F."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as interact)",
+   "nwsaom_option": "interact(effect1#effect2) now allowed in a two-mode network (egox/nodeocov on the actors, altx/nodeicov on the events, outdegree)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "egoX x altX: observed statistic -25.783 = siena07 target; estimates seeds 1,2: interaction -0.057/-0.058 vs RSiena -0.058/-0.058, density 0.672/0.670 vs 0.666/0.642, egoX 0.218/0.216 vs 0.219/0.217, altX 0.559/0.544 vs 0.550/0.531 (SE 0.17-0.19; differences < 0.1 SE). (egoX x density and density x altX are degenerate in RSiena itself: the interaction statistic equals the egoX / altX statistic, SE NA)"
+  }
+ },
+ {
+  "match": {
+   "shortName": "crossXOutAct",
+   "varType": "two-mode network",
+   "context": "a behavior variable",
+   "section": "K."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as behavior)",
+   "nwsaom_option": "behavior(...) netbeh(crossxoutact) (actors' behavior; events mirror the actor with the same index in their mode, as RSiena; needs >= as many actors as events)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "observed statistic 800 = siena07 target; estimates seeds 1,2: density -0.402/-0.398 vs RSiena -0.369/-0.373 (SE 0.27), crossXOutAct 0.117/0.116 vs 0.112/0.111, linear 0.321/0.317 vs 0.256/0.257, quad 0.130/0.145 vs 0.162/0.156 (SE 0.2); all < 0.25 SE"
+  }
+ },
+ {
+  "match": {
+   "shortName": "avGroupEgoX",
+   "varType": "two-mode network",
+   "context": "a behavior variable",
+   "section": "K."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as netbeh)",
+   "nwsaom_option": "netbeh(avgroupegox)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "observed statistic 6.0583 = siena07 target; estimates seeds 1,2: effect 10.34/11.51 vs RSiena 10.01/10.03 (SE 12), density 1.127/1.190 vs 1.216/1.237 (SE 1.5-3.8): weakly identified in both programs"
+  }
+ },
+ {
+  "match": {
+   "shortName": "totGroupEgoX",
+   "varType": "two-mode network",
+   "context": "a behavior variable",
+   "section": "K."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as netbeh)",
+   "nwsaom_option": "netbeh(totgroupegox)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "observed statistic 121.167 = siena07 target; estimates seeds 1,2: effect 0.517/0.577 vs RSiena 0.501/0.501 (SE 0.6-1.7), density 1.128/1.189 vs 1.216/1.237"
+  }
+ },
+ {
+  "match": {
+   "shortName": "degAbsDiffX",
+   "varType": "non-directed network",
+   "context": "a behavior variable",
+   "section": "K."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as symmetric + behavior)",
+   "nwsaom_option": "symmetric + behavior(...) netbeh(degabsdiffx)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "observed statistic 814 = siena07 target (density 389 = 778/2); estimates seeds 1,2: effect 0.213/0.075 vs RSiena 0.018/0.005 and density -0.141/-0.007 vs 0.071/0.042 with SE 0.9-2.0 in BOTH programs (effect nearly collinear with density in this network); behavior parameters linear -0.039/-0.032 vs -0.030/-0.031, quad 0.019/0.017 vs 0.020/0.020, avAlt 0.083/0.070 vs 0.086/0.085 agree within 0.1 SE"
+  }
+ },
+ {
+  "match": {
+   "shortName": "degPosDiffX",
+   "varType": "non-directed network",
+   "context": "a behavior variable",
+   "section": "K."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as netbeh)",
+   "nwsaom_option": "netbeh(degposdiffx)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "observed statistic 812 = siena07 target; same picture as degAbsDiffX (SE 3.1-3.4 in both programs; behavior parameters agree)"
+  }
+ },
+ {
+  "match": {
+   "shortName": "higher",
+   "varType": "non-directed network",
+   "context": "changing covariate",
+   "section": "H."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as symmetric higher)",
+   "nwsaom_option": "symmetric higher(v) tvcov(v1 v2)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "observed statistic 389 = siena07 target; DEGENERATE: for a non-directed network the higher statistic counts every tie once (1 or 0 + 0 or 1, or 0.5 + 0.5 per tie pair), i.e. it equals the density statistic exactly (RSiena target 389 = density target 389); siena07 standard errors are NA (both seeds), nwsaom stops with the singular-covariance message (rc 505). Estimates of the other parameters agree. Not identified: use for simulation only."
+  }
+ },
+ {
+  "match": {
+   "shortName": "higher",
+   "varType": "non-directed network",
+   "context": "a behavior variable",
+   "section": "K."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as netbeh)",
+   "nwsaom_option": "netbeh(higher) (already accepted; )",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "observed statistic 389 = siena07 target (equal to density, same degeneracy as above; RSiena SE NA, nwsaom rc 505)"
+  }
+ },
+ {
+  "match": {
+   "shortName": "XRecip",
+   "varType": "non-directed network",
+   "context": "changing dyadic covariate",
+   "section": "J."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as symmetric tvdyadcovrecip)",
+   "nwsaom_option": "symmetric tvdyadcovrecip(stem) with matrices stem1 stem2",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "observed statistic -3.1763 = siena07 target (50 actors, 2 periods); estimates seeds 1,2: XRecip 0.266/0.184 vs RSiena 0.325/0.208 (SE 3.7-4.5: very weakly identified in both), density 0.074/0.069 vs 0.060/0.068 (SE 0.16)"
+  }
+ },
+ {
+  "match": {
+   "shortName": "unspInt",
+   "varType": "non-directed network",
+   "context": "",
+   "section": "F."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as symmetric + interact)",
+   "nwsaom_option": "symmetric + interact(outdegree#egox) etc.",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "altX x sameX of a constant covariate (50 actors, 2 periods; : observed statistics equal siena07 targets (altX -75.32, sameX 158, interaction -52.52); estimates seed 1 vs RSiena seed 1: density 0.113 vs 0.112, sameX -0.246 vs -0.253, altX -0.039 vs -0.039, interaction -0.236 vs -0.225 (SE 0.09-0.23). (egoX x altX is degenerate in a non-directed network: identical statistics, RSiena SE NA, nwsaom rc 505.)"
+  }
+ },
+ {
+  "match": {
+   "shortName": "inActIntn",
+   "varType": "two-mode network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(inactintn)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "targets equal (dep B/other F); estimates 2 seeds max 0.13 SE"
+  }
+ },
+ {
+  "match": {
+   "shortName": "outActIntn",
+   "varType": "two-mode network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(outactintn)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "targets equal; estimates max 0.06 SE"
+  }
+ },
+ {
+  "match": {
+   "shortName": "divOutEgoIntn",
+   "varType": "two-mode network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(divoutegointn)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "targets equal; estimates max 0.06 SE"
+  }
+ },
+ {
+  "match": {
+   "shortName": "divInEgoIntn",
+   "varType": "two-mode network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(divinegointn)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "targets equal; estimates max 0.05 SE"
+  }
+ },
+ {
+  "match": {
+   "shortName": "divInAltIntn",
+   "varType": "two-mode network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(divinaltintn)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "targets equal; estimates max 0.02 SE. RSiena reads the other (one-mode) network's in-degree of the EVENT's own node number: copied; refused (error 198) if there are more events than actors (RSiena reads outside the network)"
+  }
+ },
+ {
+  "match": {
+   "shortName": "avDegIntn",
+   "varType": "two-mode network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(avdegintn)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "targets equal; estimates max 0.04 SE"
+  }
+ },
+ {
+  "match": {
+   "shortName": "outOutActIntn",
+   "varType": "two-mode network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(outoutactintn)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "targets equal; estimates max 0.08 SE"
+  }
+ },
+ {
+  "match": {
+   "shortName": "outOutAvIntn",
+   "varType": "two-mode network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(outoutavintn)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "targets equal; estimates max 0.09 SE"
+  }
+ },
+ {
+  "match": {
+   "shortName": "dist2OutInActIntn",
+   "varType": "two-mode network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(dist2outinactintn)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "targets equal; estimates max 0.11 SE"
+  }
+ },
+ {
+  "match": {
+   "shortName": "outOutDist2ActIntn",
+   "varType": "two-mode network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(outoutdist2actintn)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "targets equal; estimates max 0.09 SE"
+  }
+ },
+ {
+  "match": {
+   "shortName": "avAlt.2M.tot",
+   "varType": "two-mode network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(avalt2mtot)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "targets equal; estimates max 0.11 SE"
+  }
+ },
+ {
+  "match": {
+   "shortName": "to",
+   "varType": "two-mode network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(to)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "targets equal; estimates max 0.07 SE"
+  }
+ },
+ {
+  "match": {
+   "shortName": "toBack",
+   "varType": "two-mode network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(toback)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "targets equal; estimates max 0.07 SE"
+  }
+ },
+ {
+  "match": {
+   "shortName": "toRecip",
+   "varType": "two-mode network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(torecip)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "targets equal; estimates max 0.07 SE"
+  }
+ },
+ {
+  "match": {
+   "shortName": "sharedTo",
+   "varType": "two-mode network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(sharedto)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "targets equal (default parameter 3); estimates max 0.06 SE"
+  }
+ },
+ {
+  "match": {
+   "shortName": "avAlt.2M.tie",
+   "varType": "two-mode network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(avalt2mtie:1",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": ":2) | targets equal for parameters 1 and 2 (both orders); estimates max 0.13 SE. RSiena itself throws an exception for its default parameter 3 (MixedThreeCyclesFunction: \"can only have parameters 1 or 2\"); nwsaom still computes the centred version for parameter 3 (as before for one-mode networks)"
+  }
+ },
+ {
+  "match": {
+   "shortName": "inPopOutW",
+   "varType": "two-mode network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(inpopoutw)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "targets equal; estimates max 0.08 SE"
+  }
+ },
+ {
+  "match": {
+   "shortName": "nDist2ActIntn",
+   "varType": "two-mode network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(ndist2actintn)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "targets equal; estimates max 0.05 SE"
+  }
+ },
+ {
+  "match": {
+   "shortName": "toAny",
+   "varType": "two-mode network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(toany)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "new (code 53). RSiena MixedOnlyTwoPathEffect copied as coded, including its two contribution branches; targets equal; estimates max 0.24 SE (weakly identified)"
+  }
+ },
+ {
+  "match": {
+   "shortName": "JoutMix",
+   "varType": "two-mode network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(joutmix)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "targets equal; estimates max 0.05 SE; event index quirk as divInAltIntn"
+  }
+ },
+ {
+  "match": {
+   "shortName": "gwespFBMix",
+   "varType": "two-mode network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(gwespfbmix)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "targets equal; estimates max 0.08 SE; event index quirk as divInAltIntn"
+  }
+ },
+ {
+  "match": {
+   "shortName": "from.w.ind",
+   "varType": "one-mode network",
+   "context": "another network + another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(fromwindoo",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "fromwindow | fromwindwo) | new (codes 55-57): the agreement network / the in-degree weight network = other,other | other,own | own,other. Targets equal in pairs F-S, S-F, F-H, F-B; estimates (F,B) max 0.15 SE, (F,S) 0.25, (S,F) 0.19, (F,H) 0.12"
+  }
+ },
+ {
+  "match": {
+   "shortName": "betweenPop",
+   "varType": "one-mode network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(betweenpop)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "new (code 54); targets equal (F-H, S-F); estimates max 0.17 SE. RSiena offers it only for a one-mode other network"
+  }
+ },
+ {
+  "match": {
+   "shortName": "toAny",
+   "varType": "one-mode network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(toany)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "targets equal (F-H, F-S, S-F, F-B); estimates max 0.11 SE (S-F: weakly identified, estimates large in both programs)"
+  }
+ },
+ {
+  "match": {
+   "shortName": "toAny",
+   "varType": "non-directed network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(toany) with sym1/sym2",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "as above, pairs F-S and S-F"
+  }
+ },
+ {
+  "match": {
+   "shortName": "gwespMix",
+   "varType": "non-directed network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(gwespmix)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "alias of gwespfbmix (RSiena builds both from the same code); targets equal; estimates max 0.22 SE"
+  }
+ },
+ {
+  "match": {
+   "shortName": "outOutActIntn",
+   "varType": "non-directed network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(outoutactintn) (+sym2)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "targets equal; estimates max 0.14 SE"
+  }
+ },
+ {
+  "match": {
+   "shortName": "outOutAvIntn",
+   "varType": "non-directed network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(outoutavintn)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "targets equal; estimates agree where identified (cross estimates unstable in both programs, 5 to 9)"
+  }
+ },
+ {
+  "match": {
+   "shortName": "outOutDist2AvIntn",
+   "varType": "non-directed network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as NOT IMPLEMENTED)",
+   "nwsaom_option": "NOT IMPLEMENTED",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "RSiena 1.6.6 lists the effect in its effect table but has no implementation (not in EffectFactory.cpp or R/); siena07 stops with \"exception in C++\" (initializeFRAN). Evidence: grep of src/ and R/, siena07 run on (nwsaom's older outoutdist2avintn code is kept.)"
+  }
+ },
+ {
+  "match": {
+   "shortName": "both",
+   "varType": "non-directed network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(both:1)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "targets equal; estimates max 0.06 SE. RSiena default parameter for a non-directed other network is 1"
+  }
+ },
+ {
+  "match": {
+   "shortName": "avAlt.2M.tie",
+   "varType": "non-directed network",
+   "context": "another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(avalt2mtie:2)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "targets equal (parameters 1, 2); estimates max 0.13 SE; default parameter 3 as above"
+  }
+ },
+ {
+  "match": {
+   "shortName": "from.w.ind",
+   "varType": "non-directed network",
+   "context": "another network + another network",
+   "section": "L."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(fromwindoo",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "fromwindow | fromwindwo) with sym1/sym2 | targets equal; estimates max 0.19 SE"
+  }
+ },
+ {
+  "match": {
+   "shortName": "sameWXClosure",
+   "varType": "two-mode network",
+   "context": "another network + constant covariate",
+   "section": "M."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(samewxclosure:var)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "targets equal; estimates max 0.1 SE (the covariate is a value per actor: the first observations of the dataset, or the node rows of the two-mode network)"
+  }
+ },
+ {
+  "match": {
+   "shortName": "sharedToU",
+   "varType": "two-mode network",
+   "context": "another network + constant dyadic covariate",
+   "section": "M."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(sharedtou:matrix:#)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "new (code 3201); targets equal (parameter 1; dep B/other F actors x actors, dep F/other B actors x events); estimates max 0.1 SE"
+  }
+ },
+ {
+  "match": {
+   "shortName": "avAltU.2M.tie",
+   "varType": "two-mode network",
+   "context": "another network + constant dyadic covariate",
+   "section": "M."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(avaltutie:matrix:#)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "new (3202); targets equal; estimates agree for the identified seeds (RSiena and nwsaom both diverge for some seeds: the average over weights that can cancel is weakly identified)"
+  }
+ },
+ {
+  "match": {
+   "shortName": "toU",
+   "varType": "one-mode network",
+   "context": "another network + constant dyadic covariate",
+   "section": "M."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as cross1)",
+   "nwsaom_option": "cross1(tou:matrix)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "new (3200); targets equal in F-S, S-F, F-H. NOTE: RSiena computes it with the steps i->q in the DEPENDENT network and q->j in the other network (verified by brute force against siena07), the reverse of the description in its effect name; copied. estimates max 0.11 SE. RSiena rejects it (exception) for a one-mode network that depends on a two-mode one"
+  }
+ },
+ {
+  "match": {
+   "shortName": "FFDeg",
+   "varType": "behavior",
+   "context": "another network + another network",
+   "section": "R."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as beheff12)",
+   "nwsaom_option": "beheff12(ffdeg) [first network = net1] / beheff21(ffdeg) [first = net2]; ffdeg:2 = RSiena parameter 2 (subtract the degree)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "stat 25.2867 (net,adv; siena07 25.287), 8.96 (net,sym; 8.96); ffdeg:2 -26.76 (-26.76); est (adv,net) siena07 0.850/0.898/0.781 (SE 1.2-1.3) vs nwsaom 0.862/0.923/0.834; (net,sym) siena07 -0.175/-0.135/-0.133 vs -0.120/-0.179/-0.074 (SE 1.5)"
+  }
+ },
+ {
+  "match": {
+   "shortName": "BBDeg",
+   "varType": "behavior",
+   "context": "another network + another network",
+   "section": "R."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as beheff12)",
+   "nwsaom_option": "beheff12(bbdeg) / beheff21(bbdeg) (bbdeg:2)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "stat 32.2867 (32.287); bbdeg:2 (adv,net) -49.1 (-49.1); est bbdeg:2 (adv,net) siena07 0.371/0.402/0.323 (SE 1.0-1.4) vs nwsaom 0.272/0.300/0.320 (differences up to 0.1 SE); ffdeg:2 (net,adv) siena07 -0.082/-0.079/-0.018 vs nwsaom -0.114/-0.061/-0.031"
+  }
+ },
+ {
+  "match": {
+   "shortName": "FBDeg",
+   "varType": "behavior",
+   "context": "another network + another network",
+   "section": "R."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as beheff12)",
+   "nwsaom_option": "beheff12(fbdeg)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "stat 14.0267 (14.027); no estimate comparison: five degree effects together are unidentified in siena07 too (SE 18-140); nwsaom the same"
+  }
+ },
+ {
+  "match": {
+   "shortName": "FRDeg",
+   "varType": "behavior",
+   "context": "another network + another network",
+   "section": "R."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as beheff12)",
+   "nwsaom_option": "beheff12(frdeg)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "stat 9.56 (9.56); as FBDeg"
+  }
+ },
+ {
+  "match": {
+   "shortName": "BRDeg",
+   "varType": "behavior",
+   "context": "another network + another network",
+   "section": "R."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as beheff12)",
+   "nwsaom_option": "beheff12(brdeg)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "stat 8.56 (8.56); as FBDeg"
+  }
+ },
+ {
+  "match": {
+   "shortName": "indegMixedPop",
+   "varType": "behavior",
+   "context": "another network + another network",
+   "section": "R."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as beheff12)",
+   "nwsaom_option": "beheff12(indegmixedpop) / beheff21(indegmixedpop)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "stat 202.7733 (adv,net; 202.773) and 237.807 (net,adv; 237.807), 286.347 (net,sym; 286.347); est (adv,net) siena07 -0.044/-0.050/-0.038 (SE 0.10) vs nwsaom -0.045/-0.046/-0.043 (SE 0.10)"
+  }
+ },
+ {
+  "match": {
+   "shortName": "outdegMixedPop",
+   "varType": "behavior",
+   "context": "another network + another network",
+   "section": "R."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as beheff12)",
+   "nwsaom_option": "beheff12(outdegmixedpop) / beheff21(outdegmixedpop)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "stat 209.72 (adv,net; 209.72), 293.72 (net,adv; 293.72); est siena07 -0.025/-0.024/-0.022 (SE 0.08-0.11) vs nwsaom -0.025/-0.027/-0.023"
+  }
+ },
+ {
+  "match": {
+   "shortName": "BFDeg",
+   "varType": "behavior (non-directed network)",
+   "context": "another network + another network",
+   "section": "R."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as beheff12)",
+   "nwsaom_option": "beheff12(bfdeg) with sym2 (directed net1, non-directed net2)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "stat 7.96 (net,sym; 7.96); est siena07 0.618/0.463/0.509 (SE 1.4-2.2) vs nwsaom 0.514/0.552/0.472"
+  }
+ },
+ {
+  "match": {
+   "shortName": "constant",
+   "varType": "behavior",
+   "context": "",
+   "section": "P."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as beheff1)",
+   "nwsaom_option": "beheff1(constant) / beheff2(constant)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "stat -60 (siena07 -60); siena07 itself has NA standard errors (the effect is minus the number of changes = the behavior rate statistic, singular); nwsaom stops with the phase-3 covariance message (rc 505), as siena07's NA"
+  }
+ },
+ {
+  "match": {
+   "shortName": "behUnspInt",
+   "varType": "behavior",
+   "context": "",
+   "section": "P."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as behint)",
+   "nwsaom_option": "behint(beh_a#beh_b[#beh_c]) (user-defined interaction of linear, quadratic, avalt, avsim, also across the two networks: beh_avalt#beh2_avalt); coefficient beh_<a>_x_<b>",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "stat avAlt x avSim -0.195 (-0.195), quad x avAlt 40.0069 (40.007), avAlt(net) x avAlt(adv) 11.2151 (11.215), linear x quad x avAlt 40.0069 (40.007); est quad x avAlt siena07 0.113/0.118/0.111 (SE 0.25) vs nwsaom 0.093/0.105/0.102. siena07 refuses a 3-way interaction of two network-driven effects (\"at most one effect with interactionType not OK\"). Endow/creation of an interaction and components other than the four are not offered."
+  }
+ },
+ {
+  "match": {
+   "shortName": "avGroupEgoX",
+   "varType": "behavior",
+   "context": "a behavior variable",
+   "section": "S."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as this row is the network effect avGroupEgoX with the dependen)",
+   "nwsaom_option": "this row is the network effect avGroupEgoX with the dependent behavior as covariate in the SECOND network of nwsaom multinet: eff2(outdegree reciprocity netbeh:avgroupegox) (eff1() for the first)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "stat -55.6533 (adv; -55.653); est siena07 -0.488/-0.473/-0.460 (SE 0.56) vs nwsaom -0.451/-0.450/-0.491 (SE 0.54-0.58)"
+  }
+ },
+ {
+  "match": {
+   "shortName": "totGroupEgoX",
+   "varType": "behavior",
+   "context": "a behavior variable",
+   "section": "S."
+  },
+  "set": {
+   "status": "IMPLEMENTED (as eff2)",
+   "nwsaom_option": "eff2(... netbeh:totgroupegox)",
+   "nwsaom_roles": "eval",
+   "validated": "yes",
+   "notes": "stat -1434.667 (net; -1434.667); est (adv) siena07 -0.010/-0.009/-0.009 (SE 0.011) vs nwsaom -0.009/-0.009/-0.010. (The two group effects together are collinear, siena07 SE = NA.) A single-network bug was found and fixed on the way: netbeh(totgroupegox) used the parameter xparam(1) as the number of actors, so its coefficient was n = 50 times siena07's; SaomNbSim() now returns 0 (= n actors)."
+  }
+ },
+ {
+  "match": {
+   "shortName": "inPop_ego",
+   "varType": "two-mode network",
+   "context": "",
+   "section": "C."
+  },
+  "set": {
+   "notes": "Not implemented: siena07 itself stops with a C++ exception for this effect in a two-mode network, so there is nothing to compare with."
+  }
+ },
+ {
+  "match": {
+   "shortName": "sameXOutAct",
+   "varType": "two-mode network",
+   "context": "constant covariate",
+   "section": "G."
+  },
+  "set": {
+   "notes": "Not implemented: siena07 crashes (R aborts) when it evaluates this effect in a two-mode network, so nwsaom refuses it."
+  }
+ },
+ {
+  "match": {
+   "shortName": "sameXOutAct",
+   "varType": "two-mode network",
+   "context": "changing covariate",
+   "section": "H."
+  },
+  "set": {
+   "notes": "Not implemented: siena07 crashes (R aborts) when it evaluates this effect in a two-mode network, so nwsaom refuses it."
+  }
+ },
+ {
+  "match": {
+   "shortName": "sameXOutAct",
+   "varType": "two-mode network",
+   "context": "a behavior variable",
+   "section": "K."
+  },
+  "set": {
+   "notes": "Not implemented: siena07 crashes (R aborts) when it evaluates this effect in a two-mode network, so nwsaom refuses it."
+  }
+ },
+ {
+  "match": {
+   "shortName": "diffXOutAct",
+   "varType": "two-mode network",
+   "context": "constant covariate",
+   "section": "G."
+  },
+  "set": {
+   "notes": "Not implemented: siena07 crashes (R aborts) when it evaluates this effect in a two-mode network, so nwsaom refuses it."
+  }
+ },
+ {
+  "match": {
+   "shortName": "diffXOutAct",
+   "varType": "two-mode network",
+   "context": "changing covariate",
+   "section": "H."
+  },
+  "set": {
+   "notes": "Not implemented: siena07 crashes (R aborts) when it evaluates this effect in a two-mode network, so nwsaom refuses it."
+  }
+ },
+ {
+  "match": {
+   "shortName": "diffXOutAct",
+   "varType": "two-mode network",
+   "context": "a behavior variable",
+   "section": "K."
+  },
+  "set": {
+   "notes": "Not implemented: siena07 crashes (R aborts) when it evaluates this effect in a two-mode network, so nwsaom refuses it."
+  }
+ },
+ {
+  "match": {
+   "shortName": "avGroupEgoX",
+   "varType": "two-mode network",
+   "context": "constant covariate",
+   "section": "G."
+  },
+  "set": {
+   "notes": "Not implemented: RSiena reports the effect as not meaningful for a constant covariate."
+  }
+ },
+ {
+  "match": {
+   "shortName": "totGroupEgoX",
+   "varType": "two-mode network",
+   "context": "constant covariate",
+   "section": "G."
+  },
+  "set": {
+   "notes": "Not implemented: RSiena reports the effect as not meaningful for a constant covariate."
+  }
+ },
+ {
+  "match": {
+   "shortName": "homXOutAct2",
+   "varType": "one-mode network",
+   "context": "a behavior variable",
+   "section": "K."
+  },
+  "set": {
+   "notes": "Not implemented: RSiena reports the effect as not implemented for a behavior variable."
+  }
+ },
+ {
+  "match": {
+   "shortName": "homXOutAct2",
+   "varType": "non-directed network",
+   "context": "a behavior variable",
+   "section": "K."
+  },
+  "set": {
+   "notes": "Not implemented: RSiena reports the effect as not implemented for a behavior variable."
+  }
+ },
+ {
+  "match": {
+   "shortName": "susceptAvCovar",
+   "varType": "rate (behavior)",
+   "context": "another network + a behavior variable",
+   "section": "T."
+  },
+  "set": {
+   "notes": "Not implemented: RSiena has no such effect (the covariate can only be a constant or a changing covariate)."
+  }
+ },
+ {
+  "match": {
+   "shortName": "infectCovar",
+   "varType": "rate (behavior)",
+   "context": "another network + a behavior variable",
+   "section": "T."
+  },
+  "set": {
+   "notes": "Not implemented: RSiena has no such effect (the covariate can only be a constant or a changing covariate)."
+  }
+ },
+ {
+  "match": {
+   "shortName": "inRateInv",
+   "varType": "rate (two-mode network)",
+   "context": "",
+   "section": "T."
+  },
+  "set": {
+   "notes": "Not implemented: siena07 stops with an error for this effect in a two-mode network (the receivers of ties are not the actors)."
+  }
+ },
+ {
+  "match": {
+   "shortName": "inRateLog",
+   "varType": "rate (two-mode network)",
+   "context": "",
+   "section": "T."
+  },
+  "set": {
+   "notes": "Not implemented: siena07 stops with an error for this effect in a two-mode network (the receivers of ties are not the actors)."
+  }
+ },
+ {
+  "match": {
+   "shortName": "RateX",
+   "varType": "rate (one-mode network)",
+   "context": "continuous variable",
+   "section": "T."
+  },
+  "set": {
+   "notes": "Not implemented: continuous (stochastic differential equation) behavior variables are not planned."
+  }
+ },
+ {
+  "match": {
+   "shortName": "sameWXClosure",
+   "varType": "two-mode network",
+   "context": "another network + changing covariate",
+   "section": "M."
+  },
+  "set": {
+   "notes": "Two-mode member of nwsaom multinet with a changing covariate (tvcov()). The observed statistic equals the constant-covariate case; estimates were not compared.",
+   "status": "IMPLEMENTED (as cross1(samewxclosure:var) with tvcov())",
+   "nwsaom_option": "cross1(samewxclosure:var) tvcov()",
+   "nwsaom_roles": "eval",
+   "validated": "target only"
+  }
+ },
+ {
+  "match": {
+   "shortName": "sameWXClosure",
+   "varType": "two-mode network",
+   "context": "another network + a behavior variable",
+   "section": "M."
+  },
+  "set": {
+   "notes": "Not implemented in nwsaom multinet: a two-mode member together with a co-evolving behavior."
+  }
+ },
+ {
+  "match": {
+   "shortName": "settingSizeAct",
+   "varType": "one-mode network",
+   "context": "",
+   "section": "O."
+  },
+  "set": {
+   "notes": "Not implemented: RSiena's settings model is a separate model family (setting steps with rates per setting). In siena07 the effect has no estimate to compare with: its statistic is constant under simulation or its derivative is zero, and siena07 fixes it at 0 without a standard error."
+  }
+ },
+ {
+  "match": {
+   "shortName": "settingSizeActSqrt",
+   "varType": "one-mode network",
+   "context": "",
+   "section": "O."
+  },
+  "set": {
+   "notes": "Not implemented: RSiena's settings model is a separate model family (setting steps with rates per setting). In siena07 the effect has no estimate to compare with: its statistic is constant under simulation or its derivative is zero, and siena07 fixes it at 0 without a standard error."
+  }
+ },
+ {
+  "match": {
+   "shortName": "settingSizeActLog",
+   "varType": "one-mode network",
+   "context": "",
+   "section": "O."
+  },
+  "set": {
+   "notes": "Not implemented: RSiena's settings model is a separate model family (setting steps with rates per setting). In siena07 the effect has no estimate to compare with: its statistic is constant under simulation or its derivative is zero, and siena07 fixes it at 0 without a standard error."
+  }
+ },
+ {
+  "match": {
+   "shortName": "settingSizeActInv",
+   "varType": "one-mode network",
+   "context": "",
+   "section": "O."
+  },
+  "set": {
+   "notes": "Not implemented: RSiena's settings model is a separate model family (setting steps with rates per setting). In siena07 the effect has no estimate to compare with: its statistic is constant under simulation or its derivative is zero, and siena07 fixes it at 0 without a standard error."
+  }
+ },
+ {
+  "match": {
+   "shortName": "settingOppAct",
+   "varType": "one-mode network",
+   "context": "",
+   "section": "O."
+  },
+  "set": {
+   "notes": "Not implemented: RSiena's settings model is a separate model family (setting steps with rates per setting). In siena07 the effect has no estimate to compare with: its statistic is constant under simulation or its derivative is zero, and siena07 fixes it at 0 without a standard error."
+  }
+ },
+ {
+  "match": {
+   "shortName": "settingOppActSqrt",
+   "varType": "one-mode network",
+   "context": "",
+   "section": "O."
+  },
+  "set": {
+   "notes": "Not implemented: RSiena's settings model is a separate model family (setting steps with rates per setting). In siena07 the effect has no estimate to compare with: its statistic is constant under simulation or its derivative is zero, and siena07 fixes it at 0 without a standard error."
+  }
+ },
+ {
+  "match": {
+   "shortName": "settingOppActLog",
+   "varType": "one-mode network",
+   "context": "",
+   "section": "O."
+  },
+  "set": {
+   "notes": "Not implemented: RSiena's settings model is a separate model family (setting steps with rates per setting). In siena07 the effect has no estimate to compare with: its statistic is constant under simulation or its derivative is zero, and siena07 fixes it at 0 without a standard error."
+  }
+ },
+ {
+  "match": {
+   "shortName": "settingLogCreationAct",
+   "varType": "one-mode network",
+   "context": "",
+   "section": "O."
+  },
+  "set": {
+   "notes": "Not implemented: RSiena's settings model is a separate model family (setting steps with rates per setting). In siena07 the effect has no estimate to compare with: its statistic is constant under simulation or its derivative is zero, and siena07 fixes it at 0 without a standard error."
+  }
+ },
+ {
+  "match": {
+   "shortName": "settingOppActD",
+   "varType": "one-mode network",
+   "context": "",
+   "section": "O."
+  },
+  "set": {
+   "notes": "Not implemented: RSiena's settings model is a separate model family (setting steps with rates per setting). In siena07 the effect has no estimate to compare with: its statistic is constant under simulation or its derivative is zero, and siena07 fixes it at 0 without a standard error."
+  }
+ },
+ {
+  "match": {
+   "shortName": "settingOppActSqrtD",
+   "varType": "one-mode network",
+   "context": "",
+   "section": "O."
+  },
+  "set": {
+   "notes": "Not implemented: RSiena's settings model is a separate model family (setting steps with rates per setting). In siena07 the effect has no estimate to compare with: its statistic is constant under simulation or its derivative is zero, and siena07 fixes it at 0 without a standard error."
+  }
+ },
+ {
+  "match": {
+   "shortName": "settingOppActLogD",
+   "varType": "one-mode network",
+   "context": "",
+   "section": "O."
+  },
+  "set": {
+   "notes": "Not implemented: RSiena's settings model is a separate model family (setting steps with rates per setting). In siena07 the effect has no estimate to compare with: its statistic is constant under simulation or its derivative is zero, and siena07 fixes it at 0 without a standard error."
+  }
+ },
+ {
+  "match": {
+   "shortName": "settingLogCreationActD",
+   "varType": "one-mode network",
+   "context": "",
+   "section": "O."
+  },
+  "set": {
+   "notes": "Not implemented: RSiena's settings model is a separate model family (setting steps with rates per setting). In siena07 the effect has no estimate to compare with: its statistic is constant under simulation or its derivative is zero, and siena07 fixes it at 0 without a standard error."
+  }
+ },
+ {
+  "match": {
+   "shortName": "minXAlt",
+   "varType": "non-directed network",
+   "context": "?yyyyyy + ?zzzzzz",
+   "section": "V."
+  },
+  "set": {
+   "notes": "Placeholder entry of the RSiena effects table; the effect is not offered by siena07 for these variables."
+  }
+ },
+ {
+  "match": {
+   "shortName": "maxXAlt",
+   "varType": "non-directed network",
+   "context": "?yyyyyy + ?zzzzzz",
+   "section": "V."
+  },
+  "set": {
+   "notes": "Placeholder entry of the RSiena effects table; the effect is not offered by siena07 for these variables."
+  }
+ }
+]

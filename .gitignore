@@ -1,0 +1,4 @@
+*.log
+.DS_Store
+native/*.x86_64
+native/*.arm64

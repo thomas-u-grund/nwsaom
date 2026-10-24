@@ -2,7 +2,7 @@
 """Generates gen_effects.tex (the effects reference), gen_missing.tex (what RSiena has and nwsaom does not yet) and gen_counts.tex
 from the effects inventory (docs/SAOM_EFFECTS_INVENTORY.csv, which is gitignored: pass its path as argv[1])."""
 import csv, sys, re, collections
-src = sys.argv[1] if len(sys.argv) > 1 else "../../../docs/SAOM_EFFECTS_INVENTORY.csv"
+src = sys.argv[1] if len(sys.argv) > 1 else "../docs/SAOM_EFFECTS_INVENTORY.csv"
 rows = list(csv.DictReader(open(src)))
 
 def tex(s):
