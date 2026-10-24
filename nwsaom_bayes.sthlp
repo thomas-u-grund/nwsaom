@@ -45,6 +45,11 @@ shorter blocks are cheaper but mix the length of the sequence more slowly{p_end}
 {synopt:{opt notable}, {opt noheader}}display control{p_end}
 {synoptline}
 
+{title:Dialog box}
+
+{pstd}
+{cmd:db nwsaom_bayes} sets all options of the command and runs {cmd:nwsaom bayes} on the model in memory.
+
 {title:Description}
 
 {pstd}

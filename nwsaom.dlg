@@ -3,8 +3,8 @@ VERSION 10
 
 SYNCHRONOUS_ONLY
 INCLUDE _std_mlarge
-DEFINE _dlgwd 940
-DEFINE _dlght 480
+DEFINE _dlgwd 1080
+DEFINE _dlght 600
 INCLUDE header
 
 HELP hlp1, view("help nwsaom")
@@ -15,237 +15,558 @@ BEGIN
 	program initialize
 END
 
-SCRIPT POSTINIT
+DIALOG waves, tabtitle("Waves")
 BEGIN
-	behavior.tx_symmetric_note.hide
+  RADIO rb_nwsaom_est 10 10 520 ., label("Estimate (nwsaom)") first default(1)
+  RADIO rb_nwsaom_sim 540 10 520 ., label("Simulate only (nwsaom simulate)") last
+  TEXT tx_h2_1 10 43 1040 ., label("-- Observed waves (a dependent network per wave; wave1()/wave2() OR waves()) --")
+  TEXT tx_wave1 10 64 185 ., label("wave1()")
+  COMBOBOX cb_wave1 200 64 150 ., dropdown contents(netlist) nomem
+  TEXT tx_wave2 363 64 185 ., label("wave2()")
+  COMBOBOX cb_wave2 553 64 150 ., dropdown contents(netlist) nomem
+  TEXT tx_waves 10 85 430 ., label("waves() - 2+ networks in time order")
+  COMBOBOX cb_waves 450 85 610 ., dropdown contents(netlist) append nomem
+  TEXT tx_tvcov 10 106 430 ., label("tvcov() - changing covariates a1 a2 a3 | s1 s2 s3")
+  EDIT ed_tvcov 450 106 610 ., nomem
+  TEXT tx_actormode 10 127 430 ., label("actormode() - two-mode actor mode (1|2)")
+  EDIT ed_actormode 450 127 610 ., nomem tooltip("for: twomode")
+  TEXT tx_h13_1 10 154 1040 ., label("-- Baseline: outdegree is required unless split into endowment + creation (reciprocity is optional) --")
+  CHECKBOX cx_outdegree 10 175 260 ., label("outdegree (density)") tooltip("RSiena: density")
+  CHECKBOX cx_reciprocity 275 175 260 ., label("reciprocity (recip)") tooltip("RSiena: recip")
+  CHECKBOX cx_outdegreeendow 540 175 260 ., label("outdegreeendow")
+  CHECKBOX cx_outdegreecreation 805 175 260 ., label("outdegreecreation")
+  CHECKBOX cx_reciprocityendow 10 196 260 ., label("reciprocityendow")
+  CHECKBOX cx_reciprocitycreation 275 196 260 ., label("reciprocitycreation")
+  CHECKBOX cx_transtiesendow 540 196 260 ., label("transtiesendow")
+  CHECKBOX cx_transtiescreation 805 196 260 ., label("transtiescreation")
+  TEXT tx_endow 10 217 430 ., label("endow() - effects split into endowment")
+  COMBOBOX cb_endow 450 217 610 ., dropdown contents(endow_list) append nomem tooltip("Name the same effect in endow() and creation(); covariate effects as altx:var")
+  TEXT tx_creation 10 238 430 ., label("creation() - the same effects, creation role")
+  COMBOBOX cb_creation 450 238 610 ., dropdown contents(endow_list) append nomem
+  TEXT tx_h26_1 10 265 1040 ., label("-- Undirected networks --")
+  CHECKBOX cx_symmetric 10 286 260 ., label("symmetric (non-directed network)")
+  TEXT tx_symtype 10 307 430 ., label("symtype() - model type for undirected ties")
+  COMBOBOX cb_symtype 450 307 610 ., dropdown contents(symtype_list) nomem tooltip("for: symmetric")
+  TEXT tx_h30_1 10 334 1040 ., label("-- Degree-based effects (flags) --")
+  CHECKBOX cx_indegpopularity 10 355 260 ., label("indegpopularity (inPopSqrt)") tooltip("RSiena: inPopSqrt")
+  CHECKBOX cx_outpopularity 275 355 260 ., label("outpopularity (outPopSqrt)") tooltip("RSiena: outPopSqrt")
+  CHECKBOX cx_outactivity 540 355 260 ., label("outactivity (outAct)") tooltip("RSiena: outAct")
+  CHECKBOX cx_inactivity 805 355 260 ., label("inactivity (inActSqrt)") tooltip("RSiena: inActSqrt")
+  CHECKBOX cx_inpop 10 376 260 ., label("inpop") tooltip("RSiena: inPop")
+  CHECKBOX cx_outpop 275 376 260 ., label("outpop") tooltip("RSiena: outPop")
+  CHECKBOX cx_inact 540 376 260 ., label("inact") tooltip("RSiena: inAct")
+  CHECKBOX cx_outactsqrt 805 376 260 ., label("outactsqrt") tooltip("RSiena: outActSqrt")
+  CHECKBOX cx_inpopc 10 397 260 ., label("inpopc (inPop.c)") tooltip("RSiena: inPop.c. native plugin only")
+  CHECKBOX cx_outpopc 275 397 260 ., label("outpopc (outPop.c)") tooltip("RSiena: outPop.c. native plugin only")
+  CHECKBOX cx_outactc 540 397 260 ., label("outactc (outAct.c)") tooltip("RSiena: outAct.c. native plugin only")
+  CHECKBOX cx_inactc 805 397 260 ., label("inactc (inAct.c)") tooltip("RSiena: inAct.c. native plugin only")
+  CHECKBOX cx_degplus 10 418 260 ., label("degplus") tooltip("RSiena: degPlus. native plugin only")
+  CHECKBOX cx_degplusc 275 418 260 ., label("degplusc (degPlus.c)") tooltip("RSiena: degPlus.c. native plugin only")
+  CHECKBOX cx_recipop 540 418 260 ., label("recipop") tooltip("RSiena: reciPop")
+  CHECKBOX cx_recipopsqrt 805 418 260 ., label("recipopsqrt") tooltip("RSiena: reciPopSqrt")
+  CHECKBOX cx_reciact 10 439 260 ., label("reciact")
+  CHECKBOX cx_reciactsqrt 275 439 260 ., label("reciactsqrt")
+  CHECKBOX cx_between 540 439 260 ., label("between") tooltip("RSiena: between")
+  TEXT tx_h50_1 10 466 1040 ., label("-- Degree effects with a parameter (number or numlist) --")
+  TEXT tx_outtrunc 10 487 185 ., label("outtrunc()")
+  EDIT ed_outtrunc 200 487 150 ., nomem tooltip("RSiena: outTrunc")
+  TEXT tx_outmore 363 487 185 ., label("outmore()")
+  EDIT ed_outmore 553 487 150 ., nomem tooltip("RSiena: outMore")
+  TEXT tx_outthreshold 716 487 185 ., label("outthreshold()")
+  EDIT ed_outthreshold 906 487 150 ., nomem tooltip("RSiena: outThreshold")
 END
 
-DIALOG waves, tabtitle("Waves & baseline")
+DIALOG structure, tabtitle("Structure")
 BEGIN
-  TEXT tx_wave1 20 10 120 ., label("wave1()")
-  COMBOBOX cb_wave1 145 10 160 ., dropdown contents(netlist) nomem
-  TEXT tx_wave2 490 10 120 ., label("wave2()")
-  COMBOBOX cb_wave2 615 10 160 ., dropdown contents(netlist) nomem
-  TEXT tx_waves 20 38 300 ., label("OR waves() - 3+ networks, space-separated:")
-  EDIT ed_waves 330 38 445 ., nomem
-  TEXT tx_baseline 20 68 500 ., label("Baseline (outdegree required unless split into endow+creation):")
-  CHECKBOX cx_outdegree 30 90 130 ., label("outdegree") option(outdegree)
-  CHECKBOX cx_outdegreeendow 165 90 150 ., label("outdegreeendow") option(outdegreeendow)
-  CHECKBOX cx_outdegreecreation 320 90 160 ., label("outdegreecreation") option(outdegreecreation)
-  CHECKBOX cx_reciprocity 30 116 130 ., label("reciprocity") option(reciprocity)
-  CHECKBOX cx_reciprocityendow 165 116 150 ., label("reciprocityendow") option(reciprocityendow)
-  CHECKBOX cx_reciprocitycreation 320 116 160 ., label("reciprocitycreation") option(reciprocitycreation)
-  TEXT tx_hdr_l_150 20 150 400 ., label("-- Node covariates (RSiena aliases: egox/altx/samex/simx) --")
-  TEXT tx_nodematch 20 172 90 ., label("nodematch")
-  VARLIST vr_nodematch 195 172 155 ., nomem
-  TEXT tx_nodecov 20 198 90 ., label("nodecov")
-  VARLIST vr_nodecov 195 198 155 ., nomem
-  TEXT tx_nodeicov 20 224 90 ., label("nodeicov")
-  VARLIST vr_nodeicov 195 224 155 ., nomem
-  TEXT tx_nodeocov 20 250 90 ., label("nodeocov")
-  VARLIST vr_nodeocov 195 250 155 ., nomem
-  TEXT tx_simcov 20 276 90 ., label("simcov")
-  VARLIST vr_simcov 195 276 155 ., nomem
-  TEXT tx_hdr_r_150 490 150 400 ., label("-- Rate function --")
-  TEXT tx_ratecov 490 172 90 ., label("ratecov")
-  VARLIST vr_ratecov 665 172 155 ., nomem
-  TEXT tx_ratecovcoef 490 198 90 ., label("ratecovcoef")
-  EDIT ed_ratecovcoef 665 198 155 ., nomem
-  TEXT tx_hdr_r_230 490 230 400 ., label("-- Undirected networks --")
-  CHECKBOX cx_symmetric 500 252 150 ., label("symmetric") option(symmetric) onclickon(script symmetricOn) onclickoff(script symmetricOff)
-  TEXT tx_symtype 660 252 70 ., label("symtype()")
-  COMBOBOX cb_symtype 735 252 130 ., dropdownlist contents(list_symtype) nomem option(symtype)
+  TEXT tx_outinv 10 10 185 ., label("outinv()")
+  EDIT ed_outinv 200 10 150 ., nomem tooltip("RSiena: outInv")
+  TEXT tx_outsqinv 363 10 185 ., label("outsqinv()")
+  EDIT ed_outsqinv 553 10 150 ., nomem tooltip("RSiena: outSqInv")
+  TEXT tx_avdeg 716 10 185 ., label("avdeg()")
+  EDIT ed_avdeg 906 10 150 ., nomem tooltip("RSiena: avDeg. native plugin only")
+  TEXT tx_h6_2 10 37 1040 ., label("-- Triadic closure, cycles, balance (flags) --")
+  CHECKBOX cx_transtrip 10 58 260 ., label("transtrip") tooltip("RSiena: transTrip")
+  CHECKBOX cx_transmedtrip 275 58 260 ., label("transmedtrip") tooltip("RSiena: transMedTrip")
+  CHECKBOX cx_transrectrip 540 58 260 ., label("transrectrip") tooltip("RSiena: transRecTrip")
+  CHECKBOX cx_cycle3 805 58 260 ., label("cycle3") tooltip("RSiena: cycle3")
+  CHECKBOX cx_cycle4 10 79 260 ., label("cycle4") tooltip("RSiena: cycle4")
+  CHECKBOX cx_sqrtcycle4 275 79 260 ., label("sqrtcycle4")
+  CHECKBOX cx_dblnbrdist2 540 79 260 ., label("dblnbrdist2 (nbrDist2twice)") tooltip("RSiena: nbrDist2twice")
+  CHECKBOX cx_nbrdist2 805 79 260 ., label("nbrdist2") tooltip("RSiena: nbrDist2")
+  CHECKBOX cx_transties 10 100 260 ., label("transties") tooltip("RSiena: transTies")
+  CHECKBOX cx_balance 275 100 260 ., label("balance") tooltip("RSiena: balance")
+  CHECKBOX cx_transtriads 540 100 260 ., label("transtriads") tooltip("RSiena: transTriads. native plugin only")
+  TEXT tx_h18_2 10 127 1040 ., label("-- Geometrically weighted effects: give the decay parameter --")
+  TEXT tx_gwesp 10 148 185 ., label("gwesp()")
+  EDIT ed_gwesp 200 148 150 ., nomem tooltip("RSiena: gwesp")
+  TEXT tx_gwespfb 363 148 185 ., label("gwespfb()")
+  EDIT ed_gwespfb 553 148 150 ., nomem tooltip("RSiena: gwespFB")
+  TEXT tx_gwespbf 716 148 185 ., label("gwespbf()")
+  EDIT ed_gwespbf 906 148 150 ., nomem tooltip("RSiena: gwespBF")
+  TEXT tx_gwespbb 10 169 185 ., label("gwespbb()")
+  EDIT ed_gwespbb 200 169 150 ., nomem tooltip("RSiena: gwespBB")
+  TEXT tx_gwesprr 363 169 185 ., label("gwesprr()")
+  EDIT ed_gwesprr 553 169 150 ., nomem tooltip("RSiena: gwespRR")
+  TEXT tx_gwdspff 716 169 185 ., label("gwdspff()")
+  EDIT ed_gwdspff 906 169 150 ., nomem tooltip("RSiena: gwdspFF")
+  TEXT tx_gwdspfb 10 190 185 ., label("gwdspfb()")
+  EDIT ed_gwdspfb 200 190 150 ., nomem tooltip("RSiena: gwdspFB")
+  TEXT tx_h33_2 10 217 1040 ., label("-- Isolates and assortativity --")
+  CHECKBOX cx_isolatenet 10 238 260 ., label("isolatenet") tooltip("RSiena: isolateNet")
+  CHECKBOX cx_outiso 275 238 260 ., label("outiso") tooltip("RSiena: outIso")
+  CHECKBOX cx_antiiso 540 238 260 ., label("antiiso") tooltip("RSiena: antiIso")
+  CHECKBOX cx_antiiniso 805 238 260 ., label("antiiniso") tooltip("RSiena: antiInIso")
+  CHECKBOX cx_antiiniso2 10 259 260 ., label("antiiniso2") tooltip("RSiena: antiInIso2")
+  CHECKBOX cx_inplus3 275 259 260 ., label("inplus3 (in3Plus)") tooltip("RSiena: in3Plus")
+  CHECKBOX cx_isolatepop 540 259 260 ., label("isolatepop") tooltip("RSiena: isolatePop")
+  CHECKBOX cx_outoutass 805 259 260 ., label("outoutass")
+  CHECKBOX cx_ininass 10 280 260 ., label("ininass")
+  CHECKBOX cx_outinass 275 280 260 ., label("outinass")
+  CHECKBOX cx_inoutass 540 280 260 ., label("inoutass")
+  TEXT tx_h45_2 10 307 1040 ., label("-- Node covariate effects: one effect per variable (Statnet name = RSiena alias) --")
+  TEXT tx_nodematch 10 328 185 ., label("nodematch() (sameX)")
+  VARLIST vl_nodematch 200 328 150 ., nomem tooltip("RSiena: sameX")
+  TEXT tx_samex 363 328 185 ., label("samex()")
+  VARLIST vl_samex 553 328 150 ., nomem tooltip("RSiena: sameX")
+  TEXT tx_nodecov 716 328 185 ., label("nodecov() (altX+egoX)")
+  VARLIST vl_nodecov 906 328 150 ., nomem tooltip("RSiena: altX+egoX")
+  TEXT tx_nodeicov 10 349 185 ., label("nodeicov() (altX)")
+  VARLIST vl_nodeicov 200 349 150 ., nomem tooltip("RSiena: altX")
+  TEXT tx_altx 363 349 185 ., label("altx()")
+  VARLIST vl_altx 553 349 150 ., nomem tooltip("RSiena: altX")
+  TEXT tx_nodeocov 716 349 185 ., label("nodeocov() (egoX)")
+  VARLIST vl_nodeocov 906 349 150 ., nomem tooltip("RSiena: egoX")
+  TEXT tx_egox 10 370 185 ., label("egox()")
+  VARLIST vl_egox 200 370 150 ., nomem tooltip("RSiena: egoX")
+  TEXT tx_simcov 363 370 185 ., label("simcov() (simX)")
+  VARLIST vl_simcov 553 370 150 ., nomem tooltip("RSiena: simX")
+  TEXT tx_simx 716 370 185 ., label("simx()")
+  VARLIST vl_simx 906 370 150 ., nomem tooltip("RSiena: simX")
+  TEXT tx_absdiffx 10 391 185 ., label("absdiffx()")
+  VARLIST vl_absdiffx 200 391 150 ., nomem tooltip("RSiena: absDiffX")
+  TEXT tx_egoxaltx 363 391 185 ., label("egoxaltx()")
+  VARLIST vl_egoxaltx 553 391 150 ., nomem tooltip("RSiena: egoXaltX")
+  TEXT tx_diffx 716 391 185 ., label("diffx()")
+  VARLIST vl_diffx 906 391 150 ., nomem tooltip("RSiena: diffX")
+  TEXT tx_higher 10 412 185 ., label("higher()")
+  VARLIST vl_higher 200 412 150 ., nomem tooltip("RSiena: higher")
+  TEXT tx_egosqx 363 412 185 ., label("egosqx()")
+  VARLIST vl_egosqx 553 412 150 ., nomem tooltip("RSiena: egoSqX")
+  TEXT tx_altsqx 716 412 185 ., label("altsqx()")
+  VARLIST vl_altsqx 906 412 150 ., nomem tooltip("RSiena: altSqX")
+  TEXT tx_samexrecip 10 433 185 ., label("samexrecip()")
+  VARLIST vl_samexrecip 200 433 150 ., nomem tooltip("RSiena: sameXRecip")
+  TEXT tx_simrecipx 363 433 185 ., label("simrecipx()")
+  VARLIST vl_simrecipx 553 433 150 ., nomem tooltip("RSiena: simRecipX")
+  CHECKBOX cx_nocenter 10 454 260 ., label("nocenter - raw covariate values")
+  TEXT tx_h81_2 10 481 1040 ., label("-- Contrast and threshold covariate effects --")
 END
 
-DIALOG structural, tabtitle("Structural effects")
+DIALOG covariates, tabtitle("Covariates")
 BEGIN
-  TEXT tx_hdr_l_10 20 10 400 ., label("-- Degree-based --")
-  CHECKBOX cx_indegpopularity 20 34 400 ., label("indegpopularity") option(indegpopularity)
-  CHECKBOX cx_outactivity 20 60 400 ., label("outactivity") option(outactivity)
-  CHECKBOX cx_outpopularity 20 86 400 ., label("outpopularity") option(outpopularity)
-  CHECKBOX cx_inactivity 20 112 400 ., label("inactivity") option(inactivity)
-  TEXT tx_hdr_l_140 20 140 400 ., label("-- Triadic closure --")
-  CHECKBOX cx_transtrip 20 164 400 ., label("transtrip") option(transtrip)
-  CHECKBOX cx_transmedtrip 20 190 400 ., label("transmedtrip") option(transmedtrip)
-  CHECKBOX cx_transties 20 216 400 ., label("transties") option(transties)
-  CHECKBOX cx_transrectrip 20 242 400 ., label("transrectrip") option(transrectrip)
-  CHECKBOX cx_cycle3 20 268 400 ., label("cycle3") option(cycle3)
-  CHECKBOX cx_cycle4 20 294 400 ., label("cycle4") option(cycle4)
-  CHECKBOX cx_gwesp 20 320 170 ., label("gwesp")
-  EDIT ed_gwesp 195 320 155 ., default("0.5") numonly nomem
-  TEXT tx_hdr_r_10 490 10 400 ., label("-- Isolates and balance --")
-  CHECKBOX cx_isolatenet 490 34 400 ., label("isolatenet") option(isolatenet)
-  CHECKBOX cx_outiso 490 60 400 ., label("outiso") option(outiso)
-  CHECKBOX cx_antiiso 490 86 400 ., label("antiiso") option(antiiso)
-  CHECKBOX cx_antiiniso 490 112 400 ., label("antiiniso") option(antiiniso)
-  CHECKBOX cx_antiiniso2 490 138 400 ., label("antiiniso2") option(antiiniso2)
-  CHECKBOX cx_inplus3 490 164 400 ., label("inplus3 - RSiena's in3Plus (indegree>=3)") option(inplus3)
-  CHECKBOX cx_isolatepop 490 190 400 ., label("isolatepop") option(isolatepop)
-  CHECKBOX cx_balance 490 216 400 ., label("balance") option(balance)
-  TEXT tx_hdr_r_244 490 244 400 ., label("-- Degree assortativity --")
-  CHECKBOX cx_outoutass 490 268 400 ., label("outoutass") option(outoutass)
-  CHECKBOX cx_ininass 490 294 400 ., label("ininass") option(ininass)
-  CHECKBOX cx_outinass 490 320 400 ., label("outinass") option(outinass)
-  CHECKBOX cx_inoutass 490 346 400 ., label("inoutass") option(inoutass)
+  TEXT tx_egoplusaltsqx 10 10 185 ., label("egoplusaltsqx()")
+  VARLIST vl_egoplusaltsqx 200 10 150 ., nomem tooltip("RSiena: egoPlusAltSqX. native plugin only")
+  TEXT tx_diffsqx 363 10 185 ., label("diffsqx()")
+  VARLIST vl_diffsqx 553 10 150 ., nomem tooltip("RSiena: diffSqX. native plugin only")
+  TEXT tx_egodiffx 716 10 185 ., label("egodiffx()")
+  VARLIST vl_egodiffx 906 10 150 ., nomem tooltip("RSiena: egoDiffX. native plugin only")
+  TEXT tx_althigheregox 10 31 185 ., label("althigheregox()")
+  VARLIST vl_althigheregox 200 31 150 ., nomem tooltip("RSiena: altHigherEgoX. native plugin only")
+  TEXT tx_unequalx 363 31 185 ., label("unequalx()")
+  VARLIST vl_unequalx 553 31 150 ., nomem tooltip("RSiena: unequalX. native plugin only")
+  TEXT tx_egolthresholdx 716 31 185 ., label("egolthresholdx()")
+  VARLIST vl_egolthresholdx 906 31 150 ., nomem tooltip("RSiena: egoLThresholdX. native plugin only")
+  TEXT tx_egorthresholdx 10 52 185 ., label("egorthresholdx()")
+  VARLIST vl_egorthresholdx 200 52 150 ., nomem tooltip("RSiena: egoRThresholdX. native plugin only")
+  TEXT tx_altlthresholdx 363 52 185 ., label("altlthresholdx()")
+  VARLIST vl_altlthresholdx 553 52 150 ., nomem tooltip("RSiena: altLThresholdX. native plugin only")
+  TEXT tx_altrthresholdx 716 52 185 ., label("altrthresholdx()")
+  VARLIST vl_altrthresholdx 906 52 150 ., nomem tooltip("RSiena: altRThresholdX. native plugin only")
+  TEXT tx_degabsdiffx 10 73 185 ., label("degabsdiffx()")
+  VARLIST vl_degabsdiffx 200 73 150 ., nomem tooltip("RSiena: degAbsDiffX. native plugin only")
+  TEXT tx_degposdiffx 363 73 185 ., label("degposdiffx()")
+  VARLIST vl_degposdiffx 553 73 150 ., nomem tooltip("RSiena: degPosDiffX. native plugin only")
+  TEXT tx_degnegdiffx 716 73 185 ., label("degnegdiffx()")
+  VARLIST vl_degnegdiffx 906 73 150 ., nomem tooltip("RSiena: degNegDiffX. native plugin only")
+  TEXT tx_covthreshold 10 94 430 ., label("covthreshold() - threshold of the 4 threshold effects (default 0)")
+  EDIT ed_covthreshold 450 94 610 ., nomem tooltip("native plugin only")
+  TEXT tx_xparam 10 115 430 ., label("xparam() - parameter of netx() effects (default 1)")
+  EDIT ed_xparam 450 115 610 ., nomem tooltip("native plugin only")
+  TEXT tx_h28_3 10 142 1040 ., label("-- Covariate x triad / popularity / activity effects (directed one-mode networks) --")
+  TEXT tx_samextranstrip 10 163 185 ., label("samextranstrip()")
+  VARLIST vl_samextranstrip 200 163 150 ., nomem tooltip("RSiena: sameXTransTrip. native plugin only")
+  TEXT tx_diffxtranstrip 363 163 185 ., label("diffxtranstrip()")
+  VARLIST vl_diffxtranstrip 553 163 150 ., nomem tooltip("RSiena: diffXTransTrip. native plugin only")
+  TEXT tx_simxtranstrip 716 163 185 ., label("simxtranstrip()")
+  VARLIST vl_simxtranstrip 906 163 150 ., nomem tooltip("RSiena: simXTransTrip. native plugin only")
+  TEXT tx_homxtranstrip 10 184 185 ., label("homxtranstrip()")
+  VARLIST vl_homxtranstrip 200 184 150 ., nomem tooltip("RSiena: homXTransTrip. native plugin only")
+  TEXT tx_samexoutact 363 184 185 ., label("samexoutact()")
+  VARLIST vl_samexoutact 553 184 150 ., nomem tooltip("RSiena: sameXOutAct. native plugin only")
+  TEXT tx_diffxoutact 716 184 185 ., label("diffxoutact()")
+  VARLIST vl_diffxoutact 906 184 150 ., nomem tooltip("RSiena: diffXOutAct. native plugin only")
+  TEXT tx_samexreciact 10 205 185 ., label("samexreciact()")
+  VARLIST vl_samexreciact 200 205 150 ., nomem tooltip("RSiena: sameXReciAct. native plugin only")
+  TEXT tx_diffxreciact 363 205 185 ., label("diffxreciact()")
+  VARLIST vl_diffxreciact 553 205 150 ., nomem tooltip("RSiena: diffXReciAct. native plugin only")
+  TEXT tx_homxoutact 716 205 185 ., label("homxoutact()")
+  VARLIST vl_homxoutact 906 205 150 ., nomem tooltip("RSiena: homXOutAct. native plugin only")
+  TEXT tx_altxoutact 10 226 185 ., label("altxoutact()")
+  VARLIST vl_altxoutact 200 226 150 ., nomem tooltip("RSiena: altXOutAct. native plugin only")
+  TEXT tx_inpopx 363 226 185 ., label("inpopx()")
+  VARLIST vl_inpopx 553 226 150 ., nomem tooltip("RSiena: inPopX. native plugin only")
+  TEXT tx_outpopx 716 226 185 ., label("outpopx()")
+  VARLIST vl_outpopx 906 226 150 ., nomem tooltip("RSiena: outPopX. native plugin only")
+  TEXT tx_inactx 10 247 185 ., label("inactx()")
+  VARLIST vl_inactx 200 247 150 ., nomem tooltip("RSiena: inActX. native plugin only")
+  TEXT tx_outactx 363 247 185 ., label("outactx()")
+  VARLIST vl_outactx 553 247 150 ., nomem tooltip("RSiena: outActX. native plugin only")
+  TEXT tx_samexinpop 716 247 185 ., label("samexinpop()")
+  VARLIST vl_samexinpop 906 247 150 ., nomem tooltip("RSiena: sameXInPop. native plugin only")
+  TEXT tx_diffxinpop 10 268 185 ., label("diffxinpop()")
+  VARLIST vl_diffxinpop 200 268 150 ., nomem tooltip("RSiena: diffXInPop. native plugin only")
+  TEXT tx_h61_3 10 295 1040 ., label("-- Dyadic covariates: names of Stata n x n matrices (tv...: the stem of matrices stem1 stem2 ...) --")
+  TEXT tx_dyadcov 10 316 185 ., label("dyadcov() (X)")
+  EDIT ed_dyadcov 200 316 150 ., nomem tooltip("RSiena: X")
+  TEXT tx_dyadcovrecip 363 316 185 ., label("dyadcovrecip() (XRecip)")
+  EDIT ed_dyadcovrecip 553 316 150 ., nomem tooltip("RSiena: XRecip")
+  TEXT tx_tvdyadcov 716 316 185 ., label("tvdyadcov() (X (changing))")
+  EDIT ed_tvdyadcov 906 316 150 ., nomem tooltip("RSiena: X (changing)")
+  TEXT tx_tvdyadcovrecip 10 337 430 ., label("tvdyadcovrecip() (XRecip (changing))")
+  EDIT ed_tvdyadcovrecip 450 337 610 ., nomem tooltip("RSiena: XRecip (changing)")
+  TEXT tx_dyadx_t 10 358 1050 ., label("-- dyadx() - effects of a constant dyadic covariate: effect:matrix -- box next to the effect: matrix name")
+  COMBOBOX cb_dyadx_1 10 379 215 ., dropdown contents(lst_dyadx) values(lst_dyadx_v) nomem
+  EDIT ed_dyadx_1a 230 379 115 ., nomem
+  COMBOBOX cb_dyadx_2 363 379 215 ., dropdown contents(lst_dyadx) values(lst_dyadx_v) nomem
+  EDIT ed_dyadx_2a 583 379 115 ., nomem
+  COMBOBOX cb_dyadx_3 716 379 215 ., dropdown contents(lst_dyadx) values(lst_dyadx_v) nomem
+  EDIT ed_dyadx_3a 936 379 115 ., nomem
+  COMBOBOX cb_dyadx_4 10 400 215 ., dropdown contents(lst_dyadx) values(lst_dyadx_v) nomem
+  EDIT ed_dyadx_4a 230 400 115 ., nomem
+  COMBOBOX cb_dyadx_5 363 400 215 ., dropdown contents(lst_dyadx) values(lst_dyadx_v) nomem
+  EDIT ed_dyadx_5a 583 400 115 ., nomem
+  COMBOBOX cb_dyadx_6 716 400 215 ., dropdown contents(lst_dyadx) values(lst_dyadx_v) nomem
+  EDIT ed_dyadx_6a 936 400 115 ., nomem
+  TEXT tx_dyadx_more 10 421 215 ., label("more tokens (typed)")
+  EDIT ed_dyadx_more 230 421 830 ., nomem
+END
+
+DIALOG dyadic, tabtitle("Dyadic")
+BEGIN
+  TEXT tx_tvdyadx_t 10 10 1050 ., label("-- tvdyadx() - changing dyadic covariate: effect:stem (matrices stem1 stem2 ...) -- box next to the effect: stem of matrices stem1 stem2 ...")
+  COMBOBOX cb_tvdyadx_1 10 31 215 ., dropdown contents(lst_tvdyadx) values(lst_tvdyadx_v) nomem
+  EDIT ed_tvdyadx_1a 230 31 115 ., nomem
+  COMBOBOX cb_tvdyadx_2 363 31 215 ., dropdown contents(lst_tvdyadx) values(lst_tvdyadx_v) nomem
+  EDIT ed_tvdyadx_2a 583 31 115 ., nomem
+  COMBOBOX cb_tvdyadx_3 716 31 215 ., dropdown contents(lst_tvdyadx) values(lst_tvdyadx_v) nomem
+  EDIT ed_tvdyadx_3a 936 31 115 ., nomem
+  COMBOBOX cb_tvdyadx_4 10 52 215 ., dropdown contents(lst_tvdyadx) values(lst_tvdyadx_v) nomem
+  EDIT ed_tvdyadx_4a 230 52 115 ., nomem
+  TEXT tx_tvdyadx_more 10 73 215 ., label("more tokens (typed)")
+  EDIT ed_tvdyadx_more 230 73 830 ., nomem
+  TEXT tx_netx_t 10 100 1050 ., label("-- netx() - network effects of a covariate: effect:variable -- box next to the effect: variable or tvcov stem")
+  COMBOBOX cb_netx_1 10 121 215 ., dropdown contents(lst_netx) values(lst_netx_v) nomem
+  EDIT ed_netx_1a 230 121 115 ., nomem
+  COMBOBOX cb_netx_2 363 121 215 ., dropdown contents(lst_netx) values(lst_netx_v) nomem
+  EDIT ed_netx_2a 583 121 115 ., nomem
+  COMBOBOX cb_netx_3 716 121 215 ., dropdown contents(lst_netx) values(lst_netx_v) nomem
+  EDIT ed_netx_3a 936 121 115 ., nomem
+  COMBOBOX cb_netx_4 10 142 215 ., dropdown contents(lst_netx) values(lst_netx_v) nomem
+  EDIT ed_netx_4a 230 142 115 ., nomem
+  COMBOBOX cb_netx_5 363 142 215 ., dropdown contents(lst_netx) values(lst_netx_v) nomem
+  EDIT ed_netx_5a 583 142 115 ., nomem
+  COMBOBOX cb_netx_6 716 142 215 ., dropdown contents(lst_netx) values(lst_netx_v) nomem
+  EDIT ed_netx_6a 936 142 115 ., nomem
+  TEXT tx_netx_more 10 163 215 ., label("more tokens (typed)")
+  EDIT ed_netx_more 230 163 830 ., nomem
+  TEXT tx_ownx_t 10 190 1050 ., label("-- ownx() - own-network effects (RSiena effects without covariate) -- box next to the effect: parameter # (some need one)")
+  COMBOBOX cb_ownx_1 10 211 215 ., dropdown contents(lst_ownx) values(lst_ownx_v) nomem
+  EDIT ed_ownx_1a 230 211 115 ., nomem
+  COMBOBOX cb_ownx_2 363 211 215 ., dropdown contents(lst_ownx) values(lst_ownx_v) nomem
+  EDIT ed_ownx_2a 583 211 115 ., nomem
+  COMBOBOX cb_ownx_3 716 211 215 ., dropdown contents(lst_ownx) values(lst_ownx_v) nomem
+  EDIT ed_ownx_3a 936 211 115 ., nomem
+  COMBOBOX cb_ownx_4 10 232 215 ., dropdown contents(lst_ownx) values(lst_ownx_v) nomem
+  EDIT ed_ownx_4a 230 232 115 ., nomem
+  COMBOBOX cb_ownx_5 363 232 215 ., dropdown contents(lst_ownx) values(lst_ownx_v) nomem
+  EDIT ed_ownx_5a 583 232 115 ., nomem
+  COMBOBOX cb_ownx_6 716 232 215 ., dropdown contents(lst_ownx) values(lst_ownx_v) nomem
+  EDIT ed_ownx_6a 936 232 115 ., nomem
+  TEXT tx_ownx_more 10 253 215 ., label("more tokens (typed)")
+  EDIT ed_ownx_more 230 253 830 ., nomem
+  TEXT tx_netbeh_t 10 280 1050 ., label("-- netbeh() - network effects with the dependent behavior as covariate -- box next to the effect is not used")
+  COMBOBOX cb_netbeh_1 10 301 215 ., dropdown contents(lst_netbeh) values(lst_netbeh_v) nomem
+  EDIT ed_netbeh_1a 230 301 115 ., nomem
+  COMBOBOX cb_netbeh_2 363 301 215 ., dropdown contents(lst_netbeh) values(lst_netbeh_v) nomem
+  EDIT ed_netbeh_2a 583 301 115 ., nomem
+  COMBOBOX cb_netbeh_3 716 301 215 ., dropdown contents(lst_netbeh) values(lst_netbeh_v) nomem
+  EDIT ed_netbeh_3a 936 301 115 ., nomem
+  COMBOBOX cb_netbeh_4 10 322 215 ., dropdown contents(lst_netbeh) values(lst_netbeh_v) nomem
+  EDIT ed_netbeh_4a 230 322 115 ., nomem
+  COMBOBOX cb_netbeh_5 363 322 215 ., dropdown contents(lst_netbeh) values(lst_netbeh_v) nomem
+  EDIT ed_netbeh_5a 583 322 115 ., nomem
+  COMBOBOX cb_netbeh_6 716 322 215 ., dropdown contents(lst_netbeh) values(lst_netbeh_v) nomem
+  EDIT ed_netbeh_6a 936 322 115 ., nomem
+  TEXT tx_netbeh_more 10 343 215 ., label("more tokens (typed)")
+  EDIT ed_netbeh_more 230 343 830 ., nomem
+  TEXT tx_h56_4 10 376 1040 ., label("-- Interaction effects: products of two effects already in the model (coefficient names, e.g. nodematch_smoke1) --")
+END
+
+DIALOG rates, tabtitle("Rates")
+BEGIN
+  TEXT tx_interact_t 10 10 1050 ., label("-- interact(): pick two effects of the model per line (product of the two) --")
+  COMBOBOX cb_interact_1a 10 31 200 ., dropdown contents(interact_list) nomem
+  TEXT tx_interact_1h 215 31 12 ., label("#")
+  COMBOBOX cb_interact_1b 230 31 200 ., dropdown contents(interact_list) nomem
+  COMBOBOX cb_interact_2a 540 31 200 ., dropdown contents(interact_list) nomem
+  TEXT tx_interact_2h 745 31 12 ., label("#")
+  COMBOBOX cb_interact_2b 760 31 200 ., dropdown contents(interact_list) nomem
+  COMBOBOX cb_interact_3a 10 52 200 ., dropdown contents(interact_list) nomem
+  TEXT tx_interact_3h 215 52 12 ., label("#")
+  COMBOBOX cb_interact_3b 230 52 200 ., dropdown contents(interact_list) nomem
+  COMBOBOX cb_interact_4a 540 52 200 ., dropdown contents(interact_list) nomem
+  TEXT tx_interact_4h 745 52 12 ., label("#")
+  COMBOBOX cb_interact_4b 760 52 200 ., dropdown contents(interact_list) nomem
+  COMBOBOX cb_interact_5a 10 73 200 ., dropdown contents(interact_list) nomem
+  TEXT tx_interact_5h 215 73 12 ., label("#")
+  COMBOBOX cb_interact_5b 230 73 200 ., dropdown contents(interact_list) nomem
+  COMBOBOX cb_interact_6a 540 73 200 ., dropdown contents(interact_list) nomem
+  TEXT tx_interact_6h 745 73 12 ., label("#")
+  COMBOBOX cb_interact_6b 760 73 200 ., dropdown contents(interact_list) nomem
+  TEXT tx_interact 10 94 430 ., label("interact() - more interactions, typed: a#b c#d#e")
+  EDIT ed_interact 450 94 610 ., nomem
+  TEXT tx_h21_5 10 121 1040 ., label("-- Structural rate effects (the actor rate depends on the actor degree in the current network) --")
+  CHECKBOX cx_outrate 10 142 260 ., label("outrate") tooltip("RSiena: outRate. native plugin only")
+  CHECKBOX cx_inrate 275 142 260 ., label("inrate") tooltip("RSiena: inRate. native plugin only")
+  CHECKBOX cx_reciprate 540 142 260 ., label("reciprate") tooltip("RSiena: recipRate. native plugin only")
+  CHECKBOX cx_outrateinv 805 142 260 ., label("outrateinv") tooltip("RSiena: outRateInv. native plugin only")
+  CHECKBOX cx_inrateinv 10 163 260 ., label("inrateinv") tooltip("RSiena: inRateInv. native plugin only")
+  CHECKBOX cx_reciprateinv 275 163 260 ., label("reciprateinv") tooltip("RSiena: recipRateInv. native plugin only")
+  CHECKBOX cx_outratelog 540 163 260 ., label("outratelog") tooltip("RSiena: outRateLog. native plugin only")
+  CHECKBOX cx_inratelog 805 163 260 ., label("inratelog") tooltip("RSiena: inRateLog. native plugin only")
+  CHECKBOX cx_recipratelog 10 184 260 ., label("recipratelog") tooltip("RSiena: recipRateLog. native plugin only")
+  TEXT tx_h31_5 10 211 1040 ., label("-- Covariates of the rate --")
+  TEXT tx_ratecov 10 232 185 ., label("ratecov() (RateX)")
+  VARLIST vl_ratecov 200 232 150 ., nomem tooltip("RSiena: RateX")
+  TEXT tx_ratecovcoef 363 232 185 ., label("ratecovcoef() - start values")
+  EDIT ed_ratecovcoef 553 232 150 ., nomem
+  TEXT tx_behratecov 10 253 430 ., label("behratecov() - covariates of the behavior rate")
+  VARLIST vl_behratecov 450 253 610 ., nomem
+  TEXT tx_behratecoef 10 274 430 ., label("behratecoef() - start values (behavior rate)")
+  EDIT ed_behratecoef 450 274 610 ., nomem
+  TEXT tx_behrate_t 10 295 1050 ., label("-- behrate() - network-dependent rate effects of the behavior -- box: argument of the *covar effects only")
+  COMBOBOX cb_behrate_1 10 316 215 ., dropdown contents(lst_behrate) values(lst_behrate_v) nomem
+  EDIT ed_behrate_1a 230 316 115 ., nomem
+  COMBOBOX cb_behrate_2 363 316 215 ., dropdown contents(lst_behrate) values(lst_behrate_v) nomem
+  EDIT ed_behrate_2a 583 316 115 ., nomem
+  COMBOBOX cb_behrate_3 716 316 215 ., dropdown contents(lst_behrate) values(lst_behrate_v) nomem
+  EDIT ed_behrate_3a 936 316 115 ., nomem
+  COMBOBOX cb_behrate_4 10 337 215 ., dropdown contents(lst_behrate) values(lst_behrate_v) nomem
+  EDIT ed_behrate_4a 230 337 115 ., nomem
+  TEXT tx_behrate_more 10 358 215 ., label("more tokens (typed)")
+  EDIT ed_behrate_more 230 358 830 ., nomem
+  TEXT tx_h51_5 10 391 1040 ., label("-- Composition change: joiners and leavers --")
+  TEXT tx_present 10 412 430 ., label("present() - 0/1 variable per wave")
+  VARLIST vl_present 450 412 610 ., nomem
+  TEXT tx_joinat 10 433 185 ., label("joinat() - time of joining")
+  VARLIST vl_joinat 200 433 150 ., nomem
+  TEXT tx_leaveat 363 433 185 ., label("leaveat() - time of leaving")
+  VARLIST vl_leaveat 553 433 150 ., nomem
+  TEXT tx_h58_5 10 460 1040 ., label("-- Missing data and structural zeros/ones --")
+  TEXT tx_missnet 10 481 430 ., label("missnet() - one 0/1 matrix per wave")
+  EDIT ed_missnet 450 481 610 ., nomem
+END
+
+DIALOG rates_2, tabtitle("Rates 2")
+BEGIN
+  TEXT tx_missbeh 10 10 430 ., label("missbeh() - 0/1 variable per wave")
+  VARLIST vl_missbeh 450 10 610 ., nomem
+  TEXT tx_structural 10 31 430 ., label("structural() - 0/1 matrix of fixed dyads")
+  EDIT ed_structural 450 31 610 ., nomem
+  TEXT tx_h4_6 10 58 1040 ., label("-- Co-evolving behavior (one variable per wave, same order as the waves; at least linear) --")
+  TEXT tx_behavior 10 79 430 ., label("behavior() - variable per wave")
+  VARLIST vl_behavior 450 79 610 ., nomem
+  CHECKBOX cx_linear 10 100 260 ., label("linear") tooltip("RSiena: linear")
+  CHECKBOX cx_linearendow 275 100 260 ., label("linearendow")
+  CHECKBOX cx_linearcreation 540 100 260 ., label("linearcreation")
+  CHECKBOX cx_quadratic 805 100 260 ., label("quadratic (quad)") tooltip("RSiena: quad")
+  CHECKBOX cx_quadraticendow 10 121 260 ., label("quadraticendow")
+  CHECKBOX cx_quadraticcreation 275 121 260 ., label("quadraticcreation")
+  CHECKBOX cx_avalt 540 121 260 ., label("avalt") tooltip("RSiena: avAlt")
+  CHECKBOX cx_avaltendow 805 121 260 ., label("avaltendow")
+  CHECKBOX cx_avaltcreation 10 142 260 ., label("avaltcreation")
+  CHECKBOX cx_avsim 275 142 260 ., label("avsim") tooltip("RSiena: avSim")
+  CHECKBOX cx_avsimendow 540 142 260 ., label("avsimendow")
+  CHECKBOX cx_avsimcreation 805 142 260 ., label("avsimcreation")
+  TEXT tx_h19_6 10 169 1040 ., label("-- Network selection effects of the behavior (the behavior as covariate of tie choice) --")
+  CHECKBOX cx_behsim 10 190 260 ., label("behsim (simX (beh))") tooltip("RSiena: simX (beh)")
+  CHECKBOX cx_behegox 275 190 260 ., label("behegox (egoX (beh))") tooltip("RSiena: egoX (beh)")
+  CHECKBOX cx_behaltx 540 190 260 ., label("behaltx (altX (beh))") tooltip("RSiena: altX (beh)")
+  CHECKBOX cx_behegoplusalt 805 190 260 ., label("behegoplusalt (egoPlusAltX (beh))") tooltip("RSiena: egoPlusAltX (beh)")
+  TEXT tx_behtheta0 10 211 430 ., label("behtheta0() - start values of behavior effects")
+  EDIT ed_behtheta0 450 211 610 ., nomem
+  TEXT tx_behfrom 10 232 430 ., label("behfrom() - covariate main effects")
+  VARLIST vl_behfrom 450 232 610 ., nomem tooltip("RSiena: effFrom")
+  TEXT tx_behavxalt 10 253 185 ., label("behavxalt() (avXAlt)")
+  VARLIST vl_behavxalt 200 253 150 ., nomem tooltip("RSiena: avXAlt")
+  TEXT tx_behavsamexalt 363 253 185 ., label("behavsamexalt() (avSameXAlt)")
+  VARLIST vl_behavsamexalt 553 253 150 ., nomem tooltip("RSiena: avSameXAlt")
+  TEXT tx_behtotxalt 716 253 185 ., label("behtotxalt() (totXAlt)")
+  VARLIST vl_behtotxalt 906 253 150 ., nomem tooltip("RSiena: totXAlt")
+  TEXT tx_behtotsamexalt 10 274 430 ., label("behtotsamexalt() (totSameXAlt)")
+  VARLIST vl_behtotsamexalt 450 274 610 ., nomem tooltip("RSiena: totSameXAlt")
+  TEXT tx_beheff_t 10 295 1050 ., label("-- beheff() - behavior effects of network position, alters and similarity -- box next to the effect is not used")
+  COMBOBOX cb_beheff_1 10 316 215 ., dropdown contents(lst_beheff) values(lst_beheff_v) nomem
+  EDIT ed_beheff_1a 230 316 115 ., nomem
+  COMBOBOX cb_beheff_2 363 316 215 ., dropdown contents(lst_beheff) values(lst_beheff_v) nomem
+  EDIT ed_beheff_2a 583 316 115 ., nomem
+  COMBOBOX cb_beheff_3 716 316 215 ., dropdown contents(lst_beheff) values(lst_beheff_v) nomem
+  EDIT ed_beheff_3a 936 316 115 ., nomem
+  COMBOBOX cb_beheff_4 10 337 215 ., dropdown contents(lst_beheff) values(lst_beheff_v) nomem
+  EDIT ed_beheff_4a 230 337 115 ., nomem
+  COMBOBOX cb_beheff_5 363 337 215 ., dropdown contents(lst_beheff) values(lst_beheff_v) nomem
+  EDIT ed_beheff_5a 583 337 115 ., nomem
+  COMBOBOX cb_beheff_6 716 337 215 ., dropdown contents(lst_beheff) values(lst_beheff_v) nomem
+  EDIT ed_beheff_6a 936 337 115 ., nomem
+  TEXT tx_beheff_more 10 358 215 ., label("more tokens (typed)")
+  EDIT ed_beheff_more 230 358 830 ., nomem
+  TEXT tx_behshape_t 10 385 1050 ., label("-- behshape() - further behavior shape effects: effect[:#] -- box next to the effect: parameter # (some need one)")
+  COMBOBOX cb_behshape_1 10 406 215 ., dropdown contents(lst_behshape) values(lst_behshape_v) nomem
+  EDIT ed_behshape_1a 230 406 115 ., nomem
+  COMBOBOX cb_behshape_2 363 406 215 ., dropdown contents(lst_behshape) values(lst_behshape_v) nomem
+  EDIT ed_behshape_2a 583 406 115 ., nomem
+  COMBOBOX cb_behshape_3 716 406 215 ., dropdown contents(lst_behshape) values(lst_behshape_v) nomem
+  EDIT ed_behshape_3a 936 406 115 ., nomem
+  COMBOBOX cb_behshape_4 10 427 215 ., dropdown contents(lst_behshape) values(lst_behshape_v) nomem
+  EDIT ed_behshape_4a 230 427 115 ., nomem
+  TEXT tx_behshape_more 10 448 215 ., label("more tokens (typed)")
+  EDIT ed_behshape_more 230 448 830 ., nomem
 END
 
 DIALOG behavior, tabtitle("Behavior")
 BEGIN
-  TEXT tx_symmetric_note 20 10 700 40, label("Co-evolution (behavior()) is not combinable with symmetric - uncheck symmetric on the Waves & baseline tab to use this tab.")
-  TEXT tx_behavior 20 10 300 ., label("behavior() - one variable per wave:")
-  VARLIST vl_behavior 330 10 445 ., nomem
-  TEXT tx_hdr_10_42 20 42 700 ., label("-- Behavior co-evolution effects --")
-  CHECKBOX cx_linear 20 66 220 ., label("linear (required baseline)") option(linear)
-  CHECKBOX cx_linearendow 20 92 220 ., label("linearendow") option(linearendow)
-  CHECKBOX cx_linearcreation 20 118 220 ., label("linearcreation") option(linearcreation)
-  CHECKBOX cx_quadratic 20 144 220 ., label("quadratic") option(quadratic)
-  CHECKBOX cx_quadraticendow 20 170 220 ., label("quadraticendow") option(quadraticendow)
-  CHECKBOX cx_quadraticcreation 20 196 220 ., label("quadraticcreation") option(quadraticcreation)
-  CHECKBOX cx_avalt 490 66 220 ., label("avalt") option(avalt)
-  CHECKBOX cx_avaltendow 490 92 220 ., label("avaltendow") option(avaltendow)
-  CHECKBOX cx_avaltcreation 490 118 220 ., label("avaltcreation") option(avaltcreation)
-  CHECKBOX cx_avsim 490 144 220 ., label("avsim") option(avsim)
-  CHECKBOX cx_avsimendow 490 170 220 ., label("avsimendow") option(avsimendow)
-  CHECKBOX cx_avsimcreation 490 196 220 ., label("avsimcreation") option(avsimcreation)
-  TEXT tx_behtheta0 20 230 100 ., label("behtheta0()")
-  EDIT ed_behtheta0 195 230 300 ., nomem
+  TEXT tx_behnet2_t 10 10 1050 ., label("-- behnet2() - further behavior effects of the network: effect[:#] -- box next to the effect: parameter # (some need one)")
+  COMBOBOX cb_behnet2_1 10 31 215 ., dropdown contents(lst_behnet2) values(lst_behnet2_v) nomem
+  EDIT ed_behnet2_1a 230 31 115 ., nomem
+  COMBOBOX cb_behnet2_2 363 31 215 ., dropdown contents(lst_behnet2) values(lst_behnet2_v) nomem
+  EDIT ed_behnet2_2a 583 31 115 ., nomem
+  COMBOBOX cb_behnet2_3 716 31 215 ., dropdown contents(lst_behnet2) values(lst_behnet2_v) nomem
+  EDIT ed_behnet2_3a 936 31 115 ., nomem
+  COMBOBOX cb_behnet2_4 10 52 215 ., dropdown contents(lst_behnet2) values(lst_behnet2_v) nomem
+  EDIT ed_behnet2_4a 230 52 115 ., nomem
+  COMBOBOX cb_behnet2_5 363 52 215 ., dropdown contents(lst_behnet2) values(lst_behnet2_v) nomem
+  EDIT ed_behnet2_5a 583 52 115 ., nomem
+  COMBOBOX cb_behnet2_6 716 52 215 ., dropdown contents(lst_behnet2) values(lst_behnet2_v) nomem
+  EDIT ed_behnet2_6a 936 52 115 ., nomem
+  TEXT tx_behnet2_more 10 73 215 ., label("more tokens (typed)")
+  EDIT ed_behnet2_more 230 73 830 ., nomem
+  TEXT tx_h15_7 10 106 1040 ., label("-- Behavior effects of the network x a covariate or a dyadic covariate --")
+  TEXT tx_behwparam 10 127 430 ., label("behwparam() - parameter of avAltW/avInAltW/avSimW (1|2)")
+  EDIT ed_behwparam 450 127 610 ., nomem
+  TEXT tx_behx_t 10 148 1050 ., label("-- behx() - behavior effects of network x covariate: effect:variable -- box next to the effect: variable or tvcov stem")
+  COMBOBOX cb_behx_1 10 169 215 ., dropdown contents(lst_behx) values(lst_behx_v) nomem
+  EDIT ed_behx_1a 230 169 115 ., nomem
+  COMBOBOX cb_behx_2 363 169 215 ., dropdown contents(lst_behx) values(lst_behx_v) nomem
+  EDIT ed_behx_2a 583 169 115 ., nomem
+  COMBOBOX cb_behx_3 716 169 215 ., dropdown contents(lst_behx) values(lst_behx_v) nomem
+  EDIT ed_behx_3a 936 169 115 ., nomem
+  COMBOBOX cb_behx_4 10 190 215 ., dropdown contents(lst_behx) values(lst_behx_v) nomem
+  EDIT ed_behx_4a 230 190 115 ., nomem
+  COMBOBOX cb_behx_5 363 190 215 ., dropdown contents(lst_behx) values(lst_behx_v) nomem
+  EDIT ed_behx_5a 583 190 115 ., nomem
+  COMBOBOX cb_behx_6 716 190 215 ., dropdown contents(lst_behx) values(lst_behx_v) nomem
+  EDIT ed_behx_6a 936 190 115 ., nomem
+  TEXT tx_behx_more 10 211 215 ., label("more tokens (typed)")
+  EDIT ed_behx_more 230 211 830 ., nomem
+  TEXT tx_behw_t 10 238 1050 ., label("-- behw() - behavior effects of network x dyadic covariate: effect:matrix -- box next to the effect: matrix name")
+  COMBOBOX cb_behw_1 10 259 215 ., dropdown contents(lst_behw) values(lst_behw_v) nomem
+  EDIT ed_behw_1a 230 259 115 ., nomem
+  COMBOBOX cb_behw_2 363 259 215 ., dropdown contents(lst_behw) values(lst_behw_v) nomem
+  EDIT ed_behw_2a 583 259 115 ., nomem
+  COMBOBOX cb_behw_3 716 259 215 ., dropdown contents(lst_behw) values(lst_behw_v) nomem
+  EDIT ed_behw_3a 936 259 115 ., nomem
+  COMBOBOX cb_behw_4 10 280 215 ., dropdown contents(lst_behw) values(lst_behw_v) nomem
+  EDIT ed_behw_4a 230 280 115 ., nomem
+  TEXT tx_behw_more 10 301 215 ., label("more tokens (typed)")
+  EDIT ed_behw_more 230 301 830 ., nomem
+  TEXT tx_tvbehw_t 10 328 1050 ., label("-- tvbehw() - the same with a changing dyadic covariate: effect:stem -- box next to the effect: stem of matrices stem1 stem2 ...")
+  COMBOBOX cb_tvbehw_1 10 349 215 ., dropdown contents(lst_tvbehw) values(lst_tvbehw_v) nomem
+  EDIT ed_tvbehw_1a 230 349 115 ., nomem
+  COMBOBOX cb_tvbehw_2 363 349 215 ., dropdown contents(lst_tvbehw) values(lst_tvbehw_v) nomem
+  EDIT ed_tvbehw_2a 583 349 115 ., nomem
+  COMBOBOX cb_tvbehw_3 716 349 215 ., dropdown contents(lst_tvbehw) values(lst_tvbehw_v) nomem
+  EDIT ed_tvbehw_3a 936 349 115 ., nomem
+  COMBOBOX cb_tvbehw_4 10 370 215 ., dropdown contents(lst_tvbehw) values(lst_tvbehw_v) nomem
+  EDIT ed_tvbehw_4a 230 370 115 ., nomem
+  TEXT tx_tvbehw_more 10 391 215 ., label("more tokens (typed)")
+  EDIT ed_tvbehw_more 230 391 830 ., nomem
+  TEXT tx_h55_7 10 424 1040 ., label("-- Method of moments: replicates, start values, fixed effects --")
+  TEXT tx_k0 10 445 430 ., label("k0() - Phase 1 replicates (default 50)")
+  EDIT ed_k0 450 445 610 ., nomem
+  TEXT tx_k3 10 466 430 ., label("k3() - Phase 3 replicates (default 1000)")
+  EDIT ed_k3 450 466 610 ., nomem
+  TEXT tx_firstg 10 487 430 ., label("firstg() - initial gain (default 0.2)")
+  EDIT ed_firstg 450 487 610 ., nomem
 END
 
-DIALOG special, tabtitle("Special cases")
+DIALOG estimate, tabtitle("Estimate")
 BEGIN
-  TEXT tx_hdr_10 20 10 700 ., label("-- Composition change / missing data --")
-  TEXT tx_present 20 34 100 ., label("present()")
-  VARLIST vl_present 195 34 300 ., nomem
-  TEXT tx_missnet 20 60 100 ., label("missnet()")
-  EDIT ed_missnet 195 60 300 ., nomem
-  TEXT tx_missbeh 20 86 100 ., label("missbeh()")
-  VARLIST vl_missbeh 195 86 300 ., nomem
-  TEXT tx_hdr_120 20 120 700 ., label("-- Interaction effects --")
-  TEXT tx_interact_note1 20 144 850 ., label("interact(effect1#effect2 ...) - two-way interactions between dyadic effects only, space-separated pairs.")
-  TEXT tx_interact_note2 20 164 850 ., label("Eligible: outdegree reciprocity nodematch nodecov nodeicov nodeocov transtrip cycle3 simcov transrectrip outoutass ininass outinass inoutass cycle4 transmedtrip gwesp transties balance; a covariate effect for several variables by its coefficient name, e.g. nodematch_smoke1.")
-  EDIT ed_interact 20 186 700 ., nomem
+  TEXT tx_seed 10 10 185 ., label("seed()")
+  EDIT ed_seed 200 10 150 ., nomem
+  TEXT tx_cores 10 31 430 ., label("cores() - threads of the plugin (default all)")
+  EDIT ed_cores 450 31 610 ., nomem
+  TEXT tx_theta0 10 52 185 ., label("theta0() - start values")
+  EDIT ed_theta0 200 52 150 ., nomem
+  TEXT tx_rate0 363 52 185 ., label("rate0() - start rates")
+  EDIT ed_rate0 553 52 150 ., nomem
+  TEXT tx_fix 10 73 430 ., label("fix() - fixed effects (names or _all)")
+  EDIT ed_fix 450 73 610 ., nomem
+  CHECKBOX cx_unconditional 10 94 260 ., label("unconditional estimation")
+  TEXT tx_h11_8 10 121 1040 ., label("-- Maximum likelihood instead of the method of moments (ml; options go to mloptions()) --")
+  CHECKBOX cx_ml 10 142 260 ., label("ml - maximum likelihood estimation")
+  TEXT tx_ml_n1 10 163 430 ., label("n1() - phase 1 steps (default 50)")
+  EDIT ed_ml_n1 450 163 610 ., nomem
+  TEXT tx_ml_nsub 10 184 430 ., label("nsub() - phase 2 subphases (default 4)")
+  EDIT ed_ml_nsub 450 184 610 ., nomem
+  TEXT tx_ml_nstart2 10 205 430 ., label("nstart2() - phase 2 first steps (default 100)")
+  EDIT ed_ml_nstart2 450 205 610 ., nomem
+  TEXT tx_ml_n3 10 226 430 ., label("n3() - phase 3 steps (default 1000)")
+  EDIT ed_ml_n3 450 226 610 ., nomem
+  TEXT tx_ml_mult 10 247 430 ., label("mult() - multiplier (default 5)")
+  EDIT ed_ml_mult 450 247 610 ., nomem
+  TEXT tx_ml_nmh 10 268 430 ., label("nmh() - MH steps per ministep (default 0)")
+  EDIT ed_ml_nmh 450 268 610 ., nomem
+  TEXT tx_ml_gain 10 289 185 ., label("gain() - gain (default 0.2)")
+  EDIT ed_ml_gain 200 289 150 ., nomem
+  TEXT tx_ml_mhgeom 10 310 430 ., label("mhgeom() - geometric MH (default 0)")
+  EDIT ed_ml_mhgeom 450 310 610 ., nomem
+  TEXT tx_ml_seed 10 331 185 ., label("seed() - ML seed")
+  EDIT ed_ml_seed 200 331 150 ., nomem
+  TEXT tx_ml_theta0 363 331 185 ., label("theta0() - ML start values")
+  EDIT ed_ml_theta0 553 331 150 ., nomem
+  TEXT tx_ml_rate0 716 331 185 ., label("rate0() - ML start rates")
+  EDIT ed_ml_rate0 906 331 150 ., nomem
+  CHECKBOX cx_ml_notable 10 352 260 ., label("notable - suppress the ML table")
+  TEXT tx_h36_8 10 379 1040 ., label("-- Output --")
+  CHECKBOX cx_detail 10 400 260 ., label("detail - RSiena names, means")
+  TEXT tx_n38_8 10 421 1050 ., label("Choose 'Simulate only' with the radio buttons on the first tab: nwsaom simulate runs the model specified on the other tabs at the")
+  TEXT tx_n39_8 10 442 1050 ., label("coefficients below without estimating (RSiena siena07 with simOnly). Not used when estimating.")
+  TEXT tx_sim_theta 10 463 430 ., label("theta() - one value per network effect")
+  EDIT ed_sim_theta 450 463 610 ., nomem tooltip("RSiena: simOnly")
+  TEXT tx_sim_behtheta 10 484 430 ., label("behtheta() - one value per behavior effect")
+  EDIT ed_sim_behtheta 450 484 610 ., nomem
 END
 
-DIALOG estimation, tabtitle("Estimation")
+DIALOG estimate_2, tabtitle("Estimate 2")
 BEGIN
-  TEXT tx_theta0 20 10 100 ., label("theta0()")
-  EDIT ed_theta0 195 10 155 ., nomem
-  TEXT tx_rate0 490 10 130 ., label("rate0() - unconditional")
-  EDIT ed_rate0 665 10 70 ., nomem
-  TEXT tx_k0 20 42 100 ., label("k0() - Phase 1 reps")
-  SPINNER sp_k0 195 42 70 ., default(50) min(1) max(999999) nomem option(k0)
-  TEXT tx_k3 490 42 130 ., label("k3() - Phase 3 reps")
-  SPINNER sp_k3 665 42 70 ., default(1000) min(1) max(999999) nomem option(k3)
-  CHECKBOX ck_uncond 20 106 400 ., label("unconditional (RSiena cond = FALSE)") option(unconditional)
-  TEXT tx_firstg 20 74 100 ., label("firstg()")
-  EDIT ed_firstg 195 74 155 ., default("0.2") nomem
-  TEXT tx_seed 490 74 130 ., label("seed()")
-  SPINNER sp_seed 665 74 70 ., default(-1) min(-999999) max(999999) nomem option(seed)
-END
-
-DIALOG multiplex, tabtitle("Multiplex")
-BEGIN
-  CHECKBOX cx_multiplex 20 10 850 ., label("Enable multiplex mode (nwsaom multiplex) - uses ONLY the fields on this tab instead of every other tab")
-  TEXT tx_netawave1 20 42 110 ., label("netawave1()")
-  COMBOBOX cb_netawave1 145 42 160 ., dropdown contents(netlist) nomem
-  TEXT tx_netawave2 490 42 110 ., label("netawave2()")
-  COMBOBOX cb_netawave2 615 42 160 ., dropdown contents(netlist) nomem
-  TEXT tx_netbwave1 20 68 110 ., label("netbwave1()")
-  COMBOBOX cb_netbwave1 145 68 160 ., dropdown contents(netlist) nomem
-  TEXT tx_netbwave2 490 68 110 ., label("netbwave2()")
-  COMBOBOX cb_netbwave2 615 68 160 ., dropdown contents(netlist) nomem
-  CHECKBOX cx_crprod 20 100 120 ., label("crprod") option(crprod)
-  CHECKBOX cx_crprodb 150 100 120 ., label("crprodb") option(crprodb)
-  TEXT tx_theta01 490 100 90 ., label("theta01()")
-  EDIT ed_theta01 585 100 190 ., nomem
-  TEXT tx_mxk0 20 132 130 ., label("k0() (default 30)")
-  SPINNER sp_mxk0 195 132 70 ., default(30) min(1) max(999999) nomem option(k0)
-  TEXT tx_mxk3 490 132 130 ., label("k3() (default 200)")
-  SPINNER sp_mxk3 665 132 70 ., default(200) min(1) max(999999) nomem option(k3)
-  TEXT tx_theta02 20 164 90 ., label("theta02()")
-  EDIT ed_theta02 115 164 270 ., nomem
-  TEXT tx_mxfirstg 490 164 90 ., label("firstg()")
-  EDIT ed_mxfirstg 585 164 150 ., default("0.2") nomem
-  TEXT tx_mxseed 20 196 90 ., label("seed()")
-  SPINNER sp_mxseed 115 196 70 ., default(-1) min(-999999) max(999999) nomem option(seed)
-END
-
-SCRIPT symmetricOn
-BEGIN
-	waves.tx_waves.hide
-	waves.ed_waves.hide
-	waves.cx_reciprocity.hide
-	waves.cx_outdegreeendow.hide
-	waves.cx_outdegreecreation.hide
-	waves.cx_reciprocityendow.hide
-	waves.cx_reciprocitycreation.hide
-	structural.cx_cycle3.hide
-	structural.cx_transtrip.hide
-	structural.cx_transrectrip.hide
-	structural.cx_inactivity.hide
-	structural.cx_outpopularity.hide
-	structural.cx_ininass.hide
-	structural.cx_inoutass.hide
-	structural.cx_outoutass.hide
-	structural.cx_antiiso.hide
-	structural.cx_isolatepop.hide
-	behavior.tx_behavior.hide
-	behavior.vl_behavior.hide
-	behavior.tx_hdr_10_42.hide
-	behavior.cx_linear.hide
-	behavior.cx_linearendow.hide
-	behavior.cx_linearcreation.hide
-	behavior.cx_quadratic.hide
-	behavior.cx_quadraticendow.hide
-	behavior.cx_quadraticcreation.hide
-	behavior.cx_avalt.hide
-	behavior.cx_avaltendow.hide
-	behavior.cx_avaltcreation.hide
-	behavior.cx_avsim.hide
-	behavior.cx_avsimendow.hide
-	behavior.cx_avsimcreation.hide
-	behavior.tx_behtheta0.hide
-	behavior.ed_behtheta0.hide
-	behavior.tx_symmetric_note.show
-END
-
-SCRIPT symmetricOff
-BEGIN
-	waves.tx_waves.show
-	waves.ed_waves.show
-	waves.cx_reciprocity.show
-	waves.cx_outdegreeendow.show
-	waves.cx_outdegreecreation.show
-	waves.cx_reciprocityendow.show
-	waves.cx_reciprocitycreation.show
-	structural.cx_cycle3.show
-	structural.cx_transtrip.show
-	structural.cx_transrectrip.show
-	structural.cx_inactivity.show
-	structural.cx_outpopularity.show
-	structural.cx_ininass.show
-	structural.cx_inoutass.show
-	structural.cx_outoutass.show
-	structural.cx_antiiso.show
-	structural.cx_isolatepop.show
-	behavior.tx_behavior.show
-	behavior.vl_behavior.show
-	behavior.tx_hdr_10_42.show
-	behavior.cx_linear.show
-	behavior.cx_linearendow.show
-	behavior.cx_linearcreation.show
-	behavior.cx_quadratic.show
-	behavior.cx_quadraticendow.show
-	behavior.cx_quadraticcreation.show
-	behavior.cx_avalt.show
-	behavior.cx_avaltendow.show
-	behavior.cx_avaltcreation.show
-	behavior.cx_avsim.show
-	behavior.cx_avsimendow.show
-	behavior.cx_avsimcreation.show
-	behavior.tx_behtheta0.show
-	behavior.ed_behtheta0.show
-	behavior.tx_symmetric_note.hide
+  TEXT tx_sim_rates 10 10 430 ., label("rates() - rate of every period")
+  EDIT ed_sim_rates 450 10 610 ., nomem
+  TEXT tx_sim_ratesbeh 10 31 185 ., label("ratesbeh() - behavior rates")
+  EDIT ed_sim_ratesbeh 200 31 150 ., nomem
+  TEXT tx_sim_nsim 10 52 430 ., label("nsim() - number of simulations (default 100)")
+  EDIT ed_sim_nsim 450 52 610 ., nomem
+  TEXT tx_sim_generate 10 73 430 ., label("generate() - stub of the networks created")
+  EDIT ed_sim_generate 450 73 610 ., nomem
 END
 
 LIST netlist
@@ -253,13 +574,704 @@ BEGIN
 	// populated at runtime by _nwdialog.ado
 END
 
-LIST list_symtype
+LIST endow_list
+BEGIN
+	outdegree
+	reciprocity
+	transties
+	cycle4
+	gwesp
+	balance
+	transtrip
+	cycle3
+	transmedtrip
+	transrectrip
+	linear
+	quadratic
+	avalt
+	avsim
+	indegpopularity
+	outpopularity
+	outactivity
+	inactivity
+	inpop
+	outpop
+	inact
+	outactsqrt
+END
+
+LIST symtype_list
 BEGIN
 	forcing
 	confirmation
 	force
 	agree
 	joint
+END
+
+LIST lst_dyadx
+BEGIN
+	cywwx  (cyWWX)
+	inwwx  (InWWX)
+	outwwx  (OutWWX)
+	wwx  (WWX)
+	wxx  (WXX)
+	xwx  (XWX)
+	xwx1  (XWX1)
+	xwx2  (XWX2)
+	xxw  (XXW)
+END
+
+LIST lst_dyadx_v
+BEGIN
+	cywwx
+	inwwx
+	outwwx
+	wwx
+	wxx
+	xwx
+	xwx1
+	xwx2
+	xxw
+END
+
+LIST lst_tvdyadx
+BEGIN
+	cywwx  (cyWWX)
+	inwwx  (InWWX)
+	outwwx  (OutWWX)
+	wwx  (WWX)
+	wxx  (WXX)
+	xwx  (XWX)
+	xwx1  (XWX1)
+	xwx2  (XWX2)
+	xxw  (XXW)
+END
+
+LIST lst_tvdyadx_v
+BEGIN
+	cywwx
+	inwwx
+	outwwx
+	wwx
+	wxx
+	xwx
+	xwx1
+	xwx2
+	xxw
+END
+
+LIST lst_netx
+BEGIN
+	altdist2  (altDist2)
+	altindist2  (altInDist2)
+	avgroupegox  (avGroupEgoX)
+	crossxoutact  (crossXOutAct)
+	diffxtransrectrip  (diffXTransRecTrip)
+	egoxaltxrecip  (egoXaltXRecip)
+	homxoutact2  (homXOutAct2)
+	homxtransrectrip  (homXTransRecTrip)
+	indties  (IndTies)
+	jumpxtranstrip  (jumpXTransTrip)
+	outxmore  (outXMore)
+	sameegodist2  (sameEgoDist2)
+	sameegoindist2  (sameEgoInDist2)
+	sameinxcycle4  (sameInXCycle4)
+	samexcycle4  (sameXCycle4)
+	samextransrectrip  (sameXTransRecTrip)
+	samexv  (sameXV)
+	samexvinpop  (sameXVInPop)
+	samexvinpop2  (sameXVInPop2)
+	simdist2  (simDist2)
+	simegodist2  (simEgoDist2)
+	simegoindist2  (simEgoInDist2)
+	simrecipx  (simRecipX)
+	simxtranstrip  (simXTransTrip)
+	totdist2  (totDist2)
+	totgroupegox  (totGroupEgoX)
+	totindist2  (totInDist2)
+	transtripx  (transTripX)
+END
+
+LIST lst_netx_v
+BEGIN
+	altdist2
+	altindist2
+	avgroupegox
+	crossxoutact
+	diffxtransrectrip
+	egoxaltxrecip
+	homxoutact2
+	homxtransrectrip
+	indties
+	jumpxtranstrip
+	outxmore
+	sameegodist2
+	sameegoindist2
+	sameinxcycle4
+	samexcycle4
+	samextransrectrip
+	samexv
+	samexvinpop
+	samexvinpop2
+	simdist2
+	simegodist2
+	simegoindist2
+	simrecipx
+	simxtranstrip
+	totdist2
+	totgroupegox
+	totindist2
+	transtripx
+END
+
+LIST lst_ownx
+BEGIN
+	densetriads  (denseTriads)
+	divinego  (divIn_ego)
+	divoutego  (divOut_ego)
+	inactego  (inAct_ego)
+	ininass  (inInAss)
+	inisdegree  (inIsDegree)
+	inoutass  (inOutAss)
+	inpopdya  (inPop_dya)
+	instructeq  (inStructEq)
+	jin  (Jin)
+	jout  (Jout)
+	nonpcompress  (nonPCompress)
+	outactego  (outAct_ego)
+	outactmoreego  (outActMore_ego)
+	outactsqrtmoreego  (outActSqrtMore_ego)
+	outinass  (outInAss)
+	outmoreego  (outMore_ego)
+	outoutass  (outOutAss)
+	outpopmore  (outPopMore)
+	outpopsqrtmore  (outPopSqrtMore)
+	outpopthreshold  (outPopThreshold)
+	primary  (primary)
+	primcompress  (primCompress)
+	primdegact  (primDegAct)
+	primdegactdiff  (primDegActDiff)
+	primdegactdiffsqrt  (primDegActDiffSqrt)
+	primdegactinv  (primDegActInv)
+	primdegactlog  (primDegActLog)
+	primdegactsqrt  (primDegActSqrt)
+	reciactego  (reciAct_ego)
+	transrectrip2  (transRecTrip2)
+	transtrip1  (transTrip1)
+	transtrip2  (transTrip2)
+	transtripee  (transTrip.EE)
+	transtripfe  (transTrip.FE)
+	transtripfr  (transTrip.FR)
+END
+
+LIST lst_ownx_v
+BEGIN
+	densetriads
+	divinego
+	divoutego
+	inactego
+	ininass
+	inisdegree
+	inoutass
+	inpopdya
+	instructeq
+	jin
+	jout
+	nonpcompress
+	outactego
+	outactmoreego
+	outactsqrtmoreego
+	outinass
+	outmoreego
+	outoutass
+	outpopmore
+	outpopsqrtmore
+	outpopthreshold
+	primary
+	primcompress
+	primdegact
+	primdegactdiff
+	primdegactdiffsqrt
+	primdegactinv
+	primdegactlog
+	primdegactsqrt
+	reciactego
+	transrectrip2
+	transtrip1
+	transtrip2
+	transtripee
+	transtripfe
+	transtripfr
+END
+
+LIST lst_netbeh
+BEGIN
+	absdiffx  (absDiffX)
+	altdist2  (altDist2)
+	althigheregox  (altHigherEgoX)
+	altindist2  (altInDist2)
+	altlthresholdx  (altLThresholdX)
+	altrthresholdx  (altRThresholdX)
+	altsqx  (altSqX)
+	altxoutact  (altXOutAct)
+	avgroupegox  (avGroupEgoX)
+	crossxoutact  (crossXOutAct)
+	degabsdiffx  (degAbsDiffX)
+	degnegdiffx  (degNegDiffX)
+	degposdiffx  (degPosDiffX)
+	diffsqx  (diffSqX)
+	diffx  (diffX)
+	diffxinpop  (diffXInPop)
+	diffxoutact  (diffXOutAct)
+	diffxreciact  (diffXReciAct)
+	diffxtransrectrip  (diffXTransRecTrip)
+	diffxtranstrip  (diffXTransTrip)
+	egodiffx  (egoDiffX)
+	egolthresholdx  (egoLThresholdX)
+	egoplusaltsqx  (egoPlusAltSqX)
+	egorthresholdx  (egoRThresholdX)
+	egosqx  (egoSqX)
+	egoxaltx  (egoXaltX)
+	egoxaltxrecip  (egoXaltXRecip)
+	higher  (higher)
+	homxoutact  (homXOutAct)
+	homxtransrectrip  (homXTransRecTrip)
+	homxtranstrip  (homXTransTrip)
+	inactx  (inActX)
+	indties  (IndTies)
+	inpopx  (inPopX)
+	jumpxtranstrip  (jumpXTransTrip)
+	outactx  (outActX)
+	outpopx  (outPopX)
+	outxmore  (outXMore)
+	sameegodist2  (sameEgoDist2)
+	sameegoindist2  (sameEgoInDist2)
+	sameinxcycle4  (sameInXCycle4)
+	samex  (sameX)
+	samexcycle4  (sameXCycle4)
+	samexinpop  (sameXInPop)
+	samexoutact  (sameXOutAct)
+	samexreciact  (sameXReciAct)
+	samexrecip  (sameXRecip)
+	samextransrectrip  (sameXTransRecTrip)
+	samextranstrip  (sameXTransTrip)
+	simdist2  (simDist2)
+	simegodist2  (simEgoDist2)
+	simegoindist2  (simEgoInDist2)
+	simrecipx  (simRecipX)
+	simxtranstrip  (simXTransTrip)
+	totdist2  (totDist2)
+	totgroupegox  (totGroupEgoX)
+	totindist2  (totInDist2)
+	transtripx  (transTripX)
+	unequalx  (unequalX)
+END
+
+LIST lst_netbeh_v
+BEGIN
+	absdiffx
+	altdist2
+	althigheregox
+	altindist2
+	altlthresholdx
+	altrthresholdx
+	altsqx
+	altxoutact
+	avgroupegox
+	crossxoutact
+	degabsdiffx
+	degnegdiffx
+	degposdiffx
+	diffsqx
+	diffx
+	diffxinpop
+	diffxoutact
+	diffxreciact
+	diffxtransrectrip
+	diffxtranstrip
+	egodiffx
+	egolthresholdx
+	egoplusaltsqx
+	egorthresholdx
+	egosqx
+	egoxaltx
+	egoxaltxrecip
+	higher
+	homxoutact
+	homxtransrectrip
+	homxtranstrip
+	inactx
+	indties
+	inpopx
+	jumpxtranstrip
+	outactx
+	outpopx
+	outxmore
+	sameegodist2
+	sameegoindist2
+	sameinxcycle4
+	samex
+	samexcycle4
+	samexinpop
+	samexoutact
+	samexreciact
+	samexrecip
+	samextransrectrip
+	samextranstrip
+	simdist2
+	simegodist2
+	simegoindist2
+	simrecipx
+	simxtranstrip
+	totdist2
+	totgroupegox
+	totindist2
+	transtripx
+	unequalx
+END
+
+LIST interact_list
+BEGIN
+	outdegree
+	reciprocity
+	nodematch
+	nodecov
+	nodeicov
+	nodeocov
+	transtrip
+	cycle3
+	simcov
+	transrectrip
+	outoutass
+	ininass
+	outinass
+	inoutass
+	cycle4
+	transmedtrip
+	gwesp
+	transties
+	balance
+END
+
+LIST lst_behrate
+BEGIN
+	anyinexposuredist2  (anyInExposureDist2)
+	avexposure  (avExposure)
+	avtinexposuredist2  (avTinExposureDist2)
+	infectcovar
+	infectdeg  (infectDeg)
+	infectin  (infectIn)
+	infectout  (infectOut)
+	inrate  (inRate)
+	outrate  (outRate)
+	reciprate  (recipRate)
+	susceptavcovar
+	susceptavin  (susceptAvIn)
+	totainexposuredist2  (totAInExposureDist2)
+	totexposure  (totExposure)
+	totinexposuredist2  (totInExposureDist2)
+END
+
+LIST lst_behrate_v
+BEGIN
+	anyinexposuredist2
+	avexposure
+	avtinexposuredist2
+	infectcovar
+	infectdeg
+	infectin
+	infectout
+	inrate
+	outrate
+	reciprate
+	susceptavcovar
+	susceptavin
+	totainexposuredist2
+	totexposure
+	totinexposuredist2
+END
+
+LIST lst_beheff
+BEGIN
+	avaltdist2  (avAltDist2)
+	avaltpop  (avAltPop)
+	avatthigher  (avAttHigher)
+	avattlower  (avAttLower)
+	avinalt  (avInAlt)
+	avinaltdist2  (avInAltDist2)
+	avinsim  (avInSim)
+	avinsimpopalt  (avInSimPopAlt)
+	avrecalt  (avRecAlt)
+	avsimpopalt  (avSimPopAlt)
+	avsimpopego  (avSimPopEgo)
+	avsimrecip  (avSimRecip)
+	avsimrecpop  (avSimRecPop)
+	avtaltdist2  (avTAltDist2)
+	avtinaltdist2  (avTInAltDist2)
+	indeg  (indeg)
+	isolate  (isolate)
+	maxalt  (maxAlt)
+	minalt  (minAlt)
+	outdeg  (outdeg)
+	outisolate  (outIsolate)
+	popalt  (popAlt)
+	recipdeg  (recipDeg)
+	totaaltdist2  (totAAltDist2)
+	totainaltdist2  (totAInAltDist2)
+	totalt  (totAlt)
+	totaltdist2  (totAltDist2)
+	totaltpop  (totAltPop)
+	totatthigher  (totAttHigher)
+	totattlower  (totAttLower)
+	totinalt  (totInAlt)
+	totinaltdist2  (totInAltDist2)
+	totinsim  (totInSim)
+	totinsimpopalt  (totInSimPopAlt)
+	totpopalt  (totPopAlt)
+	totrecalt  (totRecAlt)
+	totsim  (totSim)
+	totsimpopalt  (totSimPopAlt)
+	totsimrecip  (totSimRecip)
+	totsimrecpop  (totSimRecPop)
+END
+
+LIST lst_beheff_v
+BEGIN
+	avaltdist2
+	avaltpop
+	avatthigher
+	avattlower
+	avinalt
+	avinaltdist2
+	avinsim
+	avinsimpopalt
+	avrecalt
+	avsimpopalt
+	avsimpopego
+	avsimrecip
+	avsimrecpop
+	avtaltdist2
+	avtinaltdist2
+	indeg
+	isolate
+	maxalt
+	minalt
+	outdeg
+	outisolate
+	popalt
+	recipdeg
+	totaaltdist2
+	totainaltdist2
+	totalt
+	totaltdist2
+	totaltpop
+	totatthigher
+	totattlower
+	totinalt
+	totinaltdist2
+	totinsim
+	totinsimpopalt
+	totpopalt
+	totrecalt
+	totsim
+	totsimpopalt
+	totsimrecip
+	totsimrecpop
+END
+
+LIST lst_behshape
+BEGIN
+	avgroup  (avGroup)
+	quad_cc  (quad_cc)
+	quad_nc  (quad_nc)
+	simallfar  (simAllFar)
+	simallnear  (simAllNear)
+	threshold  (threshold)
+	totgroup  (totGroup)
+END
+
+LIST lst_behshape_v
+BEGIN
+	avgroup
+	quad_cc
+	quad_nc
+	simallfar
+	simallnear
+	threshold
+	totgroup
+END
+
+LIST lst_behnet2
+BEGIN
+	avaltcc  (avAlt_cc)
+	avinaltdist2nc  (avInAltDist2_nc)
+	avinsimdist2  (avInSimDist2)
+	avsimvaralt  (avSimVarAlt)
+	avtinaltdist2nc  (avTInAltDist2_nc)
+	behdensetriads  (behDenseTriads)
+	indegavgroup  (indegAvGroup)
+	indegtotgroup  (indegTotGroup)
+	simdensetriads  (simDenseTriads)
+	totainaltdist2nc  (totAInAltDist2_nc)
+	totaltcc  (totAlt_cc)
+	totgwdspfbalt  (totGwdspFBAlt)
+	totgwdspfbaltnc  (totGwdspFBAlt_nc)
+	totgwdspffalt  (totGwdspFFAlt)
+	totgwdspffaltnc  (totGwdspFFAlt_nc)
+	totinaltdist2nc  (totInAltDist2_nc)
+	totinsimdist2  (totInSimDist2)
+	varalt  (varAlt)
+END
+
+LIST lst_behnet2_v
+BEGIN
+	avaltcc
+	avinaltdist2nc
+	avinsimdist2
+	avsimvaralt
+	avtinaltdist2nc
+	behdensetriads
+	indegavgroup
+	indegtotgroup
+	simdensetriads
+	totainaltdist2nc
+	totaltcc
+	totgwdspfbalt
+	totgwdspfbaltnc
+	totgwdspffalt
+	totgwdspffaltnc
+	totinaltdist2nc
+	totinsimdist2
+	varalt
+END
+
+LIST lst_behx
+BEGIN
+	avaltaltx  (avAltAltX)
+	avaltegox  (avAltEgoX)
+	avaltsamex  (avAltSameX)
+	avrecaltsamex  (avRecAltSameX)
+	avsamexinalt  (avSameXInAlt)
+	avsamexrecalt  (avSameXRecAlt)
+	avsimaltx  (avSimAltX)
+	avsimegox  (avSimEgoX)
+	avtxaltdist2  (avTXAltDist2)
+	avtxinaltdist2  (avTXInAltDist2)
+	avxaltdist2  (avXAltDist2)
+	avxinalt  (avXInAlt)
+	avxinaltdist2  (avXInAltDist2)
+	avxrecalt  (avXRecAlt)
+	degabscontrx  (degAbsContrX)
+	degnegcontrx  (degNegContrX)
+	degposcontrx  (degPosContrX)
+	maxxalt  (maxXAlt)
+	minxalt  (minXAlt)
+	totaltegox  (totAltEgoX)
+	totaltsamex  (totAltSameX)
+	totaxaltdist2  (totAXAltDist2)
+	totaxinaltdist2  (totAXInAltDist2)
+	totrecaltsamex  (totRecAltSameX)
+	totsamexinalt  (totSameXInAlt)
+	totsamexrecalt  (totSameXRecAlt)
+	totsimaltx  (totSimAltX)
+	totsimegox  (totSimEgoX)
+	totxaltdist2  (totXAltDist2)
+	totxinalt  (totXInAlt)
+	totxinaltdist2  (totXInAltDist2)
+	totxrecalt  (totXRecAlt)
+END
+
+LIST lst_behx_v
+BEGIN
+	avaltaltx
+	avaltegox
+	avaltsamex
+	avrecaltsamex
+	avsamexinalt
+	avsamexrecalt
+	avsimaltx
+	avsimegox
+	avtxaltdist2
+	avtxinaltdist2
+	avxaltdist2
+	avxinalt
+	avxinaltdist2
+	avxrecalt
+	degabscontrx
+	degnegcontrx
+	degposcontrx
+	maxxalt
+	minxalt
+	totaltegox
+	totaltsamex
+	totaxaltdist2
+	totaxinaltdist2
+	totrecaltsamex
+	totsamexinalt
+	totsamexrecalt
+	totsimaltx
+	totsimegox
+	totxaltdist2
+	totxinalt
+	totxinaltdist2
+	totxrecalt
+END
+
+LIST lst_behw
+BEGIN
+	avaltw  (avAltW)
+	avinaltw  (avInAltW)
+	avsimw  (avSimW)
+	avwalt  (avWAlt)
+	avwinalt  (avWInAlt)
+	totaltw  (totAltW)
+	totinaltw  (totInAltW)
+	totsimw  (totSimW)
+	totwalt  (totWAlt)
+	totwinalt  (totWInAlt)
+END
+
+LIST lst_behw_v
+BEGIN
+	avaltw
+	avinaltw
+	avsimw
+	avwalt
+	avwinalt
+	totaltw
+	totinaltw
+	totsimw
+	totwalt
+	totwinalt
+END
+
+LIST lst_tvbehw
+BEGIN
+	avaltw  (avAltW)
+	avinaltw  (avInAltW)
+	avsimw  (avSimW)
+	avwalt  (avWAlt)
+	avwinalt  (avWInAlt)
+	totaltw  (totAltW)
+	totinaltw  (totInAltW)
+	totsimw  (totSimW)
+	totwalt  (totWAlt)
+	totwinalt  (totWInAlt)
+END
+
+LIST lst_tvbehw_v
+BEGIN
+	avaltw
+	avinaltw
+	avsimw
+	avwalt
+	avwinalt
+	totaltw
+	totinaltw
+	totsimw
+	totwalt
+	totwinalt
 END
 
 PROGRAM initialize
@@ -270,154 +1282,1230 @@ END
 
 PROGRAM command
 BEGIN
-	if multiplex.cx_multiplex.iseq(1) {
-		put "nwsaom multiplex"
-		beginoptions
-			require multiplex.cb_netawave1
-			put " netawave1(" multiplex.cb_netawave1 ")"
-			require multiplex.cb_netawave2
-			put " netawave2(" multiplex.cb_netawave2 ")"
-			require multiplex.cb_netbwave1
-			put " netbwave1(" multiplex.cb_netbwave1 ")"
-			require multiplex.cb_netbwave2
-			put " netbwave2(" multiplex.cb_netbwave2 ")"
-			option multiplex.cx_crprod
-			option multiplex.cx_crprodb
-			if multiplex.ed_theta01.isneq("") {
-				put " theta01(" multiplex.ed_theta01 ")"
-			}
-			if multiplex.ed_theta02.isneq("") {
-				put " theta02(" multiplex.ed_theta02 ")"
-			}
-			optionarg multiplex.sp_mxk0
-			optionarg multiplex.sp_mxk3
-			if multiplex.ed_mxfirstg.isneq("0.2") {
-				put " firstg(" multiplex.ed_mxfirstg ")"
-			}
-			optionarg multiplex.sp_mxseed
-		endoptions
-	}
-	if multiplex.cx_multiplex.iseq(0) {
+	if waves.rb_nwsaom_est {
 		put "nwsaom"
-		beginoptions
+	}
+	if waves.rb_nwsaom_sim {
+		put "nwsaom simulate"
+	}
+	beginoptions
+		put /program opt_part1
+		put /program opt_part2
+		put /program opt_part3
+		put /program opt_part4
+		put /program opt_part5
+		put /program opt_part6
+		put /program opt_part7
+		put /program opt_part8
+		put /program opt_part9
+		put /program opt_part10
+		put /program opt_part11
+		put /program opt_part12
+		put /program opt_part13
+	endoptions
+	stata
+END
+
+PROGRAM opt_part1
+BEGIN
 			if waves.cb_wave1.isneq("") {
 				put " wave1(" waves.cb_wave1 ")"
 			}
 			if waves.cb_wave2.isneq("") {
 				put " wave2(" waves.cb_wave2 ")"
 			}
-			if waves.cx_symmetric.iseq(0) {
-				if waves.ed_waves.isneq("") {
-					put " waves(" waves.ed_waves ")"
-				}
+			if waves.cb_waves.isneq("") {
+				put " waves(" waves.cb_waves ")"
 			}
-			option waves.cx_outdegree
-			if waves.cx_symmetric.iseq(0) {
-				option waves.cx_outdegreeendow
-				option waves.cx_outdegreecreation
-				option waves.cx_reciprocity
-				option waves.cx_reciprocityendow
-				option waves.cx_reciprocitycreation
+			if waves.ed_tvcov.isneq("") {
+				put " tvcov(" waves.ed_tvcov ")"
 			}
-			if waves.vr_nodematch.isneq("") {
-				put " nodematch(" waves.vr_nodematch ")"
+			if waves.ed_actormode.isneq("") {
+				put " actormode(" waves.ed_actormode ")"
 			}
-			if waves.vr_nodecov.isneq("") {
-				put " nodecov(" waves.vr_nodecov ")"
+			if waves.cx_outdegree {
+				put " outdegree"
 			}
-			if waves.vr_nodeicov.isneq("") {
-				put " nodeicov(" waves.vr_nodeicov ")"
+			if waves.cx_reciprocity {
+				put " reciprocity"
 			}
-			if waves.vr_nodeocov.isneq("") {
-				put " nodeocov(" waves.vr_nodeocov ")"
+			if waves.cx_outdegreeendow {
+				put " outdegreeendow"
 			}
-			if waves.vr_simcov.isneq("") {
-				put " simcov(" waves.vr_simcov ")"
+			if waves.cx_outdegreecreation {
+				put " outdegreecreation"
 			}
-			if waves.vr_ratecov.isneq("") {
-				put " ratecov(" waves.vr_ratecov ")"
+			if waves.cx_reciprocityendow {
+				put " reciprocityendow"
 			}
-			if waves.ed_ratecovcoef.isneq("") {
-				put " ratecovcoef(" waves.ed_ratecovcoef ")"
+			if waves.cx_reciprocitycreation {
+				put " reciprocitycreation"
 			}
-			option waves.cx_symmetric
+			if waves.cx_transtiesendow {
+				put " transtiesendow"
+			}
+			if waves.cx_transtiescreation {
+				put " transtiescreation"
+			}
+			if waves.cb_endow.isneq("") {
+				put " endow(" waves.cb_endow ")"
+			}
+			if waves.cb_creation.isneq("") {
+				put " creation(" waves.cb_creation ")"
+			}
 			if waves.cx_symmetric {
-				optionarg waves.cb_symtype
+				put " symmetric"
 			}
-			option structural.cx_indegpopularity
-			option structural.cx_outactivity
-			option structural.cx_transmedtrip
-			option structural.cx_transties
-			option structural.cx_cycle4
-			if structural.cx_gwesp {
-				require structural.ed_gwesp
-				put " gwesp(" structural.ed_gwesp ")"
+			if waves.cb_symtype.isneq("") {
+				put " symtype(" waves.cb_symtype ")"
 			}
-			option structural.cx_isolatenet
-			option structural.cx_outiso
-			option structural.cx_antiiniso
-			option structural.cx_antiiniso2
-			option structural.cx_inplus3
-			option structural.cx_balance
-			option structural.cx_outinass
-			if waves.cx_symmetric.iseq(0) {
-				option structural.cx_outpopularity
-				option structural.cx_inactivity
-				option structural.cx_transtrip
-				option structural.cx_transrectrip
-				option structural.cx_cycle3
-				option structural.cx_antiiso
-				option structural.cx_isolatepop
-				option structural.cx_outoutass
-				option structural.cx_ininass
-				option structural.cx_inoutass
+			if waves.cx_indegpopularity {
+				put " indegpopularity"
 			}
-			if waves.cx_symmetric.iseq(0) {
-				if behavior.vl_behavior.isneq("") {
-					put " behavior(" behavior.vl_behavior ")"
+			if waves.cx_outpopularity {
+				put " outpopularity"
+			}
+			if waves.cx_outactivity {
+				put " outactivity"
+			}
+			if waves.cx_inactivity {
+				put " inactivity"
+			}
+			if waves.cx_inpop {
+				put " inpop"
+			}
+			if waves.cx_outpop {
+				put " outpop"
+			}
+			if waves.cx_inact {
+				put " inact"
+			}
+			if waves.cx_outactsqrt {
+				put " outactsqrt"
+			}
+			if waves.cx_inpopc {
+				put " inpopc"
+			}
+			if waves.cx_outpopc {
+				put " outpopc"
+			}
+			if waves.cx_outactc {
+				put " outactc"
+			}
+			if waves.cx_inactc {
+				put " inactc"
+			}
+			if waves.cx_degplus {
+				put " degplus"
+			}
+			if waves.cx_degplusc {
+				put " degplusc"
+			}
+			if waves.cx_recipop {
+				put " recipop"
+			}
+			if waves.cx_recipopsqrt {
+				put " recipopsqrt"
+			}
+END
+
+PROGRAM opt_part2
+BEGIN
+			if waves.cx_reciact {
+				put " reciact"
+			}
+			if waves.cx_reciactsqrt {
+				put " reciactsqrt"
+			}
+			if waves.cx_between {
+				put " between"
+			}
+			if waves.ed_outtrunc.isneq("") {
+				put " outtrunc(" waves.ed_outtrunc ")"
+			}
+			if waves.ed_outmore.isneq("") {
+				put " outmore(" waves.ed_outmore ")"
+			}
+			if waves.ed_outthreshold.isneq("") {
+				put " outthreshold(" waves.ed_outthreshold ")"
+			}
+			if structure.ed_outinv.isneq("") {
+				put " outinv(" structure.ed_outinv ")"
+			}
+			if structure.ed_outsqinv.isneq("") {
+				put " outsqinv(" structure.ed_outsqinv ")"
+			}
+			if structure.ed_avdeg.isneq("") {
+				put " avdeg(" structure.ed_avdeg ")"
+			}
+			if structure.cx_transtrip {
+				put " transtrip"
+			}
+			if structure.cx_transmedtrip {
+				put " transmedtrip"
+			}
+			if structure.cx_transrectrip {
+				put " transrectrip"
+			}
+			if structure.cx_cycle3 {
+				put " cycle3"
+			}
+			if structure.cx_cycle4 {
+				put " cycle4"
+			}
+			if structure.cx_sqrtcycle4 {
+				put " sqrtcycle4"
+			}
+			if structure.cx_dblnbrdist2 {
+				put " dblnbrdist2"
+			}
+			if structure.cx_nbrdist2 {
+				put " nbrdist2"
+			}
+			if structure.cx_transties {
+				put " transties"
+			}
+			if structure.cx_balance {
+				put " balance"
+			}
+			if structure.cx_transtriads {
+				put " transtriads"
+			}
+			if structure.ed_gwesp.isneq("") {
+				put " gwesp(" structure.ed_gwesp ")"
+			}
+			if structure.ed_gwespfb.isneq("") {
+				put " gwespfb(" structure.ed_gwespfb ")"
+			}
+			if structure.ed_gwespbf.isneq("") {
+				put " gwespbf(" structure.ed_gwespbf ")"
+			}
+			if structure.ed_gwespbb.isneq("") {
+				put " gwespbb(" structure.ed_gwespbb ")"
+			}
+			if structure.ed_gwesprr.isneq("") {
+				put " gwesprr(" structure.ed_gwesprr ")"
+			}
+			if structure.ed_gwdspff.isneq("") {
+				put " gwdspff(" structure.ed_gwdspff ")"
+			}
+			if structure.ed_gwdspfb.isneq("") {
+				put " gwdspfb(" structure.ed_gwdspfb ")"
+			}
+			if structure.cx_isolatenet {
+				put " isolatenet"
+			}
+			if structure.cx_outiso {
+				put " outiso"
+			}
+			if structure.cx_antiiso {
+				put " antiiso"
+			}
+			if structure.cx_antiiniso {
+				put " antiiniso"
+			}
+			if structure.cx_antiiniso2 {
+				put " antiiniso2"
+			}
+			if structure.cx_inplus3 {
+				put " inplus3"
+			}
+END
+
+PROGRAM opt_part3
+BEGIN
+			if structure.cx_isolatepop {
+				put " isolatepop"
+			}
+			if structure.cx_outoutass {
+				put " outoutass"
+			}
+			if structure.cx_ininass {
+				put " ininass"
+			}
+			if structure.cx_outinass {
+				put " outinass"
+			}
+			if structure.cx_inoutass {
+				put " inoutass"
+			}
+			if structure.vl_nodematch.isneq("") {
+				put " nodematch(" structure.vl_nodematch ")"
+			}
+			if structure.vl_samex.isneq("") {
+				put " samex(" structure.vl_samex ")"
+			}
+			if structure.vl_nodecov.isneq("") {
+				put " nodecov(" structure.vl_nodecov ")"
+			}
+			if structure.vl_nodeicov.isneq("") {
+				put " nodeicov(" structure.vl_nodeicov ")"
+			}
+			if structure.vl_altx.isneq("") {
+				put " altx(" structure.vl_altx ")"
+			}
+			if structure.vl_nodeocov.isneq("") {
+				put " nodeocov(" structure.vl_nodeocov ")"
+			}
+			if structure.vl_egox.isneq("") {
+				put " egox(" structure.vl_egox ")"
+			}
+			if structure.vl_simcov.isneq("") {
+				put " simcov(" structure.vl_simcov ")"
+			}
+			if structure.vl_simx.isneq("") {
+				put " simx(" structure.vl_simx ")"
+			}
+			if structure.vl_absdiffx.isneq("") {
+				put " absdiffx(" structure.vl_absdiffx ")"
+			}
+			if structure.vl_egoxaltx.isneq("") {
+				put " egoxaltx(" structure.vl_egoxaltx ")"
+			}
+			if structure.vl_diffx.isneq("") {
+				put " diffx(" structure.vl_diffx ")"
+			}
+			if structure.vl_higher.isneq("") {
+				put " higher(" structure.vl_higher ")"
+			}
+			if structure.vl_egosqx.isneq("") {
+				put " egosqx(" structure.vl_egosqx ")"
+			}
+			if structure.vl_altsqx.isneq("") {
+				put " altsqx(" structure.vl_altsqx ")"
+			}
+			if structure.vl_samexrecip.isneq("") {
+				put " samexrecip(" structure.vl_samexrecip ")"
+			}
+			if structure.vl_simrecipx.isneq("") {
+				put " simrecipx(" structure.vl_simrecipx ")"
+			}
+			if structure.cx_nocenter {
+				put " nocenter"
+			}
+			if covariates.vl_egoplusaltsqx.isneq("") {
+				put " egoplusaltsqx(" covariates.vl_egoplusaltsqx ")"
+			}
+			if covariates.vl_diffsqx.isneq("") {
+				put " diffsqx(" covariates.vl_diffsqx ")"
+			}
+			if covariates.vl_egodiffx.isneq("") {
+				put " egodiffx(" covariates.vl_egodiffx ")"
+			}
+			if covariates.vl_althigheregox.isneq("") {
+				put " althigheregox(" covariates.vl_althigheregox ")"
+			}
+			if covariates.vl_unequalx.isneq("") {
+				put " unequalx(" covariates.vl_unequalx ")"
+			}
+			if covariates.vl_egolthresholdx.isneq("") {
+				put " egolthresholdx(" covariates.vl_egolthresholdx ")"
+			}
+			if covariates.vl_egorthresholdx.isneq("") {
+				put " egorthresholdx(" covariates.vl_egorthresholdx ")"
+			}
+			if covariates.vl_altlthresholdx.isneq("") {
+				put " altlthresholdx(" covariates.vl_altlthresholdx ")"
+			}
+			if covariates.vl_altrthresholdx.isneq("") {
+				put " altrthresholdx(" covariates.vl_altrthresholdx ")"
+			}
+			if covariates.vl_degabsdiffx.isneq("") {
+				put " degabsdiffx(" covariates.vl_degabsdiffx ")"
+			}
+END
+
+PROGRAM opt_part4
+BEGIN
+			if covariates.vl_degposdiffx.isneq("") {
+				put " degposdiffx(" covariates.vl_degposdiffx ")"
+			}
+			if covariates.vl_degnegdiffx.isneq("") {
+				put " degnegdiffx(" covariates.vl_degnegdiffx ")"
+			}
+			if covariates.ed_covthreshold.isneq("") {
+				put " covthreshold(" covariates.ed_covthreshold ")"
+			}
+			if covariates.ed_xparam.isneq("") {
+				put " xparam(" covariates.ed_xparam ")"
+			}
+			if covariates.vl_samextranstrip.isneq("") {
+				put " samextranstrip(" covariates.vl_samextranstrip ")"
+			}
+			if covariates.vl_diffxtranstrip.isneq("") {
+				put " diffxtranstrip(" covariates.vl_diffxtranstrip ")"
+			}
+			if covariates.vl_simxtranstrip.isneq("") {
+				put " simxtranstrip(" covariates.vl_simxtranstrip ")"
+			}
+			if covariates.vl_homxtranstrip.isneq("") {
+				put " homxtranstrip(" covariates.vl_homxtranstrip ")"
+			}
+			if covariates.vl_samexoutact.isneq("") {
+				put " samexoutact(" covariates.vl_samexoutact ")"
+			}
+			if covariates.vl_diffxoutact.isneq("") {
+				put " diffxoutact(" covariates.vl_diffxoutact ")"
+			}
+			if covariates.vl_samexreciact.isneq("") {
+				put " samexreciact(" covariates.vl_samexreciact ")"
+			}
+			if covariates.vl_diffxreciact.isneq("") {
+				put " diffxreciact(" covariates.vl_diffxreciact ")"
+			}
+			if covariates.vl_homxoutact.isneq("") {
+				put " homxoutact(" covariates.vl_homxoutact ")"
+			}
+			if covariates.vl_altxoutact.isneq("") {
+				put " altxoutact(" covariates.vl_altxoutact ")"
+			}
+			if covariates.vl_inpopx.isneq("") {
+				put " inpopx(" covariates.vl_inpopx ")"
+			}
+			if covariates.vl_outpopx.isneq("") {
+				put " outpopx(" covariates.vl_outpopx ")"
+			}
+			if covariates.vl_inactx.isneq("") {
+				put " inactx(" covariates.vl_inactx ")"
+			}
+			if covariates.vl_outactx.isneq("") {
+				put " outactx(" covariates.vl_outactx ")"
+			}
+			if covariates.vl_samexinpop.isneq("") {
+				put " samexinpop(" covariates.vl_samexinpop ")"
+			}
+			if covariates.vl_diffxinpop.isneq("") {
+				put " diffxinpop(" covariates.vl_diffxinpop ")"
+			}
+			if covariates.ed_dyadcov.isneq("") {
+				put " dyadcov(" covariates.ed_dyadcov ")"
+			}
+			if covariates.ed_dyadcovrecip.isneq("") {
+				put " dyadcovrecip(" covariates.ed_dyadcovrecip ")"
+			}
+			if covariates.ed_tvdyadcov.isneq("") {
+				put " tvdyadcov(" covariates.ed_tvdyadcov ")"
+			}
+			if covariates.ed_tvdyadcovrecip.isneq("") {
+				put " tvdyadcovrecip(" covariates.ed_tvdyadcovrecip ")"
+			}
+END
+
+PROGRAM opt_part5
+BEGIN
+			if covariates.cb_dyadx_1 | covariates.cb_dyadx_2 | covariates.cb_dyadx_3 | covariates.cb_dyadx_4 | covariates.cb_dyadx_5 | covariates.cb_dyadx_6 | covariates.ed_dyadx_more {
+				put " dyadx("
+				if covariates.cb_dyadx_1.isneq("") {
+					put covariates.cb_dyadx_1
+					if covariates.ed_dyadx_1a.isneq("") {
+						put ":" covariates.ed_dyadx_1a
+					}
+					put " "
 				}
-				option behavior.cx_linear
-				option behavior.cx_linearendow
-				option behavior.cx_linearcreation
-				option behavior.cx_quadratic
-				option behavior.cx_quadraticendow
-				option behavior.cx_quadraticcreation
-				option behavior.cx_avalt
-				option behavior.cx_avaltendow
-				option behavior.cx_avaltcreation
-				option behavior.cx_avsim
-				option behavior.cx_avsimendow
-				option behavior.cx_avsimcreation
-				if behavior.ed_behtheta0.isneq("") {
-					put " behtheta0(" behavior.ed_behtheta0 ")"
+				if covariates.cb_dyadx_2.isneq("") {
+					put covariates.cb_dyadx_2
+					if covariates.ed_dyadx_2a.isneq("") {
+						put ":" covariates.ed_dyadx_2a
+					}
+					put " "
+				}
+				if covariates.cb_dyadx_3.isneq("") {
+					put covariates.cb_dyadx_3
+					if covariates.ed_dyadx_3a.isneq("") {
+						put ":" covariates.ed_dyadx_3a
+					}
+					put " "
+				}
+				if covariates.cb_dyadx_4.isneq("") {
+					put covariates.cb_dyadx_4
+					if covariates.ed_dyadx_4a.isneq("") {
+						put ":" covariates.ed_dyadx_4a
+					}
+					put " "
+				}
+				if covariates.cb_dyadx_5.isneq("") {
+					put covariates.cb_dyadx_5
+					if covariates.ed_dyadx_5a.isneq("") {
+						put ":" covariates.ed_dyadx_5a
+					}
+					put " "
+				}
+				if covariates.cb_dyadx_6.isneq("") {
+					put covariates.cb_dyadx_6
+					if covariates.ed_dyadx_6a.isneq("") {
+						put ":" covariates.ed_dyadx_6a
+					}
+					put " "
+				}
+				if covariates.ed_dyadx_more.isneq("") {
+					put covariates.ed_dyadx_more
+				}
+				put ")"
+			}
+			if dyadic.cb_tvdyadx_1 | dyadic.cb_tvdyadx_2 | dyadic.cb_tvdyadx_3 | dyadic.cb_tvdyadx_4 | dyadic.ed_tvdyadx_more {
+				put " tvdyadx("
+				if dyadic.cb_tvdyadx_1.isneq("") {
+					put dyadic.cb_tvdyadx_1
+					if dyadic.ed_tvdyadx_1a.isneq("") {
+						put ":" dyadic.ed_tvdyadx_1a
+					}
+					put " "
+				}
+				if dyadic.cb_tvdyadx_2.isneq("") {
+					put dyadic.cb_tvdyadx_2
+					if dyadic.ed_tvdyadx_2a.isneq("") {
+						put ":" dyadic.ed_tvdyadx_2a
+					}
+					put " "
+				}
+				if dyadic.cb_tvdyadx_3.isneq("") {
+					put dyadic.cb_tvdyadx_3
+					if dyadic.ed_tvdyadx_3a.isneq("") {
+						put ":" dyadic.ed_tvdyadx_3a
+					}
+					put " "
+				}
+				if dyadic.cb_tvdyadx_4.isneq("") {
+					put dyadic.cb_tvdyadx_4
+					if dyadic.ed_tvdyadx_4a.isneq("") {
+						put ":" dyadic.ed_tvdyadx_4a
+					}
+					put " "
+				}
+				if dyadic.ed_tvdyadx_more.isneq("") {
+					put dyadic.ed_tvdyadx_more
+				}
+				put ")"
+			}
+END
+
+PROGRAM opt_part6
+BEGIN
+			if dyadic.cb_netx_1 | dyadic.cb_netx_2 | dyadic.cb_netx_3 | dyadic.cb_netx_4 | dyadic.cb_netx_5 | dyadic.cb_netx_6 | dyadic.ed_netx_more {
+				put " netx("
+				if dyadic.cb_netx_1.isneq("") {
+					put dyadic.cb_netx_1
+					if dyadic.ed_netx_1a.isneq("") {
+						put ":" dyadic.ed_netx_1a
+					}
+					put " "
+				}
+				if dyadic.cb_netx_2.isneq("") {
+					put dyadic.cb_netx_2
+					if dyadic.ed_netx_2a.isneq("") {
+						put ":" dyadic.ed_netx_2a
+					}
+					put " "
+				}
+				if dyadic.cb_netx_3.isneq("") {
+					put dyadic.cb_netx_3
+					if dyadic.ed_netx_3a.isneq("") {
+						put ":" dyadic.ed_netx_3a
+					}
+					put " "
+				}
+				if dyadic.cb_netx_4.isneq("") {
+					put dyadic.cb_netx_4
+					if dyadic.ed_netx_4a.isneq("") {
+						put ":" dyadic.ed_netx_4a
+					}
+					put " "
+				}
+				if dyadic.cb_netx_5.isneq("") {
+					put dyadic.cb_netx_5
+					if dyadic.ed_netx_5a.isneq("") {
+						put ":" dyadic.ed_netx_5a
+					}
+					put " "
+				}
+				if dyadic.cb_netx_6.isneq("") {
+					put dyadic.cb_netx_6
+					if dyadic.ed_netx_6a.isneq("") {
+						put ":" dyadic.ed_netx_6a
+					}
+					put " "
+				}
+				if dyadic.ed_netx_more.isneq("") {
+					put dyadic.ed_netx_more
+				}
+				put ")"
+			}
+			if dyadic.cb_ownx_1 | dyadic.cb_ownx_2 | dyadic.cb_ownx_3 | dyadic.cb_ownx_4 | dyadic.cb_ownx_5 | dyadic.cb_ownx_6 | dyadic.ed_ownx_more {
+				put " ownx("
+				if dyadic.cb_ownx_1.isneq("") {
+					put dyadic.cb_ownx_1
+					if dyadic.ed_ownx_1a.isneq("") {
+						put ":" dyadic.ed_ownx_1a
+					}
+					put " "
+				}
+				if dyadic.cb_ownx_2.isneq("") {
+					put dyadic.cb_ownx_2
+					if dyadic.ed_ownx_2a.isneq("") {
+						put ":" dyadic.ed_ownx_2a
+					}
+					put " "
+				}
+				if dyadic.cb_ownx_3.isneq("") {
+					put dyadic.cb_ownx_3
+					if dyadic.ed_ownx_3a.isneq("") {
+						put ":" dyadic.ed_ownx_3a
+					}
+					put " "
+				}
+				if dyadic.cb_ownx_4.isneq("") {
+					put dyadic.cb_ownx_4
+					if dyadic.ed_ownx_4a.isneq("") {
+						put ":" dyadic.ed_ownx_4a
+					}
+					put " "
+				}
+				if dyadic.cb_ownx_5.isneq("") {
+					put dyadic.cb_ownx_5
+					if dyadic.ed_ownx_5a.isneq("") {
+						put ":" dyadic.ed_ownx_5a
+					}
+					put " "
+				}
+				if dyadic.cb_ownx_6.isneq("") {
+					put dyadic.cb_ownx_6
+					if dyadic.ed_ownx_6a.isneq("") {
+						put ":" dyadic.ed_ownx_6a
+					}
+					put " "
+				}
+				if dyadic.ed_ownx_more.isneq("") {
+					put dyadic.ed_ownx_more
+				}
+				put ")"
+			}
+END
+
+PROGRAM opt_part7
+BEGIN
+			if dyadic.cb_netbeh_1 | dyadic.cb_netbeh_2 | dyadic.cb_netbeh_3 | dyadic.cb_netbeh_4 | dyadic.cb_netbeh_5 | dyadic.cb_netbeh_6 | dyadic.ed_netbeh_more {
+				put " netbeh("
+				if dyadic.cb_netbeh_1.isneq("") {
+					put dyadic.cb_netbeh_1
+					if dyadic.ed_netbeh_1a.isneq("") {
+						put ":" dyadic.ed_netbeh_1a
+					}
+					put " "
+				}
+				if dyadic.cb_netbeh_2.isneq("") {
+					put dyadic.cb_netbeh_2
+					if dyadic.ed_netbeh_2a.isneq("") {
+						put ":" dyadic.ed_netbeh_2a
+					}
+					put " "
+				}
+				if dyadic.cb_netbeh_3.isneq("") {
+					put dyadic.cb_netbeh_3
+					if dyadic.ed_netbeh_3a.isneq("") {
+						put ":" dyadic.ed_netbeh_3a
+					}
+					put " "
+				}
+				if dyadic.cb_netbeh_4.isneq("") {
+					put dyadic.cb_netbeh_4
+					if dyadic.ed_netbeh_4a.isneq("") {
+						put ":" dyadic.ed_netbeh_4a
+					}
+					put " "
+				}
+				if dyadic.cb_netbeh_5.isneq("") {
+					put dyadic.cb_netbeh_5
+					if dyadic.ed_netbeh_5a.isneq("") {
+						put ":" dyadic.ed_netbeh_5a
+					}
+					put " "
+				}
+				if dyadic.cb_netbeh_6.isneq("") {
+					put dyadic.cb_netbeh_6
+					if dyadic.ed_netbeh_6a.isneq("") {
+						put ":" dyadic.ed_netbeh_6a
+					}
+					put " "
+				}
+				if dyadic.ed_netbeh_more.isneq("") {
+					put dyadic.ed_netbeh_more
+				}
+				put ")"
+			}
+			if (rates.cb_interact_1a.isneq("") & rates.cb_interact_1b.isneq("")) | (rates.cb_interact_2a.isneq("") & rates.cb_interact_2b.isneq("")) | (rates.cb_interact_3a.isneq("") & rates.cb_interact_3b.isneq("")) | (rates.cb_interact_4a.isneq("") & rates.cb_interact_4b.isneq("")) | (rates.cb_interact_5a.isneq("") & rates.cb_interact_5b.isneq("")) | (rates.cb_interact_6a.isneq("") & rates.cb_interact_6b.isneq("")) | rates.ed_interact.isneq("") {
+				put " interact("
+				if rates.cb_interact_1a.isneq("") & rates.cb_interact_1b.isneq("") {
+					put rates.cb_interact_1a "#" rates.cb_interact_1b " "
+				}
+				if rates.cb_interact_2a.isneq("") & rates.cb_interact_2b.isneq("") {
+					put rates.cb_interact_2a "#" rates.cb_interact_2b " "
+				}
+				if rates.cb_interact_3a.isneq("") & rates.cb_interact_3b.isneq("") {
+					put rates.cb_interact_3a "#" rates.cb_interact_3b " "
+				}
+				if rates.cb_interact_4a.isneq("") & rates.cb_interact_4b.isneq("") {
+					put rates.cb_interact_4a "#" rates.cb_interact_4b " "
+				}
+				if rates.cb_interact_5a.isneq("") & rates.cb_interact_5b.isneq("") {
+					put rates.cb_interact_5a "#" rates.cb_interact_5b " "
+				}
+				if rates.cb_interact_6a.isneq("") & rates.cb_interact_6b.isneq("") {
+					put rates.cb_interact_6a "#" rates.cb_interact_6b " "
+				}
+				if rates.ed_interact.isneq("") {
+					put rates.ed_interact
+				}
+				put ")"
+			}
+			if rates.cx_outrate {
+				put " outrate"
+			}
+			if rates.cx_inrate {
+				put " inrate"
+			}
+			if rates.cx_reciprate {
+				put " reciprate"
+			}
+			if rates.cx_outrateinv {
+				put " outrateinv"
+			}
+			if rates.cx_inrateinv {
+				put " inrateinv"
+			}
+			if rates.cx_reciprateinv {
+				put " reciprateinv"
+			}
+			if rates.cx_outratelog {
+				put " outratelog"
+			}
+			if rates.cx_inratelog {
+				put " inratelog"
+			}
+END
+
+PROGRAM opt_part8
+BEGIN
+			if rates.cx_recipratelog {
+				put " recipratelog"
+			}
+			if rates.vl_ratecov.isneq("") {
+				put " ratecov(" rates.vl_ratecov ")"
+			}
+			if rates.ed_ratecovcoef.isneq("") {
+				put " ratecovcoef(" rates.ed_ratecovcoef ")"
+			}
+			if rates.vl_behratecov.isneq("") {
+				put " behratecov(" rates.vl_behratecov ")"
+			}
+			if rates.ed_behratecoef.isneq("") {
+				put " behratecoef(" rates.ed_behratecoef ")"
+			}
+			if rates.cb_behrate_1 | rates.cb_behrate_2 | rates.cb_behrate_3 | rates.cb_behrate_4 | rates.ed_behrate_more {
+				put " behrate("
+				if rates.cb_behrate_1.isneq("") {
+					put rates.cb_behrate_1
+					if rates.ed_behrate_1a.isneq("") {
+						put "(" rates.ed_behrate_1a ")"
+					}
+					put " "
+				}
+				if rates.cb_behrate_2.isneq("") {
+					put rates.cb_behrate_2
+					if rates.ed_behrate_2a.isneq("") {
+						put "(" rates.ed_behrate_2a ")"
+					}
+					put " "
+				}
+				if rates.cb_behrate_3.isneq("") {
+					put rates.cb_behrate_3
+					if rates.ed_behrate_3a.isneq("") {
+						put "(" rates.ed_behrate_3a ")"
+					}
+					put " "
+				}
+				if rates.cb_behrate_4.isneq("") {
+					put rates.cb_behrate_4
+					if rates.ed_behrate_4a.isneq("") {
+						put "(" rates.ed_behrate_4a ")"
+					}
+					put " "
+				}
+				if rates.ed_behrate_more.isneq("") {
+					put rates.ed_behrate_more
+				}
+				put ")"
+			}
+			if rates.vl_present.isneq("") {
+				put " present(" rates.vl_present ")"
+			}
+			if rates.vl_joinat.isneq("") {
+				put " joinat(" rates.vl_joinat ")"
+			}
+			if rates.vl_leaveat.isneq("") {
+				put " leaveat(" rates.vl_leaveat ")"
+			}
+			if rates.ed_missnet.isneq("") {
+				put " missnet(" rates.ed_missnet ")"
+			}
+			if rates_2.vl_missbeh.isneq("") {
+				put " missbeh(" rates_2.vl_missbeh ")"
+			}
+			if rates_2.ed_structural.isneq("") {
+				put " structural(" rates_2.ed_structural ")"
+			}
+			if rates_2.vl_behavior.isneq("") {
+				put " behavior(" rates_2.vl_behavior ")"
+			}
+			if rates_2.cx_linear {
+				put " linear"
+			}
+			if rates_2.cx_linearendow {
+				put " linearendow"
+			}
+			if rates_2.cx_linearcreation {
+				put " linearcreation"
+			}
+			if rates_2.cx_quadratic {
+				put " quadratic"
+			}
+			if rates_2.cx_quadraticendow {
+				put " quadraticendow"
+			}
+			if rates_2.cx_quadraticcreation {
+				put " quadraticcreation"
+			}
+			if rates_2.cx_avalt {
+				put " avalt"
+			}
+			if rates_2.cx_avaltendow {
+				put " avaltendow"
+			}
+			if rates_2.cx_avaltcreation {
+				put " avaltcreation"
+			}
+END
+
+PROGRAM opt_part9
+BEGIN
+			if rates_2.cx_avsim {
+				put " avsim"
+			}
+			if rates_2.cx_avsimendow {
+				put " avsimendow"
+			}
+			if rates_2.cx_avsimcreation {
+				put " avsimcreation"
+			}
+			if rates_2.cx_behsim {
+				put " behsim"
+			}
+			if rates_2.cx_behegox {
+				put " behegox"
+			}
+			if rates_2.cx_behaltx {
+				put " behaltx"
+			}
+			if rates_2.cx_behegoplusalt {
+				put " behegoplusalt"
+			}
+			if rates_2.ed_behtheta0.isneq("") {
+				put " behtheta0(" rates_2.ed_behtheta0 ")"
+			}
+			if rates_2.vl_behfrom.isneq("") {
+				put " behfrom(" rates_2.vl_behfrom ")"
+			}
+			if rates_2.vl_behavxalt.isneq("") {
+				put " behavxalt(" rates_2.vl_behavxalt ")"
+			}
+			if rates_2.vl_behavsamexalt.isneq("") {
+				put " behavsamexalt(" rates_2.vl_behavsamexalt ")"
+			}
+			if rates_2.vl_behtotxalt.isneq("") {
+				put " behtotxalt(" rates_2.vl_behtotxalt ")"
+			}
+			if rates_2.vl_behtotsamexalt.isneq("") {
+				put " behtotsamexalt(" rates_2.vl_behtotsamexalt ")"
+			}
+			if rates_2.cb_beheff_1 | rates_2.cb_beheff_2 | rates_2.cb_beheff_3 | rates_2.cb_beheff_4 | rates_2.cb_beheff_5 | rates_2.cb_beheff_6 | rates_2.ed_beheff_more {
+				put " beheff("
+				if rates_2.cb_beheff_1.isneq("") {
+					put rates_2.cb_beheff_1
+					if rates_2.ed_beheff_1a.isneq("") {
+						put ":" rates_2.ed_beheff_1a
+					}
+					put " "
+				}
+				if rates_2.cb_beheff_2.isneq("") {
+					put rates_2.cb_beheff_2
+					if rates_2.ed_beheff_2a.isneq("") {
+						put ":" rates_2.ed_beheff_2a
+					}
+					put " "
+				}
+				if rates_2.cb_beheff_3.isneq("") {
+					put rates_2.cb_beheff_3
+					if rates_2.ed_beheff_3a.isneq("") {
+						put ":" rates_2.ed_beheff_3a
+					}
+					put " "
+				}
+				if rates_2.cb_beheff_4.isneq("") {
+					put rates_2.cb_beheff_4
+					if rates_2.ed_beheff_4a.isneq("") {
+						put ":" rates_2.ed_beheff_4a
+					}
+					put " "
+				}
+				if rates_2.cb_beheff_5.isneq("") {
+					put rates_2.cb_beheff_5
+					if rates_2.ed_beheff_5a.isneq("") {
+						put ":" rates_2.ed_beheff_5a
+					}
+					put " "
+				}
+				if rates_2.cb_beheff_6.isneq("") {
+					put rates_2.cb_beheff_6
+					if rates_2.ed_beheff_6a.isneq("") {
+						put ":" rates_2.ed_beheff_6a
+					}
+					put " "
+				}
+				if rates_2.ed_beheff_more.isneq("") {
+					put rates_2.ed_beheff_more
+				}
+				put ")"
+			}
+END
+
+PROGRAM opt_part10
+BEGIN
+			if rates_2.cb_behshape_1 | rates_2.cb_behshape_2 | rates_2.cb_behshape_3 | rates_2.cb_behshape_4 | rates_2.ed_behshape_more {
+				put " behshape("
+				if rates_2.cb_behshape_1.isneq("") {
+					put rates_2.cb_behshape_1
+					if rates_2.ed_behshape_1a.isneq("") {
+						put ":" rates_2.ed_behshape_1a
+					}
+					put " "
+				}
+				if rates_2.cb_behshape_2.isneq("") {
+					put rates_2.cb_behshape_2
+					if rates_2.ed_behshape_2a.isneq("") {
+						put ":" rates_2.ed_behshape_2a
+					}
+					put " "
+				}
+				if rates_2.cb_behshape_3.isneq("") {
+					put rates_2.cb_behshape_3
+					if rates_2.ed_behshape_3a.isneq("") {
+						put ":" rates_2.ed_behshape_3a
+					}
+					put " "
+				}
+				if rates_2.cb_behshape_4.isneq("") {
+					put rates_2.cb_behshape_4
+					if rates_2.ed_behshape_4a.isneq("") {
+						put ":" rates_2.ed_behshape_4a
+					}
+					put " "
+				}
+				if rates_2.ed_behshape_more.isneq("") {
+					put rates_2.ed_behshape_more
+				}
+				put ")"
+			}
+			if behavior.cb_behnet2_1 | behavior.cb_behnet2_2 | behavior.cb_behnet2_3 | behavior.cb_behnet2_4 | behavior.cb_behnet2_5 | behavior.cb_behnet2_6 | behavior.ed_behnet2_more {
+				put " behnet2("
+				if behavior.cb_behnet2_1.isneq("") {
+					put behavior.cb_behnet2_1
+					if behavior.ed_behnet2_1a.isneq("") {
+						put ":" behavior.ed_behnet2_1a
+					}
+					put " "
+				}
+				if behavior.cb_behnet2_2.isneq("") {
+					put behavior.cb_behnet2_2
+					if behavior.ed_behnet2_2a.isneq("") {
+						put ":" behavior.ed_behnet2_2a
+					}
+					put " "
+				}
+				if behavior.cb_behnet2_3.isneq("") {
+					put behavior.cb_behnet2_3
+					if behavior.ed_behnet2_3a.isneq("") {
+						put ":" behavior.ed_behnet2_3a
+					}
+					put " "
+				}
+				if behavior.cb_behnet2_4.isneq("") {
+					put behavior.cb_behnet2_4
+					if behavior.ed_behnet2_4a.isneq("") {
+						put ":" behavior.ed_behnet2_4a
+					}
+					put " "
+				}
+				if behavior.cb_behnet2_5.isneq("") {
+					put behavior.cb_behnet2_5
+					if behavior.ed_behnet2_5a.isneq("") {
+						put ":" behavior.ed_behnet2_5a
+					}
+					put " "
+				}
+				if behavior.cb_behnet2_6.isneq("") {
+					put behavior.cb_behnet2_6
+					if behavior.ed_behnet2_6a.isneq("") {
+						put ":" behavior.ed_behnet2_6a
+					}
+					put " "
+				}
+				if behavior.ed_behnet2_more.isneq("") {
+					put behavior.ed_behnet2_more
+				}
+				put ")"
+			}
+			if behavior.ed_behwparam.isneq("") {
+				put " behwparam(" behavior.ed_behwparam ")"
+			}
+END
+
+PROGRAM opt_part11
+BEGIN
+			if behavior.cb_behx_1 | behavior.cb_behx_2 | behavior.cb_behx_3 | behavior.cb_behx_4 | behavior.cb_behx_5 | behavior.cb_behx_6 | behavior.ed_behx_more {
+				put " behx("
+				if behavior.cb_behx_1.isneq("") {
+					put behavior.cb_behx_1
+					if behavior.ed_behx_1a.isneq("") {
+						put ":" behavior.ed_behx_1a
+					}
+					put " "
+				}
+				if behavior.cb_behx_2.isneq("") {
+					put behavior.cb_behx_2
+					if behavior.ed_behx_2a.isneq("") {
+						put ":" behavior.ed_behx_2a
+					}
+					put " "
+				}
+				if behavior.cb_behx_3.isneq("") {
+					put behavior.cb_behx_3
+					if behavior.ed_behx_3a.isneq("") {
+						put ":" behavior.ed_behx_3a
+					}
+					put " "
+				}
+				if behavior.cb_behx_4.isneq("") {
+					put behavior.cb_behx_4
+					if behavior.ed_behx_4a.isneq("") {
+						put ":" behavior.ed_behx_4a
+					}
+					put " "
+				}
+				if behavior.cb_behx_5.isneq("") {
+					put behavior.cb_behx_5
+					if behavior.ed_behx_5a.isneq("") {
+						put ":" behavior.ed_behx_5a
+					}
+					put " "
+				}
+				if behavior.cb_behx_6.isneq("") {
+					put behavior.cb_behx_6
+					if behavior.ed_behx_6a.isneq("") {
+						put ":" behavior.ed_behx_6a
+					}
+					put " "
+				}
+				if behavior.ed_behx_more.isneq("") {
+					put behavior.ed_behx_more
+				}
+				put ")"
+			}
+			if behavior.cb_behw_1 | behavior.cb_behw_2 | behavior.cb_behw_3 | behavior.cb_behw_4 | behavior.ed_behw_more {
+				put " behw("
+				if behavior.cb_behw_1.isneq("") {
+					put behavior.cb_behw_1
+					if behavior.ed_behw_1a.isneq("") {
+						put ":" behavior.ed_behw_1a
+					}
+					put " "
+				}
+				if behavior.cb_behw_2.isneq("") {
+					put behavior.cb_behw_2
+					if behavior.ed_behw_2a.isneq("") {
+						put ":" behavior.ed_behw_2a
+					}
+					put " "
+				}
+				if behavior.cb_behw_3.isneq("") {
+					put behavior.cb_behw_3
+					if behavior.ed_behw_3a.isneq("") {
+						put ":" behavior.ed_behw_3a
+					}
+					put " "
+				}
+				if behavior.cb_behw_4.isneq("") {
+					put behavior.cb_behw_4
+					if behavior.ed_behw_4a.isneq("") {
+						put ":" behavior.ed_behw_4a
+					}
+					put " "
+				}
+				if behavior.ed_behw_more.isneq("") {
+					put behavior.ed_behw_more
+				}
+				put ")"
+			}
+END
+
+PROGRAM opt_part12
+BEGIN
+			if behavior.cb_tvbehw_1 | behavior.cb_tvbehw_2 | behavior.cb_tvbehw_3 | behavior.cb_tvbehw_4 | behavior.ed_tvbehw_more {
+				put " tvbehw("
+				if behavior.cb_tvbehw_1.isneq("") {
+					put behavior.cb_tvbehw_1
+					if behavior.ed_tvbehw_1a.isneq("") {
+						put ":" behavior.ed_tvbehw_1a
+					}
+					put " "
+				}
+				if behavior.cb_tvbehw_2.isneq("") {
+					put behavior.cb_tvbehw_2
+					if behavior.ed_tvbehw_2a.isneq("") {
+						put ":" behavior.ed_tvbehw_2a
+					}
+					put " "
+				}
+				if behavior.cb_tvbehw_3.isneq("") {
+					put behavior.cb_tvbehw_3
+					if behavior.ed_tvbehw_3a.isneq("") {
+						put ":" behavior.ed_tvbehw_3a
+					}
+					put " "
+				}
+				if behavior.cb_tvbehw_4.isneq("") {
+					put behavior.cb_tvbehw_4
+					if behavior.ed_tvbehw_4a.isneq("") {
+						put ":" behavior.ed_tvbehw_4a
+					}
+					put " "
+				}
+				if behavior.ed_tvbehw_more.isneq("") {
+					put behavior.ed_tvbehw_more
+				}
+				put ")"
+			}
+			if behavior.ed_k0.isneq("") {
+				put " k0(" behavior.ed_k0 ")"
+			}
+			if behavior.ed_k3.isneq("") {
+				put " k3(" behavior.ed_k3 ")"
+			}
+			if behavior.ed_firstg.isneq("") {
+				put " firstg(" behavior.ed_firstg ")"
+			}
+			if estimate.ed_seed.isneq("") {
+				put " seed(" estimate.ed_seed ")"
+			}
+			if estimate.ed_cores.isneq("") {
+				put " cores(" estimate.ed_cores ")"
+			}
+			if waves.rb_nwsaom_est {
+				if estimate.ed_theta0.isneq("") {
+					put " theta0(" estimate.ed_theta0 ")"
 				}
 			}
-			if special.vl_present.isneq("") {
-				put " present(" special.vl_present ")"
+			if estimate.ed_rate0.isneq("") {
+				put " rate0(" estimate.ed_rate0 ")"
 			}
-			if special.ed_missnet.isneq("") {
-				put " missnet(" special.ed_missnet ")"
+			if waves.rb_nwsaom_est {
+				if estimate.ed_fix.isneq("") {
+					put " fix(" estimate.ed_fix ")"
+				}
 			}
-			if special.vl_missbeh.isneq("") {
-				put " missbeh(" special.vl_missbeh ")"
+			if estimate.cx_unconditional {
+				put " unconditional"
 			}
-			if special.ed_interact.isneq("") {
-				put " interact(" special.ed_interact ")"
+			if waves.rb_nwsaom_est {
+				if estimate.cx_ml {
+					put " ml"
+				}
 			}
-			if estimation.ed_theta0.isneq("") {
-				put " theta0(" estimation.ed_theta0 ")"
+			if estimate.cx_detail {
+				put " detail"
 			}
-			optionarg estimation.sp_k0
-			optionarg estimation.sp_k3
-			if estimation.ed_firstg.isneq("0.2") {
-				put " firstg(" estimation.ed_firstg ")"
+			if waves.rb_nwsaom_sim {
+				if estimate.ed_sim_theta.isneq("") {
+					put " theta(" estimate.ed_sim_theta ")"
+				}
 			}
-			optionarg estimation.sp_seed
-			if estimation.ed_rate0.isneq("") {
-				put " rate0(" estimation.ed_rate0 ")"
+			if waves.rb_nwsaom_sim {
+				if estimate.ed_sim_behtheta.isneq("") {
+					put " behtheta(" estimate.ed_sim_behtheta ")"
+				}
 			}
-			option estimation.ck_uncond
-		endoptions
-	}
-	stata
+			if waves.rb_nwsaom_sim {
+				if estimate_2.ed_sim_rates.isneq("") {
+					put " rates(" estimate_2.ed_sim_rates ")"
+				}
+			}
+			if waves.rb_nwsaom_sim {
+				if estimate_2.ed_sim_ratesbeh.isneq("") {
+					put " ratesbeh(" estimate_2.ed_sim_ratesbeh ")"
+				}
+			}
+			if waves.rb_nwsaom_sim {
+				if estimate_2.ed_sim_nsim.isneq("") {
+					put " nsim(" estimate_2.ed_sim_nsim ")"
+				}
+			}
+END
+
+PROGRAM opt_part13
+BEGIN
+			if waves.rb_nwsaom_sim {
+				if estimate_2.ed_sim_generate.isneq("") {
+					put " generate(" estimate_2.ed_sim_generate ")"
+				}
+			}
+			if waves.rb_nwsaom_est {
+				if estimate.ed_ml_n1 | estimate.ed_ml_nsub | estimate.ed_ml_nstart2 | estimate.ed_ml_n3 | estimate.ed_ml_mult | estimate.ed_ml_nmh | estimate.ed_ml_gain | estimate.ed_ml_mhgeom | estimate.ed_ml_seed | estimate.ed_ml_theta0 | estimate.ed_ml_rate0 | estimate.cx_ml_notable {
+					put " mloptions("
+					if estimate.ed_ml_n1.isneq("") {
+						put "n1(" estimate.ed_ml_n1 ") "
+					}
+					if estimate.ed_ml_nsub.isneq("") {
+						put "nsub(" estimate.ed_ml_nsub ") "
+					}
+					if estimate.ed_ml_nstart2.isneq("") {
+						put "nstart2(" estimate.ed_ml_nstart2 ") "
+					}
+					if estimate.ed_ml_n3.isneq("") {
+						put "n3(" estimate.ed_ml_n3 ") "
+					}
+					if estimate.ed_ml_mult.isneq("") {
+						put "mult(" estimate.ed_ml_mult ") "
+					}
+					if estimate.ed_ml_nmh.isneq("") {
+						put "nmh(" estimate.ed_ml_nmh ") "
+					}
+					if estimate.ed_ml_gain.isneq("") {
+						put "gain(" estimate.ed_ml_gain ") "
+					}
+					if estimate.ed_ml_mhgeom.isneq("") {
+						put "mhgeom(" estimate.ed_ml_mhgeom ") "
+					}
+					if estimate.ed_ml_seed.isneq("") {
+						put "seed(" estimate.ed_ml_seed ") "
+					}
+					if estimate.ed_ml_theta0.isneq("") {
+						put "theta0(" estimate.ed_ml_theta0 ") "
+					}
+					if estimate.ed_ml_rate0.isneq("") {
+						put "rate0(" estimate.ed_ml_rate0 ") "
+					}
+					if estimate.cx_ml_notable {
+						put "notable "
+					}
+					put ")"
+				}
+			}
 END

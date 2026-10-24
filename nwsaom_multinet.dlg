@@ -1,0 +1,1766 @@
+VERSION 10
+
+
+SYNCHRONOUS_ONLY
+INCLUDE _std_mlarge
+DEFINE _dlgwd 1080
+DEFINE _dlght 600
+INCLUDE header
+
+HELP hlp1, view("help nwsaom")
+RESET res1
+
+SCRIPT PREINIT
+BEGIN
+	program initialize
+END
+
+DIALOG networks, tabtitle("Networks")
+BEGIN
+  TEXT tx_h0_1 10 10 1040 ., label("-- Two networks that change together on the same actors (the waves of each, same number, at least two) --")
+  TEXT tx_multinet_net1 10 31 185 ., label("net1() - waves of network 1")
+  COMBOBOX cb_multinet_net1 200 31 150 ., dropdown contents(netlist) append nomem
+  TEXT tx_multinet_net2 363 31 185 ., label("net2() - waves of network 2")
+  COMBOBOX cb_multinet_net2 553 31 150 ., dropdown contents(netlist) append nomem
+  CHECKBOX cx_multinet_sym1 10 52 260 ., label("sym1 - network 1 is non-directed")
+  CHECKBOX cx_multinet_sym2 275 52 260 ., label("sym2 - network 2 is non-directed")
+  TEXT tx_multinet_actormode 10 73 430 ., label("actormode() - two-mode network: actor mode (1|2)")
+  EDIT ed_multinet_actormode 450 73 610 ., nomem
+  TEXT tx_multinet_tvcov 10 94 430 ., label("tvcov() - changing covariates a1 a2 a3")
+  EDIT ed_multinet_tvcov 450 94 610 ., nomem
+  TEXT tx_multinet_eff1_t 10 115 1050 ., label("-- eff1() - effects within network 1 (default outdegree reciprocity) -- box next to the effect: variable / matrix / parameter after the colon")
+  CHECKBOX cx_multinet_eff1_outdegree 10 136 260 ., label("outdegree (density)") default(1)
+  CHECKBOX cx_multinet_eff1_reciprocity 275 136 260 ., label("reciprocity (recip)") default(1)
+  CHECKBOX cx_multinet_eff1_transtrip 540 136 260 ., label("transtrip (transTrip)")
+  CHECKBOX cx_multinet_eff1_cycle3 805 136 260 ., label("cycle3 (cycle3)")
+  CHECKBOX cx_multinet_eff1_transmedtrip 10 157 260 ., label("transmedtrip (transMedTrip)")
+  CHECKBOX cx_multinet_eff1_cycle4 275 157 260 ., label("cycle4 (cycle4)")
+  CHECKBOX cx_multinet_eff1_indegpop 540 157 260 ., label("indegpop (inPop)")
+  CHECKBOX cx_multinet_eff1_outact 805 157 260 ., label("outact (outAct)")
+  COMBOBOX cb_multinet_eff1_1 10 178 215 ., dropdown contents(lst_multinet_eff1) values(lst_multinet_eff1_v) nomem
+  EDIT ed_multinet_eff1_1a 230 178 115 ., nomem
+  COMBOBOX cb_multinet_eff1_2 363 178 215 ., dropdown contents(lst_multinet_eff1) values(lst_multinet_eff1_v) nomem
+  EDIT ed_multinet_eff1_2a 583 178 115 ., nomem
+  COMBOBOX cb_multinet_eff1_3 716 178 215 ., dropdown contents(lst_multinet_eff1) values(lst_multinet_eff1_v) nomem
+  EDIT ed_multinet_eff1_3a 936 178 115 ., nomem
+  COMBOBOX cb_multinet_eff1_4 10 199 215 ., dropdown contents(lst_multinet_eff1) values(lst_multinet_eff1_v) nomem
+  EDIT ed_multinet_eff1_4a 230 199 115 ., nomem
+  TEXT tx_multinet_eff1_more 10 220 215 ., label("more tokens (typed)")
+  EDIT ed_multinet_eff1_more 230 220 830 ., nomem
+  TEXT tx_multinet_eff2_t 10 247 1050 ., label("-- eff2() - effects within network 2 (default outdegree reciprocity) -- box next to the effect: variable / matrix / parameter after the colon")
+  CHECKBOX cx_multinet_eff2_outdegree 10 268 260 ., label("outdegree (density)") default(1)
+  CHECKBOX cx_multinet_eff2_reciprocity 275 268 260 ., label("reciprocity (recip)") default(1)
+  CHECKBOX cx_multinet_eff2_transtrip 540 268 260 ., label("transtrip (transTrip)")
+  CHECKBOX cx_multinet_eff2_cycle3 805 268 260 ., label("cycle3 (cycle3)")
+  CHECKBOX cx_multinet_eff2_transmedtrip 10 289 260 ., label("transmedtrip (transMedTrip)")
+  CHECKBOX cx_multinet_eff2_cycle4 275 289 260 ., label("cycle4 (cycle4)")
+  CHECKBOX cx_multinet_eff2_indegpop 540 289 260 ., label("indegpop (inPop)")
+  CHECKBOX cx_multinet_eff2_outact 805 289 260 ., label("outact (outAct)")
+  COMBOBOX cb_multinet_eff2_1 10 310 215 ., dropdown contents(lst_multinet_eff2) values(lst_multinet_eff2_v) nomem
+  EDIT ed_multinet_eff2_1a 230 310 115 ., nomem
+  COMBOBOX cb_multinet_eff2_2 363 310 215 ., dropdown contents(lst_multinet_eff2) values(lst_multinet_eff2_v) nomem
+  EDIT ed_multinet_eff2_2a 583 310 115 ., nomem
+  COMBOBOX cb_multinet_eff2_3 716 310 215 ., dropdown contents(lst_multinet_eff2) values(lst_multinet_eff2_v) nomem
+  EDIT ed_multinet_eff2_3a 936 310 115 ., nomem
+  COMBOBOX cb_multinet_eff2_4 10 331 215 ., dropdown contents(lst_multinet_eff2) values(lst_multinet_eff2_v) nomem
+  EDIT ed_multinet_eff2_4a 230 331 115 ., nomem
+  TEXT tx_multinet_eff2_more 10 352 215 ., label("more tokens (typed)")
+  EDIT ed_multinet_eff2_more 230 352 830 ., nomem
+  TEXT tx_n49_1 10 379 1050 ., label("cross1() - effects of network 1 that depend on the other network. Name[:var] for covariate versions (variable or tvcov stem),")
+  TEXT tx_n50_1 10 400 1050 ., label("name:matrix for dyadic ones, name:# for a parameter. Native plugin only.")
+END
+
+DIALOG cross_net, tabtitle("Cross-net")
+BEGIN
+  TEXT tx_multinet_cross1_t 10 10 1050 ., label("-- cross1() - cross-network effects -- box next to the effect: variable / matrix / parameter after the colon")
+  COMBOBOX cb_multinet_cross1_1 10 31 215 ., dropdown contents(lst_multinet_cross1) values(lst_multinet_cross1_v) nomem
+  EDIT ed_multinet_cross1_1a 230 31 115 ., nomem
+  COMBOBOX cb_multinet_cross1_2 363 31 215 ., dropdown contents(lst_multinet_cross1) values(lst_multinet_cross1_v) nomem
+  EDIT ed_multinet_cross1_2a 583 31 115 ., nomem
+  COMBOBOX cb_multinet_cross1_3 716 31 215 ., dropdown contents(lst_multinet_cross1) values(lst_multinet_cross1_v) nomem
+  EDIT ed_multinet_cross1_3a 936 31 115 ., nomem
+  COMBOBOX cb_multinet_cross1_4 10 52 215 ., dropdown contents(lst_multinet_cross1) values(lst_multinet_cross1_v) nomem
+  EDIT ed_multinet_cross1_4a 230 52 115 ., nomem
+  COMBOBOX cb_multinet_cross1_5 363 52 215 ., dropdown contents(lst_multinet_cross1) values(lst_multinet_cross1_v) nomem
+  EDIT ed_multinet_cross1_5a 583 52 115 ., nomem
+  COMBOBOX cb_multinet_cross1_6 716 52 215 ., dropdown contents(lst_multinet_cross1) values(lst_multinet_cross1_v) nomem
+  EDIT ed_multinet_cross1_6a 936 52 115 ., nomem
+  COMBOBOX cb_multinet_cross1_7 10 73 215 ., dropdown contents(lst_multinet_cross1) values(lst_multinet_cross1_v) nomem
+  EDIT ed_multinet_cross1_7a 230 73 115 ., nomem
+  COMBOBOX cb_multinet_cross1_8 363 73 215 ., dropdown contents(lst_multinet_cross1) values(lst_multinet_cross1_v) nomem
+  EDIT ed_multinet_cross1_8a 583 73 115 ., nomem
+  COMBOBOX cb_multinet_cross1_9 716 73 215 ., dropdown contents(lst_multinet_cross1) values(lst_multinet_cross1_v) nomem
+  EDIT ed_multinet_cross1_9a 936 73 115 ., nomem
+  COMBOBOX cb_multinet_cross1_10 10 94 215 ., dropdown contents(lst_multinet_cross1) values(lst_multinet_cross1_v) nomem
+  EDIT ed_multinet_cross1_10a 230 94 115 ., nomem
+  TEXT tx_multinet_cross1_more 10 115 215 ., label("more tokens (typed)")
+  EDIT ed_multinet_cross1_more 230 115 830 ., nomem
+  TEXT tx_n23_2 10 142 1050 ., label("cross2() - effects of network 2 that depend on the other network. Name[:var] for covariate versions (variable or tvcov stem),")
+  TEXT tx_n24_2 10 163 1050 ., label("name:matrix for dyadic ones, name:# for a parameter. Native plugin only.")
+  TEXT tx_multinet_cross2_t 10 184 1050 ., label("-- cross2() - cross-network effects -- box next to the effect: variable / matrix / parameter after the colon")
+  COMBOBOX cb_multinet_cross2_1 10 205 215 ., dropdown contents(lst_multinet_cross2) values(lst_multinet_cross2_v) nomem
+  EDIT ed_multinet_cross2_1a 230 205 115 ., nomem
+  COMBOBOX cb_multinet_cross2_2 363 205 215 ., dropdown contents(lst_multinet_cross2) values(lst_multinet_cross2_v) nomem
+  EDIT ed_multinet_cross2_2a 583 205 115 ., nomem
+  COMBOBOX cb_multinet_cross2_3 716 205 215 ., dropdown contents(lst_multinet_cross2) values(lst_multinet_cross2_v) nomem
+  EDIT ed_multinet_cross2_3a 936 205 115 ., nomem
+  COMBOBOX cb_multinet_cross2_4 10 226 215 ., dropdown contents(lst_multinet_cross2) values(lst_multinet_cross2_v) nomem
+  EDIT ed_multinet_cross2_4a 230 226 115 ., nomem
+  COMBOBOX cb_multinet_cross2_5 363 226 215 ., dropdown contents(lst_multinet_cross2) values(lst_multinet_cross2_v) nomem
+  EDIT ed_multinet_cross2_5a 583 226 115 ., nomem
+  COMBOBOX cb_multinet_cross2_6 716 226 215 ., dropdown contents(lst_multinet_cross2) values(lst_multinet_cross2_v) nomem
+  EDIT ed_multinet_cross2_6a 936 226 115 ., nomem
+  COMBOBOX cb_multinet_cross2_7 10 247 215 ., dropdown contents(lst_multinet_cross2) values(lst_multinet_cross2_v) nomem
+  EDIT ed_multinet_cross2_7a 230 247 115 ., nomem
+  COMBOBOX cb_multinet_cross2_8 363 247 215 ., dropdown contents(lst_multinet_cross2) values(lst_multinet_cross2_v) nomem
+  EDIT ed_multinet_cross2_8a 583 247 115 ., nomem
+  COMBOBOX cb_multinet_cross2_9 716 247 215 ., dropdown contents(lst_multinet_cross2) values(lst_multinet_cross2_v) nomem
+  EDIT ed_multinet_cross2_9a 936 247 115 ., nomem
+  COMBOBOX cb_multinet_cross2_10 10 268 215 ., dropdown contents(lst_multinet_cross2) values(lst_multinet_cross2_v) nomem
+  EDIT ed_multinet_cross2_10a 230 268 115 ., nomem
+  TEXT tx_multinet_cross2_more 10 289 215 ., label("more tokens (typed)")
+  EDIT ed_multinet_cross2_more 230 289 830 ., nomem
+  TEXT tx_h48_2 10 322 1040 ., label("-- A behavior that co-evolves with both networks (one variable per wave) --")
+  TEXT tx_multinet_behavior 10 343 430 ., label("behavior() - variable per wave")
+  VARLIST vl_multinet_behavior 450 343 610 ., nomem
+  TEXT tx_multinet_missbeh 10 364 430 ., label("missbeh() - 0/1 variable per wave")
+  VARLIST vl_multinet_missbeh 450 364 610 ., nomem
+  TEXT tx_multinet_behint 10 385 430 ., label("behint() - interactions a#b of behavior effects")
+  EDIT ed_multinet_behint 450 385 610 ., nomem
+END
+
+DIALOG behavior, tabtitle("Behavior")
+BEGIN
+  TEXT tx_multinet_beheff1_t 10 10 1050 ., label("-- beheff1() - behavior effects driven by network 1 -- box next to the effect: variable / matrix / parameter after the colon")
+  CHECKBOX cx_multinet_beheff1_linear 10 31 260 ., label("linear (linear)")
+  CHECKBOX cx_multinet_beheff1_quadratic 275 31 260 ., label("quadratic (quad)")
+  CHECKBOX cx_multinet_beheff1_avalt 540 31 260 ., label("avalt (avAlt)")
+  CHECKBOX cx_multinet_beheff1_avsim 805 31 260 ., label("avsim (avSim)")
+  COMBOBOX cb_multinet_beheff1_1 10 52 215 ., dropdown contents(lst_multinet_beheff1) values(lst_multinet_beheff1_v) nomem
+  EDIT ed_multinet_beheff1_1a 230 52 115 ., nomem
+  COMBOBOX cb_multinet_beheff1_2 363 52 215 ., dropdown contents(lst_multinet_beheff1) values(lst_multinet_beheff1_v) nomem
+  EDIT ed_multinet_beheff1_2a 583 52 115 ., nomem
+  COMBOBOX cb_multinet_beheff1_3 716 52 215 ., dropdown contents(lst_multinet_beheff1) values(lst_multinet_beheff1_v) nomem
+  EDIT ed_multinet_beheff1_3a 936 52 115 ., nomem
+  COMBOBOX cb_multinet_beheff1_4 10 73 215 ., dropdown contents(lst_multinet_beheff1) values(lst_multinet_beheff1_v) nomem
+  EDIT ed_multinet_beheff1_4a 230 73 115 ., nomem
+  COMBOBOX cb_multinet_beheff1_5 363 73 215 ., dropdown contents(lst_multinet_beheff1) values(lst_multinet_beheff1_v) nomem
+  EDIT ed_multinet_beheff1_5a 583 73 115 ., nomem
+  COMBOBOX cb_multinet_beheff1_6 716 73 215 ., dropdown contents(lst_multinet_beheff1) values(lst_multinet_beheff1_v) nomem
+  EDIT ed_multinet_beheff1_6a 936 73 115 ., nomem
+  COMBOBOX cb_multinet_beheff1_7 10 94 215 ., dropdown contents(lst_multinet_beheff1) values(lst_multinet_beheff1_v) nomem
+  EDIT ed_multinet_beheff1_7a 230 94 115 ., nomem
+  COMBOBOX cb_multinet_beheff1_8 363 94 215 ., dropdown contents(lst_multinet_beheff1) values(lst_multinet_beheff1_v) nomem
+  EDIT ed_multinet_beheff1_8a 583 94 115 ., nomem
+  TEXT tx_multinet_beheff1_more 10 115 215 ., label("more tokens (typed)")
+  EDIT ed_multinet_beheff1_more 230 115 830 ., nomem
+  TEXT tx_multinet_beheff2_t 10 142 1050 ., label("-- beheff2() - behavior effects driven by network 2 -- box next to the effect: variable / matrix / parameter after the colon")
+  CHECKBOX cx_multinet_beheff2_linear 10 163 260 ., label("linear (linear)")
+  CHECKBOX cx_multinet_beheff2_quadratic 275 163 260 ., label("quadratic (quad)")
+  CHECKBOX cx_multinet_beheff2_avalt 540 163 260 ., label("avalt (avAlt)")
+  CHECKBOX cx_multinet_beheff2_avsim 805 163 260 ., label("avsim (avSim)")
+  COMBOBOX cb_multinet_beheff2_1 10 184 215 ., dropdown contents(lst_multinet_beheff2) values(lst_multinet_beheff2_v) nomem
+  EDIT ed_multinet_beheff2_1a 230 184 115 ., nomem
+  COMBOBOX cb_multinet_beheff2_2 363 184 215 ., dropdown contents(lst_multinet_beheff2) values(lst_multinet_beheff2_v) nomem
+  EDIT ed_multinet_beheff2_2a 583 184 115 ., nomem
+  COMBOBOX cb_multinet_beheff2_3 716 184 215 ., dropdown contents(lst_multinet_beheff2) values(lst_multinet_beheff2_v) nomem
+  EDIT ed_multinet_beheff2_3a 936 184 115 ., nomem
+  COMBOBOX cb_multinet_beheff2_4 10 205 215 ., dropdown contents(lst_multinet_beheff2) values(lst_multinet_beheff2_v) nomem
+  EDIT ed_multinet_beheff2_4a 230 205 115 ., nomem
+  COMBOBOX cb_multinet_beheff2_5 363 205 215 ., dropdown contents(lst_multinet_beheff2) values(lst_multinet_beheff2_v) nomem
+  EDIT ed_multinet_beheff2_5a 583 205 115 ., nomem
+  COMBOBOX cb_multinet_beheff2_6 716 205 215 ., dropdown contents(lst_multinet_beheff2) values(lst_multinet_beheff2_v) nomem
+  EDIT ed_multinet_beheff2_6a 936 205 115 ., nomem
+  COMBOBOX cb_multinet_beheff2_7 10 226 215 ., dropdown contents(lst_multinet_beheff2) values(lst_multinet_beheff2_v) nomem
+  EDIT ed_multinet_beheff2_7a 230 226 115 ., nomem
+  COMBOBOX cb_multinet_beheff2_8 363 226 215 ., dropdown contents(lst_multinet_beheff2) values(lst_multinet_beheff2_v) nomem
+  EDIT ed_multinet_beheff2_8a 583 226 115 ., nomem
+  TEXT tx_multinet_beheff2_more 10 247 215 ., label("more tokens (typed)")
+  EDIT ed_multinet_beheff2_more 230 247 830 ., nomem
+  TEXT tx_multinet_beheff12_t 10 274 1050 ., label("-- beheff12() - behavior effects of network 1 (as 1st) and network 2 (as 2nd) -- box next to the effect: variable / matrix / parameter after the colon")
+  COMBOBOX cb_multinet_beheff12_1 10 295 215 ., dropdown contents(lst_multinet_beheff12) values(lst_multinet_beheff12_v) nomem
+  EDIT ed_multinet_beheff12_1a 230 295 115 ., nomem
+  COMBOBOX cb_multinet_beheff12_2 363 295 215 ., dropdown contents(lst_multinet_beheff12) values(lst_multinet_beheff12_v) nomem
+  EDIT ed_multinet_beheff12_2a 583 295 115 ., nomem
+  COMBOBOX cb_multinet_beheff12_3 716 295 215 ., dropdown contents(lst_multinet_beheff12) values(lst_multinet_beheff12_v) nomem
+  EDIT ed_multinet_beheff12_3a 936 295 115 ., nomem
+  COMBOBOX cb_multinet_beheff12_4 10 316 215 ., dropdown contents(lst_multinet_beheff12) values(lst_multinet_beheff12_v) nomem
+  EDIT ed_multinet_beheff12_4a 230 316 115 ., nomem
+  COMBOBOX cb_multinet_beheff12_5 363 316 215 ., dropdown contents(lst_multinet_beheff12) values(lst_multinet_beheff12_v) nomem
+  EDIT ed_multinet_beheff12_5a 583 316 115 ., nomem
+  COMBOBOX cb_multinet_beheff12_6 716 316 215 ., dropdown contents(lst_multinet_beheff12) values(lst_multinet_beheff12_v) nomem
+  EDIT ed_multinet_beheff12_6a 936 316 115 ., nomem
+  TEXT tx_multinet_beheff12_more 10 337 215 ., label("more tokens (typed)")
+  EDIT ed_multinet_beheff12_more 230 337 830 ., nomem
+  TEXT tx_multinet_beheff21_t 10 364 1050 ., label("-- beheff21() - the same with the networks exchanged -- box next to the effect: variable / matrix / parameter after the colon")
+  COMBOBOX cb_multinet_beheff21_1 10 385 215 ., dropdown contents(lst_multinet_beheff21) values(lst_multinet_beheff21_v) nomem
+  EDIT ed_multinet_beheff21_1a 230 385 115 ., nomem
+  COMBOBOX cb_multinet_beheff21_2 363 385 215 ., dropdown contents(lst_multinet_beheff21) values(lst_multinet_beheff21_v) nomem
+  EDIT ed_multinet_beheff21_2a 583 385 115 ., nomem
+  COMBOBOX cb_multinet_beheff21_3 716 385 215 ., dropdown contents(lst_multinet_beheff21) values(lst_multinet_beheff21_v) nomem
+  EDIT ed_multinet_beheff21_3a 936 385 115 ., nomem
+  COMBOBOX cb_multinet_beheff21_4 10 406 215 ., dropdown contents(lst_multinet_beheff21) values(lst_multinet_beheff21_v) nomem
+  EDIT ed_multinet_beheff21_4a 230 406 115 ., nomem
+  COMBOBOX cb_multinet_beheff21_5 363 406 215 ., dropdown contents(lst_multinet_beheff21) values(lst_multinet_beheff21_v) nomem
+  EDIT ed_multinet_beheff21_5a 583 406 115 ., nomem
+  COMBOBOX cb_multinet_beheff21_6 716 406 215 ., dropdown contents(lst_multinet_beheff21) values(lst_multinet_beheff21_v) nomem
+  EDIT ed_multinet_beheff21_6a 936 406 115 ., nomem
+  TEXT tx_multinet_beheff21_more 10 427 215 ., label("more tokens (typed)")
+  EDIT ed_multinet_beheff21_more 230 427 830 ., nomem
+  TEXT tx_multinet_theta0 10 454 430 ., label("theta0() - start values of all effects (net1_*, net2_*, behavior)")
+  EDIT ed_multinet_theta0 450 454 610 ., nomem
+  TEXT tx_multinet_fix 10 475 430 ., label("fix() - fixed effects (coefficient names or _all)")
+  EDIT ed_multinet_fix 450 475 610 ., nomem
+  TEXT tx_multinet_k0 10 496 430 ., label("k0() - Phase 1 replicates (default 30)")
+  EDIT ed_multinet_k0 450 496 610 ., nomem
+END
+
+DIALOG estimate, tabtitle("Estimate")
+BEGIN
+  TEXT tx_multinet_k3 10 10 430 ., label("k3() - Phase 3 replicates (default 200)")
+  EDIT ed_multinet_k3 450 10 610 ., nomem
+  TEXT tx_multinet_firstg 10 31 430 ., label("firstg() - initial gain (default 0.2)")
+  EDIT ed_multinet_firstg 450 31 610 ., nomem
+  TEXT tx_multinet_seed 10 52 185 ., label("seed()")
+  EDIT ed_multinet_seed 200 52 150 ., nomem
+END
+
+LIST netlist
+BEGIN
+	// populated at runtime by _nwdialog.ado
+END
+
+LIST lst_multinet_eff1
+BEGIN
+	behsim  (simX (beh))
+	behegox  (egoX (beh))
+	behaltx  (altX (beh))
+	behegoplusalt  (egoPlusAltX (beh))
+	egox  (egoX)
+	altx  (altX)
+	samex  (sameX)
+	simx  (simX)
+	netbeh:avgroupegox  (avGroupEgoX (beh))
+	netbeh:totgroupegox  (totGroupEgoX (beh))
+END
+
+LIST lst_multinet_eff1_v
+BEGIN
+	behsim
+	behegox
+	behaltx
+	behegoplusalt
+	egox
+	altx
+	samex
+	simx
+	netbeh:avgroupegox
+	netbeh:totgroupegox
+END
+
+LIST lst_multinet_eff2
+BEGIN
+	behsim  (simX (beh))
+	behegox  (egoX (beh))
+	behaltx  (altX (beh))
+	behegoplusalt  (egoPlusAltX (beh))
+	egox  (egoX)
+	altx  (altX)
+	samex  (sameX)
+	simx  (simX)
+	netbeh:avgroupegox  (avGroupEgoX (beh))
+	netbeh:totgroupegox  (totGroupEgoX (beh))
+END
+
+LIST lst_multinet_eff2_v
+BEGIN
+	behsim
+	behegox
+	behaltx
+	behegoplusalt
+	egox
+	altx
+	samex
+	simx
+	netbeh:avgroupegox
+	netbeh:totgroupegox
+END
+
+LIST lst_multinet_cross1
+BEGIN
+	absoutdiffintn  (absOutDiffIntn)
+	alldifcovnetnet  (allDifCovNetNet)
+	alldifcovnetnetin  (allDifCovNetNetIn)
+	altdist2w  (altDist2W)
+	altindist2w  (altInDist2W)
+	avalt2mtie  (avAlt.2M.tie)
+	avalt2mtot  (avAlt.2M.tot)
+	avaltutie  (avAltU.2M.tie)
+	avdegintn  (avDegIntn)
+	betweenpop  (betweenPop)
+	both  (both)
+	closure  (closure)
+	clxwx  (cl.XWX)
+	clxwx1  (cl.XWX1)
+	clxwx2  (cl.XWX2)
+	contrastcovnetnet  (contrastCovNetNet)
+	contrastcovnetnetin  (contrastCovNetNetIn)
+	covnetnet  (covNetNet)
+	covnetnetin  (covNetNetIn)
+	crprod  (crprod)
+	crprodinactintn  (crprodInActIntn)
+	crprodmutual  (crprodMutual)
+	crprodrecip  (crprodRecip)
+	cyclosure  (cyClosure)
+	diffwwclosure  (diffWWClosure)
+	diffwxclosure  (diffWXClosure)
+	diffxwclosure  (diffXWClosure)
+	dist2outinactintn  (dist2OutInActIntn)
+	divinaltintn  (divInAltIntn)
+	divinegointn  (divInEgoIntn)
+	divoutaltintn  (divOutAltIntn)
+	divoutegointn  (divOutEgoIntn)
+	doubleinpop  (doubleInPop)
+	doubleoutact  (doubleOutAct)
+	from  (from)
+	fromany  (fromAny)
+	frommutual  (fromMutual)
+	gwespbbmix  (gwespBBMix)
+	gwespbfmix  (gwespBFMix)
+	gwespfbmix  (gwespFBMix)
+	gwespffmix  (gwespFFMix)
+	gwespmix  (gwespMix)
+	gwesprrmix  (gwespRRMix)
+	homcovnetnet  (homCovNetNet)
+	homcovnetnetin  (homCovNetNetIn)
+	homwxclosure  (homWXClosure)
+	inactintn  (inActIntn)
+	inactintnx  (inActIntnX)
+	inpopintn  (inPopIntn)
+	inpopintnx  (inPopIntnX)
+	inpopoutw  (inPopOutW)
+	jinmix  (JinMix)
+	joutmix  (JoutMix)
+	jumpfrom  (jumpFrom)
+	jumpsharedin  (jumpSharedIn)
+	jumpwwclosure  (jumpWWClosure)
+	jumpwxclosure  (jumpWXClosure)
+	mixedinxw  (mixedInXW)
+	ndist2actintn  (nDist2ActIntn)
+	outactintn  (outActIntn)
+	outactintnx  (outActIntnX)
+	outoutactintn  (outOutActIntn)
+	outoutavintn  (outOutAvIntn)
+	outoutdist2actintn  (outOutDist2ActIntn)
+	outpopintn  (outPopIntn)
+	outpopintnx  (outPopIntnX)
+	samewwclosure  (sameWWClosure)
+	samewxclosure  (sameWXClosure)
+	samexinactintn  (sameXInActIntn)
+	samexinpopintn  (sameXInPopIntn)
+	samexoutactintn  (sameXOutActIntn)
+	samexoutpopintn  (sameXOutPopIntn)
+	samexwclosure  (sameXWClosure)
+	sharedin  (sharedIn)
+	sharedto  (sharedTo)
+	sharedtou  (sharedToU)
+	simdist2w  (simDist2W)
+	simegodist2w  (simEgoDist2W)
+	simegoindist2w  (simEgoInDist2W)
+	to  (to)
+	toany  (toAny)
+	toback  (toBack)
+	torecip  (toRecip)
+	totdist2w  (totDist2W)
+	totindist2w  (totInDist2W)
+	tou  (toU)
+	wwxee  (WWX.EE)
+	wwxfr  (WWX.FR)
+	wxxer  (WXX.ER)
+	wxxfe  (WXX.FE)
+	xwxer  (XWX.ER)
+	xwxfe  (XWX.FE)
+END
+
+LIST lst_multinet_cross1_v
+BEGIN
+	absoutdiffintn
+	alldifcovnetnet
+	alldifcovnetnetin
+	altdist2w
+	altindist2w
+	avalt2mtie
+	avalt2mtot
+	avaltutie
+	avdegintn
+	betweenpop
+	both
+	closure
+	clxwx
+	clxwx1
+	clxwx2
+	contrastcovnetnet
+	contrastcovnetnetin
+	covnetnet
+	covnetnetin
+	crprod
+	crprodinactintn
+	crprodmutual
+	crprodrecip
+	cyclosure
+	diffwwclosure
+	diffwxclosure
+	diffxwclosure
+	dist2outinactintn
+	divinaltintn
+	divinegointn
+	divoutaltintn
+	divoutegointn
+	doubleinpop
+	doubleoutact
+	from
+	fromany
+	frommutual
+	gwespbbmix
+	gwespbfmix
+	gwespfbmix
+	gwespffmix
+	gwespmix
+	gwesprrmix
+	homcovnetnet
+	homcovnetnetin
+	homwxclosure
+	inactintn
+	inactintnx
+	inpopintn
+	inpopintnx
+	inpopoutw
+	jinmix
+	joutmix
+	jumpfrom
+	jumpsharedin
+	jumpwwclosure
+	jumpwxclosure
+	mixedinxw
+	ndist2actintn
+	outactintn
+	outactintnx
+	outoutactintn
+	outoutavintn
+	outoutdist2actintn
+	outpopintn
+	outpopintnx
+	samewwclosure
+	samewxclosure
+	samexinactintn
+	samexinpopintn
+	samexoutactintn
+	samexoutpopintn
+	samexwclosure
+	sharedin
+	sharedto
+	sharedtou
+	simdist2w
+	simegodist2w
+	simegoindist2w
+	to
+	toany
+	toback
+	torecip
+	totdist2w
+	totindist2w
+	tou
+	wwxee
+	wwxfr
+	wxxer
+	wxxfe
+	xwxer
+	xwxfe
+END
+
+LIST lst_multinet_cross2
+BEGIN
+	absoutdiffintn  (absOutDiffIntn)
+	alldifcovnetnet  (allDifCovNetNet)
+	alldifcovnetnetin  (allDifCovNetNetIn)
+	altdist2w  (altDist2W)
+	altindist2w  (altInDist2W)
+	avalt2mtie  (avAlt.2M.tie)
+	avalt2mtot  (avAlt.2M.tot)
+	avaltutie  (avAltU.2M.tie)
+	avdegintn  (avDegIntn)
+	betweenpop  (betweenPop)
+	both  (both)
+	closure  (closure)
+	clxwx  (cl.XWX)
+	clxwx1  (cl.XWX1)
+	clxwx2  (cl.XWX2)
+	contrastcovnetnet  (contrastCovNetNet)
+	contrastcovnetnetin  (contrastCovNetNetIn)
+	covnetnet  (covNetNet)
+	covnetnetin  (covNetNetIn)
+	crprod  (crprod)
+	crprodinactintn  (crprodInActIntn)
+	crprodmutual  (crprodMutual)
+	crprodrecip  (crprodRecip)
+	cyclosure  (cyClosure)
+	diffwwclosure  (diffWWClosure)
+	diffwxclosure  (diffWXClosure)
+	diffxwclosure  (diffXWClosure)
+	dist2outinactintn  (dist2OutInActIntn)
+	divinaltintn  (divInAltIntn)
+	divinegointn  (divInEgoIntn)
+	divoutaltintn  (divOutAltIntn)
+	divoutegointn  (divOutEgoIntn)
+	doubleinpop  (doubleInPop)
+	doubleoutact  (doubleOutAct)
+	from  (from)
+	fromany  (fromAny)
+	frommutual  (fromMutual)
+	gwespbbmix  (gwespBBMix)
+	gwespbfmix  (gwespBFMix)
+	gwespfbmix  (gwespFBMix)
+	gwespffmix  (gwespFFMix)
+	gwespmix  (gwespMix)
+	gwesprrmix  (gwespRRMix)
+	homcovnetnet  (homCovNetNet)
+	homcovnetnetin  (homCovNetNetIn)
+	homwxclosure  (homWXClosure)
+	inactintn  (inActIntn)
+	inactintnx  (inActIntnX)
+	inpopintn  (inPopIntn)
+	inpopintnx  (inPopIntnX)
+	inpopoutw  (inPopOutW)
+	jinmix  (JinMix)
+	joutmix  (JoutMix)
+	jumpfrom  (jumpFrom)
+	jumpsharedin  (jumpSharedIn)
+	jumpwwclosure  (jumpWWClosure)
+	jumpwxclosure  (jumpWXClosure)
+	mixedinxw  (mixedInXW)
+	ndist2actintn  (nDist2ActIntn)
+	outactintn  (outActIntn)
+	outactintnx  (outActIntnX)
+	outoutactintn  (outOutActIntn)
+	outoutavintn  (outOutAvIntn)
+	outoutdist2actintn  (outOutDist2ActIntn)
+	outpopintn  (outPopIntn)
+	outpopintnx  (outPopIntnX)
+	samewwclosure  (sameWWClosure)
+	samewxclosure  (sameWXClosure)
+	samexinactintn  (sameXInActIntn)
+	samexinpopintn  (sameXInPopIntn)
+	samexoutactintn  (sameXOutActIntn)
+	samexoutpopintn  (sameXOutPopIntn)
+	samexwclosure  (sameXWClosure)
+	sharedin  (sharedIn)
+	sharedto  (sharedTo)
+	sharedtou  (sharedToU)
+	simdist2w  (simDist2W)
+	simegodist2w  (simEgoDist2W)
+	simegoindist2w  (simEgoInDist2W)
+	to  (to)
+	toany  (toAny)
+	toback  (toBack)
+	torecip  (toRecip)
+	totdist2w  (totDist2W)
+	totindist2w  (totInDist2W)
+	tou  (toU)
+	wwxee  (WWX.EE)
+	wwxfr  (WWX.FR)
+	wxxer  (WXX.ER)
+	wxxfe  (WXX.FE)
+	xwxer  (XWX.ER)
+	xwxfe  (XWX.FE)
+END
+
+LIST lst_multinet_cross2_v
+BEGIN
+	absoutdiffintn
+	alldifcovnetnet
+	alldifcovnetnetin
+	altdist2w
+	altindist2w
+	avalt2mtie
+	avalt2mtot
+	avaltutie
+	avdegintn
+	betweenpop
+	both
+	closure
+	clxwx
+	clxwx1
+	clxwx2
+	contrastcovnetnet
+	contrastcovnetnetin
+	covnetnet
+	covnetnetin
+	crprod
+	crprodinactintn
+	crprodmutual
+	crprodrecip
+	cyclosure
+	diffwwclosure
+	diffwxclosure
+	diffxwclosure
+	dist2outinactintn
+	divinaltintn
+	divinegointn
+	divoutaltintn
+	divoutegointn
+	doubleinpop
+	doubleoutact
+	from
+	fromany
+	frommutual
+	gwespbbmix
+	gwespbfmix
+	gwespfbmix
+	gwespffmix
+	gwespmix
+	gwesprrmix
+	homcovnetnet
+	homcovnetnetin
+	homwxclosure
+	inactintn
+	inactintnx
+	inpopintn
+	inpopintnx
+	inpopoutw
+	jinmix
+	joutmix
+	jumpfrom
+	jumpsharedin
+	jumpwwclosure
+	jumpwxclosure
+	mixedinxw
+	ndist2actintn
+	outactintn
+	outactintnx
+	outoutactintn
+	outoutavintn
+	outoutdist2actintn
+	outpopintn
+	outpopintnx
+	samewwclosure
+	samewxclosure
+	samexinactintn
+	samexinpopintn
+	samexoutactintn
+	samexoutpopintn
+	samexwclosure
+	sharedin
+	sharedto
+	sharedtou
+	simdist2w
+	simegodist2w
+	simegoindist2w
+	to
+	toany
+	toback
+	torecip
+	totdist2w
+	totindist2w
+	tou
+	wwxee
+	wwxfr
+	wxxer
+	wxxfe
+	xwxer
+	xwxfe
+END
+
+LIST lst_multinet_beheff1
+BEGIN
+	avaltaltx  (avAltAltX)
+	avaltcc  (avAlt_cc)
+	avaltdist2  (avAltDist2)
+	avaltegox  (avAltEgoX)
+	avaltpop  (avAltPop)
+	avaltsamex  (avAltSameX)
+	avatthigher  (avAttHigher)
+	avattlower  (avAttLower)
+	avgroup  (avGroup)
+	avinalt  (avInAlt)
+	avinaltdist2  (avInAltDist2)
+	avinaltdist2nc  (avInAltDist2_nc)
+	avinsim  (avInSim)
+	avinsimdist2  (avInSimDist2)
+	avinsimpopalt  (avInSimPopAlt)
+	avrecalt  (avRecAlt)
+	avrecaltsamex  (avRecAltSameX)
+	avsamexalt
+	avsamexinalt  (avSameXInAlt)
+	avsamexrecalt  (avSameXRecAlt)
+	avsimaltx  (avSimAltX)
+	avsimegox  (avSimEgoX)
+	avsimpopalt  (avSimPopAlt)
+	avsimpopego  (avSimPopEgo)
+	avsimrecip  (avSimRecip)
+	avsimrecpop  (avSimRecPop)
+	avsimvaralt  (avSimVarAlt)
+	avtaltdist2  (avTAltDist2)
+	avtinaltdist2  (avTInAltDist2)
+	avtinaltdist2nc  (avTInAltDist2_nc)
+	avtxaltdist2  (avTXAltDist2)
+	avtxinaltdist2  (avTXInAltDist2)
+	avxalt
+	avxaltdist2  (avXAltDist2)
+	avxinalt  (avXInAlt)
+	avxinaltdist2  (avXInAltDist2)
+	avxrecalt  (avXRecAlt)
+	behdensetriads  (behDenseTriads)
+	constant
+	degabscontrx  (degAbsContrX)
+	degnegcontrx  (degNegContrX)
+	degposcontrx  (degPosContrX)
+	from
+	indeg  (indeg)
+	indegavgroup  (indegAvGroup)
+	indegtotgroup  (indegTotGroup)
+	isolate  (isolate)
+	maxalt  (maxAlt)
+	maxxalt  (maxXAlt)
+	minalt  (minAlt)
+	minxalt  (minXAlt)
+	outdeg  (outdeg)
+	outisolate  (outIsolate)
+	popalt  (popAlt)
+	quad_cc  (quad_cc)
+	quad_nc  (quad_nc)
+	recipdeg  (recipDeg)
+	simallfar  (simAllFar)
+	simallnear  (simAllNear)
+	simdensetriads  (simDenseTriads)
+	threshold  (threshold)
+	totaaltdist2  (totAAltDist2)
+	totainaltdist2  (totAInAltDist2)
+	totainaltdist2nc  (totAInAltDist2_nc)
+	totalt  (totAlt)
+	totaltcc  (totAlt_cc)
+	totaltdist2  (totAltDist2)
+	totaltegox  (totAltEgoX)
+	totaltpop  (totAltPop)
+	totaltsamex  (totAltSameX)
+	totatthigher  (totAttHigher)
+	totattlower  (totAttLower)
+	totaxaltdist2  (totAXAltDist2)
+	totaxinaltdist2  (totAXInAltDist2)
+	totgroup  (totGroup)
+	totgwdspfbalt  (totGwdspFBAlt)
+	totgwdspfbaltnc  (totGwdspFBAlt_nc)
+	totgwdspffalt  (totGwdspFFAlt)
+	totgwdspffaltnc  (totGwdspFFAlt_nc)
+	totinalt  (totInAlt)
+	totinaltdist2  (totInAltDist2)
+	totinaltdist2nc  (totInAltDist2_nc)
+	totinsim  (totInSim)
+	totinsimdist2  (totInSimDist2)
+	totinsimpopalt  (totInSimPopAlt)
+	totpopalt  (totPopAlt)
+	totrecalt  (totRecAlt)
+	totrecaltsamex  (totRecAltSameX)
+	totsamexalt
+	totsamexinalt  (totSameXInAlt)
+	totsamexrecalt  (totSameXRecAlt)
+	totsim  (totSim)
+	totsimaltx  (totSimAltX)
+	totsimegox  (totSimEgoX)
+	totsimpopalt  (totSimPopAlt)
+	totsimrecip  (totSimRecip)
+	totsimrecpop  (totSimRecPop)
+	totxalt
+	totxaltdist2  (totXAltDist2)
+	totxinalt  (totXInAlt)
+	totxinaltdist2  (totXInAltDist2)
+	totxrecalt  (totXRecAlt)
+	varalt  (varAlt)
+END
+
+LIST lst_multinet_beheff1_v
+BEGIN
+	avaltaltx
+	avaltcc
+	avaltdist2
+	avaltegox
+	avaltpop
+	avaltsamex
+	avatthigher
+	avattlower
+	avgroup
+	avinalt
+	avinaltdist2
+	avinaltdist2nc
+	avinsim
+	avinsimdist2
+	avinsimpopalt
+	avrecalt
+	avrecaltsamex
+	avsamexalt
+	avsamexinalt
+	avsamexrecalt
+	avsimaltx
+	avsimegox
+	avsimpopalt
+	avsimpopego
+	avsimrecip
+	avsimrecpop
+	avsimvaralt
+	avtaltdist2
+	avtinaltdist2
+	avtinaltdist2nc
+	avtxaltdist2
+	avtxinaltdist2
+	avxalt
+	avxaltdist2
+	avxinalt
+	avxinaltdist2
+	avxrecalt
+	behdensetriads
+	constant
+	degabscontrx
+	degnegcontrx
+	degposcontrx
+	from
+	indeg
+	indegavgroup
+	indegtotgroup
+	isolate
+	maxalt
+	maxxalt
+	minalt
+	minxalt
+	outdeg
+	outisolate
+	popalt
+	quad_cc
+	quad_nc
+	recipdeg
+	simallfar
+	simallnear
+	simdensetriads
+	threshold
+	totaaltdist2
+	totainaltdist2
+	totainaltdist2nc
+	totalt
+	totaltcc
+	totaltdist2
+	totaltegox
+	totaltpop
+	totaltsamex
+	totatthigher
+	totattlower
+	totaxaltdist2
+	totaxinaltdist2
+	totgroup
+	totgwdspfbalt
+	totgwdspfbaltnc
+	totgwdspffalt
+	totgwdspffaltnc
+	totinalt
+	totinaltdist2
+	totinaltdist2nc
+	totinsim
+	totinsimdist2
+	totinsimpopalt
+	totpopalt
+	totrecalt
+	totrecaltsamex
+	totsamexalt
+	totsamexinalt
+	totsamexrecalt
+	totsim
+	totsimaltx
+	totsimegox
+	totsimpopalt
+	totsimrecip
+	totsimrecpop
+	totxalt
+	totxaltdist2
+	totxinalt
+	totxinaltdist2
+	totxrecalt
+	varalt
+END
+
+LIST lst_multinet_beheff2
+BEGIN
+	avaltaltx  (avAltAltX)
+	avaltcc  (avAlt_cc)
+	avaltdist2  (avAltDist2)
+	avaltegox  (avAltEgoX)
+	avaltpop  (avAltPop)
+	avaltsamex  (avAltSameX)
+	avatthigher  (avAttHigher)
+	avattlower  (avAttLower)
+	avgroup  (avGroup)
+	avinalt  (avInAlt)
+	avinaltdist2  (avInAltDist2)
+	avinaltdist2nc  (avInAltDist2_nc)
+	avinsim  (avInSim)
+	avinsimdist2  (avInSimDist2)
+	avinsimpopalt  (avInSimPopAlt)
+	avrecalt  (avRecAlt)
+	avrecaltsamex  (avRecAltSameX)
+	avsamexalt
+	avsamexinalt  (avSameXInAlt)
+	avsamexrecalt  (avSameXRecAlt)
+	avsimaltx  (avSimAltX)
+	avsimegox  (avSimEgoX)
+	avsimpopalt  (avSimPopAlt)
+	avsimpopego  (avSimPopEgo)
+	avsimrecip  (avSimRecip)
+	avsimrecpop  (avSimRecPop)
+	avsimvaralt  (avSimVarAlt)
+	avtaltdist2  (avTAltDist2)
+	avtinaltdist2  (avTInAltDist2)
+	avtinaltdist2nc  (avTInAltDist2_nc)
+	avtxaltdist2  (avTXAltDist2)
+	avtxinaltdist2  (avTXInAltDist2)
+	avxalt
+	avxaltdist2  (avXAltDist2)
+	avxinalt  (avXInAlt)
+	avxinaltdist2  (avXInAltDist2)
+	avxrecalt  (avXRecAlt)
+	behdensetriads  (behDenseTriads)
+	constant
+	degabscontrx  (degAbsContrX)
+	degnegcontrx  (degNegContrX)
+	degposcontrx  (degPosContrX)
+	from
+	indeg  (indeg)
+	indegavgroup  (indegAvGroup)
+	indegtotgroup  (indegTotGroup)
+	isolate  (isolate)
+	maxalt  (maxAlt)
+	maxxalt  (maxXAlt)
+	minalt  (minAlt)
+	minxalt  (minXAlt)
+	outdeg  (outdeg)
+	outisolate  (outIsolate)
+	popalt  (popAlt)
+	quad_cc  (quad_cc)
+	quad_nc  (quad_nc)
+	recipdeg  (recipDeg)
+	simallfar  (simAllFar)
+	simallnear  (simAllNear)
+	simdensetriads  (simDenseTriads)
+	threshold  (threshold)
+	totaaltdist2  (totAAltDist2)
+	totainaltdist2  (totAInAltDist2)
+	totainaltdist2nc  (totAInAltDist2_nc)
+	totalt  (totAlt)
+	totaltcc  (totAlt_cc)
+	totaltdist2  (totAltDist2)
+	totaltegox  (totAltEgoX)
+	totaltpop  (totAltPop)
+	totaltsamex  (totAltSameX)
+	totatthigher  (totAttHigher)
+	totattlower  (totAttLower)
+	totaxaltdist2  (totAXAltDist2)
+	totaxinaltdist2  (totAXInAltDist2)
+	totgroup  (totGroup)
+	totgwdspfbalt  (totGwdspFBAlt)
+	totgwdspfbaltnc  (totGwdspFBAlt_nc)
+	totgwdspffalt  (totGwdspFFAlt)
+	totgwdspffaltnc  (totGwdspFFAlt_nc)
+	totinalt  (totInAlt)
+	totinaltdist2  (totInAltDist2)
+	totinaltdist2nc  (totInAltDist2_nc)
+	totinsim  (totInSim)
+	totinsimdist2  (totInSimDist2)
+	totinsimpopalt  (totInSimPopAlt)
+	totpopalt  (totPopAlt)
+	totrecalt  (totRecAlt)
+	totrecaltsamex  (totRecAltSameX)
+	totsamexalt
+	totsamexinalt  (totSameXInAlt)
+	totsamexrecalt  (totSameXRecAlt)
+	totsim  (totSim)
+	totsimaltx  (totSimAltX)
+	totsimegox  (totSimEgoX)
+	totsimpopalt  (totSimPopAlt)
+	totsimrecip  (totSimRecip)
+	totsimrecpop  (totSimRecPop)
+	totxalt
+	totxaltdist2  (totXAltDist2)
+	totxinalt  (totXInAlt)
+	totxinaltdist2  (totXInAltDist2)
+	totxrecalt  (totXRecAlt)
+	varalt  (varAlt)
+END
+
+LIST lst_multinet_beheff2_v
+BEGIN
+	avaltaltx
+	avaltcc
+	avaltdist2
+	avaltegox
+	avaltpop
+	avaltsamex
+	avatthigher
+	avattlower
+	avgroup
+	avinalt
+	avinaltdist2
+	avinaltdist2nc
+	avinsim
+	avinsimdist2
+	avinsimpopalt
+	avrecalt
+	avrecaltsamex
+	avsamexalt
+	avsamexinalt
+	avsamexrecalt
+	avsimaltx
+	avsimegox
+	avsimpopalt
+	avsimpopego
+	avsimrecip
+	avsimrecpop
+	avsimvaralt
+	avtaltdist2
+	avtinaltdist2
+	avtinaltdist2nc
+	avtxaltdist2
+	avtxinaltdist2
+	avxalt
+	avxaltdist2
+	avxinalt
+	avxinaltdist2
+	avxrecalt
+	behdensetriads
+	constant
+	degabscontrx
+	degnegcontrx
+	degposcontrx
+	from
+	indeg
+	indegavgroup
+	indegtotgroup
+	isolate
+	maxalt
+	maxxalt
+	minalt
+	minxalt
+	outdeg
+	outisolate
+	popalt
+	quad_cc
+	quad_nc
+	recipdeg
+	simallfar
+	simallnear
+	simdensetriads
+	threshold
+	totaaltdist2
+	totainaltdist2
+	totainaltdist2nc
+	totalt
+	totaltcc
+	totaltdist2
+	totaltegox
+	totaltpop
+	totaltsamex
+	totatthigher
+	totattlower
+	totaxaltdist2
+	totaxinaltdist2
+	totgroup
+	totgwdspfbalt
+	totgwdspfbaltnc
+	totgwdspffalt
+	totgwdspffaltnc
+	totinalt
+	totinaltdist2
+	totinaltdist2nc
+	totinsim
+	totinsimdist2
+	totinsimpopalt
+	totpopalt
+	totrecalt
+	totrecaltsamex
+	totsamexalt
+	totsamexinalt
+	totsamexrecalt
+	totsim
+	totsimaltx
+	totsimegox
+	totsimpopalt
+	totsimrecip
+	totsimrecpop
+	totxalt
+	totxaltdist2
+	totxinalt
+	totxinaltdist2
+	totxrecalt
+	varalt
+END
+
+LIST lst_multinet_beheff12
+BEGIN
+	ffdeg
+	bbdeg
+	fbdeg
+	bfdeg
+	frdeg
+	brdeg
+	indegmixedpop
+	outdegmixedpop
+END
+
+LIST lst_multinet_beheff12_v
+BEGIN
+	ffdeg
+	bbdeg
+	fbdeg
+	bfdeg
+	frdeg
+	brdeg
+	indegmixedpop
+	outdegmixedpop
+END
+
+LIST lst_multinet_beheff21
+BEGIN
+	ffdeg
+	bbdeg
+	fbdeg
+	bfdeg
+	frdeg
+	brdeg
+	indegmixedpop
+	outdegmixedpop
+END
+
+LIST lst_multinet_beheff21_v
+BEGIN
+	ffdeg
+	bbdeg
+	fbdeg
+	bfdeg
+	frdeg
+	brdeg
+	indegmixedpop
+	outdegmixedpop
+END
+
+PROGRAM initialize
+BEGIN
+	put "_nwdialog nwsaom_multinet"
+	stata hidden immediate
+END
+
+PROGRAM command
+BEGIN
+	put "nwsaom multinet"
+	beginoptions
+		put /program opt_part1
+		put /program opt_part2
+		put /program opt_part3
+		put /program opt_part4
+		put /program opt_part5
+		put /program opt_part6
+		put /program opt_part7
+		put /program opt_part8
+	endoptions
+	stata
+END
+
+PROGRAM opt_part1
+BEGIN
+			if networks.cb_multinet_net1.isneq("") {
+				put " net1(" networks.cb_multinet_net1 ")"
+			}
+			if networks.cb_multinet_net2.isneq("") {
+				put " net2(" networks.cb_multinet_net2 ")"
+			}
+			if networks.cx_multinet_sym1 {
+				put " sym1"
+			}
+			if networks.cx_multinet_sym2 {
+				put " sym2"
+			}
+			if networks.ed_multinet_actormode.isneq("") {
+				put " actormode(" networks.ed_multinet_actormode ")"
+			}
+			if networks.ed_multinet_tvcov.isneq("") {
+				put " tvcov(" networks.ed_multinet_tvcov ")"
+			}
+			if networks.cx_multinet_eff1_outdegree | networks.cx_multinet_eff1_reciprocity | networks.cx_multinet_eff1_transtrip | networks.cx_multinet_eff1_cycle3 | networks.cx_multinet_eff1_transmedtrip | networks.cx_multinet_eff1_cycle4 | networks.cx_multinet_eff1_indegpop | networks.cx_multinet_eff1_outact | networks.cb_multinet_eff1_1 | networks.cb_multinet_eff1_2 | networks.cb_multinet_eff1_3 | networks.cb_multinet_eff1_4 | networks.ed_multinet_eff1_more {
+				put " eff1("
+				if networks.cx_multinet_eff1_outdegree {
+					put "outdegree "
+				}
+				if networks.cx_multinet_eff1_reciprocity {
+					put "reciprocity "
+				}
+				if networks.cx_multinet_eff1_transtrip {
+					put "transtrip "
+				}
+				if networks.cx_multinet_eff1_cycle3 {
+					put "cycle3 "
+				}
+				if networks.cx_multinet_eff1_transmedtrip {
+					put "transmedtrip "
+				}
+				if networks.cx_multinet_eff1_cycle4 {
+					put "cycle4 "
+				}
+				if networks.cx_multinet_eff1_indegpop {
+					put "indegpop "
+				}
+				if networks.cx_multinet_eff1_outact {
+					put "outact "
+				}
+				if networks.cb_multinet_eff1_1.isneq("") {
+					put networks.cb_multinet_eff1_1
+					if networks.ed_multinet_eff1_1a.isneq("") {
+						put ":" networks.ed_multinet_eff1_1a
+					}
+					put " "
+				}
+				if networks.cb_multinet_eff1_2.isneq("") {
+					put networks.cb_multinet_eff1_2
+					if networks.ed_multinet_eff1_2a.isneq("") {
+						put ":" networks.ed_multinet_eff1_2a
+					}
+					put " "
+				}
+				if networks.cb_multinet_eff1_3.isneq("") {
+					put networks.cb_multinet_eff1_3
+					if networks.ed_multinet_eff1_3a.isneq("") {
+						put ":" networks.ed_multinet_eff1_3a
+					}
+					put " "
+				}
+				if networks.cb_multinet_eff1_4.isneq("") {
+					put networks.cb_multinet_eff1_4
+					if networks.ed_multinet_eff1_4a.isneq("") {
+						put ":" networks.ed_multinet_eff1_4a
+					}
+					put " "
+				}
+				if networks.ed_multinet_eff1_more.isneq("") {
+					put networks.ed_multinet_eff1_more
+				}
+				put ")"
+			}
+END
+
+PROGRAM opt_part2
+BEGIN
+			if networks.cx_multinet_eff2_outdegree | networks.cx_multinet_eff2_reciprocity | networks.cx_multinet_eff2_transtrip | networks.cx_multinet_eff2_cycle3 | networks.cx_multinet_eff2_transmedtrip | networks.cx_multinet_eff2_cycle4 | networks.cx_multinet_eff2_indegpop | networks.cx_multinet_eff2_outact | networks.cb_multinet_eff2_1 | networks.cb_multinet_eff2_2 | networks.cb_multinet_eff2_3 | networks.cb_multinet_eff2_4 | networks.ed_multinet_eff2_more {
+				put " eff2("
+				if networks.cx_multinet_eff2_outdegree {
+					put "outdegree "
+				}
+				if networks.cx_multinet_eff2_reciprocity {
+					put "reciprocity "
+				}
+				if networks.cx_multinet_eff2_transtrip {
+					put "transtrip "
+				}
+				if networks.cx_multinet_eff2_cycle3 {
+					put "cycle3 "
+				}
+				if networks.cx_multinet_eff2_transmedtrip {
+					put "transmedtrip "
+				}
+				if networks.cx_multinet_eff2_cycle4 {
+					put "cycle4 "
+				}
+				if networks.cx_multinet_eff2_indegpop {
+					put "indegpop "
+				}
+				if networks.cx_multinet_eff2_outact {
+					put "outact "
+				}
+				if networks.cb_multinet_eff2_1.isneq("") {
+					put networks.cb_multinet_eff2_1
+					if networks.ed_multinet_eff2_1a.isneq("") {
+						put ":" networks.ed_multinet_eff2_1a
+					}
+					put " "
+				}
+				if networks.cb_multinet_eff2_2.isneq("") {
+					put networks.cb_multinet_eff2_2
+					if networks.ed_multinet_eff2_2a.isneq("") {
+						put ":" networks.ed_multinet_eff2_2a
+					}
+					put " "
+				}
+				if networks.cb_multinet_eff2_3.isneq("") {
+					put networks.cb_multinet_eff2_3
+					if networks.ed_multinet_eff2_3a.isneq("") {
+						put ":" networks.ed_multinet_eff2_3a
+					}
+					put " "
+				}
+				if networks.cb_multinet_eff2_4.isneq("") {
+					put networks.cb_multinet_eff2_4
+					if networks.ed_multinet_eff2_4a.isneq("") {
+						put ":" networks.ed_multinet_eff2_4a
+					}
+					put " "
+				}
+				if networks.ed_multinet_eff2_more.isneq("") {
+					put networks.ed_multinet_eff2_more
+				}
+				put ")"
+			}
+END
+
+PROGRAM opt_part3
+BEGIN
+			if cross_net.cb_multinet_cross1_1 | cross_net.cb_multinet_cross1_2 | cross_net.cb_multinet_cross1_3 | cross_net.cb_multinet_cross1_4 | cross_net.cb_multinet_cross1_5 | cross_net.cb_multinet_cross1_6 | cross_net.cb_multinet_cross1_7 | cross_net.cb_multinet_cross1_8 | cross_net.cb_multinet_cross1_9 | cross_net.cb_multinet_cross1_10 | cross_net.ed_multinet_cross1_more {
+				put " cross1("
+				if cross_net.cb_multinet_cross1_1.isneq("") {
+					put cross_net.cb_multinet_cross1_1
+					if cross_net.ed_multinet_cross1_1a.isneq("") {
+						put ":" cross_net.ed_multinet_cross1_1a
+					}
+					put " "
+				}
+				if cross_net.cb_multinet_cross1_2.isneq("") {
+					put cross_net.cb_multinet_cross1_2
+					if cross_net.ed_multinet_cross1_2a.isneq("") {
+						put ":" cross_net.ed_multinet_cross1_2a
+					}
+					put " "
+				}
+				if cross_net.cb_multinet_cross1_3.isneq("") {
+					put cross_net.cb_multinet_cross1_3
+					if cross_net.ed_multinet_cross1_3a.isneq("") {
+						put ":" cross_net.ed_multinet_cross1_3a
+					}
+					put " "
+				}
+				if cross_net.cb_multinet_cross1_4.isneq("") {
+					put cross_net.cb_multinet_cross1_4
+					if cross_net.ed_multinet_cross1_4a.isneq("") {
+						put ":" cross_net.ed_multinet_cross1_4a
+					}
+					put " "
+				}
+				if cross_net.cb_multinet_cross1_5.isneq("") {
+					put cross_net.cb_multinet_cross1_5
+					if cross_net.ed_multinet_cross1_5a.isneq("") {
+						put ":" cross_net.ed_multinet_cross1_5a
+					}
+					put " "
+				}
+				if cross_net.cb_multinet_cross1_6.isneq("") {
+					put cross_net.cb_multinet_cross1_6
+					if cross_net.ed_multinet_cross1_6a.isneq("") {
+						put ":" cross_net.ed_multinet_cross1_6a
+					}
+					put " "
+				}
+				if cross_net.cb_multinet_cross1_7.isneq("") {
+					put cross_net.cb_multinet_cross1_7
+					if cross_net.ed_multinet_cross1_7a.isneq("") {
+						put ":" cross_net.ed_multinet_cross1_7a
+					}
+					put " "
+				}
+				if cross_net.cb_multinet_cross1_8.isneq("") {
+					put cross_net.cb_multinet_cross1_8
+					if cross_net.ed_multinet_cross1_8a.isneq("") {
+						put ":" cross_net.ed_multinet_cross1_8a
+					}
+					put " "
+				}
+				if cross_net.cb_multinet_cross1_9.isneq("") {
+					put cross_net.cb_multinet_cross1_9
+					if cross_net.ed_multinet_cross1_9a.isneq("") {
+						put ":" cross_net.ed_multinet_cross1_9a
+					}
+					put " "
+				}
+				if cross_net.cb_multinet_cross1_10.isneq("") {
+					put cross_net.cb_multinet_cross1_10
+					if cross_net.ed_multinet_cross1_10a.isneq("") {
+						put ":" cross_net.ed_multinet_cross1_10a
+					}
+					put " "
+				}
+				if cross_net.ed_multinet_cross1_more.isneq("") {
+					put cross_net.ed_multinet_cross1_more
+				}
+				put ")"
+			}
+END
+
+PROGRAM opt_part4
+BEGIN
+			if cross_net.cb_multinet_cross2_1 | cross_net.cb_multinet_cross2_2 | cross_net.cb_multinet_cross2_3 | cross_net.cb_multinet_cross2_4 | cross_net.cb_multinet_cross2_5 | cross_net.cb_multinet_cross2_6 | cross_net.cb_multinet_cross2_7 | cross_net.cb_multinet_cross2_8 | cross_net.cb_multinet_cross2_9 | cross_net.cb_multinet_cross2_10 | cross_net.ed_multinet_cross2_more {
+				put " cross2("
+				if cross_net.cb_multinet_cross2_1.isneq("") {
+					put cross_net.cb_multinet_cross2_1
+					if cross_net.ed_multinet_cross2_1a.isneq("") {
+						put ":" cross_net.ed_multinet_cross2_1a
+					}
+					put " "
+				}
+				if cross_net.cb_multinet_cross2_2.isneq("") {
+					put cross_net.cb_multinet_cross2_2
+					if cross_net.ed_multinet_cross2_2a.isneq("") {
+						put ":" cross_net.ed_multinet_cross2_2a
+					}
+					put " "
+				}
+				if cross_net.cb_multinet_cross2_3.isneq("") {
+					put cross_net.cb_multinet_cross2_3
+					if cross_net.ed_multinet_cross2_3a.isneq("") {
+						put ":" cross_net.ed_multinet_cross2_3a
+					}
+					put " "
+				}
+				if cross_net.cb_multinet_cross2_4.isneq("") {
+					put cross_net.cb_multinet_cross2_4
+					if cross_net.ed_multinet_cross2_4a.isneq("") {
+						put ":" cross_net.ed_multinet_cross2_4a
+					}
+					put " "
+				}
+				if cross_net.cb_multinet_cross2_5.isneq("") {
+					put cross_net.cb_multinet_cross2_5
+					if cross_net.ed_multinet_cross2_5a.isneq("") {
+						put ":" cross_net.ed_multinet_cross2_5a
+					}
+					put " "
+				}
+				if cross_net.cb_multinet_cross2_6.isneq("") {
+					put cross_net.cb_multinet_cross2_6
+					if cross_net.ed_multinet_cross2_6a.isneq("") {
+						put ":" cross_net.ed_multinet_cross2_6a
+					}
+					put " "
+				}
+				if cross_net.cb_multinet_cross2_7.isneq("") {
+					put cross_net.cb_multinet_cross2_7
+					if cross_net.ed_multinet_cross2_7a.isneq("") {
+						put ":" cross_net.ed_multinet_cross2_7a
+					}
+					put " "
+				}
+				if cross_net.cb_multinet_cross2_8.isneq("") {
+					put cross_net.cb_multinet_cross2_8
+					if cross_net.ed_multinet_cross2_8a.isneq("") {
+						put ":" cross_net.ed_multinet_cross2_8a
+					}
+					put " "
+				}
+				if cross_net.cb_multinet_cross2_9.isneq("") {
+					put cross_net.cb_multinet_cross2_9
+					if cross_net.ed_multinet_cross2_9a.isneq("") {
+						put ":" cross_net.ed_multinet_cross2_9a
+					}
+					put " "
+				}
+				if cross_net.cb_multinet_cross2_10.isneq("") {
+					put cross_net.cb_multinet_cross2_10
+					if cross_net.ed_multinet_cross2_10a.isneq("") {
+						put ":" cross_net.ed_multinet_cross2_10a
+					}
+					put " "
+				}
+				if cross_net.ed_multinet_cross2_more.isneq("") {
+					put cross_net.ed_multinet_cross2_more
+				}
+				put ")"
+			}
+			if cross_net.vl_multinet_behavior.isneq("") {
+				put " behavior(" cross_net.vl_multinet_behavior ")"
+			}
+			if cross_net.vl_multinet_missbeh.isneq("") {
+				put " missbeh(" cross_net.vl_multinet_missbeh ")"
+			}
+			if cross_net.ed_multinet_behint.isneq("") {
+				put " behint(" cross_net.ed_multinet_behint ")"
+			}
+END
+
+PROGRAM opt_part5
+BEGIN
+			if behavior.cx_multinet_beheff1_linear | behavior.cx_multinet_beheff1_quadratic | behavior.cx_multinet_beheff1_avalt | behavior.cx_multinet_beheff1_avsim | behavior.cb_multinet_beheff1_1 | behavior.cb_multinet_beheff1_2 | behavior.cb_multinet_beheff1_3 | behavior.cb_multinet_beheff1_4 | behavior.cb_multinet_beheff1_5 | behavior.cb_multinet_beheff1_6 | behavior.cb_multinet_beheff1_7 | behavior.cb_multinet_beheff1_8 | behavior.ed_multinet_beheff1_more {
+				put " beheff1("
+				if behavior.cx_multinet_beheff1_linear {
+					put "linear "
+				}
+				if behavior.cx_multinet_beheff1_quadratic {
+					put "quadratic "
+				}
+				if behavior.cx_multinet_beheff1_avalt {
+					put "avalt "
+				}
+				if behavior.cx_multinet_beheff1_avsim {
+					put "avsim "
+				}
+				if behavior.cb_multinet_beheff1_1.isneq("") {
+					put behavior.cb_multinet_beheff1_1
+					if behavior.ed_multinet_beheff1_1a.isneq("") {
+						put ":" behavior.ed_multinet_beheff1_1a
+					}
+					put " "
+				}
+				if behavior.cb_multinet_beheff1_2.isneq("") {
+					put behavior.cb_multinet_beheff1_2
+					if behavior.ed_multinet_beheff1_2a.isneq("") {
+						put ":" behavior.ed_multinet_beheff1_2a
+					}
+					put " "
+				}
+				if behavior.cb_multinet_beheff1_3.isneq("") {
+					put behavior.cb_multinet_beheff1_3
+					if behavior.ed_multinet_beheff1_3a.isneq("") {
+						put ":" behavior.ed_multinet_beheff1_3a
+					}
+					put " "
+				}
+				if behavior.cb_multinet_beheff1_4.isneq("") {
+					put behavior.cb_multinet_beheff1_4
+					if behavior.ed_multinet_beheff1_4a.isneq("") {
+						put ":" behavior.ed_multinet_beheff1_4a
+					}
+					put " "
+				}
+				if behavior.cb_multinet_beheff1_5.isneq("") {
+					put behavior.cb_multinet_beheff1_5
+					if behavior.ed_multinet_beheff1_5a.isneq("") {
+						put ":" behavior.ed_multinet_beheff1_5a
+					}
+					put " "
+				}
+				if behavior.cb_multinet_beheff1_6.isneq("") {
+					put behavior.cb_multinet_beheff1_6
+					if behavior.ed_multinet_beheff1_6a.isneq("") {
+						put ":" behavior.ed_multinet_beheff1_6a
+					}
+					put " "
+				}
+				if behavior.cb_multinet_beheff1_7.isneq("") {
+					put behavior.cb_multinet_beheff1_7
+					if behavior.ed_multinet_beheff1_7a.isneq("") {
+						put ":" behavior.ed_multinet_beheff1_7a
+					}
+					put " "
+				}
+				if behavior.cb_multinet_beheff1_8.isneq("") {
+					put behavior.cb_multinet_beheff1_8
+					if behavior.ed_multinet_beheff1_8a.isneq("") {
+						put ":" behavior.ed_multinet_beheff1_8a
+					}
+					put " "
+				}
+				if behavior.ed_multinet_beheff1_more.isneq("") {
+					put behavior.ed_multinet_beheff1_more
+				}
+				put ")"
+			}
+END
+
+PROGRAM opt_part6
+BEGIN
+			if behavior.cx_multinet_beheff2_linear | behavior.cx_multinet_beheff2_quadratic | behavior.cx_multinet_beheff2_avalt | behavior.cx_multinet_beheff2_avsim | behavior.cb_multinet_beheff2_1 | behavior.cb_multinet_beheff2_2 | behavior.cb_multinet_beheff2_3 | behavior.cb_multinet_beheff2_4 | behavior.cb_multinet_beheff2_5 | behavior.cb_multinet_beheff2_6 | behavior.cb_multinet_beheff2_7 | behavior.cb_multinet_beheff2_8 | behavior.ed_multinet_beheff2_more {
+				put " beheff2("
+				if behavior.cx_multinet_beheff2_linear {
+					put "linear "
+				}
+				if behavior.cx_multinet_beheff2_quadratic {
+					put "quadratic "
+				}
+				if behavior.cx_multinet_beheff2_avalt {
+					put "avalt "
+				}
+				if behavior.cx_multinet_beheff2_avsim {
+					put "avsim "
+				}
+				if behavior.cb_multinet_beheff2_1.isneq("") {
+					put behavior.cb_multinet_beheff2_1
+					if behavior.ed_multinet_beheff2_1a.isneq("") {
+						put ":" behavior.ed_multinet_beheff2_1a
+					}
+					put " "
+				}
+				if behavior.cb_multinet_beheff2_2.isneq("") {
+					put behavior.cb_multinet_beheff2_2
+					if behavior.ed_multinet_beheff2_2a.isneq("") {
+						put ":" behavior.ed_multinet_beheff2_2a
+					}
+					put " "
+				}
+				if behavior.cb_multinet_beheff2_3.isneq("") {
+					put behavior.cb_multinet_beheff2_3
+					if behavior.ed_multinet_beheff2_3a.isneq("") {
+						put ":" behavior.ed_multinet_beheff2_3a
+					}
+					put " "
+				}
+				if behavior.cb_multinet_beheff2_4.isneq("") {
+					put behavior.cb_multinet_beheff2_4
+					if behavior.ed_multinet_beheff2_4a.isneq("") {
+						put ":" behavior.ed_multinet_beheff2_4a
+					}
+					put " "
+				}
+				if behavior.cb_multinet_beheff2_5.isneq("") {
+					put behavior.cb_multinet_beheff2_5
+					if behavior.ed_multinet_beheff2_5a.isneq("") {
+						put ":" behavior.ed_multinet_beheff2_5a
+					}
+					put " "
+				}
+				if behavior.cb_multinet_beheff2_6.isneq("") {
+					put behavior.cb_multinet_beheff2_6
+					if behavior.ed_multinet_beheff2_6a.isneq("") {
+						put ":" behavior.ed_multinet_beheff2_6a
+					}
+					put " "
+				}
+				if behavior.cb_multinet_beheff2_7.isneq("") {
+					put behavior.cb_multinet_beheff2_7
+					if behavior.ed_multinet_beheff2_7a.isneq("") {
+						put ":" behavior.ed_multinet_beheff2_7a
+					}
+					put " "
+				}
+				if behavior.cb_multinet_beheff2_8.isneq("") {
+					put behavior.cb_multinet_beheff2_8
+					if behavior.ed_multinet_beheff2_8a.isneq("") {
+						put ":" behavior.ed_multinet_beheff2_8a
+					}
+					put " "
+				}
+				if behavior.ed_multinet_beheff2_more.isneq("") {
+					put behavior.ed_multinet_beheff2_more
+				}
+				put ")"
+			}
+END
+
+PROGRAM opt_part7
+BEGIN
+			if behavior.cb_multinet_beheff12_1 | behavior.cb_multinet_beheff12_2 | behavior.cb_multinet_beheff12_3 | behavior.cb_multinet_beheff12_4 | behavior.cb_multinet_beheff12_5 | behavior.cb_multinet_beheff12_6 | behavior.ed_multinet_beheff12_more {
+				put " beheff12("
+				if behavior.cb_multinet_beheff12_1.isneq("") {
+					put behavior.cb_multinet_beheff12_1
+					if behavior.ed_multinet_beheff12_1a.isneq("") {
+						put ":" behavior.ed_multinet_beheff12_1a
+					}
+					put " "
+				}
+				if behavior.cb_multinet_beheff12_2.isneq("") {
+					put behavior.cb_multinet_beheff12_2
+					if behavior.ed_multinet_beheff12_2a.isneq("") {
+						put ":" behavior.ed_multinet_beheff12_2a
+					}
+					put " "
+				}
+				if behavior.cb_multinet_beheff12_3.isneq("") {
+					put behavior.cb_multinet_beheff12_3
+					if behavior.ed_multinet_beheff12_3a.isneq("") {
+						put ":" behavior.ed_multinet_beheff12_3a
+					}
+					put " "
+				}
+				if behavior.cb_multinet_beheff12_4.isneq("") {
+					put behavior.cb_multinet_beheff12_4
+					if behavior.ed_multinet_beheff12_4a.isneq("") {
+						put ":" behavior.ed_multinet_beheff12_4a
+					}
+					put " "
+				}
+				if behavior.cb_multinet_beheff12_5.isneq("") {
+					put behavior.cb_multinet_beheff12_5
+					if behavior.ed_multinet_beheff12_5a.isneq("") {
+						put ":" behavior.ed_multinet_beheff12_5a
+					}
+					put " "
+				}
+				if behavior.cb_multinet_beheff12_6.isneq("") {
+					put behavior.cb_multinet_beheff12_6
+					if behavior.ed_multinet_beheff12_6a.isneq("") {
+						put ":" behavior.ed_multinet_beheff12_6a
+					}
+					put " "
+				}
+				if behavior.ed_multinet_beheff12_more.isneq("") {
+					put behavior.ed_multinet_beheff12_more
+				}
+				put ")"
+			}
+			if behavior.cb_multinet_beheff21_1 | behavior.cb_multinet_beheff21_2 | behavior.cb_multinet_beheff21_3 | behavior.cb_multinet_beheff21_4 | behavior.cb_multinet_beheff21_5 | behavior.cb_multinet_beheff21_6 | behavior.ed_multinet_beheff21_more {
+				put " beheff21("
+				if behavior.cb_multinet_beheff21_1.isneq("") {
+					put behavior.cb_multinet_beheff21_1
+					if behavior.ed_multinet_beheff21_1a.isneq("") {
+						put ":" behavior.ed_multinet_beheff21_1a
+					}
+					put " "
+				}
+				if behavior.cb_multinet_beheff21_2.isneq("") {
+					put behavior.cb_multinet_beheff21_2
+					if behavior.ed_multinet_beheff21_2a.isneq("") {
+						put ":" behavior.ed_multinet_beheff21_2a
+					}
+					put " "
+				}
+				if behavior.cb_multinet_beheff21_3.isneq("") {
+					put behavior.cb_multinet_beheff21_3
+					if behavior.ed_multinet_beheff21_3a.isneq("") {
+						put ":" behavior.ed_multinet_beheff21_3a
+					}
+					put " "
+				}
+				if behavior.cb_multinet_beheff21_4.isneq("") {
+					put behavior.cb_multinet_beheff21_4
+					if behavior.ed_multinet_beheff21_4a.isneq("") {
+						put ":" behavior.ed_multinet_beheff21_4a
+					}
+					put " "
+				}
+				if behavior.cb_multinet_beheff21_5.isneq("") {
+					put behavior.cb_multinet_beheff21_5
+					if behavior.ed_multinet_beheff21_5a.isneq("") {
+						put ":" behavior.ed_multinet_beheff21_5a
+					}
+					put " "
+				}
+				if behavior.cb_multinet_beheff21_6.isneq("") {
+					put behavior.cb_multinet_beheff21_6
+					if behavior.ed_multinet_beheff21_6a.isneq("") {
+						put ":" behavior.ed_multinet_beheff21_6a
+					}
+					put " "
+				}
+				if behavior.ed_multinet_beheff21_more.isneq("") {
+					put behavior.ed_multinet_beheff21_more
+				}
+				put ")"
+			}
+END
+
+PROGRAM opt_part8
+BEGIN
+			if behavior.ed_multinet_theta0.isneq("") {
+				put " theta0(" behavior.ed_multinet_theta0 ")"
+			}
+			if behavior.ed_multinet_fix.isneq("") {
+				put " fix(" behavior.ed_multinet_fix ")"
+			}
+			if behavior.ed_multinet_k0.isneq("") {
+				put " k0(" behavior.ed_multinet_k0 ")"
+			}
+			if estimate.ed_multinet_k3.isneq("") {
+				put " k3(" estimate.ed_multinet_k3 ")"
+			}
+			if estimate.ed_multinet_firstg.isneq("") {
+				put " firstg(" estimate.ed_multinet_firstg ")"
+			}
+			if estimate.ed_multinet_seed.isneq("") {
+				put " seed(" estimate.ed_multinet_seed ")"
+			}
+END
