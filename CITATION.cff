@@ -5,7 +5,7 @@ type: software
 authors:
   - family-names: Grund
     given-names: Thomas U.
-    affiliation: University College Dublin
+    affiliation: RWTH Aachen University
 version: 1.0.1
 date-released: '2026-10-24'
 license: GPL-3.0-only
