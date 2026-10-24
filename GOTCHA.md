@@ -585,3 +585,14 @@ After the nwsaom branches were merged, `nwsaom.ado` (208 KB on disk) failed to l
 looks the same) a `PROGRAM command` of a few hundred lines, so the generator splits the option code into sub-programs
 (`put /program opt_partN` inside `beginoptions`). A dialog can be tested in batch: `capture db nwsaom_multinet` and display `_rc`
 (0 = loads; run `NWCORE=... dlg/db_load_check.sh`). A dialog window cannot be opened in batch mode, so its looks must be checked by hand.
+
+## A behavior rate effect that "hangs": runaway rate, not an infinite loop (2026-10-25)
+
+`nwsaom ..., behavior(...) behrate(avexposure)` or `behrate(avtinexposuredist2)` seemed to run for 30+ minutes on the dialog smoke-test model. `sample` shows the
+main thread inside `simulate_period` (plugin): the rate-effect coefficient and the behavior rate drift upwards in phase 2, the total rate explodes, and one period
+needs 10^7+ ministeps. Not a Mata loop and not specific to the token (any behrate effect on data it does not fit). RSiena stops such fits with "thetaBound
+should be set higher" because its phase-2 check covers every free parameter, the rates included (rate beh period 2 = 50.07 was the offender, seeds 1 and 2).
+The coev estimator checked only the first `p` (non-rate) parameters. Now: all free parameters, and the plugin abandons a period of more than
+max(1000000, 500 n) ministeps (scalar `__saom_native_stepcap`, `SaomStepCapCheck()`). Trap while debugging: `pgrep -n StataBE` can pick another session's
+Stata; match on the do-file name. A Mata `exit()` inside a function that switched frames must restore the frame first (the check runs after `st_framecurrent(origframe)`).
+Consequence: a coev fit whose behavior rate really exceeds 50 (as in the smoke-test data, rate 120 before) now stops with r(498), as it does in RSiena.

@@ -3,8 +3,10 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.0.3] - 2026-10-25
 
+### Fixed
+- A co-evolution fit with a behavior rate effect (`behrate()`, for example `avexposure` or `avtinexposuredist2`) could run for hours: when the data do not fit such an effect, its coefficient and the behavior rate grow without bound, and one simulated period then needs ever more ministeps. The `thetaBound` safeguard of phase 2 (as RSiena, 50 in absolute value) now covers every free parameter, the rates and the rate-effect coefficients included, and the plugin abandons a simulated period of more than max(1000000, 500 n) ministeps. Both stop the fit within seconds with r(498) and a message; RSiena stops the same models with "thetaBound should be set higher". Test `cscripts/test_nwsaom_behratediv.do`. The Linux and Windows plugins need a rebuild (CI) for the ministep guard; the `thetaBound` part works with any plugin.
 ### Changed
 - Dialog boxes: every option and every effect of `nwsaom` can be set from a dialog (`db nwsaom`, `db nwsaom_multinet`, `db nwsaom_bayes`, `db nwsaom_meta`, `db nwsaom_describe`, `db nwsaom_estat`); the dialogs are generated from a specification (`dlg/`).
 - The version is shown at the bottom of each help file.
