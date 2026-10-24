@@ -8,7 +8,6 @@
 {p2colset 9 21 22 2}{...}
 {p2col :nwsaom {hline 2}}Stochastic actor-oriented model (SAOM) estimation between observed network waves{p_end}
 {p2colreset}{...}
-{pstd}{it:nwsaom version 1.0.2, 24 October 2026}{p_end}{* nwversion}
 
 {title:Syntax}
 
@@ -897,3 +896,6 @@ the RSiena project.
 {title:See also}
 
 	{help nwergm}, {help nwset}, {help nwrandom}
+
+{hline}
+{pstd}{it:nwsaom version 1.0.2, 24 October 2026}{p_end}{* nwversion}

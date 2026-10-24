@@ -6,7 +6,6 @@
 {p2colset 9 25 26 2}{...}
 {p2col :nwsaom remarks {hline 2}}Remarks, effect library, and estimation details for {cmd:nwsaom}{p_end}
 {p2colreset}{...}
-{pstd}{it:nwsaom version 1.0.2, 24 October 2026}{p_end}{* nwversion}
 
 {title:Description}
 
@@ -1077,3 +1076,6 @@ The same estimates are available as {cmd:nwsaom_ml} after an {cmd:nwsaom} fit. T
 {title:See also}
 
     {help nwsaom}, {help nwsaom_estat}, {help nwergm}
+
+{hline}
+{pstd}{it:nwsaom version 1.0.2, 24 October 2026}{p_end}{* nwversion}

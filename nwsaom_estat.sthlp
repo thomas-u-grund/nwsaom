@@ -6,7 +6,6 @@
 {p2colset 9 25 26 2}{...}
 {p2col :nwsaom postestimation {hline 2}}Postestimation tools for {cmd:nwsaom}{p_end}
 {p2colreset}{...}
-{pstd}{it:nwsaom version 1.0.2, 24 October 2026}{p_end}{* nwversion}
 
 {title:Description}
 
@@ -328,3 +327,6 @@ Duxbury, S.W., Zhao, X. {cmd:netmediate}: Micro-Macro Analysis for Social Networ
 {title:See also}
 
 	{help nwsaom}
+
+{hline}
+{pstd}{it:nwsaom version 1.0.2, 24 October 2026}{p_end}{* nwversion}
