@@ -577,3 +577,14 @@ Build the fixed-dummy model by hand: a varCovar `cbind(0,1)` + `includeEffects(e
 ## One ado program cannot be larger than about 133 KB of code: "system limit exceeded - see manual" at load (2026-10-24)
 
 After the nwsaom branches were merged, `nwsaom.ado` (208 KB on disk) failed to load with `system limit exceeded - see manual (error occurred while loading nwsaom.ado)` and nearly every test failed. The limit counts CODE, not comments: stripping all comment lines and even all indentation did not help, but each of the branches alone (up to 132.5 KB of non-comment, non-blank code, measured as the sum of the stripped line lengths) loaded and the merge (134.3 KB) did not; adding 3 KB to a loading file made it fail, 20 short lines did not. Remedy used: the internal local macros that no other file uses were renamed `__nwsaom_x` -> `__ns_x` (about 5 KB). Headroom is a few KB: **put all new Stata-side code of nwsaom into helper ado files** (`nwsaom_*.ado`, `_nwsaom_*.ado`; the main program only dispatches with a few lines, as for `meta`, `bayes`, `describe`). Measure with: sum of `len(stripped line)+1` over lines that are neither blank nor start with `//`, `*` or `/*`. nwergm.ado is at about 107 KB by the same measure.
+
+## A behavior rate effect that "hangs": runaway rate, not an infinite loop (2026-10-25)
+
+`nwsaom ..., behavior(...) behrate(avexposure)` or `behrate(avtinexposuredist2)` seemed to run for 30+ minutes on the dialog smoke-test model. `sample` shows the
+main thread inside `simulate_period` (plugin): the rate-effect coefficient and the behavior rate drift upwards in phase 2, the total rate explodes, and one period
+needs 10^7+ ministeps. Not a Mata loop and not specific to the token (any behrate effect on data it does not fit). RSiena stops such fits with "thetaBound
+should be set higher" because its phase-2 check covers every free parameter, the rates included (rate beh period 2 = 50.07 was the offender, seeds 1 and 2).
+The coev estimator checked only the first `p` (non-rate) parameters. Now: all free parameters, and the plugin abandons a period of more than
+max(1000000, 500 n) ministeps (scalar `__saom_native_stepcap`, `SaomStepCapCheck()`). Trap while debugging: `pgrep -n StataBE` can pick another session's
+Stata; match on the do-file name. A Mata `exit()` inside a function that switched frames must restore the frame first (the check runs after `st_framecurrent(origframe)`).
+Consequence: a coev fit whose behavior rate really exceeds 50 (as in the smoke-test data, rate 120 before) now stops with r(498), as it does in RSiena.

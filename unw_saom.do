@@ -12656,7 +12656,9 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 			for (k=p+1; k<=p+2*P; k++) if (theta[k] < 0.5*thprev[k]) theta[k] = 0.5*thprev[k]
 			thav = thav + theta
 			thavn = thavn + 1
-			SaomCheckThetaBound(select(theta[1..p], !coevfixed[1..p]), 50)
+			// RSiena's check covers every free parameter of theta, the rates and the rate-effect coefficients included (a behavior rate
+			// effect can send a rate to infinity; the simulation of one period then needs ever more ministeps and the fit appears to hang)
+			SaomCheckThetaBound(select(theta, !coevfixed), 50)
 
 			if (nit >= 2) {
 				ac = J(1, ptot, -1)
@@ -15107,6 +15109,7 @@ real matrix SaomBatchRun(real scalar P, real scalar pNet, real scalar pBeh,
 	stata("plugin call saomnativesim " + invtokens(names) + ", " + char(34) + argstr + char(34))
 	out = st_data((1::K), names)
 	st_framecurrent(origframe)
+	SaomStepCapCheck()
 	return(out)
 }
 
@@ -15402,6 +15405,16 @@ void SaomBatchSetupMB(pointer(class SaomGraph scalar) rowvector Gwaves, real sca
 	stata("capture frame drop __saom_batch")
 }
 
+/* the plugin abandons a simulated period of more than max(1000000, 500 n) ministeps when rate effects drive the total rate to infinity
+   (native/saom_sim.c, saom_stepcap_hit) and sets the scalar; a plugin without the guard never sets it */
+void SaomStepCapCheck() {
+	if (st_numscalar("__saom_native_stepcap") == 1) {
+		st_numscalar("__saom_native_stepcap", 0)
+		errprintf("SAOM simulation: a simulated period needed more than 1000000 ministeps. A rate effect has sent the total rate towards infinity, so the estimates have diverged (RSiena stops such a fit with its thetaBound error). Try other starting values (theta0()), fewer rate effects, or a narrower model.\n")
+		exit(498)
+	}
+}
+
 /* K replicates (BATCHRUN) for nb behaviors. Columns: summed statistics (network, behaviors' lagged), summed
    scores, per period 6 columns (netdist behdist1 stepsNet stepsBeh1 nchanges nchangesBeh1), the per-period
    statistics and scores when doper, then per period and behavior 2.. (behdist, stepsBeh, nchangesBeh). */
@@ -15441,6 +15454,7 @@ real matrix SaomBatchRunMB(real scalar P, real scalar pNet, real rowvector pB, r
 	stata("plugin call saomnativesim " + invtokens(names) + ", " + char(34) + argstr + char(34))
 	out = st_data((1::K), names)
 	st_framecurrent(origframe)
+	SaomStepCapCheck()
 	return(out)
 }
 

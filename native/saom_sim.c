@@ -4861,6 +4861,11 @@ static void rc_aggregate(long n, long nrc, const double *rcval, const double *wf
 	}
 }
 
+/* Runaway guard of the batch simulation (BATCHRUN): a rate effect (ratecov, behavior rate effects) can drive the total rate to infinity during
+   estimation, and one simulated period then needs ever more ministeps (the fit seems to hang). Such a period is abandoned after
+   max(1000000, 500 n) ministeps (RSiena's runEpoch() uses 1000000 steps for the same situation) and BATCHRUN reports it in the Stata scalar
+   __saom_native_stepcap; the Mata caller stops with an error. Only set while a batch runs. */
+static volatile int saom_stepcap_on = 0, saom_stepcap_hit = 0;
 static int simulate_period(const model_t *M, const period_t *PD, const simparams_t *P,
 	unsigned long long seed, int keep_final, simres_t *R) {
 
@@ -5045,6 +5050,7 @@ static int simulate_period(const model_t *M, const period_t *PD, const simparams
 			   within a million ministeps is abandoned; the time is then
 			   returned as missing (SV_missval), which the caller reports */
 			if (P->condmode && steps >= 1000000.0) { condcap = 1; break; }
+			if (saom_stepcap_on && !P->condmode && (hasbrc || P->hasratecov) && steps >= (n > 2000 ? 500.0 * (double)n : 1000000.0)) { saom_stepcap_hit = 1; break; }
 			double dt_rc = -log(rng_unif(&rng)) / grandRate;
 			/* protocol 27: composition change at fractional times (EpochSimulation::makeNextCompositionChange()):
 			   an event that falls before the next ministep is made first and the waiting time redrawn */
@@ -6465,7 +6471,11 @@ static ST_retcode batch_run(char *arg) {
 
 	res = (simres_t *)calloc((size_t)(K * P), sizeof(simres_t));
 	J.M = M; J.per = batch_cur->per; J.prm = prm; J.K = K; J.P = P; J.seed = seed; J.res = res;
+	saom_stepcap_hit = 0;
+	saom_stepcap_on = 1;
 	batch_run_units(&J, nthreads);
+	saom_stepcap_on = 0;
+	SF_scal_save("__saom_native_stepcap", (ST_double)saom_stepcap_hit);
 
 	/* condmode 2 = conditional simulation with the full output of mode 0
 	   plus a 7th per-period column, the simulated time */
