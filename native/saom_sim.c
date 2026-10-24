@@ -189,6 +189,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 #if defined(_MSC_VER) && !defined(__thread)
 #define __thread __declspec(thread)
 #endif

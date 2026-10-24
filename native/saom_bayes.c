@@ -879,7 +879,7 @@ static int bbatch(bctx_t *B, bst_t *S, bmoves_t *mv, int change, double *prate, 
 /* multi_siena's improveMH: tune the scale factors with batches that do not change the parameters */
 static int bimprove(bctx_t *B, bst_t *S, bmoves_t *mv, long totruns, double target) {
 	double desired = target * (double)totruns, tol = (double)totruns / 20.0, actual[3], prev[3] = {0, 0, 0}, mult[3];
-	int nearGoal[3] = {0, 0, 0}, far[3] = {1, 1, 1}, past[3] = {0, 0, 0};
+	int nearGoal[3] = {0, 0, 0}, farg[3] = {1, 1, 1}, past[3] = {0, 0, 0};
 	long iter = 0, b, j;
 	if (totruns <= 0) return 0;
 	for (;;) {
@@ -896,13 +896,13 @@ static int bimprove(bctx_t *B, bst_t *S, bmoves_t *mv, long totruns, double targ
 			double farm;
 			if (nearGoal[j]) actual[j] = (actual[j] + prev[j]) / 2.0;
 			if (fabs(actual[j] - desired) < tol) nearGoal[j] = 1;
-			if (fabs(actual[j] - desired) < 2.0 * tol) far[j] = 0;
+			if (fabs(actual[j] - desired) < 2.0 * tol) farg[j] = 0;
 			farm = actual[j] > desired ? 2.0 : 0.5;
 			if (actual[j] > 5.0 * desired) farm = 5.0;
 			if (5.0 * actual[j] < desired) farm = 0.2;
 			prev[j] = actual[j];
 			if (fabs(actual[j] - desired) <= tol) past[j]++;
-			mult[j] = far[j] ? farm : 1.0 + (actual[j] - desired) / sqrt(sqrt((double)iter) * desired * ((double)totruns - desired));
+			mult[j] = farg[j] ? farm : 1.0 + (actual[j] - desired) / sqrt(sqrt((double)iter) * desired * ((double)totruns - desired));
 			if (mult[j] < 0.1) mult[j] = 0.1;
 			if (mult[j] > 10.0) mult[j] = 10.0;
 		}
