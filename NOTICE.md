@@ -18,9 +18,9 @@ nwsaom is Copyright (C) 2026 Thomas U. Grund and is distributed under the GNU Ge
 
 Estimates, standard errors, rate parameters, target statistics, score tests, simulated statistics and Bayesian/maximum-likelihood posterior summaries were compared with RSiena (versions 1.6.6 and 1.6.14) and multiSiena 1.2.40 on the RSiena example data (s50, s501-s503) and on simulated and made-up data; the R scripts and data are in `dev/`, the regression tests in `cscripts/test_nwsaom_*.do` (see `cscripts/test_nwsaom_rsiena.do` and `test_nwsaom_coev_rsiena.do` for the reference numbers) and the benchmarks in `manual/` (chapter on validation and benchmark). The native plugin is certified against the Mata reference implementation.
 
-## AI assistance (PLACEHOLDER: the owner confirms or rewrites this paragraph)
+## AI assistance
 
-Parts of the code, tests, documentation and build tooling of this package were written with the help of an AI assistant (Claude, Anthropic) working under the direction of the author, who reviewed and is responsible for the result. [Wording to be confirmed by the author before release.]
+The software was developed with Claude Code (Anthropic), an AI coding assistant, working under the author's direction. It helped port algorithms from RSiena and multiSiena into Stata, Mata and C and helped write the tests. The author specified the scope, reviewed the code, and is responsible for the package. Its correctness rests on validation, not on the assistant: the results are compared numerically with RSiena and multiSiena, and the test suite reruns these comparisons.
 
 ## How to cite
 
