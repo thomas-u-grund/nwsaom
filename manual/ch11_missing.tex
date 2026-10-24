@@ -62,7 +62,7 @@ nwsaom, wave1(glasgow1) wave2(glasgow2) outdegree reciprocity transtrip ///
 \paragraph{Scope.} \opt{structural()} is implemented for the two-wave path \opt{wave1()}/\opt{wave2()}, for network-only models, and it is not combinable with \opt{symmetric}, \opt{ratecov()} or the network endowment/creation split; each of these combinations is rejected outright. For users the option is limited to the two-wave path; it is used with \opt{waves()} only internally, for two-mode networks. It runs in the native plugin.
 
 \section{What RSiena has that \nwsaom{} does not (yet)}\label{sec:notimpl}
-RSiena's effects table, as returned by \texttt{getEffects()} for 12 data configurations of RSiena 1.6.14, has \nTotal{} rows (a row is one RSiena short name for one variable type and interaction context). Every row was compared with \nwsaom{} by reading the code and the documentation, and by running models against \texttt{siena07} where they were implemented. Of these rows:
+RSiena's effects table, as returned by \texttt{getEffects()} for twelve data configurations of RSiena 1.6.6, has \nTotal{} rows (a row is one RSiena short name for one variable type and interaction context). The effects that RSiena 1.6.7 to 1.6.14 added or changed (for example \texttt{WXZX} and the two-mode \texttt{toU}) are implemented and compared with RSiena 1.6.14 but are not part of these counts; the counts change with RSiena releases. Every row was compared with \nwsaom{} by reading the code and the documentation, and by running models against \texttt{siena07} where they were implemented. Of these rows:
 \begin{itemize}
 \item \nImpl{} are implemented, \nPartial{} is partly implemented;
 \item \nNotImpl{} are \emph{not implemented};
