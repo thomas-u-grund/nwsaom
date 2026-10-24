@@ -1,9 +1,9 @@
 {smcl}
-{* *! version 1.0.0  24oct2026 author: Thomas Grund}{...}
+{* *! version 1.0.1  24oct2026 author: Thomas Grund}{...}
 {vieweralsosee "nwsaom" "help nwsaom"}{...}
 {vieweralsosee "nwsaom_estat" "help nwsaom_estat"}{...}
 {title:Title}
-{pstd}{it:nwsaom version 1.0.0, 24 October 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.0.1, 24 October 2026}{p_end}{* nwversion}
 
 {phang}
 {bf:nwsaom meta} {hline 2} Multi-group meta-analysis of separate {cmd:nwsaom} fits (RSiena's {cmd:siena08}){p_end}

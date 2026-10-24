@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.0.0  24oct2026 author: Thomas Grund}{...}
+{* *! version 1.0.1  24oct2026 author: Thomas Grund}{...}
 {marker topic}
 {helpb nwtopical##analysis_statmodels:[NW-2.6.6] Statistical Estimation of Networks}
 
@@ -8,7 +8,7 @@
 {p2colset 9 21 22 2}{...}
 {p2col :nwsaom {hline 2}}Stochastic actor-oriented model (SAOM) estimation between observed network waves{p_end}
 {p2colreset}{...}
-{pstd}{it:nwsaom version 1.0.0, 24 October 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.0.1, 24 October 2026}{p_end}{* nwversion}
 
 {title:Syntax}
 
@@ -528,6 +528,16 @@ each weighted by the covariate value for (i,q) (RSiena 1.6.12 and later).
 contrastcovnetnet alldifcovnetnet covnetnetin homcovnetnetin contrastcovnetnetin alldifcovnetnetin inpopintnx inactintnx outpopintnx outactintnx samexinpopintn samexinactintn
 samexoutpopintn samexoutactintn altdist2w totdist2w simdist2w altindist2w totindist2w simegodist2w simegoindist2w} (RSiena sameWWClosure, diffWWClosure, jumpWWClosure, jumpFrom,
 jumpSharedIn, sameWXClosure, ..., covNetNet, homCovNetNet, ..., inPopIntnX, ..., altDist2W, ..., simEgoInDist2W; the number is RSiena's effect parameter).
+
+{title:Version}
+
+{p 8 17 2}
+{cmd:nwsaom version}
+{p_end}
+
+{pstd}
+{cmd:nwsaom version} displays the installed release of {cmd:nwsaom}, the version of the {cmd:nwcommands} core, the license and the version of the R package that the results were compared with, and the native plugin in use. It stores the release in {cmd:r(version)} and {cmd:r(date)}, the core version in {cmd:r(core)}, and the license in {cmd:r(license)}. After estimation by the method of moments, the release that produced the results is in {cmd:e(version)}; quote it when reporting an analysis. {cmd:nwversion} lists the core and all installed model packages.
+{p_end}
 
 {title:Description}
 
