@@ -1,5 +1,7 @@
 # NOTICE
 
+<!--version-->**Version 1.0.0** (released 24 October 2026)<!--/version-->
+
 nwsaom is Copyright (C) 2026 Thomas U. Grund and is distributed under the GNU General Public License, version 3 (file `LICENSE`).
 
 ## What this package is derived from
@@ -22,6 +24,6 @@ Parts of the code, tests, documentation and build tooling of this package were w
 
 ## How to cite
 
-Grund, T. U. (2026). nwsaom: a Stata package. Zenodo. https://doi.org/10.5281/zenodo.XXXXXXX
+Grund, T. U. (2026). nwsaom: a Stata package (version 1.0.0). Zenodo. https://doi.org/10.5281/zenodo.XXXXXXX
 (placeholder DOI; the owner replaces it when the Zenodo record exists).
 Please also cite the core package (Grund, T. U., nwcommands) and the work this package is derived from (see above).

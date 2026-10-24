@@ -1,9 +1,10 @@
 {smcl}
-{* *! version 0.2.0  23oct2026}{...}
+{* *! version 1.0.0  24oct2026 author: Thomas Grund}{...}
 {vieweralsosee "nwsaom" "help nwsaom"}{...}
 {vieweralsosee "nwsaom_estat" "help nwsaom_estat"}{...}
 {vieweralsosee "nwsaom_meta" "help nwsaom_meta"}{...}
 {title:Title}
+{pstd}{it:nwsaom version 1.0.0, 24 October 2026}{p_end}{* nwversion}
 
 {phang}
 {bf:nwsaom bayes} {hline 2} Bayesian estimation of a stochastic actor-oriented model, following multiSiena's {cmd:multi_siena()} (the successor of RSiena's {cmd:sienaBayes}) for a single group{p_end}

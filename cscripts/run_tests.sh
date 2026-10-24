@@ -7,6 +7,7 @@
 #   Stata process has its own memory, frames and Mata); their logs are run_<test>.log. The threaded plugin batch uses all
 #   cores in every process, so more jobs than cores/3 stop paying off.
 cd "$(dirname "$0")/.." || exit 1
+python3 tools/check_version.py || exit 1
 if [[ -z $NWCORE || ! -f $NWCORE/unw_core.do ]]; then echo "set NWCORE to the nwcommands (core) directory"; exit 1; fi
 export NWCORE
 mode=${1:-quick}

@@ -1,4 +1,4 @@
-*! version 0.1.0 24oct2026 nwcommands: the rates of the last nwsaom fit (or of nwsaom bayes / ml) for the Bayesian and maximum likelihood estimators
+*! version 1.0.0  24oct2026 nwcommands: the rates of the last nwsaom fit (or of nwsaom bayes / ml) for the Bayesian and maximum likelihood estimators
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General

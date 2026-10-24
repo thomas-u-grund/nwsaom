@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "nwsaom: a Stata package"
+type: software
+authors:
+  - family-names: Grund
+    given-names: Thomas U.
+    affiliation: University College Dublin
+version: 1.0.0
+date-released: '2026-10-24'
+license: GPL-3.0-only
+repository-code: "https://github.com/thomas-u-grund/nwsaom"
+# doi: 10.5281/zenodo.XXXXXXX   (placeholder: replace when the Zenodo record exists)
