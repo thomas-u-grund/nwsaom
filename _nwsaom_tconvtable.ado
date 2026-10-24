@@ -17,7 +17,7 @@ program define _nwsaom_tconvtable
 	local names : colnames `m'
 	local k = colsof(`m')
 	if "`detail'" != "" {
-		di as text "Convergence t-ratios (|t| < 0.1 good; overall maximum ratio < 0.25 good):"
+		di as text "Convergence t-ratios (criterion: every |t| below 0.1; the overall maximum ratio below 0.25 is a separate criterion):"
 		forvalues j = 1/`k' {
 			local nm : word `j' of `names'
 			if udstrlen("`nm'") > 24 local nm = usubstr("`nm'", 1, 23) + "~"
@@ -35,13 +35,16 @@ program define _nwsaom_tconvtable
 				local bad "`bad' `nm' (`: di %5.3f `m'[1,`j']')"
 			}
 		}
+		/* RSiena's two criteria are separate and both are needed (siena.Rd): every convergence t-ratio below 0.1 in absolute value
+		   AND the overall maximum convergence ratio (a different quantity, it also reflects the correlations of the deviations) below
+		   0.25. Each line states one criterion and whether it is met, so that the text cannot contradict the numbers. */
 		local ok = e(tconv_max) < 0.25
-		di as text "Overall maximum convergence ratio: " as result %5.3f e(tconv_max) _continue
-		if `ok' & "`bad'" == "" di as text " (good; all t-ratios below 0.1)"
-		else if `ok' di as text " (below 0.25)"
-		else di as text " ({bf:not converged}: should be below 0.25)"
-		if "`bad'" != "" di as text "Convergence t-ratios of 0.1 or more in absolute value:" as result "`bad'"
-		if !`ok' di as text "Refit starting from these estimates with theta0(); see {help nwsaom}."
+		di as text "Overall maximum convergence ratio: " as result %5.3f e(tconv_max) as text " (criterion: below 0.25; " cond(`ok', "met", "{bf:not met}") ")"
+		if "`bad'" == "" di as text "Convergence t-ratios (criterion: all below 0.1 in absolute value): met"
+		else di as text "Convergence t-ratios (criterion: all below 0.1 in absolute value): {bf:not met} for" as result "`bad'"
+		if !`ok' | "`bad'" != "" {
+			di as text "Convergence is good only if both criteria are met. Refit starting from these estimates with theta0(); see {help nwsaom}."
+		}
 	}
 	if "`e(engine)'" == "mata" {
 		di as text "(simulated in Mata, not the native plugin: `e(engine_why)')"

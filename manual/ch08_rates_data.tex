@@ -101,7 +101,8 @@ Rate parameters (estimated, one per inter-wave period):
           se |    0.4424     0.4402 
 Covariate-rate coefficient (age):    0.1887 (se 0.1027)
 Covariate-rate coefficient (outrate):   -0.1548 (se 0.1098)
-Overall maximum convergence ratio: 0.103 (good; all t-ratios below 0.1)
+Overall maximum convergence ratio: 0.103 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 \end{lstlisting}
 The effects \texttt{inRateInv} and \texttt{inRateLog} do not exist for two-mode networks (\texttt{siena07} stops, because the receivers of the ties are not the actors), and the pairwise non-directed model types are refused with rate effects and a behavior (\texttt{siena07} fails there).
 
@@ -119,7 +120,8 @@ behavior_r~e |    1.1722     1.1098
           se |    1.2612     0.9582 
 Rate effect of the behavior (alcohol1):    0.4314 (se 0.2642)
 Rate effect of the behavior (outrate):    0.3316 (se 0.2901)
-Overall maximum convergence ratio: 0.186 (good; all t-ratios below 0.1)
+Overall maximum convergence ratio: 0.186 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 \end{lstlisting}
 The coefficients are returned in \texttt{e(behratecoefs)}, \texttt{e(behratecoefs\_se)} and \texttt{e(behratecoefs\_tratio)}, the observed statistics in \texttt{e(rc\_target)}. The options cannot be combined with \opt{present()}, \opt{joinat()}, \opt{missnet()}, \opt{missbeh()}, several behaviors, the structural rate effects of the network, a two-mode network or the pairwise non-directed model types, and no \texttt{estat} command is available afterwards. They need the native plugin. \texttt{RateX} of a continuous behavior is not planned, and \texttt{susceptAvCovar} and \texttt{infectCovar} with the behavior itself as the covariate do not exist in RSiena.
 

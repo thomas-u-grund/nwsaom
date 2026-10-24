@@ -441,5 +441,5 @@ program define nwsaom_multinet, eclass
 	ereturn display
 	di as text "Rates (estimated):"
 	matrix list e(rates), noheader format(%8.3f)
-	di as text "Overall maximum convergence ratio: " as result %5.3f e(tconv_max)
+	di as text "Overall maximum convergence ratio: " as result %5.3f e(tconv_max) as text " (criterion: below 0.25; " cond(e(tconv_max) < 0.25, "met", "{bf:not met}") ")"
 end

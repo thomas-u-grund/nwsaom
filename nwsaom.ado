@@ -2786,6 +2786,7 @@ program nwsaom, eclass
 			capture mata: mata drop __ns_rawbehptr __ns_missbehptr
 			mata: __ns_rawbehptr = (`__ns_rawbehptrlist')
 			mata: __ns_missbehptr = (`__ns_missbehptrlist')
+			mata: __ns_obsmean = SaomBehObsMean(__ns_rawbehptr, __ns_missbehptr)
 			forvalues __w = 1/`__nwsaom_nwaves' {
 				mata: __ns_beh_w`__w' = SaomImputeBehaviorWave(__ns_rawbehptr, __ns_missbehptr, `__nwsaom_nwaves', `nodes', `__w')
 			}
@@ -2800,6 +2801,8 @@ program nwsaom, eclass
 			else local __ns_behptrlist "`__ns_behptrlist', &__ns_beh_w`__w'"
 		}
 		mata: __nwsaom_last_Behwaves = (`__ns_behptrlist')
+		if !`__ns_hasmissbeh' mata: __ns_obsmean = .
+		mata: SaomBehSetCentre(__ns_obsmean, __nwsaom_last_Behwaves)
 
 		// --- missbeh(): derive the PERIOD-level union mask(s) the
 		// co-evolution estimators themselves take (same "missing at
@@ -2884,7 +2887,7 @@ program nwsaom, eclass
 				local __td_be "__nstd_`++__ns_n'"
 				mata: `__td_be' = SaomTermData()
 				mata: `__td_be'.attr = __ns_beh_w1
-				mata: `__td_be'.center = mean(SaomMBPooled(__nwsaom_last_Behwaves))
+				mata: `__td_be'.center = SaomBehCentre(SaomMBPooled(__nwsaom_last_Behwaves))
 				mata: __nwsaom_last_M.addterm("`__e'", 1, &stat_saom_`__e'(), &change_saom_`__e'(), `__td_be', ("`__e'"))
 				local __nwsaom_efflist : subinstr local __nwsaom_efflist " [behavior:" " `__e' [behavior:"
 				mata: st_local("__nwsaom_p", strofreal(__nwsaom_last_M.nparam()))
@@ -2915,9 +2918,9 @@ program nwsaom, eclass
 						mata: __nwsaom_tm_map[__nwsaom_tm_evidx] = __nwsaom_tm_actidx[1..rows(__nwsaom_tm_evidx)]
 						local __nbtmcode = cond("`__e'" == "crossxoutact", 220, cond("`__e'" == "avgroupegox", 243, 244))
 						local __nbtmp1 = cond("`__e'" == "crossxoutact", `__nbp', `__nwsaom_tm_ne')
-						mata: SaomRegNatBehTm(__nwsaom_last_M, "`__e'", `__nbtmcode', __ns_beh_w1, mean(SaomMBPooled(__nwsaom_last_Behwaves)), `__nbtmp1', __nwsaom_tm_map)
+						mata: SaomRegNatBehTm(__nwsaom_last_M, "`__e'", `__nbtmcode', __ns_beh_w1, SaomBehCentre(SaomMBPooled(__nwsaom_last_Behwaves)), `__nbtmp1', __nwsaom_tm_map)
 					}
-					else mata: SaomRegNatBeh(__nwsaom_last_M, "`__e'", `__nc', __ns_beh_w1, mean(SaomMBPooled(__nwsaom_last_Behwaves)), `__nbp', `__nbs')
+					else mata: SaomRegNatBeh(__nwsaom_last_M, "`__e'", `__nc', __ns_beh_w1, SaomBehCentre(SaomMBPooled(__nwsaom_last_Behwaves)), `__nbp', `__nbs')
 					local __nwsaom_efflist : subinstr local __nwsaom_efflist " [behavior:" " natb_`__e' [behavior:"
 					mata: st_local("__nwsaom_p", strofreal(__nwsaom_last_M.nparam()))
 					continue
@@ -2938,7 +2941,7 @@ program nwsaom, eclass
 				local __td_nbv "__nstd_`++__ns_n'"
 				mata: `__td_nbv' = SaomTermData()
 				mata: `__td_nbv'.attr = __ns_beh_w1
-				mata: `__td_nbv'.center = mean(SaomMBPooled(__nwsaom_last_Behwaves))
+				mata: `__td_nbv'.center = SaomBehCentre(SaomMBPooled(__nwsaom_last_Behwaves))
 				mata: `__td_nbv'.decay = `covthreshold'
 				mata: __nwsaom_last_M.addterm("bv_`__e'", 1, &stat_saom_bv_`__e'(), &change_saom_bv_`__e'(), `__td_nbv', ("bv_`__e'"))
 				local __nwsaom_efflist : subinstr local __nwsaom_efflist " [behavior:" " bv_`__e' [behavior:"
@@ -2990,7 +2993,7 @@ program nwsaom, eclass
 		local __ns_mbeff1 "`__ns_effbeh'"
 		mata: __ns_mbmin = __nwsaom_beh_minval
 		mata: __ns_mbmax = __nwsaom_beh_maxval
-		mata: __ns_mbover = mean(SaomMBPooled(__nwsaom_last_Behwaves))
+		mata: __ns_mbover = SaomBehCentre(SaomMBPooled(__nwsaom_last_Behwaves))
 		mata: __ns_mbsim = __nwsaom_last_Mbeh.simMean
 		local __ns_mbptrM "&__nwsaom_last_Mbeh"
 		local __ns_mbtotal = `__ns_pbeh'
@@ -3603,6 +3606,10 @@ program nwsaom, eclass
 		ereturn matrix covmeans = `__cm'
 	}
 	ereturn scalar centered = `__nwsaom_center'
+	if `__nwsaom_coev' {
+		mata: st_numscalar("__ns_bmean", SaomBehCentre(SaomMBPooled(__nwsaom_last_Behwaves)))
+		ereturn scalar behmean = scalar(__ns_bmean)
+	}
 	capture mata: st_local("__nwsaom_condpost", strofreal(__nwsaom_fit.cond))
 	if `__nwsaom_coev' local __nwsaom_condpost 0
 	ereturn scalar conditional = `__nwsaom_condpost'

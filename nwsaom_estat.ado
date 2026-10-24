@@ -424,7 +424,7 @@ program define nwsaom_estat_gof, rclass
 		forvalues __w = 2/`nwaves' {
 			mata: __nwsaom_gof_allbehvals = __nwsaom_gof_allbehvals \ *__nwsaom_last_Behwaves[`__w']
 		}
-		mata: st_numscalar("__nwsaom_gof_behmean", mean(__nwsaom_gof_allbehvals))
+		mata: st_numscalar("__nwsaom_gof_behmean", SaomBehCentre(__nwsaom_gof_allbehvals))
 		local __gof_behoverallmean = __nwsaom_gof_behmean
 		mata: mata drop __nwsaom_gof_allbehvals
 	}

@@ -718,7 +718,7 @@ fits: on RSiena's scale for pairwise models (see {help nwsaom_remarks##undirecte
 		  {bf:e(rate_beh)}		estimated behavior rate parameter (co-evolution, wave1()/wave2() path only), estimated jointly with the other parameters (see {help nwsaom_remarks##coev:Co-evolution} in nwsaom_remarks)
 		  {bf:e(rate_beh_se)}		standard error of e(rate_beh) (co-evolution, wave1()/wave2() path only)
 		  {bf:e(rate_beh_tratio)}	behavior rate parameter's convergence t-ratio on RSiena's scale (co-evolution, wave1()/wave2() path only)
-		  {bf:e(tconv_max)}		RSiena's overall maximum convergence ratio; below 0.25 indicates good convergence
+		  {bf:e(tconv_max)}		RSiena's overall maximum convergence ratio; one of the two criteria of good convergence (below 0.25; the other: every t-ratio in e(tconv) below 0.1 in absolute value)
 
 		Macros
 		  {bf:e(cmd)}			{bf:nwsaom}

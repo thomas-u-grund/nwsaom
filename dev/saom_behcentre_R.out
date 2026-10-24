@@ -1,0 +1,13 @@
+mean of wave means: 3.065928  pooled: 3.053846 
+RSIENA miss seed 1 targets 115 106 238 160 22 23 5.792 85.893 28.693 
+RSIENA miss seed 1 est 5.879 4.543 -2.36 2.822 1.063 1.876 0.284 -0.806 1.841 
+RSIENA miss seed 2 targets 115 106 238 160 22 23 5.792 85.893 28.693 
+RSIENA miss seed 2 est 5.817 4.535 -2.352 2.814 1.076 1.855 0.279 -0.813 1.827 
+RSIENA miss seed 3 targets 115 106 238 160 22 23 5.792 85.893 28.693 
+RSIENA miss seed 3 est 5.846 4.538 -2.357 2.82 1.073 1.836 0.281 -0.826 1.884 
+RSIENA complete seed 1 targets 115 106 238 160 27 33 11.667 121.071 53.909 
+RSIENA complete seed 1 est 5.861 4.548 -2.354 2.816 1.252 1.702 0.404 -0.514 1.214 
+RSIENA complete seed 2 targets 115 106 238 160 27 33 11.667 121.071 53.909 
+RSIENA complete seed 2 est 5.87 4.529 -2.363 2.829 1.252 1.666 0.417 -0.518 1.232 
+RSIENA complete seed 3 targets 115 106 238 160 27 33 11.667 121.071 53.909 
+RSIENA complete seed 3 est 5.796 4.482 -2.36 2.82 1.257 1.689 0.409 -0.522 1.247 

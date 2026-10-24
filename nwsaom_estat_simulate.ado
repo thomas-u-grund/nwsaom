@@ -136,7 +136,7 @@ program define nwsaom_estat_simulate, rclass
 		forvalues w = 2/`nwaves' {
 			mata: __nwsaom_sim_allbeh = __nwsaom_sim_allbeh \ *__nwsaom_last_Behwaves[`w']
 		}
-		mata: st_numscalar("__nwsaom_sim_behmean", mean(__nwsaom_sim_allbeh))
+		mata: st_numscalar("__nwsaom_sim_behmean", SaomBehCentre(__nwsaom_sim_allbeh))
 		local behoverall = __nwsaom_sim_behmean
 		mata: mata drop __nwsaom_sim_allbeh
 	}

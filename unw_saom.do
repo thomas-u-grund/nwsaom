@@ -10765,7 +10765,7 @@ void SaomMNAddCrossCov(class SaomModel scalar M, string scalar eff, string scala
 		}
 		allb = *__nwsaom_mn_Bw[1]
 		for (k=2; k<=cols(__nwsaom_mn_Bw); k++) allb = allb \ *__nwsaom_mn_Bw[k]
-		bmean = mean(allb)
+		bmean = SaomBehCentre(allb)
 		brng = max(allb) - min(allb)
 		if (brng <= 0) brng = 1
 		psim = p1
@@ -10943,7 +10943,7 @@ void SaomMNAddEff(class SaomModel scalar M, string scalar eff, string scalar vn,
 			M.addterm("behsim", 1, &stat_saom_behsim(), &change_saom_behsim(), td, ("behsim"))
 		}
 		else {
-			td.center = mean(allb)
+			td.center = SaomBehCentre(allb)
 			if (eff == "behegox") M.addterm("behegox", 1, &stat_saom_behegox(), &change_saom_behegox(), td, ("behegox"))
 			else if (eff == "behaltx") M.addterm("behaltx", 1, &stat_saom_behaltx(), &change_saom_behaltx(), td, ("behaltx"))
 			else M.addterm("behegoplusalt", 1, &stat_saom_behegoplusalt(), &change_saom_behegoplusalt(), td, ("behegoplusalt"))
@@ -11098,7 +11098,7 @@ void SaomMNAddNetBeh(class SaomModel scalar M, string scalar spec) {
 	}
 	allb = *__nwsaom_mn_Bw[1]
 	for (k=2; k<=cols(__nwsaom_mn_Bw); k++) allb = allb \ *__nwsaom_mn_Bw[k]
-	bmean = mean(allb)
+	bmean = SaomBehCentre(allb)
 	brng = max(allb) - min(allb)
 	if (brng <= 0) {
 		errprintf("nwsaom multinet: netbeh:" + eff + ": the behavior variable does not vary.\n")
@@ -11530,7 +11530,7 @@ struct SaomMNBFit scalar SaomEstimateMNB(pointer(class SaomGraph scalar) rowvect
 			hasmissb = (max(missPd) > 0)
 		}
 	}
-	overallMean = mean(allb)
+	overallMean = SaomBehCentre(allb)
 	SaomSetEngine(1, "")
 	noev = J(1, P, NULL)
 	codes = cfgB.termcodes :+ 10000 * net2flag
@@ -11776,6 +11776,7 @@ void SaomMNImputeBeh(real scalar nwaves, real scalar n) {
 	raw = __nwsaom_mn_Bw
 	imp = J(1, 0, NULL)
 	for (w=1; w<=nwaves; w++) imp = (imp, &(SaomImputeBehaviorWave(raw, __nwsaom_mn_Miss, nwaves, n, w)))
+	SaomBehSetCentre(SaomBehObsMean(raw, __nwsaom_mn_Miss), imp)
 	__nwsaom_mn_Bw = imp
 }
 real scalar SaomMNBehMin(pointer(real colvector) rowvector Bw) {
@@ -12461,7 +12462,7 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 
 	allbehvals = *Behwaves[1]
 	for (pd=2; pd<=nwaves; pd++) allbehvals = allbehvals \ *Behwaves[pd]
-	C.overallMean = mean(allbehvals)
+	C.overallMean = SaomBehCentre(allbehvals)
 	C.simMean = Mbeh.simMean
 
 	// per period: lagged statistic network, targets, distance targets,
@@ -14770,7 +14771,7 @@ void SaomImportanceCore(pointer(class SaomGraph scalar) rowvector Gstart, real s
 		}
 		allb = *Behwaves[1]
 		for (w=2; w<=cols(Behwaves); w++) allb = allb \ *Behwaves[w]
-		overallMean = mean(allb)
+		overallMean = SaomBehCentre(allb)
 		noev = J(1, P, NULL)
 		SaomBatchSetup(Gstart, P, cfg, cfgB.termcodes, Behwaves, behmin, behmax, Mbeh.simMean, overallMean, 0, J(0, 3, 0), J(n, P, 0), 0, J(n, P, 1), cfgB.fntype, 0, J(0, 0, 0), noev)
 	}
@@ -17414,6 +17415,43 @@ real rowvector SaomMBConstants(pointer(real colvector) rowvector Bw) {
 
 
 /* all wave vectors of one behavior, stacked */
+/* Behavior centring constant. RSiena (BehaviorLongitudinalData::calculateProperties) centres every behavior effect by the MEAN OF THE
+   WAVE MEANS of the OBSERVED values; with complete data this is the pooled mean, with missbeh() it is not (the pooled mean of the imputed
+   values differs). The data-preparation layer stores the observed value with SaomBehSetCentre(obsmean, Behwaves), keyed by the number of
+   values and the pooled mean of the (imputed) waves it belongs to; SaomBehCentre(pooled) returns it for exactly that data and the pooled
+   mean otherwise (direct Mata use, other data). */
+real scalar SaomBehObsMean(pointer(real colvector) rowvector Bw, pointer(real colvector) rowvector Miss) {
+	real scalar w, s, k
+	real colvector x
+	s = 0
+	k = 0
+	for (w=1; w<=cols(Bw); w++) {
+		x = select(*Bw[w], *Miss[w] :== 0)
+		if (rows(x) > 0) {
+			s = s + mean(x)
+			k++
+		}
+	}
+	return(k > 0 ? s / k : .)
+}
+void SaomBehSetCentre(real scalar obsmean, pointer(real colvector) rowvector Bw) {
+	external real rowvector __nwsaom_behcentre
+	real colvector pooled
+	pooled = SaomMBPooled(Bw)
+	__nwsaom_behcentre = (obsmean < . ? (rows(pooled), mean(pooled), obsmean) : J(1, 0, .))
+}
+real scalar SaomBehCentre(real colvector pooled) {
+	external real rowvector __nwsaom_behcentre
+	pointer(real rowvector) scalar pc
+	pc = findexternal("__nwsaom_behcentre")
+	if (pc != NULL) {
+		if (cols(*pc) == 3) {
+			if ((*pc)[1] == rows(pooled) & abs((*pc)[2] - mean(pooled)) < 1e-12) return((*pc)[3])
+		}
+	}
+	return(mean(pooled))
+}
+
 real colvector SaomMBPooled(pointer(real colvector) rowvector Bw) {
 	real colvector all
 	real scalar w
@@ -17696,7 +17734,7 @@ void SaomChainPrepare(pointer(class SaomGraph scalar) rowvector Gall, real scala
 		}
 		allb = *Behwaves[1]
 		for (w=2; w<=cols(Behwaves); w++) allb = allb \ *Behwaves[w]
-		overallMean = mean(allb)
+		overallMean = SaomBehCentre(allb)
 		noev = J(1, P, NULL)
 		SaomBatchSetup(Gstart, P, cfg, cfgB.termcodes, Behwaves, behmin, behmax, Mbeh.simMean, overallMean, 0, J(0, 3, 0), J(n, P, 0), 0, J(n, P, 1), cfgB.fntype, 0, J(0, 0, 0), noev)
 		for (pd=1; pd<=P; pd++) BE = BE \ (J(n, 1, pd), (1::n), *Behwaves[pd+1])

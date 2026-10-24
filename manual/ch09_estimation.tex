@@ -70,7 +70,7 @@ After the coefficient table, \nwsaom{} prints the rate table and the convergence
 \end{itemize}
 If either condition fails, run the model again from the estimates as shown above. The $t$-ratios of the coefficients in \texttt{e(b)} are in \texttt{e(tratio)}; all of them, with the rates, are in \texttt{e(tconv)}.
 
-A real run on the Glasgow data (RSiena's \texttt{s50}, three waves) illustrates the output. The $t$-ratios are slightly above 0.1 for two parameters, but the overall ratio of 0.142 is below 0.25:
+A real run on the Glasgow data (RSiena's \texttt{s50}, three waves) illustrates the output. Two $t$-ratios are slightly above 0.1 in absolute value, while the overall ratio of 0.142 is below 0.25 (the two criteria are separate, and the detail listing is shown):
 \begin{lstlisting}
 . nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip seed(1)
 SAOM (Method of Moments, conditional), waves: glasgow1 glasgow2 glasgow3
@@ -81,12 +81,12 @@ Actors: 50                             Periods: 2
 Rate parameters (estimated, one per inter-wave period):
         rate |    6.5292     5.2435
           se |    1.0759     0.9023
-Convergence t-ratios (|t| < 0.1 good; overall maximum ratio < 0.25 good):
+Convergence t-ratios (criterion: every |t| below 0.1; the overall maximum ratio below 0.25 is a separate criterion):
   outdegree                 -0.139      reciprocity               -0.130
   transtrip                 -0.096
 Overall maximum convergence ratio:  0.142
 \end{lstlisting}
-(Columns trimmed. The digits depend on the seed.) By the criterion above this fit is acceptable but borderline in two $t$-ratios; restarting from these estimates would be the cautious next step.
+(Columns trimmed. The digits depend on the seed.) By the two criteria above the overall ratio is met but the $t$-ratio criterion is not (two parameters); without \texttt{detail}, \nwsaom{} prints one line per criterion and names those parameters. Restarting from these estimates is the next step.
 
 \section{Errors, divergence and what to do}
 \nwsaom{} stops loudly rather than return numbers it cannot support. The return codes below are those the code sets.

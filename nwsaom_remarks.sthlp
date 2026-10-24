@@ -1008,7 +1008,8 @@ deviation / its standard deviation, one per parameter including the rates) and R
 maximum convergence ratio {cmd:e(tconv_max)}. As in RSiena, a fit is considered converged when
 every |t| is below 0.1 and the overall ratio below 0.25; otherwise, run the model again from the
 estimates ({opt theta0()} and {opt rate0()}, see the examples in {help nwsaom}). Below the coefficient
-table, every fit prints the overall ratio and names any parameter whose |t| is 0.1 or more; the
+table, every fit prints the two criteria on separate lines, each with the statement "met" or "not met": the overall ratio (criterion: below 0.25)
+and the individual t-ratios (criterion: every |t| below 0.1, with the parameters that fail named); the
 {opt detail} option lists the t-ratios of all parameters, rates included, and {cmd:e(tratio)}
 holds the ones of the coefficients in e(b), on the same scale.
 
