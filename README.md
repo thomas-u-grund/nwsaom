@@ -50,6 +50,10 @@ The package ships a native Stata plugin (saom_sim.c) for macOS (universal), Linu
 
 `lib/build.do` rebuilds `lib/lnwsaom1.mlib` and `lib/lnwsaom2.mlib` from `unw_saom.do` (run it from the repository root: `NWCORE=/path/to/nwcommands StataBE -e do lib/build.do`).
 
+## Acknowledgments
+
+nwsaom follows the Siena project. The stochastic actor-oriented model is due to Tom Snijders, and RSiena (Ripley, Snijders, Boda, Voros, Preciado and contributors) and multiSiena (Snijders, Koskinen, Ripley) are the reference implementations: effect definitions, estimation algorithms, defaults and output are modeled on them, and every result is compared with them. nwsaom is not affiliated with or endorsed by the Siena project; errors in nwsaom are the author's.
+
 ## License
 
 GNU General Public License version 3 (see `LICENSE`); see `NOTICE.md` for what the package is derived from and
