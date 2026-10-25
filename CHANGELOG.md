@@ -11,6 +11,7 @@ project uses [Semantic Versioning](https://semver.org/).
 ### Changed
 - Requirements stated plainly: Stata 17 or later; tested with Stata 17 and Stata 18.
 
+
 ## [1.0.7] - 2026-10-25
 
 ### Fixed
