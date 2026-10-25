@@ -22,6 +22,7 @@
 */
 capture program drop nwsaom_estat_score
 program define nwsaom_estat_score, rclass
+	_nwsaom_libcheck
 	syntax [, TESTED(string) ]
 
 	if !inlist(`"`e(cmd)'"', "nwsaom", "nwsaom_multinet") {

@@ -30,3 +30,14 @@ r(3021) "class compiled at different times". So for every core release that chan
    `lib/lnwcommands.mlib` is the final one of the core release.
 3. Run `python3 tools/set_version.py`, the tests (above) and release this package in lockstep with the core: raise the "requires core
    X.Y.Z or later" statement in `README.md` and `nwsaom.pkg`, add a CHANGELOG entry, tag and release after the core release is out.
+
+## Lockstep check with the core Mata library
+
+The Mata libraries of this package are compiled against the core's `lib/lnwcommands.mlib`. After every build of the libraries
+(`lib/build.do`) record which core library they were built against:
+
+    NWCORE=/path/to/nwcommands python3 tools/record_core_lib.py      # writes lib/core_mlib.sha256 (sha256 of the core library)
+
+`tools/check_version.py` compares `lib/core_mlib.sha256` with `$NWCORE/lib/lnwcommands.mlib` when `NWCORE` is set and fails with
+"the core Mata library changed since this package's libraries were built: run lib/build.do and release in step" when they differ.
+Run `NWCORE=/path/to/nwcommands python3 tools/check_version.py` before every release (it is the first step of the tests when NWCORE is set).

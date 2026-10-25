@@ -23,6 +23,7 @@
 */
 capture program drop nwsaom_simulate
 program define nwsaom_simulate, rclass
+	_nwsaom_libcheck
 	local cmdline `"`0'"'
 	local theta ""
 	local behtheta ""

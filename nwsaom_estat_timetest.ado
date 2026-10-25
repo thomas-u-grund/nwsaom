@@ -23,6 +23,7 @@
 */
 capture program drop nwsaom_estat_timetest
 program define nwsaom_estat_timetest, rclass
+	_nwsaom_libcheck
 	syntax [, EFFects(string) FIXRates ]
 
 	if !inlist(`"`e(cmd)'"', "nwsaom", "nwsaom_multinet") {

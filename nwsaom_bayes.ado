@@ -14,6 +14,7 @@
 capture program drop nwsaom_bayes
 program nwsaom_bayes, eclass
 	version 14
+	_nwsaom_libcheck
 	syntax [, NPREWARM(integer 50) NWARM(integer 50) NMAIN(integer 250) NRUNMH(integer 20) NIMPROVEMH(integer 100) MHGEOM(real 0) MULT(real 5) TARGETMH(real 0.25) ///
 		NMH(integer 0) NSAMPCONST(integer 1) NSAMPRATES(integer 0) THETA0(numlist) RATE0(numlist >0) FIXRATES ///
 		SEED(integer -1) PRIORMEANETA(numlist) PRIORSIGETA(numlist >0) RATEPRIORMEAN(numlist) RATEPRIORSD(real 1) GIBBSRATES PRIORRATE(numlist min=2 max=2 >=0) ///

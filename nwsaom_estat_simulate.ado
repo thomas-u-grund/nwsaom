@@ -25,6 +25,7 @@
 */
 capture program drop nwsaom_estat_simulate
 program define nwsaom_estat_simulate, rclass
+	_nwsaom_libcheck
 	syntax [, NSIM(integer 100) SEED(integer -1) THETA(name) RATES(numlist >0) RATESBEH(numlist >0) GENerate(name) ]
 
 	if `"`e(cmd)'"' != "nwsaom" {

@@ -18,8 +18,8 @@
 capture program drop nwsaom_describe
 program define nwsaom_describe, rclass
 	version 14
-	syntax , WAVES(string) [ BEHavior(string) ]
 	_nwsaom_libcheck
+	syntax , WAVES(string) [ BEHavior(string) ]
 	local nw : word count `waves'
 	if `nw' < 2 {
 		di as err "waves() needs at least two networks."

@@ -46,6 +46,7 @@
 capture program drop nwsaom_multiplex
 program define nwsaom_multiplex, eclass
 	version 14
+	_nwsaom_libcheck
 	syntax , NETAWAVE1(string) NETAWAVE2(string) NETBWAVE1(string) NETBWAVE2(string) ///
 		[ THETA01(string) THETA02(string) K0(integer 30) K3(integer 200) FIRSTG(real 0.2) seed(integer -1) CRPROD CRPRODB DETail ]
 

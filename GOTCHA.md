@@ -596,3 +596,18 @@ The coev estimator checked only the first `p` (non-rate) parameters. Now: all fr
 max(1000000, 500 n) ministeps (scalar `__saom_native_stepcap`, `SaomStepCapCheck()`). Trap while debugging: `pgrep -n StataBE` can pick another session's
 Stata; match on the do-file name. A Mata `exit()` inside a function that switched frames must restore the frame first (the check runs after `st_framecurrent(origframe)`).
 Consequence: a coev fit whose behavior rate really exceeds 50 (as in the smoke-test data, rate 120 before) now stops with r(498), as it does in RSiena.
+
+## `mata mlib index` does not persist: a library installed by net install can be missing from a session's Mata library list
+
+Stata builds its list of Mata libraries (.mlib) once, early in a session; `mata mlib index` rebuilds it for the running session only
+and nothing is saved. A library that `net install` put into PLUS/l/ can be absent from the list (`mata mlib query` shows `lnwcommands`
+but not `lnwsaom1/lnwsaom2`). The first Mata call then stops with r(3499) "<function>() not found", and a Mata block that mentions a class of
+the library stops the whole ado file with r(3000) "class ... undefined (error occurred while loading ...)". Running `mata mlib index`
+by hand "fixes" it for that session only, which hid the bug in every manual test.
+- Every entry program starts with `_nwsaom_libcheck` (which runs `mata mlib index` once when a library function is not visible); do not
+  call Mata before it.
+- A **file-scope** `mata:` block in an .ado file is compiled when the file is auto-loaded, i.e. before any program of the file runs:
+  `_nwsaom_libcheck` is therefore also called at file scope (`capture quietly ...`, as in nwsaom_multinet.ado) in front of such a block.
+- Reproduce: `SMOKE_STALE=1 tools/smoke_fresh_install.sh <core> <models>` in the core repo builds exactly this state (the session's Mata
+  index is made while only the core library is visible). Without `SMOKE_STALE` a plain new session usually finds all libraries,
+  which is why a simple "install, restart, run" test passes.

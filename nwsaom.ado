@@ -78,6 +78,7 @@ program nwsaom, eclass
 		nwsaom_version
 		exit
 	}
+	_nwsaom_libcheck
 	if `"`1'"' == "multinet" | `"`1'"' == "multinet," {
 		gettoken __saom_sub 0 : 0
 		nwsaom_multinet , `0'
@@ -139,7 +140,6 @@ program nwsaom, eclass
 		FIRSTG(real 0.2) SEED(integer -1) CORES(integer 0) UNCONDitional NOCENTER ///
 		ENDOW(string) CREATION(string) ACTORMODE(integer 0) TVCOV(string) DETail ]
 	set more off
-	_nwsaom_libcheck
 	mata: SaomRatesReset()
 
 	// --- endow(effects) creation(effects): RSiena's effect "types" (includeEffects(type = "endow" /

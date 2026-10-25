@@ -123,6 +123,7 @@
 
 capture program drop nwsaom_estat
 program define nwsaom_estat, rclass
+	_nwsaom_libcheck
 	gettoken subcmd rest : 0, parse(" ,")
 	local subcmd = lower(trim("`subcmd'"))
 	if `"`e(cmd)'"' == "nwsaom_multinet" & !inlist("`subcmd'", "score", "timetest") {

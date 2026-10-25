@@ -21,6 +21,7 @@
 */
 capture program drop nwsaom_estat_importance
 program define nwsaom_estat_importance, rclass
+	_nwsaom_libcheck
 	syntax
 
 	if `"`e(cmd)'"' != "nwsaom" {

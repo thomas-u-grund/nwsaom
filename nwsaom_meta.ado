@@ -13,6 +13,7 @@
 */
 program nwsaom_meta, rclass
 	version 14
+	_nwsaom_libcheck
 	syntax namelist(min=2) [, BOUND(real 10) ALPHA(real 0.05) MAXIT(integer 20) RATES NOTABLE]
 	if `alpha' <= 0 | `alpha' >= 1 {
 		di "{err}{bf:alpha()} must be between 0 and 1."

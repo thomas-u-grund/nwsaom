@@ -13,6 +13,7 @@
 capture program drop nwsaom_ml
 program nwsaom_ml, eclass
 	version 14
+	_nwsaom_libcheck
 	syntax [, N1(integer 50) NSUB(integer 4) NSTART2(integer 100) N3(integer 1000) MULT(real 5) NMH(integer 0) GAIN(real 0.2) MHGEOM(real 0) SEED(integer -1) THETA0(numlist) RATE0(numlist >0) NOTABLE]
 	if `"`e(cmd)'"' != "nwsaom" {
 		di as err "nwsaom ml works on the model of the last nwsaom fit."

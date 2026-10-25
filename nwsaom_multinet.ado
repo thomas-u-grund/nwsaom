@@ -5,6 +5,9 @@
 * Public License, version 3, as published by the Free Software Foundation. It is distributed in the hope
 * that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 * or FITNESS FOR A PARTICULAR PURPOSE. See the file LICENSE for the full text.
+// The Mata block below is compiled when this file is loaded and uses classes of the Mata library of the package, so the
+// library must be visible by then (Stata indexes the .mlib files once per session): index it first if needed.
+capture quietly _nwsaom_libcheck
 capture mata: mata drop __nwsaom_mn_addwave()
 capture mata: mata drop __nwsaom_mn_post()
 capture mata: mata drop __nwsaom_mnb_post()
@@ -111,10 +114,10 @@ end
 capture program drop nwsaom_multinet
 program define nwsaom_multinet, eclass
 	version 14
+	_nwsaom_libcheck
 	syntax , NET1(string) NET2(string) [ EFF1(string) EFF2(string) CROSS1(string) CROSS2(string) SYM1 SYM2 BEHavior(string) BEHEFF1(string) BEHEFF2(string) BEHEFF12(string) BEHEFF21(string) MISSBEH(string) BEHINT(string) THETA0(numlist) FIX(string) TVCOV(string) ///
 		K0(integer 30) K3(integer 200) FIRSTG(real 0.2) seed(integer -1) ACTORmode(integer 2) ]
 
-	_nwsaom_libcheck
 	if `seed' != -1 set seed `seed'
 	capture mata: mata drop __nwsaom_fixmask
 	capture mata: mata drop __nwsaom_score_D
