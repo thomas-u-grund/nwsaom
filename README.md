@@ -10,7 +10,7 @@ own repository; it needs the core package nwcommands but no other model package.
 ## Install
 
 1. Install the core package first (Stata): `net install nwcommands, from(<URL of the nwcommands distribution>)`
-   then run `nwinstall`. Required: nwcommands (core), version 3.4.0 or later.
+   then run `nwinstall, everything` (the core and all four model packages in one step) or `nwinstall, all` (core only). Required: nwcommands (core), version 3.4.0 or later.
 2. Install this package:
 
        net install nwsaom, from(https://raw.githubusercontent.com/thomas-u-grund/nwsaom/main/) replace
