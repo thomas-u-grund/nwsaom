@@ -17,3 +17,16 @@ version, line 2 the release date in Stata format, e.g. `24oct2026`).
 
 Users install the latest release with `net install nwsaom, from(https://raw.githubusercontent.com/thomas-u-grund/nwsaom/main/) replace`
 and a specific one with `.../nwsaom/vX.Y.Z/`.
+
+## Whenever the core library changes
+
+The Mata libraries of this package (`lib/lnwsaom1.mlib`, `lib/lnwsaom2.mlib`) are compiled against the core's `lnwcommands.mlib`
+(class `nw_def`). If the core library is rebuilt for a new core release and this package is not, a fresh install fails with
+r(3021) "class compiled at different times". So for every core release that changes its Mata library:
+
+1. Build the core library first (`do lib/build.do` in the core) and note the core version.
+2. Rebuild these libraries against that exact core state, from the root of this repository, with a scratch PLUS folder so that no
+   installed copy is seen: `NWCORE=/path/to/nwcommands StataBE -e do lib/build.do`. `NWCORE` must be the core checkout whose
+   `lib/lnwcommands.mlib` is the final one of the core release.
+3. Run `python3 tools/set_version.py`, the tests (above) and release this package in lockstep with the core: raise the "requires core
+   X.Y.Z or later" statement in `README.md` and `nwsaom.pkg`, add a CHANGELOG entry, tag and release after the core release is out.

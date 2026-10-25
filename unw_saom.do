@@ -17578,6 +17578,16 @@ void __nwsaom_bridge_twomode(pointer(class nw_def scalar) scalar netobj,
 	}
 }
 
+// Used by _nwsaom_libcheck.ado: touching the core class raises r(3021) when the installed core and this library do not match.
+void __nwsaom_libcheck_use(pointer(class nw_def scalar) scalar netobj) {
+	real scalar k
+	k = netobj->get_nodes()
+}
+void __nwsaom_libcheck() {
+	class nw_def scalar d
+	d = nw_def()
+	__nwsaom_libcheck_use(&d)
+}
 void __nwsaom_bridge_from_netobj(pointer(class nw_def scalar) scalar netobj,
 	class SaomGraph scalar G){
 	real scalar i, k

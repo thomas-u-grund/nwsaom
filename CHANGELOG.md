@@ -3,6 +3,13 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.0.4] - 2026-10-25
+
+### Changed
+- Rebuilt for nwcommands 3.3.0. nwsaom now requires the core nwcommands 3.3.0 or later.
+- A clear message if the core and nwsaom libraries do not match: instead of the raw error r(3021) ("class compiled at different times"), nwsaom, `nwsaom multinet` and `nwsaom describe` say that the installed core nwcommands and nwsaom were built for different versions and how to reinstall the model package (`nwinstall, models`).
+- `lib/build.do` now compiles the Mata libraries against the core's finished library `lnwcommands.mlib` instead of recompiling the core source.
+
 ## [1.0.3] - 2026-10-25
 
 ### Fixed
