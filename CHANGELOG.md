@@ -5,6 +5,9 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- `nwsaom version` as the first command of a fresh session no longer reports the native plugin as "missing": the Mata library is indexed before the plugin path is looked up.
+
 ## [1.0.6] - 2026-10-25
 
 ### Changed

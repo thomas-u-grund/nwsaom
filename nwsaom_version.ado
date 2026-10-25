@@ -30,6 +30,8 @@ program nwsaom_version, rclass
 		if "`__coredate'" != "" local __core "distribution of `__coredate'"
 		else local __core "installed (development copy, no distribution date)"
 	}
+	// the Mata library must be indexed before SaomNativePluginPath() can be found (a fresh session otherwise reports the plugin as missing)
+	capture _nwsaom_libcheck
 	capture mata: st_local("__plp", SaomNativePluginPath())
 	capture mata: st_local("__plv", strofreal(SaomNativePluginVersion()))
 	if "`__plp'" != "" & real("`__plv'") > 0 & real("`__plv'") < . {
