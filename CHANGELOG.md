@@ -3,7 +3,7 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
-## [1.0.5] - not yet released
+## [1.0.5] - 2026-10-25
 
 ### Fixed
 - Works right after a fresh install: the Mata libraries are indexed automatically. Before, the first call in a new Stata session could stop with r(3499) "... not found" (or, for nwergm, "class ErgmGraph undefined") until `mata mlib index` was run by hand.
