@@ -2,6 +2,19 @@
 
 Known, already diagnosed pitfalls. Entries copied from the nwcommands notes at the time of the split; some mention the core package.
 
+## Mata libraries must be built with the OLDEST supported Stata (Stata 17), never a newer one
+
+The 2026-10-25 releases (core 3.5.0, nwsaom 1.0.7, nwergm 1.2.0, nwdynam 1.1.0, nwrem 1.0.5) shipped `.mlib` files built with Stata 18.
+A Stata 17 user got `nwwebuse florentine` -> `<istmt>: 3499 nws_create() not found`, even from a clean install: Stata 17 lists the
+library (`mata mlib query`, `mata describe using lnwcommands` work) but silently ignores its contents. The only trace is
+`mata which nws_create()`: "(nws_create() in lnwcommands, compiled by Stata 18.0, is too new to be run by this version of Stata and so
+was ignored)". The reverse is fine: Stata 18 reads libraries built by Stata 17. So build with the oldest supported Stata (currently 17).
+`lib/build.do` of every package stops when `c(stata_version)` is higher than 17 (`NW_ALLOW_NEWER_STATA=1` overrides, for libraries that
+are never released). The only reliable check of a release candidate is to run a
+command in Stata 17 against the built library. The core has `_nwlibcheck.ado` (called by `unw_defs` and the commands that do not call it) which turns the
+failure into a readable message with exit 3499. An OLD library in the user's PLUS folder (for example from a Sep 2026 install) shadows
+the new one and gives r(3021) or other class errors; the message tells the user to `ado uninstall nwcommands` first.
+
 ## `nwsaom`'s native backend can leave state that crashes a later, unrelated `nwsaom` call
 
 Found while building the SAOM chapter's own convergence-workflow example: in one continuous Stata

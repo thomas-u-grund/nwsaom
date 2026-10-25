@@ -31,6 +31,13 @@ r(3021) "class compiled at different times". So for every core release that chan
 3. Run `python3 tools/set_version.py`, the tests (above) and release this package in lockstep with the core: raise the "requires core
    X.Y.Z or later" statement in `README.md` and `nwsaom.pkg`, add a CHANGELOG entry, tag and release after the core release is out.
 
+## Build the Mata libraries with the oldest supported Stata
+
+Build every Mata library of this package with Stata 17, the OLDEST supported Stata, never with a newer one: a library built by a newer
+Stata is ignored by older Stata versions (all functions "not found", r(3499)). `lib/build.do` stops when `c(stata_version)` is higher
+than 17 (`NW_ALLOW_NEWER_STATA=1` overrides, for experiments only). The full rule is in the RELEASING.md of the core repository
+(nwcommands).
+
 ## Lockstep check with the core Mata library
 
 The Mata libraries of this package are compiled against the core's `lib/lnwcommands.mlib`. After every build of the libraries

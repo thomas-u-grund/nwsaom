@@ -1,4 +1,4 @@
-*! version 1.0.7  25oct2026 _nwsaom_libcheck - make the nwsaom Mata libraries visible; clear message when the core nwcommands and nwsaom Mata libraries do not match
+*! version 1.0.8  25oct2026 _nwsaom_libcheck - make the nwsaom Mata libraries visible; clear message when the core nwcommands and nwsaom Mata libraries do not match
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom (GPL-3, see the file LICENSE).
 * Stata indexes the Mata libraries (.mlib) once, early in a session. Libraries installed by net install can be missing from that

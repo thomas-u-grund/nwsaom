@@ -1,6 +1,6 @@
 # nwsaom
 
-<!--version-->**Version 1.0.7** (released 25 October 2026)<!--/version-->
+<!--version-->**Version 1.0.8** (released 25 October 2026)<!--/version-->
 
 `nwsaom` fits stochastic actor-oriented models (SAOM, Snijders 2001) to longitudinal network panels declared with `nwset`: network-only and network-behavior co-evolution, one-mode, two-mode and multiplex/multi-network data, covariates, rate effects, composition change, method of moments (conditional and unconditional), maximum likelihood and Bayesian estimation, meta-analysis over several groups, goodness of fit and time-heterogeneity tests. The simulation and estimation engine runs in a native plugin. A manual is in `manual/` and an inventory of the RSiena effects with their status in `docs/`.
 
@@ -10,7 +10,7 @@ own repository; it needs the core package nwcommands but no other model package.
 ## Install
 
 1. Install the core package first (Stata): `net install nwcommands, from(<URL of the nwcommands distribution>)`
-   then run `nwinstall`. Required: nwcommands (core), version 3.4.0 or later.
+   then run `nwinstall`. Required: nwcommands (core), version 3.5.1 or later.
 2. Install this package:
 
        net install nwsaom, from(https://raw.githubusercontent.com/thomas-u-grund/nwsaom/main/) replace
@@ -18,7 +18,7 @@ own repository; it needs the core package nwcommands but no other model package.
 `net install nwsaom` installs the latest release (the state of the main branch). To install a specific version, point `from()` at the
 release tag (GitHub serves every tag under its own raw URL), for example version 1.0.0:
 
-       net install nwsaom, from(https://raw.githubusercontent.com/thomas-u-grund/nwsaom/v1.0.7/) replace
+       net install nwsaom, from(https://raw.githubusercontent.com/thomas-u-grund/nwsaom/v1.0.8/) replace
 
 `net describe nwsaom` shows the version and distribution date, `nwsaom version` the package, core and plugin versions, and `e(version)`
 holds the package version in the stored results. Release history: `CHANGELOG.md`; how releases are made: `RELEASING.md`.
@@ -26,7 +26,7 @@ holds the package version in the stored results. Release history: `CHANGELOG.md`
 
 ## Requirements
 
-* Stata 14 or later (StataBE is enough).
+* Stata 17 or later. Tested with Stata 17 and Stata 18 (Stata/BE is enough). The Mata libraries are built with Stata 17, the oldest tested version, because a library built by a newer Stata is ignored by older ones; Stata 16 and older have not been tested and are not expected to work.
 * The core nwcommands package (see above), including its Mata library `lnwcommands.mlib`.
 * Platform plugins are shipped for macOS, Linux and Windows.
 

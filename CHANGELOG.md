@@ -3,6 +3,14 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.0.8] - 2026-10-25
+
+### Fixed
+- The Mata libraries were built with Stata 18 and could not be used in Stata 17; they are now built with Stata 17 (works in Stata 17 and 18). Needs nwcommands 3.5.1 or later.
+
+### Changed
+- Requirements stated plainly: Stata 17 or later; tested with Stata 17 and Stata 18.
+
 ## [1.0.7] - 2026-10-25
 
 ### Fixed
