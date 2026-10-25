@@ -1,4 +1,4 @@
-*! version 1.0.8  25oct2026 nwcommands: estat importance after nwsaom
+*! version 1.0.9  26oct2026 nwcommands: estat importance after nwsaom
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General

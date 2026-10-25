@@ -3,6 +3,12 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.0.9] - 2026-10-26
+
+### Changed
+- Rebuilt for nwcommands (core) 3.6.0: the Mata library libraries are compiled against the core library of 3.6.0 (built with Stata 17) and the package needs nwcommands 3.6.0 or later. No change in results.
+- Install lines and the README: `nwinstall, everything` installs the core and the four model packages in one step. Supported Stata versions: 17 or later, tested with Stata 17 and 18.
+
 ## [1.0.8] - 2026-10-25
 
 ### Fixed
