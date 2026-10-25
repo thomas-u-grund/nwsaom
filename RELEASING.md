@@ -1,50 +1,45 @@
 # Releasing nwsaom
 
-Versions follow semantic versioning, MAJOR.MINOR.PATCH: MAJOR for incompatible changes of syntax or results, MINOR for new
-features that keep old do-files working, PATCH for bug fixes. The single source of truth is the file `VERSION` (line 1 the
-version, line 2 the release date in Stata format, e.g. `24oct2026`).
+## Master procedure: https://github.com/thomas-u-grund/nwcommands/blob/main/RELEASING.md
 
-1. Edit `VERSION`, or run `python3 tools/set_version.py X.Y.Z [date]` (this writes `VERSION` and updates every display: the
-   first line of every .ado, the .sthlp headers and the version line at the bottom of every help file, `nwsaom.pkg`, `stata.toc`, README, NOTICE,
-   CITATION.cff, the `e(version)`/`nwsaom version` literals).
-2. Add a section `## [X.Y.Z] - YYYY-MM-DD` to `CHANGELOG.md` (Added / Changed / Fixed / Removed).
-3. Run `python3 tools/check_version.py` (also the first step of `cscripts/run_tests.sh` and of CI) and the tests
-   (`NWCORE=/path/to/nwcommands cscripts/run_tests.sh`).
-4. Commit: `git commit -am "Release X.Y.Z"`.
-5. Tag: `git tag -a vX.Y.Z -m "nwsaom X.Y.Z"`.
-6. Push: `git push origin main --tags` (let the "Build native plugins" workflow finish and `git pull --rebase` before the next push, if the package has one).
-7. Release: `gh release create vX.Y.Z --title "nwsaom X.Y.Z" --notes-file <excerpt of CHANGELOG>`.
+All release procedures and policies of the five packages (steps, order, test launch, tags, GitHub release, website update, Zenodo, lockstep with the core
+Mata library, building libraries with Stata 17, known traps) are in the master document above. Follow it; this file only holds what is specific to nwsaom.
+Two rules from there that are easy to miss: push the release tag by name (`git push origin vX.Y.Z`), never `git push origin main --tags`
+(old local tags of this clone never existed on GitHub); and build `lib/*.mlib` with Stata 17, not 18.
 
-Users install the latest release with `net install nwsaom, from(https://raw.githubusercontent.com/thomas-u-grund/nwsaom/main/) replace`
-and a specific one with `.../nwsaom/vX.Y.Z/`.
+## Version files and checks
 
-## Whenever the core library changes
+- Single source of truth: `VERSION` (line 1 the version, line 2 the release date in Stata format, e.g. `25oct2026`). Semantic versioning (master B.4, C4).
+- `python3 tools/set_version.py X.Y.Z [date]` writes it into every display (first line of every `.ado`, help headers and the footer of every help file, `nwsaom.pkg`, `stata.toc`,
+  `README.md`, `NOTICE.md`, `CITATION.cff`, the `e(version)` / `nwsaom version` literals, the manual's `\pkgversion`/`\pkgdate`); `--check` changes nothing.
+- Add `## [X.Y.Z] - YYYY-MM-DD` to `CHANGELOG.md` (Added / Changed / Fixed / Removed); its text is the GitHub release notes.
+- `NWCORE=/path/to/nwcommands python3 tools/check_version.py` = version check plus the core-library hash check (below).
+- Install lines: latest `net install nwsaom, from(https://raw.githubusercontent.com/thomas-u-grund/nwsaom/main/) replace`; a given release `.../nwsaom/vX.Y.Z/`.
+  `nwsaom.pkg` states `Requires nwcommands (core), version A.B.C or later`; raise it (and `README.md`) only when this release needs a newer core.
 
-The Mata libraries of this package (`lib/lnwsaom1.mlib`, `lib/lnwsaom2.mlib`) are compiled against the core's `lnwcommands.mlib`
-(class `nw_def`). If the core library is rebuilt for a new core release and this package is not, a fresh install fails with
-r(3021) "class compiled at different times". So for every core release that changes its Mata library:
+## Library and lockstep with the core
 
-1. Build the core library first (`do lib/build.do` in the core) and note the core version.
-2. Rebuild these libraries against that exact core state, from the root of this repository, with a scratch PLUS folder so that no
-   installed copy is seen: `NWCORE=/path/to/nwcommands StataBE -e do lib/build.do`. `NWCORE` must be the core checkout whose
-   `lib/lnwcommands.mlib` is the final one of the core release.
-3. Run `python3 tools/set_version.py`, the tests (above) and release this package in lockstep with the core: raise the "requires core
-   X.Y.Z or later" statement in `README.md` and `nwsaom.pkg`, add a CHANGELOG entry, tag and release after the core release is out.
+`lib/build.do` builds `lib/lnwsaom1.mlib` and `lib/lnwsaom2.mlib` from `unw_saom.do` against the core's finished `lib/lnwcommands.mlib` (class `nw_def`): run it from the repository root with the Stata 17 binary,
+`NWCORE=/path/to/nwcommands "/Applications/Stata 17.0/StataBE.app/Contents/MacOS/StataBE" -e do lib/build.do`, then `NWCORE=/path/to/nwcommands python3 tools/record_core_lib.py`
+(writes `lib/core_mlib.sha256`). Whenever the core library changes, rebuild, record, test and release this package in the same batch as the core (master B.5, C3), core first.
+Without that, a fresh install fails with r(3021) "class compiled at different times".
 
-## Build the Mata libraries with the oldest supported Stata
+## Tests
 
-Build every Mata library of this package with Stata 17, the OLDEST supported Stata, never with a newer one: a library built by a newer
-Stata is ignored by older Stata versions (all functions "not found", r(3499)). `lib/build.do` stops when `c(stata_version)` is higher
-than 17 (`NW_ALLOW_NEWER_STATA=1` overrides, for experiments only). The full rule is in the RELEASING.md of the core repository
-(nwcommands).
+`NWCORE=/path/to/nwcommands cscripts/run_tests.sh quick|full [plugin_dir] [jobs]` (first step: `tools/check_version.py`; each test runs in its own `-e` Stata process; set `STATA` to the Stata 17 binary, then repeat with 18).
+Most tests print no PASS marker: failure is an `r()` error and a missing log is NOT RUN (master C0).
+`quick` (about a minute with jobs; run after every change) covers the newer features and the ado checks; `full` adds the RSiena regression tests (35 minutes serial, 10-15 in parallel); run `full` before a MINOR or lockstep release.
+`plugin_dir` puts a freshly built `saom_sim_macos.plugin` ahead of any installed copy on the adopath (a repo copy with its own `lib/plugins/` shadows it: copy the plugin there too).
 
-## Lockstep check with the core Mata library
+## Plugin
 
-The Mata libraries of this package are compiled against the core's `lib/lnwcommands.mlib`. After every build of the libraries
-(`lib/build.do`) record which core library they were built against:
+`native/saom_sim.c` (+ `saom_ml.c`, `saom_bayes.c`) builds `saom_sim` for macOS, Windows and Linux; the workflow "Build native plugins" commits the three binaries to `lib/plugins/` on `main` after a push that touches `native/`.
+`pull --rebase` and tag after the bot commit. The plugin reports its protocol number (`SAOM_NATIVE_VERSION`, scalar `__saom_native_version`); new effects are native-only and stop with a clear message on an older plugin. Protocol numbers never appear in user-facing text.
+Never copy a rebuilt plugin over a loaded one (`rm` first); test through a scratch `adopath`.
 
-    NWCORE=/path/to/nwcommands python3 tools/record_core_lib.py      # writes lib/core_mlib.sha256 (sha256 of the core library)
+## Effects inventory, counts, manual and Zenodo
 
-`tools/check_version.py` compares `lib/core_mlib.sha256` with `$NWCORE/lib/lnwcommands.mlib` when `NWCORE` is set and fails with
-"the core Mata library changed since this package's libraries were built: run lib/build.do and release in step" when they differ.
-Run `NWCORE=/path/to/nwcommands python3 tools/check_version.py` before every release (it is the first step of the tests when NWCORE is set).
+- After each new effect: update the inventory (`docs/inventory_tools/update_inventory.py`) and `docs/SAOM_EFFECTS_TODO.md` (master B.11). Counts quoted publicly name the RSiena version they come from (1.6.6 for the 1,201 / 1,121 rows).
+- The manual (`manual/`, PDF `manual/nwsaom_manual.pdf`) is archived at Zenodo, all-versions DOI `10.5281/zenodo.23623807`; the record's text says "Manual for version 1.0.3". Per master B.10 a new Zenodo version is uploaded (by the owner) only for a new minor/major whose documented behaviour changed;
+  at nwsaom 1.1.0 retitle the manual "Manual for version 1.1" and fix the citation texts. Patch releases and lockstep rebuilds get no upload.
+- `nwsaom.ado` and `unw_saom.do` are near Stata's per-program size limit; helper programs return values through `r()`; subcommands live in their own ado files (GOTCHA.md).
