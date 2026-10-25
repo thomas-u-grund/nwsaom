@@ -5,11 +5,14 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-### Fixed
-- `nwsaom multinet` with a behavior no longer prints the effect list ("linear quadratic avalt") and three blank lines before the results table.
+## [1.0.6] - 2026-10-25
 
 ### Changed
+- Rebuilt for nwcommands 3.4.0; requires core 3.4.0 or later.
 - Help: the ML point estimates come from phase 2 and do not change with `n3()` (only the standard errors and the convergence check do); a p-value of 0.000 in `estat gof` means none of the simulated distances reached the observed one.
+
+### Fixed
+- `nwsaom multinet` with a behavior no longer prints the effect list ("linear quadratic avalt") and three blank lines before the results table.
 
 ## [1.0.5] - 2026-10-25
 
