@@ -1,5 +1,5 @@
 v 3
 d nwsaom: stochastic actor-oriented models for Stata
 
-p nwsaom Stochastic actor-oriented models v1.0.6
+p nwsaom Stochastic actor-oriented models v1.0.7
 d nwsaom. Stochastic actor-oriented models (SAOM; Snijders) for network and behavior panels declared with nwset
