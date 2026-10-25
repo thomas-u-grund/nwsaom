@@ -1071,6 +1071,7 @@ Controls in {opt mloptions()}: {opt n1(#)} iterations of phase 1 (default 50), {
 Metropolis-Hastings steps per iteration as a multiple of the number of tie changes (5), {opt gain(#)} the initial gain (0.2), {opt seed(#)}.
 The estimator covers one directed one-mode network, with or without one co-evolving behavior (behavior ministeps and their rates are part of the augmented data; {cmd:e(rates_beh)}, {cmd:e(rates_beh_ml)}), without endowment/creation effects, rate covariates, structural zeros,
 missing data or composition change. It takes several minutes for the default controls.
+The point estimates come from phase 2; {opt n3()} only sets how many iterations of phase 3 are used for the standard errors and the convergence check (as in RSiena), so a larger {opt n3()} leaves the estimates unchanged and changes the standard errors and the t-ratio of the scores. If the check ends {it:poor} or {it:acceptable}, raise {opt n3()} (and {opt nstart2()}); the estimates stay the same unless phase 2 changes.
 The same estimates are available as {cmd:nwsaom_ml} after an {cmd:nwsaom} fit. The Bayesian estimator of the same model is {helpb nwsaom_bayes:nwsaom bayes}.
 
 {title:See also}

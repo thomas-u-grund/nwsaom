@@ -75,6 +75,7 @@ proportions are collinear by construction, e.g. they sum to 1, so the plain cova
 rank-deficient), each replicate's own Mahalanobis distance from the simulated mean is computed,
 and the reported p-value is the empirical proportion of simulated distances at or beyond the
 observed vector's own distance - a permutation-style p-value, not a chi-square/normal-theory one.
+A p-value printed as 0.000 means that none of the simulated distances reached the observed one; with {it:B} simulations read it as p < 1/({it:B}+1).
 
 {pstd}
 {bf:Simulation source differs from real RSiena, disclosed.} Real RSiena's own {cmd:iterations}
