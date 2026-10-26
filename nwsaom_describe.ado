@@ -1,4 +1,4 @@
-*! version 1.0.9  26oct2026 nwcommands: nwsaom describe - the data description that comes before a SAOM fit
+*! version 1.0.10  26oct2026 nwcommands: nwsaom describe - the data description that comes before a SAOM fit
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
