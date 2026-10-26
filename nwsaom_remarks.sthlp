@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.0.10  26oct2026 author: Thomas Grund}{...}
+{* *! version 1.0.11  26oct2026 author: Thomas Grund}{...}
 
 {title:Title}
 
@@ -478,7 +478,7 @@ reciprocity and one effect): observed statistics -10, 122.5, 327.587, 303.187, 5
 higher 0.19 (0.18), egoSqX 0.12 (0.115), altSqX 0.023 (0.019), sameXRecip -0.148 (-0.155), simRecipX 0.285 (0.265). With missing values (7 of 50 alcohol values set missing; RSiena's rule: a tie
 with a missing value is skipped - egoSqX only the ego's, altSqX only the alter's; higher counts such a tie 0.5) the statistics are identical to
 RSiena's too (absDiffX 113, egoXaltX 109.489, diffX -9, higher 122.5, egoSqX 216.676, altSqX 207.257, sameXRecip 42, simRecipX 12.977) and the
-estimates agree (dev/saom_rsiena_cov2miss.*).
+estimates agree.
 
 {pstd}
 {bf:Endowment/creation of covariate effects.} {cmd:endow(altx:alc) creation(altx:alc)} (also egox, samex, simx, nodecov): the tie statistic of the
@@ -514,7 +514,7 @@ the actors is possible (the events are generated as absent actors); its network 
 and {opt interact()} of the effects above are available too. Several waves ({opt waves()}) are supported. Not available: reciprocity, triads, balance,
 gwesp, structural rate effects, {opt missnet()}, endowment/creation; RSiena's sameXOutAct/diffXOutAct cannot be evaluated by siena07 in a
 two-mode network and are not offered. Validation against RSiena 1.6.6 on a simulated 40 x 20, 3-wave network
-(known parameters; dev/saom_rsiena_twomode_sim.R): the observed statistics are identical to RSiena's targets (density 529,
+(known parameters): the observed statistics are identical to RSiena's targets (density 529,
 cycle4 12990, inPopSqrt 2399.29, outAct 4359, egoX 103.142, altX 71.484), and the estimates agree: density -2.37..-2.50 against -2.42..-2.53,
 cycle4 0.094 (0.09-0.096), inPopSqrt 0.57 (0.57-0.59), outAct 0.06-0.08 (0.07-0.08), egoX 0.55-0.57 (0.55-0.57), altX 0.217 (0.215),
 rates 4.49 and 3.03 (4.52, 3.05).
@@ -879,7 +879,7 @@ leaving time on RSiena's scale (wave 1 = time 1, wave W = time W; one interval p
 ties it had in the start network, a leaver loses all its ties, and (as in RSiena) an inactive actor stays among the possible
 alters of an active actor - a tie made to it is removed again at the end of the period when the period has join/leave events.
 The rate parameter's compensator is the time-integral of the number of active actors. The simulation reproduces RSiena's:
-the five scenarios of {cmd:dev/saom_rsiena_tc_scen.R} (joiners/leavers in each period, actors absent for a whole period) give the same
+five scenarios (joiners/leavers in each period, actors absent for a whole period) give the same
 deviations from the targets as {cmd:siena07}, and s50 with 10 joiners/leavers gives estimates within noise of RSiena (density,
 reciprocity, transitive triplets, both rates, and a rate covariate). The same rules apply to {opt present()}: since 2026-10-22 an
 absent actor stays among the alters of an active actor, as in RSiena. As in RSiena (option 1), the ties an absent actor has in the
@@ -1079,4 +1079,4 @@ The same estimates are available as {cmd:nwsaom_ml} after an {cmd:nwsaom} fit. T
     {help nwsaom}, {help nwsaom_estat}, {help nwergm}
 
 {hline}
-{pstd}{it:nwsaom version 1.0.10, 26 October 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.0.11, 26 October 2026}{p_end}{* nwversion}

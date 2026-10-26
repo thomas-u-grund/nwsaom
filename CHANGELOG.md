@@ -3,6 +3,13 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.0.11] - 2026-10-26
+
+Patch release. Works with nwcommands 3.6.0 and later; no change of the Mata library.
+
+### Changed
+- Help text corrected: the provenance line no longer calls the package an independent reimplementation (it was developed from RSiena and is distributed under the GPL-3); references to development scripts removed from the help; the README install lines start with nwinstall. No change in code or results; the Mata libraries are unchanged.
+
 ## [1.0.10] - 2026-10-26
 
 Patch release. Works with nwcommands 3.6.0 and later (the Mata libraries are rebuilt, with Stata 17, against the unchanged core library of 3.6.0).

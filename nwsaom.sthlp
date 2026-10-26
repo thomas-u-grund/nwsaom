@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.0.10  26oct2026 author: Thomas Grund}{...}
+{* *! version 1.0.11  26oct2026 author: Thomas Grund}{...}
 {marker topic}
 {helpb nwtopical##analysis_statmodels:[NW-2.6.6] Statistical Estimation of Networks}
 
@@ -898,12 +898,12 @@ Lospinoso, J., Snijders, T.A.B. (2019). Goodness of fit for stochastic actor-ori
 {it:Methodological Innovations}, 12(3).
 
 {pstd}
-{cmd:nwsaom} is an independent, native reimplementation and is not affiliated with or endorsed by
-the RSiena project.
+{cmd:nwsaom} was developed from RSiena and is distributed under the GNU General Public License, version 3.
+It is not affiliated with or endorsed by the RSiena project.
 
 {title:See also}
 
 	{help nwergm}, {help nwset}, {help nwrandom}
 
 {hline}
-{pstd}{it:nwsaom version 1.0.10, 26 October 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.0.11, 26 October 2026}{p_end}{* nwversion}

@@ -1,6 +1,6 @@
 # nwsaom
 
-<!--version-->**Version 1.0.10** (released 26 October 2026)<!--/version-->
+<!--version-->**Version 1.0.11** (released 26 October 2026)<!--/version-->
 
 `nwsaom` fits stochastic actor-oriented models (SAOM, Snijders 2001) to longitudinal network panels declared with `nwset`: network-only and network-behavior co-evolution, one-mode, two-mode and multiplex/multi-network data, covariates, rate effects, composition change, method of moments (conditional and unconditional), maximum likelihood and Bayesian estimation, meta-analysis over several groups, goodness of fit and time-heterogeneity tests. The simulation and estimation engine runs in a native plugin. A manual is in `manual/` and an inventory of the RSiena effects with their status in `docs/`.
 
@@ -9,16 +9,18 @@ own repository; it needs the core package nwcommands but no other model package.
 
 ## Install
 
-1. Install the core package first (Stata): `net install nwcommands, from(<URL of the nwcommands distribution>)`
-   then run `nwinstall, everything` (the core and all four model packages in one step) or `nwinstall, all` (core only). Required: nwcommands (core), version 3.6.0 or later.
-2. Install this package:
+1. Install the core package first (Stata): `net install nwcommands, from(https://nwcommands.org/net/) replace`
+   (alternative: `from(https://raw.githubusercontent.com/thomas-u-grund/nwcommands/main/)`). Required: nwcommands (core), version 3.6.0 or later.
+2. Install this package from the core: `nwinstall, modelpkg(nwsaom)`.
+   `nwinstall, everything` installs the core and all four model packages in one step; `nwinstall, all` installs the core only and `nwinstall, models` adds the model packages to it.
+
+`nwinstall` installs the latest release (the state of the main branch). Without `nwinstall`, the package can be installed directly from GitHub:
 
        net install nwsaom, from(https://raw.githubusercontent.com/thomas-u-grund/nwsaom/main/) replace
 
-`net install nwsaom` installs the latest release (the state of the main branch). To install a specific version, point `from()` at the
-release tag (GitHub serves every tag under its own raw URL), for example version 1.0.0:
+To install a specific version, point `from()` at the release tag (GitHub serves every tag under its own raw URL), for example version 1.0.10:
 
-       net install nwsaom, from(https://raw.githubusercontent.com/thomas-u-grund/nwsaom/v1.0.10/) replace
+       net install nwsaom, from(https://raw.githubusercontent.com/thomas-u-grund/nwsaom/v1.0.11/) replace
 
 `net describe nwsaom` shows the version and distribution date, `nwsaom version` the package, core and plugin versions, and `e(version)`
 holds the package version in the stored results. Release history: `CHANGELOG.md`; how releases are made: `RELEASING.md`.
