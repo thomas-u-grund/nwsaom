@@ -3,6 +3,11 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+- The help file no longer quotes plugin protocol numbers, and `nwsaom version` prints "plugin build N" instead of "plugin protocol N". (Some error messages of the Mata source still say "protocol N or later"; they are to be reworded together with the next source change.)
+
 ## [1.0.9] - 2026-10-26
 
 ### Changed
