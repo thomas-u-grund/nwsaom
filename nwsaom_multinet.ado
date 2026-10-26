@@ -158,6 +158,7 @@ program define nwsaom_multinet, eclass
 		forvalues __w = 1/`nw`__s'' {
 			local __wname : word `__w' of `net`__s''
 			_nwsyntax `__wname', max(1) other(mn`__s'_`__w')
+			_nwsaom_chkbin, netobj(`mn`__s'_`__w'netobj') name(`__wname') valued(`mn`__s'_`__w'valued')
 			local __wtm = ("`mn`__s'_`__w'is2mode'" == "true")
 			if `__w' == 1 local __tm`__s' = `__wtm'
 			else if `__wtm' != `__tm`__s'' {

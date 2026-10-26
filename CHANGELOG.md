@@ -3,10 +3,19 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.0.10] - 2026-10-26
+
+Patch release. Works with nwcommands 3.6.0 and later (the Mata libraries are rebuilt, with Stata 17, against the unchanged core library of 3.6.0).
+
+### Results that change (read before you re-run old analyses)
+- **`nwsaom` refuses a network that holds real shares or other values than 0, 1, 10 and 11, whatever its Valued flag says.** The wave networks are judged by their tie values, as RSiena does ("entries in networks must be 0, 1, 10 or 11"). A network of shares that was saved as not valued by an earlier release used to be turned into ties silently; it now stops the command. `nwsaom multiplex` and `nwsaom multinet` check their networks in the same way (before they did not check at all). Ties that are all 1 are accepted, also in a network created with a value variable (which nwcommands 3.6.0 flags as valued and which was refused as "valued").
+
+### Fixed
+- With nwcommands 3.6.0 the Valued flag is set when a network is created, so a 0/1 network made with a value variable (`nwfromedge a b one`, every value 1) is valued and was refused as "valued"; see above.
 
 ### Changed
-- The help file no longer quotes plugin protocol numbers, and `nwsaom version` prints "plugin build N" instead of "plugin protocol N". (Some error messages of the Mata source still say "protocol N or later"; they are to be reworded together with the next source change.)
+- The help file no longer quotes plugin protocol numbers, and `nwsaom version` prints "plugin build N" instead of "plugin protocol N".
+- The error messages that said "native plugin (protocol N or later)" now say "a newer native plugin is needed (update nwcommands and nwsaom)".
 
 ## [1.0.9] - 2026-10-26
 

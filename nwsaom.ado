@@ -453,10 +453,7 @@ program nwsaom, eclass
 			di "{err}nwsaom estimates on ordinary static wave snapshots; no wave() network may itself carry {bf:nwset}-style temporal metadata (build an explicit static slice first, e.g. via {bf:nwattime})."
 			error 198
 		}
-		if "`w`__w'valued'" == "true" {
-			di "{err}nwsaom v1 estimates on binary ties only; a valued/weighted wave network is not yet supported."
-			error 198
-		}
+		_nwsaom_chkbin, netobj(`w`__w'netobj') name(`__wname') valued(`w`__w'valued')
 		if `__w' == 1 local nodes = `w1nodes'
 		else if `w`__w'nodes' != `nodes' {
 			di "{err}every wave must have the same number of nodes - nwsaom always uses a FIXED, common actor set across every wave; an actor not present at every wave still needs a row in each wave's own network, marked absent via {bf:present()}, not omitted from the network itself."

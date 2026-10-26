@@ -6,6 +6,7 @@ d GPL-3. Requires the core package nwcommands.
 d Requires nwcommands (core), version 3.6.0 or later
 d Version: 1.0.9
 d Distribution-Date: 26oct2026
+f _nwsaom_chkbin.ado
 f _nwsaom_getrates.ado
 f _nwsaom_libcheck.ado
 f _nwsaom_mnbeh.ado

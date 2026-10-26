@@ -80,6 +80,7 @@ program define nwsaom_multiplex, eclass
 	_nwrowalign `netawave1' `netawave2' `netbwave1' `netbwave2'
 
 	foreach __w in w1a w1b w2a w2b {
+		_nwsaom_chkbin, netobj(``__w'netobj') name(``__w'netname') valued(``__w'valued')
 		if "``__w'directed'" != "true" {
 			di "{err}nwsaom multiplex requires directed networks, matching plain nwsaom's own v1 scope."
 			error 198

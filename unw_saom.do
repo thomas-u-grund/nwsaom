@@ -4952,7 +4952,7 @@ real scalar _saom_cxstat(real scalar v, class SaomGraph scalar G, class SaomTerm
 	return(tot)
 }
 real rowvector _saom_cxchg(string scalar nm) {
-	errprintf("nwsaom: " + nm + " needs the native plugin (protocol 39 or later); there is no Mata implementation of this effect.\n")
+	errprintf("nwsaom: " + nm + " needs a newer native plugin (update nwcommands and nwsaom); there is no Mata implementation of this effect.\n")
 	exit(198)
 	return(0)
 }
@@ -5027,7 +5027,7 @@ real scalar _saom_dfstat(real scalar v, class SaomGraph scalar G, class SaomTerm
 	return(v == 7 ? tot / 6 : tot)
 }
 real rowvector _saom_dfchg(string scalar nm) {
-	errprintf("nwsaom: " + nm + " needs the native plugin (protocol 40 or later); there is no Mata implementation of this effect.\n")
+	errprintf("nwsaom: " + nm + " needs a newer native plugin (update nwcommands and nwsaom); there is no Mata implementation of this effect.\n")
 	exit(198)
 	return(0)
 }
@@ -5084,7 +5084,7 @@ real scalar _saom_ctstat(real scalar v, class SaomGraph scalar G, class SaomTerm
 	return(tot)
 }
 real rowvector _saom_ctchg(string scalar nm) {
-	errprintf("nwsaom: " + nm + " needs the native plugin (protocol 41 or later); there is no Mata implementation of this effect.\n")
+	errprintf("nwsaom: " + nm + " needs a newer native plugin (update nwcommands and nwsaom); there is no Mata implementation of this effect.\n")
 	exit(198)
 	return(0)
 }
@@ -5357,7 +5357,7 @@ real scalar _saom_bvcode(string scalar nm) {
 	return(0)
 }
 real scalar change_saom_bv(string scalar nm) {
-	errprintf("nwsaom: " + nm + " with the behavior as covariate needs the native plugin (protocol 45 or later).\n")
+	errprintf("nwsaom: " + nm + " with the behavior as covariate needs a newer native plugin (update nwcommands and nwsaom).\n")
 	exit(198)
 	return(0)
 }
@@ -5750,7 +5750,7 @@ real rowvector stat_saom_nat(class SaomGraph scalar G, class SaomTermData scalar
 	return(SaomNativeNetStat(G, td.levels[1] + (dyn ? 1000 : 0), td.decay, a))
 }
 real rowvector change_saom_nat(class SaomGraph scalar G, real scalar i, real scalar j, class SaomTermData scalar td) {
-	errprintf("nwsaom: this network effect needs the native plugin (protocol 46 or later); there is no Mata implementation of its simulation.\n")
+	errprintf("nwsaom: this network effect needs a newer native plugin (update nwcommands and nwsaom); there is no Mata implementation of its simulation.\n")
 	exit(198)
 	return(0)
 }
@@ -8248,26 +8248,26 @@ void SaomNetCtxInit(struct SaomNetCtx scalar C, pointer(class SaomGraph scalar) 
 	C.use_batch = C.use_native & (!C.hastimed | ver >= 27) & (ver >= 5) & ((!C.hasratecov & C.symtype == 0 & !C.hasnetgate & !C.hasstructural) | ver >= 11)
 	if (SaomRateTVCount() > 0) {
 		if (!C.use_batch | ver < 71) {
-			errprintf("nwsaom: a changing covariate in ratecov() needs the native plugin, protocol 71 or later; there is no Mata implementation.\n")
+			errprintf("nwsaom: a changing covariate in ratecov() needs a newer native plugin (update nwcommands and nwsaom); there is no Mata implementation.\n")
 			exit(198)
 		}
 	}
 	if (C.hasratecov & C.hasstructural & ver < 70) {
-		errprintf("nwsaom: rate effects of a two-mode network need the native plugin, protocol 70 or later; there is no Mata implementation.\n")
+		errprintf("nwsaom: rate effects of a two-mode network need a newer native plugin (update nwcommands and nwsaom); there is no Mata implementation.\n")
 		exit(198)
 	}
 	if (cols(SaomSRTypes()) > 0) {
 		if (C.symtype != 0 & ver < 70) {
-			errprintf("nwsaom: the structural rate effects of a non-directed network need the native plugin, protocol 70 or later; there is no Mata implementation.\n")
+			errprintf("nwsaom: the structural rate effects of a non-directed network need a newer native plugin (update nwcommands and nwsaom); there is no Mata implementation.\n")
 			exit(198)
 		}
 		if (!C.use_batch | ver < 42) {
-			errprintf("nwsaom: the structural rate effects (outrate, inrate, ...) need the native plugin, protocol 42 or later; there is no Mata implementation.\n")
+			errprintf("nwsaom: the structural rate effects (outrate, inrate, ...) need a newer native plugin (update nwcommands and nwsaom); there is no Mata implementation.\n")
 			exit(198)
 		}
 	}
 	if (C.symtype != 0 & !C.use_native) {
-		errprintf("SAOM estimation of a non-directed relation (symmetric, symtype()) requires the native (C) backend, protocol 8 or later for symtype(forcing)/(confirmation); it is not available for this model/platform (there is no Mata fallback for these ministeps).\n")
+		errprintf("SAOM estimation of a non-directed relation (symmetric, symtype()) requires the native (C) backend (a newer native plugin may be needed: update nwcommands and nwsaom) for symtype(forcing)/(confirmation); it is not available for this model/platform (there is no Mata fallback for these ministeps).\n")
 		exit(198)
 	}
 	C.missDyadsPd = J(0, 3, 0)
@@ -11303,11 +11303,11 @@ struct SaomMNFit scalar SaomEstimateMN(pointer(class SaomGraph scalar) rowvector
 	}
 	ver = SaomNativePluginVersion()
 	if ((args() >= 10 ? (sym1 | sym2) : 0) & ver < 62) {
-		errprintf("nwsaom multinet with a non-directed network needs a plugin of protocol 62 or later (this one is " + strofreal(ver) + ").\n")
+		errprintf("nwsaom multinet with a non-directed network needs a newer native plugin (update nwcommands and nwsaom).\n")
 		exit(198)
 	}
 	if (ver < 52) {
-		errprintf("nwsaom multinet needs a plugin of protocol 52 or later (this one is " + strofreal(ver) + "); rebuild or update it.\n")
+		errprintf("nwsaom multinet needs a newer native plugin (update nwcommands and nwsaom).\n")
 		exit(198)
 	}
 	cfg1 = SaomNativeSetup(M1)
@@ -11317,7 +11317,7 @@ struct SaomMNFit scalar SaomEstimateMN(pointer(class SaomGraph scalar) rowvector
 		exit(198)
 	}
 	if ((any(cfg1.termcodes :== 3200) | any(cfg2.termcodes :== 3200)) & ver < 130) {
-		errprintf("nwsaom multinet: tou needs a newer plugin (this one is protocol " + strofreal(ver) + "); rebuild or update it.\n")
+		errprintf("nwsaom multinet: tou needs a newer native plugin (update nwcommands and nwsaom).\n")
 		exit(198)
 	}
 	nfree1 = n * (n - 1)
@@ -11330,7 +11330,7 @@ struct SaomMNFit scalar SaomEstimateMN(pointer(class SaomGraph scalar) rowvector
 		tmf1 = *findexternal("__nwsaom_mn_tm1")
 		tmf2 = *findexternal("__nwsaom_mn_tm2")
 		if (ver < 90) {
-			errprintf("nwsaom multinet with a two-mode network needs a plugin of protocol 90 or later (this one is " + strofreal(ver) + "); rebuild or update it.\n")
+			errprintf("nwsaom multinet with a two-mode network needs a newer native plugin (update nwcommands and nwsaom).\n")
 			exit(198)
 		}
 		Sm = SaomMNStructMask(n, nA, tmf1)
@@ -11489,22 +11489,22 @@ struct SaomMNBFit scalar SaomEstimateMNB(pointer(class SaomGraph scalar) rowvect
 	}
 	ver = SaomNativePluginVersion()
 	if (ver < 64) {
-		errprintf("nwsaom multinet with a behavior needs a plugin of protocol 64 or later (this one is " + strofreal(ver) + "); rebuild or update it.\n")
+		errprintf("nwsaom multinet with a behavior needs a newer native plugin (update nwcommands and nwsaom).\n")
 		exit(198)
 	}
 	cfg1 = SaomNativeSetup(M1)
 	cfg2 = SaomNativeSetup(M2)
 	cfgB = SaomBehaviorNativeSetup(Mbeh)
 	if ((any(cfg1.termcodes :== 3200) | any(cfg2.termcodes :== 3200)) & ver < 130) {
-		errprintf("nwsaom multinet: tou needs a newer plugin (this one is protocol " + strofreal(ver) + "); rebuild or update it.\n")
+		errprintf("nwsaom multinet: tou needs a newer native plugin (update nwcommands and nwsaom).\n")
 		exit(198)
 	}
 	if (any(cfgB.termcodes :>= 30000) & ver < 103) {
-		errprintf("nwsaom multinet: interactions of behavior effects need a newer plugin (this one is protocol " + strofreal(ver) + "); rebuild or update it.\n")
+		errprintf("nwsaom multinet: interactions of behavior effects need a newer native plugin (update nwcommands and nwsaom).\n")
 		exit(198)
 	}
 	if (any(cfgB.termcodes :>= 20000) & ver < 100) {
-		errprintf("nwsaom multinet: the behavior effects of both networks need a newer plugin (this one is protocol " + strofreal(ver) + "); rebuild or update it.\n")
+		errprintf("nwsaom multinet: the behavior effects of both networks need a newer native plugin (update nwcommands and nwsaom).\n")
 		exit(198)
 	}
 	if (!cfg1.eligible | !cfg2.eligible | !cfgB.eligible) {
@@ -11512,7 +11512,7 @@ struct SaomMNBFit scalar SaomEstimateMNB(pointer(class SaomGraph scalar) rowvect
 		exit(198)
 	}
 	if (any(cfgB.fntype :!= 0) & ver < 101) {
-		errprintf("nwsaom multinet: endowment/creation effects of the behavior need a newer plugin (this one is protocol " + strofreal(ver) + "); rebuild or update it.\n")
+		errprintf("nwsaom multinet: endowment/creation effects of the behavior need a newer native plugin (update nwcommands and nwsaom).\n")
 		exit(198)
 	}
 	allb = *Behwaves[1]
@@ -11523,7 +11523,7 @@ struct SaomMNBFit scalar SaomEstimateMNB(pointer(class SaomGraph scalar) rowvect
 	if (findexternal("__nwsaom_mn_Miss") != NULL) {
 		if (cols(*findexternal("__nwsaom_mn_Miss")) == P + 1) {
 			if (ver < 102) {
-				errprintf("nwsaom multinet: missbeh() needs a newer plugin (this one is protocol " + strofreal(ver) + "); rebuild or update it.\n")
+				errprintf("nwsaom multinet: missbeh() needs a newer native plugin (update nwcommands and nwsaom).\n")
 				exit(198)
 			}
 			for (pd=1; pd<=P; pd++) missPd[., pd] = ((*(*findexternal("__nwsaom_mn_Miss"))[pd] :| *(*findexternal("__nwsaom_mn_Miss"))[pd+1]) :!= 0)
@@ -12439,16 +12439,16 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 	else why = "native plugin too old for this model"
 	SaomSetEngine(C.use_native, why)
 	if (C.symtype != 0 & !C.use_batch) {
-		errprintf("nwsaom: co-evolution of a non-directed (symmetric) relation needs the native (C) plugin with the threaded batch path (protocol 11 or later), which is not available for this model/platform.\n")
+		errprintf("nwsaom: co-evolution of a non-directed (symmetric) relation needs the native (C) plugin with the threaded batch path (a newer native plugin may be needed: update nwcommands and nwsaom), which is not available for this model/platform.\n")
 		exit(198)
 	}
 	if (nrcT > 0 | SaomRCBehCount() > 0) {
 		if (!C.use_batch) {
-			errprintf("nwsaom: rate effects in a model with a behavior need the native plugin, protocol 72 or later; there is no Mata implementation.\n")
+			errprintf("nwsaom: rate effects in a model with a behavior need a newer native plugin (update nwcommands and nwsaom); there is no Mata implementation.\n")
 			exit(198)
 		}
 		if (SaomNativePluginVersion() < 72) {
-			errprintf("nwsaom: rate effects in a model with a behavior need the native plugin, protocol 72 or later; there is no Mata implementation.\n")
+			errprintf("nwsaom: rate effects in a model with a behavior need a newer native plugin (update nwcommands and nwsaom); there is no Mata implementation.\n")
 			exit(198)
 		}
 	}
@@ -16420,7 +16420,7 @@ real rowvector stat_saom_bs(class SaomBehavior scalar Beh, class SaomGraph scala
 	return(tot)
 }
 real scalar change_saom_bs(class SaomBehavior scalar Beh, class SaomGraph scalar G, real scalar i, real scalar diff) {
-	errprintf("nwsaom: this behavior effect needs the native plugin (protocol 43 or later); there is no Mata implementation of its simulation.\n")
+	errprintf("nwsaom: this behavior effect needs a newer native plugin (update nwcommands and nwsaom); there is no Mata implementation of its simulation.\n")
 	exit(198)
 	return(0)
 }

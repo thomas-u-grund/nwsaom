@@ -591,7 +591,7 @@ for a full wall-clock benchmark against real RSiena and the performance-tuning h
 {title:Supported network types}
 
 {pstd}
-Binary: yes (only) - a valued/weighted wave is rejected. Directed one-mode: yes (the default
+Binary: yes (only) - the ties of every wave must be 0/1, as in RSiena. A wave with a tie value other than 1 is rejected, whether or not it is declared valued; a network declared valued whose ties are all 1 is accepted. Dichotomize first ({help nwdichotomize}). Directed one-mode: yes (the default
 model; an actor controls its own outgoing ties). Non-directed (undirected or tie-symmetric waves,
 RSiena's non-directed model types): yes, see {opt symmetric}. Two-mode (bipartite, actors choose
 events): yes, see {opt actormode()}. Several co-evolving networks: {help nwsaom##multinet:nwsaom multinet}.
@@ -604,7 +604,7 @@ Signed: not applicable/not supported.
 
 {p2colset 9 13 15 2}{...}
 {p2col: o}Two-mode (bipartite) waves are supported (see {help nwsaom_remarks##twomode:Two-mode networks}); temporal-metadata
-and valued/weighted waves are rejected with an explicit error - never silently coerced.{p_end}
+and waves with tie values other than 0/1 are rejected with an explicit error - never silently coerced.{p_end}
 {p2col: o}Composition change (actors joining/leaving between waves, {opt present()}) and missing
 tie/behavior data ({opt missnet()}/{opt missbeh()}) are both supported - see
 {help nwsaom_remarks##compchange:Composition change} and {help nwsaom_remarks##missingdata:Missing data} in nwsaom_remarks for
