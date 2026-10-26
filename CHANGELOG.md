@@ -3,6 +3,11 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- With nwcommands 3.6.0 the Valued flag is set when a network is created, so a 0/1 network made with a value variable (`nwfromedge a b one`, every value 1) is valued and was refused as "valued". The wave networks are now judged by their tie values: ties that are all 1 are accepted whatever the flag says; any other tie value stops the command (RSiena: "entries in networks must be 0, 1, 10 or 11"), also for a network that is not declared valued but holds shares (saved by an earlier release), which used to be turned into ties silently. `nwsaom multiplex` and `nwsaom multinet` check their networks in the same way (they did not check at all).
+
 ## [1.0.9] - 2026-10-26
 
 ### Changed
