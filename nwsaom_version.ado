@@ -35,7 +35,7 @@ program nwsaom_version, rclass
 	capture mata: st_local("__plp", SaomNativePluginPath())
 	capture mata: st_local("__plv", strofreal(SaomNativePluginVersion()))
 	if "`__plp'" != "" & real("`__plv'") > 0 & real("`__plv'") < . {
-		local __plug "`__plp' (plugin protocol `__plv')"
+		local __plug "`__plp' (plugin build `__plv')"
 	}
 	else local __plug "missing (the Mata engine is used where possible; some options need the plugin)"
 	local __ref "RSiena 1.6.14"

@@ -68,7 +68,7 @@ used by that name in {opt nodeocov()}/{opt nodeicov()}/{opt nodecov()}/{opt node
 covariates), also with two-mode networks (nodeocov/nodeicov, egosqx/altsqx and the two-mode netx effects below), not with {opt interact()} or {cmd:estat gof}. See
 {help nwsaom_remarks##tvcov:Time-varying covariates}{p_end}
 {synopt:{opt actormode(#)}}Two-mode networks: the mode whose nodes are the actors (they choose their ties to the other mode, the events); 1 or 2, default 2 = the {it:rows} of the
-affiliation matrix given to {cmd:nwset, bipartite}. Covariate effects in a two-mode network (protocol 56, native; the covariate is a variable on the nodes of one mode, other nodes
+affiliation matrix given to {cmd:nwset, bipartite}. Covariate effects in a two-mode network (native; the covariate is a variable on the nodes of one mode, other nodes
 ignored): {cmd:egosqx()} (actors), {cmd:altsqx()} (events),
 {cmd:netx(altindist2 totindist2 simegoindist2 sameegoindist2 crossxoutact samexcycle4 avgroupegox totgroupegox:}{it:var}{cmd:)} on the actor mode,
 {cmd:netx(sameinxcycle4 homxoutact2:}{it:var}{cmd:)} on the event mode ({cmd:homxoutact2} needs {cmd:xparam(3)} for RSiena's default); a {cmd:tvcov()} covariate works in all of
@@ -260,11 +260,11 @@ estimates agree within noise for the identified effects. Requires {opt behavior(
 {synopt:{it:more beheff() tokens}}{cmd:avinsim totinsim avinsimpopalt totinsimpopalt avsimrecip totsimrecip avsimrecpop totsimrecpop popalt totpopalt avinalt totinalt avaltdist2 totaltdist2 avtaltdist2 totaaltdist2 avinaltdist2 totinaltdist2 avtinaltdist2 totainaltdist2}:
 RSiena's (the last eight: avAltDist2, totAltDist2, avTAltDist2, totAAltDist2, avInAltDist2, totInAltDist2, avTInAltDist2, totAInAltDist2)  avInSim, totInSim, avInSimPopAlt,
 totInSimPopAlt, avSimRecip, totSimRecip, avSimRecPop, totSimRecPop, popAlt, totPopAlt, avInAlt, totInAlt (in-/reciprocated-alter similarity and averages, popularity of the alters).
-Estimates agree with siena07. Native only (protocol 44){p_end}
+Estimates agree with siena07. Native only{p_end}
 {synopt:{opt behfrom(varlist)}}Covariate main effects on the co-evolving behavior (RSiena's {cmd:effFrom}): for each numeric variable the behavior's tendency to be higher where the
 covariate is higher (contribution = change x centred covariate; coefficient {cmd:beh_from_}{it:var}). Constant covariates or {opt tvcov()} covariates (use the stem; period {it:p}
 takes wave {it:p}), the first behavior, at most 8; missing values are set to the mean. Observed statistics and estimates equal siena07. Requires {opt behavior()}{p_end}
-{synopt:{opt netx(effect:var ...)}, {opt xparam(#)}}Further covariate network effects, native only (protocol 46): {it:effect} is one of
+{synopt:{opt netx(effect:var ...)}, {opt xparam(#)}}Further covariate network effects, native only: {it:effect} is one of
 {cmd:crossxoutact homxoutact2 outxmore indties transtripx jumpxtranstrip altdist2 totdist2 simdist2 simegodist2 sameegodist2 altindist2 totindist2 simegoindist2 sameegoindist2 homxtransrectrip samextransrectrip diffxtransrectrip egoxaltxrecip samexcycle4 sameinxcycle4 avgroupegox totgroupegox}
 (RSiena's crossXOutAct, homXOutAct2, outXMore, IndTies, transTripX, jumpXTransTrip, altDist2, totDist2, simDist2, simEgoDist2, sameEgoDist2, altInDist2, totInDist2, simEgoInDist2,
 sameEgoInDist2, homXTransRecTrip, sameXTransRecTrip, diffXTransRecTrip, egoXaltXRecip, sameXCycle4, sameInXCycle4 - {opt xparam(1|2)} is their parameter -, avGroupEgoX,
@@ -275,20 +275,20 @@ the dependent behavior as the covariate{p_end}
 {synopt:{opt netbeh(effects)}}Network effects with the {it:dependent behavior} as the covariate (RSiena's "a behavior variable" contexts): any of
 {cmd:samex diffx higher egosqx altsqx samexrecip absdiffx egoxaltx samextranstrip diffxtranstrip homxtranstrip samexoutact diffxoutact samexreciact diffxreciact homxoutact altxoutact inpopx outpopx inactx outactx samexinpop diffxinpop egoplusaltsqx diffsqx egodiffx althigheregox unequalx egolthresholdx egorthresholdx altlthresholdx altrthresholdx degabsdiffx degposdiffx degnegdiffx}.
 The value is the behavior's current value minus its overall mean in the simulation and its value at the start of the period in the statistic (like {opt behsim}). First behavior
-only; in a two-mode network {cmd:crossxoutact}, {cmd:avgroupegox} and {cmd:totgroupegox} (the behavior of the actors, read at the event's index within its mode as RSiena does, so at least as many actors as events are needed) are available besides {cmd:egosqx altindist2 totindist2 simegoindist2 sameegoindist2 samexcycle4}; coefficients {cmd:bv_}{it:effect}. Estimates agree with siena07. {bf:Native plugin only} (protocol 45){p_end}
+only; in a two-mode network {cmd:crossxoutact}, {cmd:avgroupegox} and {cmd:totgroupegox} (the behavior of the actors, read at the event's index within its mode as RSiena does, so at least as many actors as events are needed) are available besides {cmd:egosqx altindist2 totindist2 simegoindist2 sameegoindist2 samexcycle4}; coefficients {cmd:bv_}{it:effect}. Estimates agree with siena07. {bf:Native plugin only}{p_end}
 {synopt:{opt behx(family:var ...)}}Behavior effects of the network x a covariate (RSiena's avXInAlt, totXInAlt, avXRecAlt, totXRecAlt, avSameXInAlt, totSameXInAlt, avSameXRecAlt,
 totSameXRecAlt, avAltSameX, totAltSameX, avRecAltSameX, totRecAltSameX, avAltAltX, avSimAltX, totSimAltX, minXAlt, maxXAlt, degAbsContrX, degPosContrX, degNegContrX): {it:family}
 is the lower-case effect name, {it:var} a numeric variable or a {opt tvcov()} stem, e.g. {cmd:behx(avsamexinalt:sex maxxalt:age)}; shares the covariate slots (at most 8 different
 covariates) with {opt behfrom()}. {it:var} may also be {cmd:beh2}, {cmd:beh3}, ...: another {it:co-evolving behavior} of {opt behavior()} as the covariate (the statistics read its
-start-of-period values, the ministeps its current values; plugin protocol 53; same for {opt behfrom()}, {opt behavxalt()} ...). Coefficients {cmd:beh_}{it:family}{cmd:_}{it:var}.
-Estimates agree with siena07. {bf:Native plugin only} (protocol 43){p_end}
+start-of-period values, the ministeps its current values; same for {opt behfrom()}, {opt behavxalt()} ...). Coefficients {cmd:beh_}{it:family}{cmd:_}{it:var}.
+Estimates agree with siena07. {bf:Native plugin only}{p_end}
 {synopt:{opt tvdyadcov(stem ...)} {opt tvdyadcovrecip(stem ...)} {opt tvdyadx(effect:stem ...)}}Changing dyadic covariates (RSiena varDyadCovar): the
 matrices {it:stem}1 ... {it:stem}P (Stata matrices, P = waves - 1, the matrix of period p is the one of the period's start wave) for {opt dyadcov} /
 {opt dyadcovrecip} (centred by the overall mean, as RSiena) and for the {opt dyadx()} effects (raw). Directed and symmetric relations. Statistics and
 estimates agree with siena07{p_end}
 {synopt:{opt netx(samexv:v1:v2) netx(samexvinpop:v1:v2[:#])}}RSiena's sameXV, sameXVInPop (= sameXVInPop2) for two integer category covariates (0 .. 20, uncentred); part of {opt netx()}. Estimates agree with siena07{p_end}
-{synopt:{opt ownx(effect[:#] ...)}}Own-network effects without a covariate (native, protocol 54; protocol 56 adds {cmd:outinass[:2]} {cmd:outoutass[:2]} {cmd:ininass[:2]}
-{cmd:inoutass[:2]} (RSiena outInAss, outOutAss, inInAss, inOutAss; default parameter 2 = square roots, :1 = plain products); protocol 61 adds the primary-setting effects
+{synopt:{opt ownx(effect[:#] ...)}}Own-network effects without a covariate (native; also {cmd:outinass[:2]} {cmd:outoutass[:2]} {cmd:ininass[:2]}
+{cmd:inoutass[:2]} (RSiena outInAss, outOutAss, inInAss, inOutAss; default parameter 2 = square roots, :1 = plain products); also the primary-setting effects
 {cmd:primary primcompress nonpcompress primdegact primdegactlog primdegactsqrt primdegactinv primdegactdiff primdegactdiffsqrt}, {cmd:inpopdya[:2]} (inPop_dya), {cmd:inisdegree},
 {cmd:instructeq} (inStructEq) and {cmd:densetriads[:5|6]}; also in two-mode and non-directed networks, together with {cmd:gwdspfb()}, {cmd:avdeg()} and
 {cmd:outtrunc()}/{cmd:outmore()}/{cmd:outthreshold()} there): {cmd:jin jout transtrip1 transtrip2 transrectrip2 transtripfr transtripfe transtripee outpopmore:}{it:#}
@@ -301,21 +301,21 @@ XXW): {it:effect} is the lower-case name, {it:matrix} a Stata {it:n} x {it:n} ma
 {cmd:dyadx(xwx:DM wwx:DM)}. {cmd:wxzx:}{it:W}{cmd::}{it:Z} is RSiena's WXZX, the closure of the paths i -W-> h -X-> k -Z-> j by the tie i -> j, with two matrices.
 In a two-mode network the available effects are {cmd:wxx} (a matrix among the actors, {it:na} x {it:na}), {cmd:xwx xwx1 xwx2} (a matrix among the events) and {cmd:wxzx:}{it:W}{cmd::}{it:Z}
 (W among the actors, Z among the events). Coefficients {cmd:nat_}{it:effect}{cmd:_}{it:matrix}. Observed statistics and estimates agree with siena07.
-{bf:Native plugin only} (protocol 49){p_end}
-{synopt:{opt behshape(effect[:#] ...)}}RSiena's further behavior shape effects (native, protocol 51): {cmd:quad_cc} and {cmd:quad_nc} (centred / non-centred quadratic shape - use
+{bf:Native plugin only}{p_end}
+{synopt:{opt behshape(effect[:#] ...)}}RSiena's further behavior shape effects (native): {cmd:quad_cc} and {cmd:quad_nc} (centred / non-centred quadratic shape - use
 them {it:instead of} {cmd:quadratic}), {cmd:threshold:}{it:#}, {cmd:simallnear:}{it:#} (default 2), {cmd:simallfar:}{it:#} (default 4), {cmd:avgroup}[{cmd::}{it:#}],
 {cmd:totgroup}[{cmd::}{it:#}] (default parameter 1), {cmd:constant} (minus the sum of the absolute changes: equal to minus the behavior rate statistic, so the fit stops with a
 singular Jacobian). Coefficients {cmd:beh_}{it:effect}[{cmd:(}{it:#}{cmd:)}]. Estimates agree with siena07{p_end}
-{synopt:{opt behnet2(effect[:#] ...)}}Further RSiena behavior effects of the network (native, protocol 55):
+{synopt:{opt behnet2(effect[:#] ...)}}Further RSiena behavior effects of the network (native):
 {cmd:indegavgroup[:}{it:#}{cmd:] indegtotgroup[:}{it:#}{cmd:] avaltcc totaltcc avinaltdist2nc totinaltdist2nc avtinaltdist2nc totainaltdist2nc avinsimdist2 totinsimdist2 totgwdspffalt[:}{it:#}{cmd:] totgwdspfbalt[:}{it:#}{cmd:] totgwdspffaltnc[:}{it:#}{cmd:] totgwdspfbaltnc[:}{it:#}{cmd:] varalt avsimvaralt behdensetriads[:5|6] simdensetriads[:5|6]}
 (RSiena indegAvGroup, indegTotGroup, avAlt_cc, totAlt_cc, avInAltDist2_nc, totInAltDist2_nc, avTInAltDist2_nc, totAInAltDist2_nc, avInSimDist2, totInSimDist2, totGwdspFFAlt,
 totGwdspFBAlt and the _nc versions; the number is RSiena's effect parameter: centring value of the group effects (default 1), gwdsp weight (default 69)). Estimates agree with
 siena07{p_end}
-{synopt:{opt tvbehw(family:stem ...)}}The same ten effects with a changing dyadic covariate (RSiena varDyadCovar): the Stata matrices {it:stem}1 ... {it:stem}(waves-1), one per period (native, protocol 57). May be combined with {opt behw()}; estimates agree with siena07{p_end}
+{synopt:{opt tvbehw(family:stem ...)}}The same ten effects with a changing dyadic covariate (RSiena varDyadCovar): the Stata matrices {it:stem}1 ... {it:stem}(waves-1), one per period (native). May be combined with {opt behw()}; estimates agree with siena07{p_end}
 {synopt:{opt behw(family:matrix ...)}}Behavior effects of the network x a constant dyadic covariate W (RSiena's avAltW, totAltW, avInAltW, totInAltW, avWAlt, totWAlt, avWInAlt,
 totWInAlt, avSimW, totSimW): {it:family} is the lower-case effect name, {it:matrix} a Stata {it:n} x {it:n} matrix (centred like {opt dyadcov()}), e.g.
 {cmd:behw(avsimw:DM totaltw:DM)}; at most 8 different matrices. Coefficients {cmd:beh_}{it:family}{cmd:_}{it:matrix}. Observed statistics and estimates agree with siena07; avAltW
-and avSimW with parameter 2 (RSiena's default) are unstable in siena07 as well when the weights nearly sum to zero. {bf:Native plugin only} (protocol 48){p_end}
+and avSimW with parameter 2 (RSiena's default) are unstable in siena07 as well when the weights nearly sum to zero. {bf:Native plugin only}{p_end}
 {synopt:{opt behwparam(#)}}RSiena's effect parameter of avAltW, avInAltW and avSimW: 2 (default, the denominator is the sum of the weights) or 1 (the number of alters); the names then carry {cmd:_p1}{p_end}
 {synopt:{opt outrate}, {opt inrate}, {opt reciprate}, {opt outrateinv}, {opt inrateinv}, {opt reciprateinv}, {opt outratelog}, {opt inratelog}, {opt recipratelog}}Structural rate
 effects (RSiena's outRate, inRate, recipRate and their Inv / Log versions): the actor's rate is the period rate times exp(sum of b_k f_k) with f = out-, in- or reciprocated degree
@@ -326,15 +326,15 @@ missnet()). A non-directed or a two-mode network has only the degree versions {o
 contrast and threshold effects (RSiena's egoPlusAltSqX, diffSqX, egoDiffX, altHigherEgoX, unequalX, egoLThresholdX, egoRThresholdX, altLThresholdX, altRThresholdX, degAbsDiffX,
 degPosDiffX, degNegDiffX). The four threshold effects compare the {it:centred} covariate with {opt covthreshold(#)} (default 0, as RSiena's internal parameter). The deg*DiffX
 effects compare the outdegree with floor of the centred covariate (copied from RSiena). Directed relations, no missing values. Observed statistics and estimates equal siena07.
-{bf:Native plugin only} (protocol 41){p_end}
+{bf:Native plugin only}{p_end}
 {synopt:{opt inpopc}, {opt outpopc}, {opt outactc}, {opt inactc}, {opt degplus}, {opt degplusc}, {opt avdeg(#)}, {opt transtriads}}Centred and combined degree effects and the
 triangle count (RSiena's inPop.c, outPop.c, outAct.c, inAct.c, degPlus, degPlus.c, avDeg, transTriads). The centring constant is the average degree over all waves (degplusc: twice
 the average out-degree; avdeg: the constant {it:#} you give, RSiena's default is 2). {opt degplus}, {opt degplusc} and {opt transtriads} are offered for a non-directed relation
-({opt symmetric}) only, {opt outpopc} and {opt inactc} for a directed relation only. Observed statistics and estimates equal siena07. {bf:Native plugin only} (protocol 40){p_end}
+({opt symmetric}) only, {opt outpopc} and {opt inactc} for a directed relation only. Observed statistics and estimates equal siena07. {bf:Native plugin only}{p_end}
 {synopt:{opt samextranstrip(varlist)}, {opt diffxtranstrip()}, {opt simxtranstrip()}, {opt homxtranstrip()}, {opt samexoutact()}, {opt diffxoutact()}, {opt samexreciact()}, {opt diffxreciact()}, {opt homxoutact()}, {opt altxoutact()}, {opt inpopx()}, {opt outpopx()}, {opt inactx()}, {opt outactx()}, {opt samexinpop()}, {opt diffxinpop()}}Covariate
 x triad / popularity / activity effects (RSiena's sameXTransTrip, diffXTransTrip, simXTransTrip, homXTransTrip, sameXOutAct, diffXOutAct, sameXReciAct, diffXReciAct, homXOutAct,
 altXOutAct, inPopX, outPopX, inActX, outActX, sameXInPop, diffXInPop; internal parameter 1). One numeric covariate per name, no missing values, directed one-mode networks. Observed
-statistics and estimates equal siena07. {bf:Native plugin only} (protocol 39): there is no Mata implementation of the simulation{p_end}
+statistics and estimates equal siena07. {bf:Native plugin only}: there is no Mata implementation of the simulation{p_end}
 {synopt:{opt behavxalt(varlist)}, {opt behavsamexalt(varlist)}, {opt behtotxalt(varlist)}, {opt behtotsamexalt(varlist)}}Covariate-moderated influence on the co-evolving behavior
 (RSiena's {cmd:avXAlt}, {cmd:avSameXAlt}, {cmd:totXAlt}, {cmd:totSameXAlt}): the ego's behavior times the average (av) or sum (tot) over its out-alters of the centred covariate (X)
 or of the indicator that the alter has the ego's covariate value (SameX). Constant covariates, first behavior; together with {opt behfrom()} at most 8 different covariates.
@@ -492,7 +492,7 @@ each network (default {cmd:outdegree reciprocity}): {cmd:outdegree reciprocity t
 {opt cross2()} those of network 2 on network 1: {cmd:crprod crprodrecip crprodmutual from frommutual fromany to toback torecip clxwx clxwx1 clxwx2 mixedinxw}
 (RSiena's crprod, crprodRecip, crprodMutual, from, fromMutual, fromAny, to, toBack, toRecip, cl.XWX, cl.XWX1, cl.XWX2, mixedInXW; a parameter after a colon,
 e.g. {cmd:from:2}, is RSiena's effect parameter). The cross-network statistics read the other network at the start of the period, the simulation its current
-state, as RSiena. {opt sym1} / {opt sym2} declare the first / second network non-directed (undirected {cmd:nwset}, forcing model, protocol 62). {bf:Native plugin only} (protocol 52); observed statistics and estimates agree with siena07.
+state, as RSiena. {opt sym1} / {opt sym2} declare the first / second network non-directed (undirected {cmd:nwset}, forcing model). {bf:Native plugin only}; observed statistics and estimates agree with siena07.
 {bf:A two-mode network.} One of the two networks may be two-mode ({cmd:nwset, bipartite}, detected from the data): its actors (the mode given by {opt actormode()}, default 2 = the rows)
 choose among the events, and the other network is a one-mode network among the same actors. See {help nwsaom_remarks##twomode:the remarks on two-mode networks}.
 
@@ -512,7 +512,7 @@ behavior on tie formation, endowment/creation, {opt behint()} and {opt missbeh()
 {help nwsaom_estat##estat_score:estat score} and {help nwsaom_estat##estat_timetest:estat timetest} are available.
 
 {p 4 4 2}
-Further cross-network effects (all validated against siena07; the names are RSiena's short names in lower case, see the effects inventory): the degree and distance-two
+Further cross-network effects (all validated against siena07; the names are RSiena's short names in lower case): the degree and distance-two
 families ({cmd:inpopintn inactintn crprodinactintn outpopintn outactintn divoutegointn divinegointn divoutaltintn divinaltintn avdegintn absoutdiffintn both outoutactintn
 outoutavintn dist2outinactintn outoutdist2actintn outoutdist2avintn ndist2actintn doubleoutact}), closure and mixed-triad effects ({cmd:closure cyclosure sharedin wwxee wwxfr wxxfe
 wxxer xwxer xwxfe jinmix joutmix gwespffmix gwespbbmix gwespbfmix gwespfbmix gwesprrmix inpopoutw sharedto avalt2mtie avalt2mtot doubleinpop}).
@@ -522,7 +522,7 @@ With a {bf:dyadic covariate} (a Stata matrix, written {it:effect}{cmd::}{it:matr
 {cmd:tou} counts, for the ego i and the alter j, the actors q with a tie i -> q in the {it:other} network and a tie q -> j in the own network,
 each weighted by the covariate value for (i,q) (RSiena 1.6.12 and later).
 {bf:With a covariate} of the actors (a variable in the current dataset, written {it:effect}{cmd::}{it:var}[{cmd::}{it:#}], e.g. {cmd:cross1(covnetnet:alc homcovnetnet:alc)}; a covariate that changes between waves is declared with
-{cmd:tvcov(a1 a2 a3)}, one variable per period, and used by its stem: {cmd:cross1(samewxclosure:a)}; not for the three similarity effects), protocol 56:
+{cmd:tvcov(a1 a2 a3)}, one variable per period, and used by its stem: {cmd:cross1(samewxclosure:a)}; not for the three similarity effects):
 {cmd:samewwclosure diffwwclosure jumpwwclosure jumpfrom jumpsharedin samewxclosure diffwxclosure jumpwxclosure homwxclosure samexwclosure diffxwclosure covnetnet homcovnetnet
 contrastcovnetnet alldifcovnetnet covnetnetin homcovnetnetin contrastcovnetnetin alldifcovnetnetin inpopintnx inactintnx outpopintnx outactintnx samexinpopintn samexinactintn
 samexoutpopintn samexoutactintn altdist2w totdist2w simdist2w altindist2w totindist2w simegodist2w simegoindist2w} (RSiena sameWWClosure, diffWWClosure, jumpWWClosure, jumpFrom,
