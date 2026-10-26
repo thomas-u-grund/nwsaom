@@ -12,7 +12,7 @@ This chapter takes you from data to a first fitted model, shows how to read the 
 
 \paragraph{Covariates and behavior.} Actor attributes are ordinary variables in the dataset that holds the nodes. \opt{samex(smoke1)} refers to the variable \texttt{smoke1} in the current dataset. A time-varying attribute or a behavior is given as one variable per wave, and the variables are listed in the temporal order of the waves, for example \opt{behavior(alcohol1 alcohol2 alcohol3)}. Dyadic covariates and the indicators for missing data are Stata matrices; see the chapters on rates and data and on missing data.
 
-\paragraph{Binary ties.} The ties must be binary. Valued networks are rejected.
+\paragraph{Binary ties.} The ties must be binary: every tie has the value 1. A network with other tie values (real shares, counts, or the values 10 and 11 that RSiena uses for structural zeros and ones) is rejected with an error; a network that is flagged as valued but whose ties are all 1 is accepted.
 
 \subsection*{The Glasgow data}
 
@@ -78,10 +78,9 @@ Rate parameters (estimated, one per inter-wave period):
         rate |    6.5292     5.2435
           se |    1.0759     0.9023
 (conditional: rate = mean time to reach the observed distance, se = its SD)
-Convergence t-ratios (|t| < 0.1 good; overall maximum ratio < 0.25 good):
-  outdegree                 -0.139      reciprocity               -0.130
-  transtrip                 -0.096
-Overall maximum convergence ratio:  0.142
+Overall maximum convergence ratio: 0.142 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for outdegree (-0.139) reciprocity (-0.130)
+Convergence is good only if both criteria are met. Refit starting from these estimates with theta0(); see nwsaom.
 \end{lstlisting}
 The fit takes a second or two.
 
@@ -145,9 +144,8 @@ glasgow1_t~2 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
  reciprocity |    2.46621   .2371179    10.40   0.000     2.001468    2.930953
 ------------------------------------------------------------------------------
 (conditional: rate = mean time to reach the observed distance, se = its SD)
-Convergence t-ratios (|t| < 0.1 good; overall maximum ratio < 0.25 good):
-  outdegree                 -0.054      reciprocity                0.024
-Overall maximum convergence ratio:  0.138
+Overall maximum convergence ratio: 0.138 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 \end{lstlisting}
 
 \section{A model with behavior co-evolution}
@@ -163,23 +161,23 @@ Behavior: alcohol1 alcohol2 alcohol3
 -------------------------------------------------------------------------------
 glasgow1_to~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
 --------------+----------------------------------------------------------------
-    outdegree |  -2.760383   .1463104   -18.87   0.000    -3.047146    -2.47362
-  reciprocity |   2.367478   .2085952    11.35   0.000     1.958639    2.776317
-    transtrip |   .6150662   .0751121     8.19   0.000     .4678492    .7622831
-       behsim |   1.446294   .6382165     2.27   0.023     .1954127    2.697175
-   beh_linear |   .3965896   .2292768     1.73   0.084    -.0527847    .8459639
-beh_quadratic |   -.607822   .3590868    -1.69   0.091    -1.311619    .0959752
-    beh_avalt |   1.317363    .875507     1.50   0.132    -.3985988    3.033325
+    outdegree |  -2.757199   .1349809   -20.43   0.000    -3.021756   -2.492641
+  reciprocity |   2.354286   .1955549    12.04   0.000     1.971005    2.737566
+    transtrip |   .6171082   .0810321     7.62   0.000     .4582882    .7759282
+       behsim |   1.460707   .5936198     2.46   0.014     .2972331     2.62418
+   beh_linear |   .4048519    .219986     1.84   0.066    -.0263128    .8360166
+beh_quadratic |  -.6072986   .3477506    -1.75   0.081    -1.288877      .07428
+    beh_avalt |   1.332807    .861505     1.55   0.122    -.3557119    3.021326
 -------------------------------------------------------------------------------
 Rate parameters (estimated, one per inter-wave period):
              |   period1    period2
 -------------+---------------------
-network_rate |    6.4518     5.1274
-          se |    1.2578     0.9181
-behavior_r~e |    1.3194     1.8041
-          se |    0.3397     0.5375
+network_rate |    6.4808     5.1330
+          se |    1.1964     0.8537
+behavior_r~e |    1.3266     1.7977
+          se |    0.3694     0.5333
 ...
-Overall maximum convergence ratio:  0.143
+Overall maximum convergence ratio: 0.130 (criterion: below 0.25; met)
 \end{lstlisting}
 The behavior coefficients carry the prefix \texttt{beh\_}; the network coefficients come first in \texttt{e(b)} (their number is \texttt{e(p\_net)}, here 4). The rates of the behavior are in \texttt{e(rates\_beh)}. The co-evolution is the subject of its own chapter.
 

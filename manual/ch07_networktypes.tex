@@ -80,10 +80,10 @@ nwsaom, waves(sg1 sg2 sg3) outdegree behavior(alcohol1 alcohol2 alcohol3) ///
     linear avalt symtype(joint) seed(1) k3(300)
 \end{lstlisting}
 \begin{lstlisting}
-   outdegree |   -1.32381   .0697569   -18.98   0.000
-  beh_linear |   .3504245   .1282042     2.73   0.006
-   beh_avalt |   .2587449   .2190706     1.18   0.238
-network_rate |    0.5696     0.5264
+   outdegree |  -1.324586   .0702653   -18.85   0.000
+  beh_linear |   .3497927   .1313378     2.66   0.008
+   beh_avalt |    .257606   .2158045     1.19   0.233
+network_rate |    0.5698     0.5263
 \end{lstlisting}
 (maximum convergence ratio 0.231).
 
@@ -308,7 +308,7 @@ Rates (estimated):
            period1  period2
 rate_net1    5.632    4.711
 rate_net2    1.754    1.749
-Overall maximum convergence ratio: 0.242
+Overall maximum convergence ratio: 0.242 (criterion: below 0.25; met)
 \end{lstlisting}
 Coefficients are named \texttt{net1\_}/\texttt{net2\_} plus the effect; cross effects add \texttt{x\_} (\texttt{net1\_x\_crprod}) or, with a covariate, \texttt{xc\_}\emph{effect}\texttt{\_}\emph{var}. \texttt{e(rates)} has four rows (rate and standard error for each network). On these artificial data \texttt{crprod} is not significant, as expected, and because the advice network is a thinned copy of the friendship network a model with \texttt{crprod} in \emph{both} directions diverged (return code 498) in a trial run: when one network is nearly a subset of the other, the cross effects are close to unidentified.
 
@@ -325,7 +325,7 @@ nwsaom multinet, net1(sg1 sg2 sg3) net2(advice1 advice2 advice3) sym1 ///
      net1_x_from |   .7790062    .278174     2.80   0.005
   net2_outdegree |  -1.841514   .0969473   -19.00   0.000
 net2_reciprocity |   1.103243   .2721599     4.05   0.000
-Overall maximum convergence ratio: 0.261
+Overall maximum convergence ratio: 0.261 (criterion: below 0.25; not met)
 \end{lstlisting}
 Twenty cross effects were validated against \texttt{siena07} for a non-directed first network with a directed second one (for example \opt{crprod from fromany to closure clxwx mixedinxw joutmix outpopintn outactintn avdegintn doubleoutact sharedto inpopoutw}).
 

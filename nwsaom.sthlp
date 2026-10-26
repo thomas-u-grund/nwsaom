@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.0.11  26oct2026 author: Thomas Grund}{...}
+{* *! version 1.1.0  26oct2026 author: Thomas Grund}{...}
 {marker topic}
 {helpb nwtopical##analysis_statmodels:[NW-2.6.6] Statistical Estimation of Networks}
 
@@ -713,7 +713,7 @@ fits: on RSiena's scale for pairwise models (see {help nwsaom_remarks##undirecte
 {bf:e(ratecoefs_tratio)}, {bf:e(ratecoefs_fixed)} (with one variable also the scalars {bf:e(ratecoef)}, {bf:e(ratecoef_se)}, {bf:e(ratecoef_tratio)},
 {bf:e(ratecoef_fixed)})
 		  {bf:e(behratecoefs)}		{opt behratecov()}/{opt behrate()} fits: 1 x K coefficients; also {bf:e(behratecoefs_se)}, {bf:e(behratecoefs_tratio)}, and {bf:e(rc_target)} (observed statistics of the covariate rate effects)
-		  {bf:e(engine)}		{bf:native} if the simulations ran in the C plugin, {bf:mata} if in Mata (then also a note after the table and {bf:e(engine_why)})
+		  {bf:e(engine)}		{bf:native} if the simulations ran in the C plugin, {bf:mata} if in Mata (then also a warning before the estimation, a note after the table and {bf:e(engine_why)})
 		  {bf:e(rsiena_labels)}	RSiena's effect names of the coefficients, in {bf:e(b)}'s order, separated by "|" (e.g. "alcohol1 ego", "same smoke1", "alcohol1 ego x reciprocity")
 		  {bf:e(rate_actor)}		non-directed fits only: the rate at which an actor gets an opportunity to change, the scale of every other {cmd:nwsaom} rate (differs from e(rate), RSiena's rate, only for the pairwise types force/agree/joint)
 		  {bf:e(conditional)}		1 for conditional estimation, 0 for unconditional
@@ -906,4 +906,4 @@ It is not affiliated with or endorsed by the RSiena project.
 	{help nwergm}, {help nwset}, {help nwrandom}
 
 {hline}
-{pstd}{it:nwsaom version 1.0.11, 26 October 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.1.0, 26 October 2026}{p_end}{* nwversion}

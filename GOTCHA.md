@@ -624,3 +624,14 @@ by hand "fixes" it for that session only, which hid the bug in every manual test
 - Reproduce: `SMOKE_STALE=1 tools/smoke_fresh_install.sh <core> <models>` in the core repo builds exactly this state (the session's Mata
   index is made while only the core library is visible). Without `SMOKE_STALE` a plain new session usually finds all libraries,
   which is why a simple "install, restart, run" test passes.
+
+## The fallback warning is printed from Mata (SaomSetEngine), once per fit, and `quietly` removes it
+
+A fit that cannot use the plugin runs on the slow Mata simulator. `SaomSetEngine()` (unw_saom.do) prints one warning line before the
+long computation, but only when the engine was not already `mata`: each command resets `__nwsaom_engine = ""` first, so a command that
+calls `SaomSetEngine()` twice warns once. Because it is Mata `printf`, `quietly` suppresses it (so does a log with output off); check `e(engine)` then.
+- The test `cscripts/test_nwsaom_fallbackwarn.do` makes the no-plugin case from a copy of the ado-files without `lib/plugins` and takes every other
+  copy of the plugin off the adopath first (a plugin dir on the adopath, as `run_tests.sh <plugin_dir>` adds it, would otherwise be found by `findfile`).
+  It cannot reload `unw_saom.do` in the same session (class `SaomGraph() already exists`), so the Mata code of the first part is reused.
+- `nwsaom ml` and `nwsaom bayes` have no Mata engine and stop with an error when the plugin is missing; they never warn.
+- The manual is labelled by the minor series (`\manualseries`), the examples by `\pkgversion`; a patch release changes only the latter (`manual/README.md`).

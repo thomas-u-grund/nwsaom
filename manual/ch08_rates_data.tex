@@ -25,7 +25,7 @@ SAOM (Method of Moments, conditional), waves: glasgow1 glasgow2 glasgow3
         rate |    6.2097     5.2876
 Covariate-rate coefficient (alcohol1):    0.3915 (se 0.1182)
 Covariates centred by their means: alcohol1  2.880
-Overall maximum convergence ratio:  0.074
+Overall maximum convergence ratio: 0.074 (criterion: below 0.25; met)
 \end{lstlisting}
 Pupils who drink more get significantly more opportunities to revise their friendships ($\exp(0.39)\approx1.5$ per category). The coefficients are returned in the 1$\times$K matrix \texttt{e(ratecoefs)} (columns named by the variables), with \texttt{e(ratecoefs\_se)}, \opt{e(ratecoefs\_tratio)} and \texttt{e(ratecoefs\_fixed)}; with one variable the scalars \texttt{e(ratecoef)}, \texttt{e(ratecoef\_se)}, \texttt{e(ratecoef\_tratio)} and \texttt{e(ratecoef\_fixed)} exist as well.
 
@@ -83,7 +83,7 @@ nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip outrat
    transtrip |   .5707772   .1006059     5.67   0.000
         rate |    3.8587     3.0975
 Covariate-rate coefficient (outrate):    0.1971 (se 0.1110)
-Overall maximum convergence ratio:  0.206
+Overall maximum convergence ratio: 0.206 (criterion: below 0.25; met)
 \end{lstlisting}
 Pupils with more friends are slightly faster, but the effect is not significant ($t=1.8$). A trial with two structural rate effects at once (\opt{inrateinv} and \opt{outratelog}) stopped with ``a simulated period did not reach the observed distance within 1000000 ministeps'' (return code 498); structural rate effects are strongly dependent and one at a time is the safe starting point.
 
@@ -112,12 +112,12 @@ In a co-evolution model the rate of the behavior can depend on actor characteris
 \begin{lstlisting}
 . nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip behavior(smoke1 smoke2 smoke3 : linear quadratic avalt) behratecov(alcohol1) behrate(outrate) k0(100) k3(1000) seed(1)
 Rate parameters (estimated, one per inter-wave period):
-             |   period1    period2 
+             |   period1    period2
 -------------+---------------------
-network_rate |    6.4756     5.2785 
-          se |    1.1609     0.8483 
-behavior_r~e |    1.1722     1.1098 
-          se |    1.2612     0.9582 
+network_rate |    6.4756     5.2785
+          se |    1.1609     0.8483
+behavior_r~e |    1.1722     1.1098
+          se |    1.2612     0.9582
 Rate effect of the behavior (alcohol1):    0.4314 (se 0.2642)
 Rate effect of the behavior (outrate):    0.3316 (se 0.2901)
 Overall maximum convergence ratio: 0.186 (criterion: below 0.25; met)
@@ -169,7 +169,7 @@ SAOM (Method of Moments, unconditional), waves: cc1 cc2 cc3
  reciprocity |   2.520413   .2129212    11.84   0.000
    transtrip |   .5735564    .094382     6.08   0.000
         rate |    8.9589     4.9796
-Overall maximum convergence ratio:  0.240
+Overall maximum convergence ratio: 0.240 (criterion: below 0.25; met)
 \end{lstlisting}
 Rates are unconditional here and therefore not on the scale of the conditional rates of the earlier examples.
 
@@ -199,7 +199,7 @@ SAOM (Method of Moments, unconditional), waves: cc1 cc2 cc3
  reciprocity |   2.550914   .2125371    12.00   0.000
    transtrip |   .5951937   .0917836     6.48   0.000
         rate |    8.2655     5.6119
-Overall maximum convergence ratio:  0.239
+Overall maximum convergence ratio: 0.239 (criterion: below 0.25; met)
 \end{lstlisting}
 (Pupils 1--5 join in the middle of period 1, pupils 46--50 leave in the middle of period 2; their ties in the data are coded 0 for the waves they are absent. Note that actor 1--5 are marked absent at wave 1 and present at wave 2, so \opt{joinat(1.5)} is consistent.) \opt{present()} is the special case of whole-period presence.
 

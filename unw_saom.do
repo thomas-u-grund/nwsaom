@@ -6667,8 +6667,24 @@ void SaomCheckThetaBound(real rowvector theta, real scalar thetaBound) {
 /* SaomSetEngine(): which simulator a fit used, for e(engine) ("native"
    or "mata") and the note nwsaom prints when it is Mata (2026-10-01; a
    model the plugin covers must never fall back silently). */
+/* SaomSlowWarn(): one warning line, before the long computation, when a fit runs on the Mata fallback (the plugin file is
+   missing for the platform, the global NWSAOM_NONATIVE is set, the plugin is older than the model needs, or the model is outside
+   the plugin's capacity). The Mata simulator is orders of magnitude slower, so the slowness must not be silent (nwergm does the
+   same). Printed once per fit (SaomSetEngine() is called once per fit; the commands reset the engine to "" first) and, like every
+   output, suppressed by quietly. */
+void SaomSlowWarn(string scalar reason) {
+	string scalar why
+	if (strtoreal(st_global("NWSAOM_NONATIVE")) == 1) why = "the global NWSAOM_NONATIVE is set"
+	else if (reason == "no native plugin for this platform") why = "the plugin file " + SaomNativePluginFilename() + " was not found; reinstall the package with {bf:net install nwsaom, replace}"
+	else if (strpos(reason, "too old") > 0) why = "the installed plugin is older than this model needs; update it with {bf:net install nwsaom, replace}"
+	else why = "the model is outside the capacity of the plugin: " + reason
+	displayas("txt")
+	printf("(Warning: the compiled plugin is not used for this fit (%s); the Mata fallback is much slower, possibly hours. See {help nwsaom_remarks##engine:Check which engine ran}.)\n", why)
+}
+
 void SaomSetEngine(real scalar native, string scalar reason) {
 	external string scalar __nwsaom_engine, __nwsaom_engine_why
+	if (!native & __nwsaom_engine != "mata") SaomSlowWarn(reason)
 	__nwsaom_engine = (native ? "native" : "mata")
 	__nwsaom_engine_why = (native ? "" : reason)
 }

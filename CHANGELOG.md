@@ -3,6 +3,17 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.1.0] - 2026-10-26
+
+Minor release. Works with nwcommands 3.6.0 and later. The Mata library `lnwsaom1.mlib` is rebuilt (Stata 17) against the unchanged core library of 3.6.0.
+
+### Added
+- A visible warning when a fit runs on the slow Mata fallback instead of the compiled plugin. One line is printed once, before the estimation starts, and says why: the plugin file for the platform was not found, the installed plugin is older than the model needs, the model is outside the capacity of the plugin, or the testing switch `NWSAOM_NONATIVE` is set. The results do not change; `quietly` suppresses the line; `e(engine)` and `e(engine_why)` are set as before. Before, the fit ran without any message until the note after the table. New test `cscripts/test_nwsaom_fallbackwarn.do`.
+
+### Changed
+- The manual is relabelled "Manual for version 1.1" (it holds for all versions 1.1.x) and brought up to date: installation (`net install nwcommands, from(https://nwcommands.org/net/) replace`, then `nwinstall, all` and `nwinstall, modelpkg(nwsaom)`, or `nwinstall, everything`), Stata 17 or later (tested with 17 and 18), the rule for the tie values (0, 1, 10 and 11; real shares are refused), the engine warning, and the changes of the releases 1.0.4 to 1.0.11. The manual is archived at Zenodo under the all-versions DOI 10.5281/zenodo.23623807.
+- Help text: the pages say that the Mata fallback gives a warning and how to check which engine ran.
+
 ## [1.0.11] - 2026-10-26
 
 Patch release. Works with nwcommands 3.6.0 and later; no change of the Mata library.

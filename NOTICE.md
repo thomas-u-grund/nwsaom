@@ -1,6 +1,6 @@
 # NOTICE
 
-<!--version-->**Version 1.0.11** (released 26 October 2026)<!--/version-->
+<!--version-->**Version 1.1.0** (released 26 October 2026)<!--/version-->
 
 nwsaom is Copyright (C) 2026 Thomas U. Grund and is distributed under the GNU General Public License, version 3 (file `LICENSE`).
 
@@ -24,5 +24,6 @@ The software was developed with Claude Code (Anthropic), an AI coding assistant,
 
 ## How to cite
 
-Grund, T. U. (2026). nwsaom: Stochastic actor-oriented models in Stata. Manual for version 1.0.3. Zenodo. https://doi.org/10.5281/zenodo.23623807
+Grund, T. U. (2026). nwsaom: Stochastic actor-oriented models in Stata. Manual for version 1.1. Zenodo. https://doi.org/10.5281/zenodo.23623807
+The DOI is the one of all versions of the manual; the label is the series (valid for all 1.1.x). Please also report the exact version of the package that produced your results, as printed by `nwsaom version` (for example nwsaom 1.1.0).
 Please also cite the core package (Grund, T. U., nwcommands) and the work this package is derived from (see above).

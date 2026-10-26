@@ -58,9 +58,9 @@ matrix r = e(rates)
 nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip ///
     unconditional theta0(`=b[1,1]' `=b[1,2]' `=b[1,3]') rate0(`=r[1,1]' `=r[1,2]') seed(2)
 \end{lstlisting}
-A start far from the data, for example twice the closed-form rate, can make the phase-1 derivative estimates unusable and the fit diverge.
+A start far from the data, for example twice the closed-form rate, can make the phase-1 derivative estimates unusable and the fit diverge. As in RSiena, a parameter whose absolute value exceeds 50 in phase 2 (\texttt{thetaBound}) stops the fit with a message and the error r(498); this holds for every free parameter, the rates and the rate-effect coefficients included, and it stops a co-evolution fit with a behavior rate effect that the data do not support within seconds instead of after hours. A simulated period that needs more than $\max(10^6, 500n)$ ministeps is abandoned in the same way.
 
-\paragraph{Which engine ran.} If a model exceeds a limit of the native engine, \nwsaom{} falls back to the Mata engine without an error. The results are the same, but the fit is orders of magnitude slower, and a note is printed after the table. After fitting a large network look at \texttt{e(engine)} (\texttt{native} or \texttt{mata}); \texttt{e(engine\_why)} gives the reason. Many effects exist only natively (Appendix~\ref{app:mata} lists those that also run in Mata); a missing or too-old plugin then gives an explicit error rather than a fallback (Chapter~\ref{ch:effects}).
+\paragraph{Which engine ran.} If the compiled plugin cannot be used (the plugin file is missing for the platform, it is older than the model needs, or the model exceeds a limit of the native engine), \nwsaom{} falls back to the Mata engine, and says so: one warning line is printed before the estimation starts, and a note follows the table (Section~\ref{sec:fallbackwarn}). The results are the same, but the fit is orders of magnitude slower. \texttt{e(engine)} (\texttt{native} or \texttt{mata}) and \texttt{e(engine\_why)} give the engine and the reason. Many effects exist only natively (Appendix~\ref{app:mata} lists those that also run in Mata); a missing or too-old plugin then gives an explicit error rather than a fallback (Chapter~\ref{ch:effects}).
 
 \section{Judging convergence}
 After the coefficient table, \nwsaom{} prints the rate table and the convergence $t$-ratios. Each $t$-ratio is the phase-3 mean deviation between simulated and target statistic divided by its standard deviation, one per parameter, rates included (under conditional estimation the rates have none). As in RSiena a fit is considered converged when
@@ -189,16 +189,16 @@ Maximum likelihood estimates (Robbins-Monro on the score of the augmented data)
 ------------------------------------------------------------------------------
 glasgow1_t~2 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
 -------------+----------------------------------------------------------------
-   outdegree |  -2.513991   .1344354   -18.70   0.000     -2.77748   -2.250503
- reciprocity |   1.950255   .2270613     8.59   0.000     1.505223    2.395287
-   transtrip |   .6844643   .0905317     7.56   0.000     .5070253    .8619032
+   outdegree |  -2.504279   .1334947   -18.76   0.000    -2.765924   -2.242634
+ reciprocity |   1.962156   .2303885     8.52   0.000     1.510603    2.413709
+   transtrip |   .6749363   .0950854     7.10   0.000     .4885723    .8613002
 ------------------------------------------------------------------------------
 Rate parameters (one per inter-wave period):
        period1
- rate   6.2036
-   se   0.8409
-tconv   0.0084
-Overall maximum t-ratio of the scores: 0.055 (good; below 0.1)
+ rate   6.5482
+   se   0.9585
+tconv  -0.1597
+Overall maximum t-ratio of the scores: 0.160 (acceptable)
 \end{lstlisting}
 The method-of-moments fit of the same model, which is printed first and used as the starting point, has $-2.53$, $2.15$ and $0.59$. With the default controls this example takes about one minute and ends with a largest $t$-ratio of 0.52, which the output flags as poor; the longer phases above (about two minutes) bring it below 0.1, and the output tells you to run longer when this happens. Estimates from different seeds differ by simulation noise. Against \texttt{siena07} with \texttt{maxlike = TRUE} the estimates of this model are $-2.65$, $2.22$ to $2.24$ and $0.69$ to $0.70$ in \nwsaom{} (several runs) and $-2.66$ and $-2.63$, $2.22$ and $2.19$, $0.71$ and $0.70$ in two runs of RSiena. With a co-evolving behavior the estimates are within 0.1 standard errors of RSiena's.
 
@@ -217,14 +217,14 @@ The following example uses a short run to keep the time low (50 seconds); the dr
 . nwsaom bayes, nprewarm(20) nwarm(20) nmain(100) nimprovemh(40) seed(1)
 Bayesian SAOM (data augmentation)                Number of actors  =       50
 Waves: glasgow1 glasgow2                         Saved draws       =      100
-Pre-warm 20, warm 20, main 100 x 20              Mean chain length =    315.5
+Pre-warm 20, warm 20, main 100 x 20              Mean chain length =    303.8
 -----------------------------------------------------------------------------
       Effect |Post. mean  Post. sd[95% interval]             Median      ESS
 -------------+---------------------------------------------------------------
-   outdegree |   -2.5318    0.1162   -2.7870   -2.3412   -2.5164       44
- reciprocity |    1.9803    0.2428    1.5025    2.4021    1.9806       46
-   transtrip |    0.6880    0.0917    0.5121    0.8624    0.6957       46
-rate_period1 |    6.2702    0.6865    5.1368    7.6435    6.2086       45
+   outdegree |   -2.5449    0.1485   -2.8234   -2.2776   -2.5478       66
+ reciprocity |    1.9911    0.2224    1.6226    2.4580    1.9759       54
+   transtrip |    0.6920    0.0975    0.4830    0.8614    0.6918       75
+rate_period1 |    6.1214    0.5872    5.0219    7.3055    6.0462       71
 -----------------------------------------------------------------------------
 \end{lstlisting}
 The result replaces the estimates of the fit (\texttt{estimates store} first to keep them): \texttt{e(b)} and \texttt{e(V)} are the posterior means and covariance matrix, \texttt{e(rates)} the posterior mean and standard deviation of the rates, \texttt{e(interval)} the interval limits and median, \texttt{e(ess)} the effective sample sizes, and \texttt{e(post\_frame)} the name of the frame that holds the draws (one row per main iteration). The acceptance rates of all steps are in \texttt{e(accept\_effects)}, \texttt{e(accept\_rates)} and the \texttt{e(accept\_}\emph{step}\texttt{)} results, the tuned scale factors in \texttt{e(scale\_effects)}.

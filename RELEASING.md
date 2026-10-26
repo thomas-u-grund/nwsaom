@@ -40,6 +40,6 @@ Never copy a rebuilt plugin over a loaded one (`rm` first); test through a scrat
 ## Effects inventory, counts, manual and Zenodo
 
 - After each new effect: update the inventory (`docs/inventory_tools/update_inventory.py`) and `docs/SAOM_EFFECTS_TODO.md` (master B.11). Counts quoted publicly name the RSiena version they come from (1.6.6 for the 1,201 / 1,121 rows).
-- The manual (`manual/`, PDF `manual/nwsaom_manual.pdf`) is archived at Zenodo, all-versions DOI `10.5281/zenodo.23623807`; the record's text says "Manual for version 1.0.3". Per master B.10 a new Zenodo version is uploaded (by the owner) only for a new minor/major whose documented behaviour changed;
-  at nwsaom 1.1.0 retitle the manual "Manual for version 1.1" and fix the citation texts. Patch releases and lockstep rebuilds get no upload.
+- The manual (`manual/`, PDF `manual/nwsaom_manual.pdf`) is archived at Zenodo, all-versions DOI `10.5281/zenodo.23623807`; the record of nwsaom 1.1.0 is "Manual for version 1.1" (metadata in `manual/ZENODO.md`). Per master B.10 a new Zenodo version is uploaded (by the owner) only for a new minor/major whose documented behaviour changed (then change `\manualseries` in `manual/nwsaom_manual.tex` and the citation texts);
+  patch releases (1.1.x) and lockstep rebuilds get no upload: only `\pkgversion` and `\pkgdate` change (`tools/set_version.py`).
 - `nwsaom.ado` and `unw_saom.do` are near Stata's per-program size limit; helper programs return values through `r()`; subcommands live in their own ado files (GOTCHA.md).

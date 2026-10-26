@@ -1,4 +1,4 @@
-*! version 1.0.11  26oct2026 nwsaom multiplex (split out of nwsaom.ado: the programs of one ado-file all count towards Stata's 1000 KB adosize while loaded)
+*! version 1.1.0  26oct2026 nwsaom multiplex (split out of nwsaom.ado: the programs of one ado-file all count towards Stata's 1000 KB adosize while loaded)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -66,7 +66,7 @@ program define nwsaom_multiplex, eclass
 		ereturn scalar rate1_se = `__r'[3, 1]
 		ereturn scalar rate2_se = `__r'[4, 1]
 		ereturn local cmd "nwsaom_multiplex"
-		ereturn local version "1.0.11"
+		ereturn local version "1.1.0"
 		exit
 	}
 	if `seed' != -1 set seed `seed'
@@ -150,7 +150,7 @@ program define nwsaom_multiplex, eclass
 	matrix rownames __nwsaom_mp_rate1_tconv = tconv
 	ereturn matrix tconv = __nwsaom_mp_rate1_tconv
 	ereturn local cmd "nwsaom_multiplex"
-	ereturn local version "1.0.11"
+	ereturn local version "1.1.0"
 	_nwsaom_postengine
 
 	di as text "{hline}"

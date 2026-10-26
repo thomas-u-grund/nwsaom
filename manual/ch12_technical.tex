@@ -93,9 +93,15 @@ Actors & Seconds \\
 \end{center}
 A full-length run, with the default \opt{k3()} of 1\,000 and more phase-2 iterations, costs several times more. One thousand actors is routine; a few thousand actors take minutes to tens of minutes; beyond roughly 10\,000 actors the model itself, in which each ministep looks at all alters, is the limit and not the software. A dyadic covariate adds to this (at $n=300$ about 4 seconds instead of 2, at $n=700$ about 12 seconds in the measurement quoted).
 
-\subsection{The silent fallback}
+\subsection{The fallback warning}\label{sec:fallbackwarn}
 
-\textbf{If a model exceeds a capacity of the native engine but all its effects have a Mata implementation, the fit runs in Mata without an error.} It gives the same results, but it is slower by orders of magnitude. Until 22 October 2026 the test for ``too many covariate arrays'' used 127 instead of the plugin's real limit of 1\,023, so that a dyadic covariate on 129 or more actors ran in Mata: a fit that takes seconds natively ran for more than an hour. That is fixed, but the lesson holds: after you have fitted a large network, look at \texttt{e(engine)}.
+\textbf{If the compiled plugin cannot be used, the fit runs in Mata, and \nwsaom{} says so before it starts.} Mata is slower by orders of magnitude; the results are the same. The command prints one line, once per fit, before the long computation:
+\begin{lstlisting}
+(Warning: the compiled plugin is not used for this fit (the plugin file
+saom_sim_macos.plugin was not found; reinstall the package with net install
+nwsaom, replace); the Mata fallback is much slower, possibly hours. See Check which engine ran.)
+\end{lstlisting}
+The reason in the brackets is one of four: the plugin file for the platform was not found; the installed plugin is older than the model needs; the model contains an effect or an option that the plugin does not cover (it is outside the capacity of the plugin); or the global macro \texttt{NWSAOM\_NONATIVE} is set to 1, a testing switch that forces Mata. Like all output the line is suppressed by \texttt{quietly}; in that case look at \texttt{e(engine)} after the fit. The warning exists because a fit that silently ran in Mata took more than an hour where the plugin takes seconds: until 22 October 2026 the test for ``too many covariate arrays'' used 127 instead of the plugin's real limit of 1\,023, so that a dyadic covariate on 129 or more actors ran in Mata. That is fixed. Effects that exist only in the plugin are refused with an error instead of a fallback.
 
 \section{Performance}
 

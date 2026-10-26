@@ -30,22 +30,22 @@ Behavior: alcohol1 alcohol2 alcohol3
 -------------------------------------------------------------------------------
 glasgow1_to~3 | Coefficient  Std. err.      z    P>|z|
 --------------+----------------------------------------------------------------
-    outdegree |  -2.760383   .1418124   -19.47   0.000
-  reciprocity |   2.367478    .207555    11.41   0.000
-    transtrip |   .6150662   .0746171     8.24   0.000
-       behsim |   1.446294   .8003719     1.81   0.071
-   beh_linear |   .3965896   .2153328     1.84   0.066
-beh_quadratic |   -.607822   .3080686    -1.97   0.048
-    beh_avalt |   1.317363   .7485551     1.76   0.078
+    outdegree |  -2.757199   .1369389   -20.13   0.000
+  reciprocity |   2.354286   .1885015    12.49   0.000
+    transtrip |   .6171082    .079396     7.77   0.000
+       behsim |   1.460707   .7023146     2.08   0.038
+   beh_linear |   .4048519    .225693     1.79   0.073
+beh_quadratic |  -.6072986   .3372504    -1.80   0.072
+    beh_avalt |   1.332807   .9032867     1.48   0.140
 -------------------------------------------------------------------------------
              |   period1    period2
-network_rate |    6.4518     5.1274
-behavior_rate|    1.3194     1.8041
-Overall maximum convergence ratio:  0.222
+network_rate |    6.4808     5.1330
+behavior_r~e |    1.3266     1.7977
+Overall maximum convergence ratio: 0.214 (criterion: below 0.25; met)
 \end{lstlisting}
 (Rate standard errors and the convergence $t$-ratios are omitted here; \texttt{e(rates)}, \texttt{e(rates\_beh)} and \texttt{e(tconv)} hold them.) The first four coefficients belong to the network side, the last three to the behavior side. Network coefficients keep their plain names; behavior coefficients start with \texttt{beh\_}. The network effects use the \opt{waves()} and \opt{seed()} options exactly as in Chapter~\ref{ch:start}.
 
-A comparison with RSiena 1.6.6 on this model (RSiena estimate, standard error in brackets; the run above with \opt{k3(300)} gives values of the same size, e.g.\ \opt{behsim} 1.446, \texttt{beh\_avalt} 1.317):
+A comparison with RSiena 1.6.6 on this model (RSiena estimate, standard error in brackets; the run above with \opt{k3(300)} gives values of the same size, e.g.\ \opt{behsim} 1.461, \texttt{beh\_avalt} 1.333):
 
 \begin{center}
 \begin{tabular}{lrr}
@@ -102,14 +102,14 @@ nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip ///
     seed(1) k3(300)
 \end{lstlisting}
 \begin{lstlisting}
-    outdegree |  -2.647354    .140056   -18.90   0.000
-  reciprocity |   2.429259   .2282148    10.64   0.000
-    transtrip |   .6047165   .0743783     8.13   0.000
-      behegox |   .0447982   .0951204     0.47   0.638
-      behaltx |  -.0463469   .0847807    -0.55   0.585
-   beh_linear |   .3868733   .1699837     2.28   0.023
-beh_quadratic |  -.0535451   .1064301    -0.50   0.615
-    beh_avsim |   4.123988    2.13372     1.93   0.053
+    outdegree |  -2.645783   .1364209   -19.39   0.000
+  reciprocity |   2.417929   .2301453    10.51   0.000
+    transtrip |   .6080427   .0794256     7.66   0.000
+      behegox |   .0428219   .0894065     0.48   0.632
+      behaltx |  -.0470071   .0945201    -0.50   0.619
+   beh_linear |   .3848605   .1717554     2.24   0.025
+beh_quadratic |  -.0545059   .1058316    -0.52   0.607
+    beh_avsim |    4.10136   2.155297     1.90   0.057
 \end{lstlisting}
 
 \subsection{Endowment and creation roles}
@@ -122,10 +122,10 @@ nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip behsim
     seed(1) k3(300)
 \end{lstlisting}
 \begin{lstlisting}
- beh_avalt_endow |  -2.141754   3.210858    -0.67   0.505
-beh_avalt_creation|   3.065424   4.502735     0.68   0.496
+ beh_avalt_endow |  -1.950248    9.95725    -0.20   0.845
+beh_avalt_creation|   2.803769   13.81057     0.20   0.839
 \end{lstlisting}
-Here the fit converges (maximum convergence ratio 0.303, above the 0.25 guideline) but the two roles have standard errors of 3 to 4.5; the data do not separate them. Such fits can also stop with the \texttt{thetaBound} error or a near-singular covariance matrix; both mean ``use the plain effect''. The split of \opt{linear} (\opt{linearendow}/\opt{linearcreation}) is refused: the sums of increases and decreases add to the behavior-rate statistic, so with an estimated behavior rate the model is not identified (RSiena also reports a singular covariance matrix).
+Here the fit converges (maximum convergence ratio 0.308, above the 0.25 guideline) but the two roles have standard errors of 10 and 14; the data do not separate them. Such fits can also stop with the \texttt{thetaBound} error or a near-singular covariance matrix; both mean ``use the plain effect''. The split of \opt{linear} (\opt{linearendow}/\opt{linearcreation}) is refused: the sums of increases and decreases add to the behavior-rate statistic, so with an estimated behavior rate the model is not identified (RSiena also reports a singular covariance matrix).
 
 \subsection{Network effects on behavior: beheff, behnet2 and friends}
 
@@ -154,14 +154,14 @@ nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip behsim
     beheff(totalt indeg) behfrom(sport1) seed(1) k3(300)
 \end{lstlisting}
 \begin{lstlisting}
-   beh_linear |    .126359   .5581673     0.23   0.821
-beh_quadratic |  -.5475244   .3459674    -1.58   0.114
-    beh_avalt |   .1023272   2.435999     0.04   0.966
-   beh_totalt |    .382001   .7636128     0.50   0.617
-    beh_indeg |   .1098258   .2436868     0.45   0.652
-beh_from_sport1|   .2236675   .3975685     0.56   0.574
+   beh_linear |   .1180438   .4695822     0.25   0.802
+beh_quadratic |  -.5452115   .3349634    -1.63   0.104
+    beh_avalt |   .1386549   1.552623     0.09   0.929
+   beh_totalt |   .3668935   .5863433     0.63   0.531
+    beh_indeg |   .1120459   .2132112     0.53   0.599
+beh_from_sport1|   .2255768    .520363     0.43   0.665
 \end{lstlisting}
-(\texttt{avalt} and \texttt{totalt} are nearly collinear in these data; the standard error of \texttt{beh\_avalt} grows from 0.75 in the first model to 2.4.)
+(\texttt{avalt} and \texttt{totalt} are nearly collinear in these data; the standard error of \texttt{beh\_avalt} grows from 0.90 in the first model to 1.6.)
 
 An example with a dyadic covariate: the first wave of the friendship network used as the weight matrix $W$.
 \begin{lstlisting}
@@ -171,10 +171,10 @@ nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity ///
     behavior(alcohol1 alcohol2 alcohol3 : linear) behw(avsimw:DM) seed(1) k3(300)
 \end{lstlisting}
 \begin{lstlisting}
-    outdegree |  -2.356908   .1159083   -20.33   0.000
-  reciprocity |   2.822803   .1968733    14.34   0.000
-   beh_linear |   .3552337   .1554802     2.28   0.022
-beh_avsimw_DM |   3.467163   1.336423     2.59   0.009
+    outdegree |  -2.355008   .1088196   -21.64   0.000
+  reciprocity |   2.816019   .1859523    15.14   0.000
+   beh_linear |   .3573914   .1572064     2.27   0.023
+beh_avsimw_DM |   3.480099   1.361142     2.56   0.011
 \end{lstlisting}
 (This is only a demonstration of the syntax: using the network itself as a dyadic covariate is not a sensible substantive model.)
 
@@ -202,14 +202,14 @@ nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip ///
     seed(1) k3(300)
 \end{lstlisting}
 \begin{lstlisting}
-    outdegree |    -3.0174   .2388013   -12.64   0.000
-  reciprocity |   2.391431   .2237419    10.69   0.000
-    transtrip |   .6101854   .0867924     7.03   0.000
-     bv_samex |   .6676742   .3624426     1.84   0.065
-    bv_egosqx |   .1200029    .090639     1.32   0.186
-   beh_linear |   .3999268   .2106728     1.90   0.058
-beh_quadratic |  -.5643059   .3146445    -1.79   0.073
-    beh_avalt |     1.2566   .7310308     1.72   0.086
+    outdegree |  -3.021243   .2297244   -13.15   0.000
+  reciprocity |   2.404304   .2541302     9.46   0.000
+    transtrip |   .6079681   .0830053     7.32   0.000
+     bv_samex |   .6621004   .3493041     1.90   0.058
+    bv_egosqx |    .123066   .0939408     1.31   0.190
+   beh_linear |   .4019641   .2233198     1.80   0.072
+beh_quadratic |  -.5731636   .3507732    -1.63   0.102
+    beh_avalt |   1.280226   .8326005     1.54   0.124
 \end{lstlisting}
 
 According to the validation runs, 32 \opt{netbeh()} estimates agree with \texttt{siena07} on the s50 data; \texttt{degNegDiffX} is degenerate in both programs.
@@ -225,24 +225,24 @@ nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip ///
 \end{lstlisting}
 \begin{lstlisting}
 SAOM co-evolution of the network and 2 behaviors (Method of Moments)
-            outdegree |  -2.754319   .1429746   -19.26   0.000
-          reciprocity |   2.357028    .212744    11.08   0.000
-            transtrip |   .6164275   .0827658     7.45   0.000
-               behsim |   1.430266   .7080562     2.02   0.043
-   beh_alcohol_linear |   .3934624   .2099502     1.87   0.061
-beh_alcohol_quadratic |  -.5937406   .3414086    -1.74   0.082
-    beh_alcohol_avalt |   1.294857   .8745685     1.48   0.139
-     beh_smoke_linear |  -1.862156   .3160527    -5.89   0.000
-  beh_smoke_quadratic |   1.947808   .4002872     4.87   0.000
-      beh_smoke_avalt |   1.761282    .858102     2.05   0.040
+            outdegree |   -2.75781   .1703927   -16.19   0.000
+          reciprocity |   2.367145    .211245    11.21   0.000
+            transtrip |   .6161519    .088544     6.96   0.000
+               behsim |     1.4556   .6820728     2.13   0.033
+   beh_alcohol_linear |   .3969122   .2273756     1.75   0.081
+beh_alcohol_quadratic |  -.5929355   .3849404    -1.54   0.123
+    beh_alcohol_avalt |   1.292148   .9027781     1.43   0.152
+     beh_smoke_linear |  -1.872286   .4276136    -4.38   0.000
+  beh_smoke_quadratic |   1.962126   .5115277     3.84   0.000
+      beh_smoke_avalt |   1.754189   1.055277     1.66   0.096
 \end{lstlisting}
 \opt{behsim} is written inside the group of the \emph{first} behavior. (A global \opt{behsim} given outside the groups together with several behaviors was accepted without error but produced no \texttt{behsim} coefficient and the same estimates as the model without it, so always put it inside the first group.)
 
 Coefficients are named \texttt{beh\_}\emph{name}\texttt{\_}\emph{effect}, with \emph{name} the first variable without trailing digits. \texttt{e(rates\_beh)} has one row per behavior (values of the model above):
 \begin{lstlisting}
                 period1    period2
-rate_alcohol  1.3350     1.7769
-  rate_smoke  2.9479     2.6810
+rate_alcohol  1.3320     1.7828
+  rate_smoke  2.9711     2.7089
 \end{lstlisting}
 Validation against RSiena 1.6.6 (alcohol and smoking, \texttt{s501}--\texttt{s503}) gives, for example, alcohol linear 0.42 (RSiena 0.43), smoking linear $-1.91$ to $-1.94$ ($-1.92$ to $-1.94$), smoking avAlt 1.92--1.97 (2.01--2.06), with the network and behavior rates agreeing.
 

@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.0.11  26oct2026 author: Thomas Grund}{...}
+{* *! version 1.1.0  26oct2026 author: Thomas Grund}{...}
 
 {title:Title}
 
@@ -454,7 +454,7 @@ of behavior values over the observed range, with no overflow category).
 Co-evolution uses the native (C) backend, like the network-only case (see {bf:Performance} in
 {help nwsaom}). Every effect, the behavior endowment/creation splits included, has native code. If
 a model ever contains a term without native code, the whole fit runs in Mata, and
-{cmd:e(engine)} and a note after the output say so.
+a warning before the estimation, {cmd:e(engine)} and a note after the output say so.
 
 {pstd}
 {bf:Genuinely out of scope for co-evolution v1} (tracked, not silently dropped): cross-behavior effects (one behavior
@@ -838,9 +838,14 @@ possible alters) is the limit.
 11,000 x 11,000 in Stata/SE, 65,534 x 65,534 in Stata/MP. A dyadic covariate also travels to the plugin as one variable per actor, so the native engine handles it up to about 1,000 actors (1,023
 covariate arrays; Stata/BE has 2,048 variables altogether). Bring larger networks in as edge lists, not matrices.
 
+{marker engine}{...}
 {pstd}
-{bf:Check which engine ran.} If a model exceeds a limit of the native engine, {cmd:nwsaom} falls back to the Mata engine without an error; it gives the same results but is orders of magnitude slower.
-After fitting a large network look at {cmd:e(engine)} ({cmd:native} or {cmd:mata}). Until 22 October 2026 a dyadic covariate on 129 or more actors fell back to Mata by mistake.
+{bf:Check which engine ran.} If the compiled plugin cannot be used, {cmd:nwsaom} runs the slow Mata engine instead and says so: one warning line is printed before the estimation starts
+({cmd:(Warning: the compiled plugin is not used for this fit (...); the Mata fallback is much slower, possibly hours.)}), and a note follows the output. The reason in the brackets is one of:
+the plugin file for your platform was not found (reinstall with {cmd:net install nwsaom, replace}); the installed plugin is older than the model needs (update the same way); the model contains an effect or
+option that the plugin does not cover (it lies outside the capacity of the plugin); or the global macro {cmd:NWSAOM_NONATIVE} is set to 1 (a testing switch). The fit then gives the same results but is orders of magnitude slower.
+The warning is shown once per fit and, like all output, is suppressed by {cmd:quietly}; {cmd:e(engine)} ({cmd:native} or {cmd:mata}) and {cmd:e(engine_why)} are always set.
+Until 22 October 2026 a dyadic covariate on 129 or more actors fell back to Mata by mistake.
 
 {marker compchange}{...}
 {title:Composition change (joiners and leavers)}
@@ -1079,4 +1084,4 @@ The same estimates are available as {cmd:nwsaom_ml} after an {cmd:nwsaom} fit. T
     {help nwsaom}, {help nwsaom_estat}, {help nwergm}
 
 {hline}
-{pstd}{it:nwsaom version 1.0.11, 26 October 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.1.0, 26 October 2026}{p_end}{* nwversion}

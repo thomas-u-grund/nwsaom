@@ -207,5 +207,5 @@ The following list collects the restrictions that the program enforces and that 
   \item \opt{tvcov()}: no missing values; not with \opt{interact()}, \opt{symmetric} or \texttt{estat gof}.
   \item Several behaviors: not with \opt{symmetric}, \opt{ratecov()}, \opt{present()}, \opt{missnet()}/\opt{missbeh()}, \opt{structural()}, network endowment/creation, or \texttt{estat gof}/\texttt{estat mems}.
   \item \opt{joinat()}/\opt{leaveat()}: not with \opt{behsim} or endowment/creation effects in co-evolution models; not yet with \opt{endow()}/\opt{creation()}; with \opt{symmetric} not with \opt{ratecov()}.
-  \item Valued networks and networks carrying \texttt{nwset}-style temporal metadata are rejected.
+  \item Networks with tie values other than 1 (valued networks with real shares or counts) and networks carrying \texttt{nwset}-style temporal metadata are rejected; a network flagged as valued whose ties are all 1 is accepted.
 \end{itemize}
