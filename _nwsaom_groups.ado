@@ -81,6 +81,25 @@ program define _nwsaom_groups, rclass
 		return local pnames "`pn'"
 		return local tvcov `"`tvnew'"'
 	}
+	else if "`sub'" == "behvars" {
+		* the behavior at the virtual waves (one new variable per virtual wave), the group constants of the behavior (RSiena keeps them per group)
+		syntax , NAMES(string) BEHAVIOR(string) NODES(integer) [NAMES2(string) MISSBEH(string)]
+		confirm numeric variable `behavior'
+		if "`missbeh'" != "" mata: SaomGroupsBehConstants(st_data(1::`nodes', "`behavior'"), st_data(1::`nodes', "`missbeh'"))
+		else mata: SaomGroupsBehConstants(st_data(1::`nodes', "`behavior'"), J(0, 0, 0))
+		foreach v of local names {
+			quietly gen double `v' = .
+		}
+		mata: st_store(1::`nodes', tokens("`names'"), SaomGroupsBehVirtual(st_data(1::`nodes', "`behavior'")))
+		return local behavior "`names'"
+		if "`missbeh'" != "" {
+			foreach v of local names2 {
+				quietly gen double `v' = .
+			}
+			mata: st_store(1::`nodes', tokens("`names2'"), SaomGroupsBehVirtual(st_data(1::`nodes', "`missbeh'")))
+			return local missbeh "`names2'"
+		}
+	}
 	else if "`sub'" == "show" {
 		syntax , GROUPS(string) W(integer)
 		tempname gn gw

@@ -20,7 +20,7 @@ waves <- lapply(waves, blk)
 gsets <- list(1, 1, 2, 3); gw <- list(1:3, 1:3, 1:3)
 if (feat == 'unequal') { gsets <- list(1, 1, 2, 3); gw <- list(1:2, 2:3, 1:2, 2:3) } else { gsets <- list(1, 2, 3) }
 present <- matrix(1, 50, 3)
-if (feat == 'comp') {                                     # actors 3 and 8 (group 1), 22 (group 2) and 40 (group 3) join at wave 2 (a leaver exactly at an observation is treated differently by present() and sienaCompositionChange)
+if (feat %in% c('comp', 'coevcomp')) {                                     # actors 3 and 8 (group 1), 22 (group 2) and 40 (group 3) join at wave 2 (a leaver exactly at an observation is treated differently by present() and sienaCompositionChange)
   present[3, 1] <- 0; present[8, 1] <- 0; present[40, 1] <- 0; present[22, 1] <- 0
   # the ties of an absent actor at a wave where it is absent are those of the nearest wave where it is present (RSiena and nwsaom both
   # count the ties of absent actors as they are in the data)
@@ -52,7 +52,8 @@ mk <- function(gi) {
   arr <- array(unlist(lapply(ws, function(w) waves[[w]][i, i])), dim = c(length(i), length(i), length(ws)))
   if (feat == 'miss') for (k in seq_along(ws)) { m <- miss[[ws[k]]][i, i]; a <- arr[, , k]; a[m == 1] <- NA; arr[, , k] <- a }
   net <- sienaDependent(arr, allowOnly = FALSE)
-  if (feat == 'tvcov') alc <- varCovar(as.matrix(s50a[i, ws]))
+  if (feat %in% c('coev', 'coevq', 'coevsim', 'coevcomp')) alc <- sienaDependent(as.matrix(s50a[i, ws]), type = 'behavior', allowOnly = FALSE)
+  else if (feat == 'tvcov') alc <- varCovar(as.matrix(s50a[i, ws]))
   else alc <- coCovar(s50a[i, 1], centered = (feat != 'unequal'))
   if (feat == 'dyad') { D <- coDyadCovar(D0[i, i]); return(sienaDataCreate(net, alc, D)) }
   if (feat == 'comp') {
@@ -60,6 +61,7 @@ mk <- function(gi) {
     cc <- sienaCompositionChange(ch)
     return(sienaDataCreate(net, alc, cc))
   }
+  if (feat == 'coevcomp') { ch <- lapply(i, function(a) { p <- present[a, ws]; w1 <- which(p == 1); c(min(w1), max(w1)) }); cc <- sienaCompositionChange(ch); return(sienaDataCreate(net, alc, cc)) }
   sienaDataCreate(net, alc)
 }
 gd <- sienaGroupCreate(lapply(seq_along(gsets), mk))
@@ -70,6 +72,9 @@ if (feat %in% c('unequal', 'comp', 'miss')) { eff <- includeEffects(eff, transTr
 if (feat == 'tvcov') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, altX, simX, interaction1 = "alc") }
 if (feat == 'ratecov') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, interaction1 = "alc"); eff <- includeEffects(eff, RateX, interaction1 = "alc", type = "rate") }
 if (feat == 'inter') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, interaction1 = "alc"); eff <- includeInteraction(eff, egoX, recip, interaction1 = c("alc", "")) }
+if (feat == 'coevq') { eff <- includeEffects(eff, transTrip) }
+if (feat == 'coevsim') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, avSim, name = 'alc', interaction1 = 'net'); eff <- includeEffects(eff, simX, interaction1 = 'alc') }
+if (feat %in% c('coev', 'coevcomp')) { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, altX, interaction1 = 'alc'); eff <- includeEffects(eff, avAlt, name = 'alc', interaction1 = 'net') }
 if (feat == 'dyad') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, X, interaction1 = "D"); }
 res <- NULL
 for (s in 1:nseed) {

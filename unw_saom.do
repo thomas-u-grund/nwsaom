@@ -9063,7 +9063,7 @@ void SaomGroupsReset() {
 	rmexternal("__nwsaom_grouppres")
 	rmexternal("__nwsaom_gcreg")
 	rmexternal("__nwsaom_gcval")
-	rmexternal("__nwsaom_gbehmean")
+	rmexternal("__nwsaom_gbeh")
 }
 
 /* the group codes of the actors (n x 1, the values 1..G in the order of the sorted group variable) or 0 x 1 */
@@ -9443,6 +9443,115 @@ real rowvector SaomGroupsSimMeansOwnTV(real matrix xpd) {
 	return(out)
 }
 
+/* A dependent behavior in groups. Z: n x W (the behavior at the original waves), MISS: the same size with 1 = missing or 0 x 0.
+   RSiena keeps these constants per group (BehaviorLongitudinalData of every data object): overallMean = mean over the group's waves of the
+   mean of the non-missing values; simMean = mean over the pairs of the group of 1 - |z_i - z_j| / range of the base waves (all but the last)
+   of the group, the range of all the group's values; variance of the values of the base waves. Row 1: overallMean, 2: simMean, 3: variance
+   (one column per group), stored in the external __nwsaom_gbeh. */
+void SaomGroupsBehConstants(real matrix Z, real matrix MISS) {
+	real colvector code, idx, nw, v, ms, allv
+	real matrix wl, res, B
+	pointer(real matrix) scalar pb
+	real scalar G, h, c, nWh, r, tot, cnt, i, w, om, sm, sq, nn
+	code = SaomGroupsId()
+	wl = SaomGroupsWL()
+	nw = SaomGroupsNW()
+	G = rows(nw)
+	res = J(3, G, 0)
+	for (h=1; h<=G; h++) {
+		idx = selectindex(code :== h)
+		nWh = nw[h]
+		om = 0
+		allv = J(0, 1, 0)
+		for (c=1; c<=nWh; c++) {
+			v = Z[idx, wl[h, c]]
+			if (rows(MISS) > 0) v = select(v, MISS[idx, wl[h, c]] :== 0)
+			om = om + (rows(v) > 0 ? mean(v) : 0)
+			allv = allv \ v
+		}
+		res[1, h] = om / nWh
+		r = (rows(allv) > 0 ? max(allv) - min(allv) : 0)
+		tot = 0
+		cnt = 0
+		sq = 0
+		sm = 0
+		nn = 0
+		for (c=1; c<nWh; c++) {
+			v = Z[idx, wl[h, c]]
+			ms = (rows(MISS) > 0 ? MISS[idx, wl[h, c]] : J(rows(v), 1, 0))
+			sm = sm + sum(select(v, ms :== 0))
+			sq = sq + sum(select(v, ms :== 0) :^ 2)
+			nn = nn + sum(ms :== 0)
+			if (r > 0) {
+				for (i=1; i<=rows(v); i++) {
+					if (ms[i]) continue
+					w = sum((1 :- abs(v[i] :- v) :/ r) :* (ms :== 0)) - 1
+					tot = tot + w
+					cnt = cnt + sum(ms :== 0) - 1
+				}
+			}
+		}
+		res[2, h] = (r > 0 & cnt > 0 ? tot / cnt : 0)
+		res[3, h] = (nn > 0 ? sq / nn - (sm / nn)^2 : 0)
+	}
+	rmexternal("__nwsaom_gbeh")
+	pb = crexternal("__nwsaom_gbeh")
+	*pb = res
+}
+
+/* the behavior at the virtual waves: n x Wv */
+real matrix SaomGroupsBehVirtual(real matrix Z) {
+	real colvector nw
+	real matrix out, wl
+	real colvector code
+	real scalar Wv, k, h, c, s
+	code = SaomGroupsId()
+	nw = SaomGroupsNW()
+	wl = SaomGroupsWL()
+	Wv = sum(nw :- 1) + 1
+	out = J(rows(Z), Wv, 0)
+	for (k=1; k<=Wv; k++) {
+		s = 0
+		for (h=1; h<=rows(nw); h++) {
+			c = min((max((k - s, 1)), nw[h]))
+			s = s + nw[h] - 1
+			out[selectindex(code :== h), k] = Z[selectindex(code :== h), wl[h, c]]
+		}
+	}
+	return(out)
+}
+
+/* 3 x G constants of the behavior, or 0 x 0 */
+real matrix SaomGroupsBehGet() {
+	pointer(real matrix) scalar p
+	p = findexternal("__nwsaom_gbeh")
+	if (p == NULL) return(J(0, 0, 0))
+	return(*p)
+}
+
+/* one constant (row 1 overallMean, 2 simMean, 3 variance) of the behavior for every virtual period; missing when not available */
+real rowvector SaomGroupsBehPd(real scalar row) {
+	real matrix b
+	b = SaomGroupsBehGet()
+	if (rows(b) == 0) return(J(1, 0, .))
+	return(b[row, SaomGroupsPeriodGroup()])
+}
+
+/* BATCHSETUP trailer: the per-period behavior constants: " 1" and then overallMean, simMean, variance for every period, or " 0" */
+string scalar SaomGroupsBehTrailer(real scalar P) {
+	real matrix b
+	real rowvector pg
+	real scalar r, pd
+	string scalar s
+	if (!SaomGroupsMode()) return("")
+	b = SaomGroupsBehGet()
+	if (rows(b) == 0) return(" 0")
+	pg = SaomGroupsPeriodGroup()
+	s = " 1"
+	for (r=1; r<=3; r++) for (pd=1; pd<=P; pd++) s = s + " " + strofreal(b[r, pg[pd]], "%25.17g")
+	return(s)
+}
+
 /* registers the group-specific constants of the terms of M: simcov -> td.center (the similarity mean), balance -> td.decay (the balance mean) */
 void SaomGroupsRegister(class SaomModel scalar M) {
 	pointer(real matrix) scalar preg, pval
@@ -9461,6 +9570,10 @@ void SaomGroupsRegister(class SaomModel scalar M) {
 		if (strpos(nm, "simcov") == 1) {
 			reg = reg \ (t, 1)
 			val = val \ (rows((*tdp).attrpd) > 0 ? SaomGroupsSimMeansOwnTV((*tdp).attrpd) : SaomGroupsSimMeansOwn((*tdp).attr))
+		}
+		else if ((nm == "behegox" | nm == "behaltx" | nm == "behegoplusalt") & rows(SaomGroupsBehGet()) > 0) {
+			reg = reg \ (t, 1)
+			val = val \ SaomGroupsBehGet()[1, .]
 		}
 		else if (strpos(nm, "balance") == 1) {
 			reg = reg \ (t, 2)
@@ -9880,6 +9993,8 @@ real scalar change_saom_linear(class SaomBehavior scalar Beh, class SaomGraph sc
    being this codebase's own certification standard throughout.
 */
 real rowvector stat_saom_quadratic(class SaomBehavior scalar Beh, class SaomGraph scalar G){
+	// several groups: the statistic of the centred values (RSiena); the mean of the group changes between the periods
+	if (SaomGroupsMode()) return(sum((Beh.values :- Beh.overallMean) :^ 2))
 	return(sum(Beh.values :* Beh.values))
 }
 real scalar change_saom_quadratic(class SaomBehavior scalar Beh, class SaomGraph scalar G, real scalar i, real scalar diff){
@@ -12529,6 +12644,7 @@ struct SaomCoevCtx {
 	struct SaomNativeConfig scalar cfg
 	struct SaomBehaviorNativeConfig scalar cfgBeh
 	real scalar behminval, behmaxval, overallMean, simMean
+	real rowvector overallMeanPd, simMeanPd		// per period (groups: the constants of the group of the period)
 	real scalar use_native, use_batch, hasmiss, haspresent, needsExtras
 	real scalar nperiods, pNet, pBeh, p, ptot, n
 	real matrix target			// nperiods x p
@@ -12996,6 +13112,17 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 	for (pd=2; pd<=nwaves; pd++) allbehvals = allbehvals \ *Behwaves[pd]
 	C.overallMean = SaomBehCentre(allbehvals)
 	C.simMean = Mbeh.simMean
+	C.overallMeanPd = J(1, P, C.overallMean)
+	C.simMeanPd = J(1, P, C.simMean)
+	if (SaomGroupsMode()) {
+		if (rows(SaomGroupsBehGet()) > 0) {
+			C.overallMeanPd = SaomGroupsBehPd(1)
+			C.simMeanPd = SaomGroupsBehPd(2)
+			C.overallMean = C.overallMeanPd[1]
+			C.simMean = C.simMeanPd[1]
+		}
+		SaomGroupsRegister(M)
+	}
 
 	// per period: lagged statistic network, targets, distance targets,
 	// closed-form rate starting values
@@ -13012,12 +13139,13 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 		if (C.hasmiss) C.GpStat[pd] = &(SaomBuildMaskedGraph(*Gwaves[pd], *missMaskNetPd[pd]))
 		else C.GpStat[pd] = Gwaves[pd]
 		Behpend = SaomBehavior()
-		Behpend.init(*Behwaves[pd+1], behminval, behmaxval, C.overallMean, C.simMean)
+		Behpend.init(*Behwaves[pd+1], behminval, behmaxval, C.overallMeanPd[pd], C.simMeanPd[pd])
+		SaomGroupsSync(M, pd)
 		if (hasbehsim) SaomBehSimSync(M, *Behwaves[pd])		// lagged: starting behavior
 		if (C.hasmiss) C.target[pd,.] = (SaomMaskedStatistic(Gpend, M, *missMaskNetPd[pd]), SaomCoevStatBeh(Behpend, *C.GpStat[pd], Mbeh, C.missBehPd[.,pd]))
 		else C.target[pd,.] = (M.full_statistic(Gpend), SaomCoevStatBeh(Behpend, *C.GpStat[pd], Mbeh, missBehZero))
 		C.target[pd,.] = SaomBehaviorPatchEndowCreation(Mbeh, C.target[pd,.], C.pNet, *Behwaves[pd],
-			*Behwaves[pd+1], C.GpStat[pd], C.overallMean, C.missBehPd[.,pd])
+			*Behwaves[pd+1], C.GpStat[pd], C.overallMeanPd[pd], C.missBehPd[.,pd])
 		if (C.hasnetgate) C.target[pd,1..C.pNet] = SaomNetworkPatchEndowCreation(M, fntype, C.target[pd,1..C.pNet], Gp, Gpend, (C.hasmiss ? *missMaskNetPd[pd] : J(0, 0, 0)))
 
 		if (C.hasmiss) C.targetRateNet[pd] = SaomCountDifferingMasked(Gp, Gpend, *missMaskNetPd[pd])
@@ -15594,7 +15722,7 @@ void SaomBatchSetup(pointer(class SaomGraph scalar) rowvector Gwaves, real scala
 	argstr = argstr + SaomBehCovTrailer(n)
 	argstr = argstr + SaomBehDyTrailer(n)
 	argstr = argstr + SaomSRTrailer() + SaomBehVarTrailer() + SaomRCTVTrailer() + SaomBRTrailer()
-	if (grpcol > 0) argstr = argstr + " " + strofreal(grpcol) + SaomGroupsTrailer(P)
+	if (grpcol > 0) argstr = argstr + " " + strofreal(grpcol) + SaomGroupsTrailer(P) + SaomGroupsBehTrailer(P)
 
 	stata("capture program saomnativesim, plugin using(" + char(34) + SaomNativePluginPath() + char(34) + ")")
 	if (strtoreal(st_global("NWSAOM_TRACE")) == 4) printf("TRACE BATCHSETUP argument string: %f characters\n", strlen(argstr))

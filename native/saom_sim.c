@@ -4753,7 +4753,8 @@ static void beh_stats_on_edges(const model_t *M, long ne, const long *ei, const 
 				for (i = 1; i <= n; i++) tot += bz[i];
 				break;
 			case TERMCODE_BEH_QUADRATIC:
-				for (i = 1; i <= n; i++) tot += bz[i] * bz[i];
+				/* groups: RSiena's statistic is that of the CENTRED values (the mean of the group differs between periods, so the raw sum is no longer equivalent) */
+				for (i = 1; i <= n; i++) tot += (M->grpcol > 0 ? (bz[i] - M->behOverallMean) * (bz[i] - M->behOverallMean) : bz[i] * bz[i]);
 				break;
 			case TERMCODE_BEH_AVALT:
 				for (i = 1; i <= n; i++) if (odl[i] > 0.0) tot += (bz[i] - M->behOverallMean) * (sumz[i] / odl[i] - M->behOverallMean);
@@ -5936,6 +5937,7 @@ typedef struct {
 	double **attrmem;	// nattr arrays of n+1
 	model_t *Mpd;		// protocol 142 (groups): per period a copy of M with the constants of the group of the period (p1 of registered terms), NULL otherwise
 	long novr;		// number of per-period overrides read from the BATCHSETUP trailer
+	double *bhv[3];		// protocol 142: per-period behavior overallMean, similarityMean and variance (P values each), NULL without
 	long ovslot[MAXTERMS];
 	double *ovval[MAXTERMS];	// P values each
 	long symtype;		// protocol 11: non-directed model type
@@ -6296,6 +6298,7 @@ static ST_retcode batch_setup(char *arg) {
 	M->grpcol = (int)next_long_opt(0);
 	if (M->grpcol < 0 || M->grpcol > M->nattr) { SF_error("saom_sim: BATCHSETUP bad group column\n"); return 198; }
 	batch_cur->novr = 0;
+	{ long q0; for (q0 = 0; q0 < 3; q0++) { free(batch_cur->bhv[q0]); batch_cur->bhv[q0] = NULL; } }
 	if (M->grpcol > 0) {
 		/* protocol 142: per-period values of group-specific constants: count, then per constant the term slot (0-based) and P values */
 		long nv = next_long_opt(0), q, pp;
@@ -6307,6 +6310,12 @@ static ST_retcode batch_setup(char *arg) {
 			for (pp = 0; pp < P; pp++) batch_cur->ovval[q][pp] = next_double();
 		}
 		batch_cur->novr = nv;
+		if (next_long_opt(0) == 1) {
+			for (q = 0; q < 3; q++) {
+				batch_cur->bhv[q] = (double *)malloc((size_t)P * sizeof(double));
+				for (pp = 0; pp < P; pp++) batch_cur->bhv[q][pp] = next_double();
+			}
+		}
 	}
 	if (wire_parse_error) { SF_error("saom_sim: BATCHSETUP argument string ran out of fields\n"); return 198; }
 
@@ -6523,14 +6532,20 @@ static ST_retcode batch_setup(char *arg) {
 		}
 		saom_bdy_pending = 0;
 	}
-	if (batch_cur->novr > 0) {
+	if (batch_cur->novr > 0 || batch_cur->bhv[0]) {
 		long q;
 		batch_cur->Mpd = (model_t *)malloc((size_t)P * sizeof(model_t));
 		for (pd = 0; pd < P; pd++) {
 			batch_cur->Mpd[pd] = *M;
 			for (q = 0; q < batch_cur->novr; q++) batch_cur->Mpd[pd].p1[batch_cur->ovslot[q]] = batch_cur->ovval[q][pd];
+			if (batch_cur->bhv[0]) {
+				batch_cur->Mpd[pd].behOverallMean = batch_cur->bhv[0][pd];
+				batch_cur->Mpd[pd].behSimMean = batch_cur->bhv[1][pd];
+				batch_cur->Mpd[pd].behVariance = batch_cur->bhv[2][pd];
+			}
 		}
 		for (q = 0; q < batch_cur->novr; q++) { free(batch_cur->ovval[q]); batch_cur->ovval[q] = NULL; }
+		for (q = 0; q < 3; q++) { free(batch_cur->bhv[q]); batch_cur->bhv[q] = NULL; }
 	}
 	batch_cur->ready = 1;
 	SF_scal_save("__saom_native_version", (ST_double)SAOM_NATIVE_VERSION);
