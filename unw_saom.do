@@ -9403,7 +9403,8 @@ real matrix SaomGroupsPresent(real matrix pmo) {
 	pm = J(rows(code), Wv, 0)
 	s = 0
 	for (h=1; h<=G; h++) {
-		for (k=s+1; k<=s+nw[h]; k++) {
+		// column k = start of virtual period k: the actors of group h are active in its own periods (when present at the start wave)
+		for (k=s+1; k<=s+nw[h]-1; k++) {
 			c = k - s
 			if (rows(pmo) == 0) pm[selectindex(code :== h), k] = J(sum(code :== h), 1, 1)
 			else pm[selectindex(code :== h), k] = pmo[selectindex(code :== h), wl[h, c]]
@@ -9824,7 +9825,7 @@ struct SaomFit scalar SaomEstimateRM(class SaomGraph scalar Gobs_start,
 
    Gwaves: pointers to the observed waves, in temporal order (read-only).
    Optional: presentMat (n x nwaves, actor present at each wave; an
-   actor is active in a period when present at both of its waves),
+   actor is active in a period when present at the wave where the period starts (RSiena activeStart)),
    missMaskPd (one n x n mask per period), rates0 (starting rates, one
    per period; empty or missing entries: the closed form). Placeholders
    to reach a later argument: J(0,0,0) and J(1,0,NULL).
@@ -9849,7 +9850,7 @@ struct SaomFit scalar SaomEstimateRMMulti(pointer(class SaomGraph scalar) rowvec
 	if (nargs >= 7) {
 		if (rows(presentMat) > 0) {
 			presentPd = J(rows(presentMat), P, 0)
-			for (pd=1; pd<=P; pd++) presentPd[.,pd] = presentMat[.,pd] :* presentMat[.,pd+1]
+			for (pd=1; pd<=P; pd++) presentPd[.,pd] = presentMat[.,pd]		// RSiena: active in a period when active at its START (activeStart); a leaver acts in the period that starts at its last wave
 		}
 	}
 	mm = J(1, 0, NULL)
@@ -13064,7 +13065,7 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 	C.haspresent = (args() >= 12)
 	C.presentPd = J(n, P, 1)
 	if (C.haspresent) {
-		for (pd=1; pd<=P; pd++) C.presentPd[.,pd] = presentMat[.,pd] :* presentMat[.,pd+1]
+		for (pd=1; pd<=P; pd++) C.presentPd[.,pd] = presentMat[.,pd]		// active at the start of the period, as RSiena
 	}
 	C.npresentPd = colsum(C.presentPd)
 	C.compEv = J(1, P, NULL)

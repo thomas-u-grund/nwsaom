@@ -513,7 +513,7 @@ and {opt unconditional} estimation both work. To let a parameter differ between 
 Actor covariates are centred at their mean over all actors of all groups, so a variable that is constant within a group (group size, a group indicator) can be used with {cmd:egox()}.
 
 {pstd}
-{bf:Composition change and missing data} ({cmd:present()}, {cmd:missnet()}, {cmd:missbeh()}) are given for all actors; a group uses the waves it has. As in a single group, an actor that is
+{bf:Composition change and missing data} ({cmd:present()}, {cmd:missnet()}, {cmd:missbeh()}) are given for all actors; a group uses the waves it has; leavers and joiners follow RSiena's rule (see {help nwsaom_remarks##compchange:Composition change}). As in a single group, an actor that is
 absent at a wave must carry the ties (and behavior value) of the nearest wave where it is present, and conditional estimation is then not used. A changing covariate ({cmd:tvcov()}) is
 given for the waves of {cmd:waves()}; each group uses the values of its own periods.
 
@@ -527,7 +527,7 @@ use the number of actors or averages of the whole data set (the centred degree e
 {bf:Validation.} Against RSiena 1.6.14 (three groups of 15, 20 and 15 actors cut out of the s50 data, ten runs of each program, conditional and unconditional estimation) the estimates,
 standard errors and rates agree within the simulation error for: density, reciprocity, transitive triplets, 3-cycles, egoX, altX, simX, balance, a changing covariate, a rate covariate, an
 interaction, a dyadic covariate, joiners (composition change), missing ties, and a co-evolving behavior (linear and quadratic shape, average alter, average similarity, egoX/altX/simX
-of the behavior, a behavior rate covariate, composition change). RSiena 1.6.14 itself stops with an error for groups with different numbers of waves; that case was checked against the
+of the behavior, a behavior rate covariate, composition change, joiners and leavers, missing behavior values). RSiena 1.6.14 itself stops with an error for groups with different numbers of waves; that case was checked against the
 equivalent object made of two-wave groups.
 
 {marker tvcov}{...}
@@ -898,8 +898,9 @@ Until 22 October 2026 a dyadic covariate on 129 or more actors fell back to Mata
 RSiena's own "method of joiners and leavers" (Huisman and Snijders 2003, Section 5.3.3 of its own
 manual). One 0/1 variable per wave (same convention as {opt behavior()}): 1 marks an actor present
 (eligible to act, and eligible to be tied to by another actor) at that wave, 0 marks absent. An
-actor is treated as present for a given inter-wave PERIOD only if present at BOTH that period's own
-endpoint waves - {cmd:nwsaom} supports WHOLE-PERIOD composition change only (an actor's presence can
+actor acts in an inter-wave PERIOD if it is present at the wave at which the period STARTS (RSiena's {cmd:activeStart}). A joiner present from wave m on acts from the period that starts at wave m;
+a leaver present up to wave m still acts in the period that starts at wave m (RSiena's {cmd:sienaCompositionChange()} with the interval ending at the integer m: the leave
+event falls at the very start of that period and is dropped), and is absent from the following period on. {cmd:nwsaom} supports WHOLE-PERIOD composition change only (an actor's presence can
 change at wave boundaries; for a change at an arbitrary point strictly between two waves use {opt joinat()}/{opt leaveat()}, below) - this covers the common
 real-world case (an actor enrolled, transferred, or dropped out between whole survey waves).
 

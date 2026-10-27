@@ -667,10 +667,14 @@ fit time of a small model (X2 of the article's extra benchmark: 0.77 s -> 0.26 s
 - RSiena 1.6.14 stops with `INTEGER() can only be applied to a 'integer', not a 'list'` (initializeFRAN) for a group object whose groups have different numbers of waves, with or without
   covariates; `gwaves()` is validated against the equivalent object made of two-wave groups (uncentred covariates, no group constants in the model). Also in 1.6.14 the "GroupTest" of
   `sienaTimeTest()` tests each PERIOD (the `sienaGroupEffects` branch is never taken), `estat timetest` reports that test as "Test of each period" and the group version as "Test of each group".
-- `present()`: an actor that leaves exactly at an observation is treated differently by `present()` (inactive in the following period, ties kept) and `sienaCompositionChange()` (the event is
-  inside the period: the leaver loses its ties and they are put back at the end); the validation uses joiners only. Absent actors must carry the ties/behavior of the nearest present wave.
-- Missing behavior values together with the network effects of the behavior as covariate (`behegox`, `behaltx`) do not agree with RSiena in groups (they do in one group); behavior effects
-  alone do. Open.
+- `present()` follows RSiena's `activeStart`: an actor acts in the period that STARTS at a wave where it is present (`R/sienaDataCreate.r` makes `activeStart[j, ceiling(start):trunc(end)]`; the join/leave events at the
+  integer time of a wave have time 0 and are dropped in `unpackCompositionChange()`: `events[events$time > 1e-10, ]`). So a leaver present up to wave m still acts in the period that starts at m. Until 2026-10-27 nwsaom
+  required presence at BOTH waves of a period (leavers switched off one period too early; symptom: the rate of that period 15% too high). Absent actors must carry the ties/behavior of the nearest present wave
+  (RSiena option 1 does this itself for missing entries). `SaomGroupsPresent()` builds the start-of-period columns only.
+- Network effects with the dependent behavior as covariate: RSiena's `tieStatistic()` returns 0 for a tie whose covariate value is MISSING at the start of the period (`CovariateDependentNetworkEffect::missing()`
+  reads the missing flag of wave `period`), while the ministep contribution uses the imputed value minus the overall mean. nwsaom summed the imputed values in the statistic (a small error in one group, a clear
+  one in groups: behaltx -0.069 vs 0.00). The flags come as `__nwsaom_bsm` (Mata) and frame columns `ms<pd>` (plugin, protocol 143). Mind the work directory when validating by hand: data from an earlier run
+  (other feature) silently gave a 'difference' of this size once.
 - The state is the Mata externals `__nwsaom_groupmode`, `_groupid`, `_groupw`, `_groupbal`, `_grouppres`, `_gcreg`, `_gcval`, `_gbeh`; `SaomRatesReset()` removes them at the start and the end of every
   `nwsaom` call. A caller that builds its own BATCHSETUP frame must not run while they exist.
 - The `else if hasmiss` branch that builds an all-ones presence matrix would overwrite the group presence matrix: it is skipped in group mode (symptom: rates around 0.6 instead of 4).

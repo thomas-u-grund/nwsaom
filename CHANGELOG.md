@@ -14,6 +14,10 @@ project uses [Semantic Versioning](https://semver.org/).
 - The compiled plugin restricts the alternatives of an actor to its own group and takes per-period constants (needs the plugin of this release; there is no Mata fallback for groups).
 - Not yet with groups: `estat gof`/`simulate`/`importance`, `nwsaom bayes`, `ml`, `structural()`, `joinat()`/`leaveat()`, two-mode and non-directed networks, several behaviors, the centred degree effects, `avdeg`, `transtriads`.
 
+### Fixed
+- `present()`: an actor who leaves at an observation now acts in the period that starts at its last wave, as RSiena's `sienaCompositionChange()` does (RSiena: active at the START of a period; a leave event at the integer time of the wave is dropped). Before, an actor was active in a period only if present at BOTH its waves, so leavers were switched off one period too early. Joiners are unchanged. Checked against RSiena 1.6.14 in one group and in groups (10 runs each, all z-scores below 1.6).
+- Network effects of the dependent behavior as covariate (`behegox`, `behaltx`, `behegoplusalt`, `behsim`) skip, in the statistic, a tie whose covariate value was missing at the start of the period (RSiena's `CovariateDependentNetworkEffect::missing()` / `tieStatistic()`); the ministep contributions use the imputed value, as before. With missing behavior values this changes the estimates of these effects slightly in one group and clearly in groups (plugin protocol 143 for the native part).
+
 ### Changed
 - The checks of `symmetric`/`symtype()` live in `_nwsaom_symcheck.ado` (nwsaom.ado is at the size limit of one ado program).
 

@@ -106,6 +106,15 @@ forvalues w = 1/3 {
 }
 save "__groups_mact.dta", replace
 
+import delimited "dev/saom_groups_lactors.csv", clear
+forvalues w = 1/3 {
+	preserve
+	import delimited "dev/saom_groups_lw`w'.csv", clear varnames(nonames)
+	mkmat v*, matrix(Gleav`w')
+	restore
+}
+save "__groups_leav.dta", replace
+
 * the missing-tie masks and the dyadic covariate
 forvalues w = 1/3 {
 	matrix Mm`w' = J(50, 50, 0)
@@ -386,6 +395,30 @@ frame drop ref
 display "PASS: comp (uncond) agrees with RSiena"
 
 
+* ---- compl
+nwclear
+use "__groups_leav.dta", clear
+forvalues w = 1/3 {
+	nwset, mat(Gleav`w') name(g`w') nooutput
+}
+frame create ref
+frame ref: import delimited "dev/saom_rsiena_groups_compl_cond0.csv", clear
+__gfit, opts(outdegree reciprocity transtrip egox(alc) altx(alc) present(p1 p2 p3)) uncond
+__gchk outdegree "outdegree (density)" 0.12 0
+__gchk reciprocity "reciprocity" 0.12 0
+__gchk transtrip "transitive triplets" 0.12 0
+__gchk altx_alc "alc alter" 0.12 0
+__gchk egox_alc "alc ego" 0.12 0
+__gchk period1 "constant net rate (period 1)" 0.1 0.08
+__gchk period2 "constant net rate (period 2)" 0.1 0.08
+__gchk period4 "constant net rate (period 4)" 0.1 0.08
+__gchk period5 "constant net rate (period 5)" 0.1 0.08
+__gchk period7 "constant net rate (period 7)" 0.1 0.08
+__gchk period8 "constant net rate (period 8)" 0.1 0.08
+frame drop ref
+display "PASS: compl (uncond) agrees with RSiena"
+
+
 * ---- coev
 nwclear
 use "__groups_base.dta", clear
@@ -549,6 +582,71 @@ frame drop ref
 display "PASS: coevcomp (uncond) agrees with RSiena"
 
 
+
+* ---- a co-evolving behavior with missing values in ONE group: the network effects of the behavior skip the ties whose covariate value was missing at the start of the period
+clear
+nwclear
+import delimited "dev/saom_single_cm_beh.csv", clear
+forvalues w = 1/3 {
+	preserve
+	import delimited "dev/saom_single_cm_w`w'.csv", clear varnames(nonames)
+	mkmat v*, matrix(S`w')
+	restore
+	nwset, mat(S`w') name(s`w') nooutput
+}
+frame create ref
+frame ref: import delimited "dev/saom_rsiena_single_cm.csv", clear
+local first 1
+forvalues s = 1/3 {
+	quietly nwsaom, waves(s1 s2 s3) outdegree reciprocity transtrip behavior(alc1 alc2 alc3) linear quadratic avalt behegox behaltx missbeh(m1 m2 m3) k0(30) k3(1000) seed(`s') cores(1)
+	matrix __gb = e(b)
+	if `first' matrix __gm = __gb
+	else matrix __gm = __gm + __gb
+	local first 0
+}
+matrix __gm = __gm / 3
+__gchk outdegree "outdegree (density)" 0.12 0
+__gchk reciprocity "reciprocity" 0.12 0
+__gchk behegox "alc ego" 0.08 0
+__gchk behaltx "alc alter" 0.08 0
+__gchk beh_linear "alc linear shape" 0.12 0
+__gchk beh_quadratic "alc quadratic shape" 0.12 0
+frame drop ref
+display "PASS: behavior with missing values in one group agrees with RSiena"
+
+
+* ---- leavers and joiners in ONE group (present(): an actor is active in the period that starts at a wave where it is present; RSiena's activeStart)
+clear
+nwclear
+import delimited "dev/saom_single_leave_actors.csv", clear
+forvalues w = 1/3 {
+	preserve
+	import delimited "dev/saom_single_leave_w`w'.csv", clear varnames(nonames)
+	mkmat v*, matrix(S`w')
+	restore
+	nwset, mat(S`w') name(s`w') nooutput
+}
+frame create ref
+frame ref: import delimited "dev/saom_rsiena_single_leave.csv", clear
+local first 1
+forvalues s = 1/3 {
+	quietly nwsaom, waves(s1 s2 s3) outdegree reciprocity transtrip egox(alc) altx(alc) present(p1 p2 p3) k0(30) k3(1000) seed(`s') cores(1)
+	matrix __gb = e(b), e(rates)
+	if `first' matrix __gm = __gb
+	else matrix __gm = __gm + __gb
+	local first 0
+}
+matrix __gm = __gm / 3
+__gchk outdegree "outdegree (density)" 0.12 0
+__gchk reciprocity "reciprocity" 0.12 0
+__gchk transtrip "transitive triplets" 0.12 0
+__gchk altx_alc "alc alter" 0.12 0
+__gchk egox_alc "alc ego" 0.12 0
+__gchk period1 "constant net rate (period 1)" 0.1 0.08
+__gchk period2 "constant net rate (period 2)" 0.1 0.08
+frame drop ref
+display "PASS: leavers and joiners in one group agree with RSiena"
+
 * ---- the rest of the contract: e() results, refusals, state after the fit
 nwclear
 use "__groups_base.dta", clear
@@ -607,3 +705,4 @@ display "PASS: refusals and no group state after a grouped fit"
 erase "__groups_base.dta"
 erase "__groups_comp.dta"
 erase "__groups_mact.dta"
+erase "__groups_leav.dta"

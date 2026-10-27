@@ -1,0 +1,71 @@
+"seed","name","theta"
+1,"constant net rate (period 1)",5.91208608961254
+1,"constant net rate (period 2)",4.20197067756867
+1,"outdegree (density)",-2.75480536035771
+1,"reciprocity",2.58857934958858
+1,"transitive triplets",0.658855965356169
+1,"alc alter",-0.0755918668655147
+1,"alc ego",0.0457687966430234
+2,"constant net rate (period 1)",5.95855111269081
+2,"constant net rate (period 2)",4.17821026405293
+2,"outdegree (density)",-2.76163313865382
+2,"reciprocity",2.60158317223641
+2,"transitive triplets",0.661877100953499
+2,"alc alter",-0.0758729650102839
+2,"alc ego",0.0398973984752887
+3,"constant net rate (period 1)",5.84490329589661
+3,"constant net rate (period 2)",4.20569973630561
+3,"outdegree (density)",-2.75490395529273
+3,"reciprocity",2.59462016902997
+3,"transitive triplets",0.655559466550756
+3,"alc alter",-0.0715358647544892
+3,"alc ego",0.0370208177668808
+4,"constant net rate (period 1)",5.90579768991873
+4,"constant net rate (period 2)",4.14322640614463
+4,"outdegree (density)",-2.75325824476805
+4,"reciprocity",2.59143879880231
+4,"transitive triplets",0.658801153531796
+4,"alc alter",-0.071181930652964
+4,"alc ego",0.0379371269652951
+5,"constant net rate (period 1)",5.91153065564257
+5,"constant net rate (period 2)",4.17028180492294
+5,"outdegree (density)",-2.7583847972259
+5,"reciprocity",2.60384434328946
+5,"transitive triplets",0.653633528572504
+5,"alc alter",-0.0724174380640524
+5,"alc ego",0.0386253302859315
+6,"constant net rate (period 1)",5.93093724391542
+6,"constant net rate (period 2)",4.21193989340401
+6,"outdegree (density)",-2.77747614081644
+6,"reciprocity",2.62308747796224
+6,"transitive triplets",0.661078111629804
+6,"alc alter",-0.0788175251937741
+6,"alc ego",0.0425745353167228
+7,"constant net rate (period 1)",5.98076815167371
+7,"constant net rate (period 2)",4.20228967348677
+7,"outdegree (density)",-2.76789060646708
+7,"reciprocity",2.61781200033007
+7,"transitive triplets",0.659676239978135
+7,"alc alter",-0.0779216917375887
+7,"alc ego",0.044278180612551
+8,"constant net rate (period 1)",5.89601206840451
+8,"constant net rate (period 2)",4.1794085119274
+8,"outdegree (density)",-2.76300808347818
+8,"reciprocity",2.60542921932294
+8,"transitive triplets",0.655914401049355
+8,"alc alter",-0.076213020326828
+8,"alc ego",0.0373317529433443
+9,"constant net rate (period 1)",5.94205138044336
+9,"constant net rate (period 2)",4.21287157281613
+9,"outdegree (density)",-2.75653449755412
+9,"reciprocity",2.59885760249359
+9,"transitive triplets",0.654504673347627
+9,"alc alter",-0.0780505010636821
+9,"alc ego",0.0426445408993441
+10,"constant net rate (period 1)",5.98197423689501
+10,"constant net rate (period 2)",4.17762784034819
+10,"outdegree (density)",-2.76131441941663
+10,"reciprocity",2.60886088655657
+10,"transitive triplets",0.65375966743554
+10,"alc alter",-0.0737201974364623
+10,"alc ego",0.0361095802086411

@@ -1017,7 +1017,7 @@ program nwsaom, eclass
 			}
 			mata: __nwsaom_presentmat[.,`__w'] = st_data(1::`nodes', "`__wpres'")
 		}
-		mata: __ns_present1 = __nwsaom_presentmat[.,1] :* __nwsaom_presentmat[.,2]
+		mata: __ns_present1 = __nwsaom_presentmat[.,1]
 	}
 	// groups(): joint estimation of several groups (RSiena's sienaGroupCreate()); the groups are glued into one chain of virtual waves, see _nwsaom_groups.ado
 	local __ns_isgrp = ("`groups'" != "")

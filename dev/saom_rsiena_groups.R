@@ -20,6 +20,14 @@ waves <- lapply(waves, blk)
 gsets <- list(1, 1, 2, 3); gw <- list(1:3, 1:3, 1:3)
 if (feat == 'unequal') { gsets <- list(1, 1, 2, 3); gw <- list(1:2, 2:3, 1:2, 2:3) } else { gsets <- list(1, 2, 3) }
 present <- matrix(1, 50, 3)
+if (feat == 'compl') {                                    # leavers: actors 3, 22 present at waves 1,2 only; 41 at wave 1 only; joiners 8 and 40 (waves 2,3)
+  present[3, 3] <- 0; present[22, 3] <- 0; present[41, 2:3] <- 0; present[8, 1] <- 0; present[40, 1] <- 0
+  orig <- waves
+  for (a in 1:50) for (w in 1:3) if (present[a, w] == 0) {
+    pw <- which(present[a, ] == 1); wn <- pw[which.min(abs(pw - w))]
+    waves[[w]][a, ] <- orig[[wn]][a, ]; waves[[w]][, a] <- orig[[wn]][, a]
+  }
+}
 if (feat %in% c('comp', 'coevcomp')) {                                     # actors 3 and 8 (group 1), 22 (group 2) and 40 (group 3) join at wave 2 (a leaver exactly at an observation is treated differently by present() and sienaCompositionChange)
   present[3, 1] <- 0; present[8, 1] <- 0; present[40, 1] <- 0; present[22, 1] <- 0
   # the ties of an absent actor at a wave where it is absent are those of the nearest wave where it is present (RSiena and nwsaom both
@@ -31,7 +39,7 @@ if (feat %in% c('comp', 'coevcomp')) {                                     # act
   }
 }
 s50b <- as.matrix(s50a[, 1:3])                             # behavior / changing covariate values; absent actors take the nearest present wave
-if (feat %in% c('comp', 'coevcomp')) for (a in 1:50) for (w in 1:3) if (present[a, w] == 0) { pw <- which(present[a, ] == 1); s50b[a, w] <- s50b[a, pw[which.min(abs(pw - w))]] }
+if (feat %in% c('comp', 'coevcomp', 'compl')) for (a in 1:50) for (w in 1:3) if (present[a, w] == 0) { pw <- which(present[a, ] == 1); s50b[a, w] <- s50b[a, pw[which.min(abs(pw - w))]] }
 bmiss <- matrix(0, 50, 3)
 if (feat %in% c('coevmiss', 'coevmiss0')) { bmiss[5, 2] <- 1; bmiss[25, 1] <- 1; bmiss[45, 3] <- 1; bmiss[30, 2] <- 1 }
 miss <- list(NULL, NULL, NULL)
@@ -61,7 +69,7 @@ mk <- function(gi) {
   else if (feat == 'tvcov') alc <- varCovar(as.matrix(s50a[i, ws]))
   else alc <- coCovar(s50a[i, 1], centered = (feat != 'unequal'))
   if (feat == 'dyad') { D <- coDyadCovar(D0[i, i]); return(sienaDataCreate(net, alc, D)) }
-  if (feat == 'comp') {
+  if (feat %in% c('comp', 'compl')) {
     ch <- lapply(i, function(a) { p <- present[a, ws]; w1 <- which(p == 1); c(min(w1), max(w1)) })
     cc <- sienaCompositionChange(ch)
     return(sienaDataCreate(net, alc, cc))
@@ -78,7 +86,7 @@ if (feat == 'score') {      # restricted model: altX and egoX of alc fixed at 0 
   eff <- includeEffects(eff, egoX, altX, interaction1 = "alc", fix = TRUE, test = TRUE)
 }
 if (feat == 'balsim') { eff <- includeEffects(eff, balance); eff <- includeEffects(eff, egoX, simX, interaction1 = "alc") }
-if (feat %in% c('unequal', 'comp', 'miss')) { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, altX, interaction1 = "alc") }
+if (feat %in% c('unequal', 'comp', 'compl', 'miss')) { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, altX, interaction1 = "alc") }
 if (feat == 'tvcov') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, altX, simX, interaction1 = "alc") }
 if (feat == 'ratecov') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, interaction1 = "alc"); eff <- includeEffects(eff, RateX, interaction1 = "alc", type = "rate") }
 if (feat == 'inter') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, interaction1 = "alc"); eff <- includeInteraction(eff, egoX, recip, interaction1 = c("alc", "")) }

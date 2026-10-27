@@ -352,7 +352,7 @@ Coefficients {cmd:beh_avxalt_}{it:var} etc.; estimates equal siena07{p_end}
 {marker compchange_options}{...}
 {syntab:Composition change and missing data}
 {synopt:{opth present(varlist)}}Composition change ("joiners and leavers"): one 0/1 variable per wave, same "one variable per wave" convention as
-{opt behavior()}, marking which actors are present at each wave. Optional - omitting it means every actor is present the whole time. See
+{opt behavior()}, marking which actors are present at each wave; an actor acts in the period that starts at a wave where it is present (RSiena's {cmd:activeStart}, so a leaver acts in the period that starts at its last wave). Optional - omitting it means every actor is present the whole time. See
 {help nwsaom_remarks##compchange:Composition change} in nwsaom_remarks{p_end}
 {synopt:{opth joinat(varname)}, {opth leaveat(varname)}}Composition change with joiners and leavers at {it:fractional} times inside a period, exactly as RSiena's
 {cmd:sienaCompositionChange()} (option 1): one numeric node variable each, on RSiena's time scale (wave 1 = time 1, the last wave = time W). An actor is active from {opt joinat()}
