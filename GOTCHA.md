@@ -635,3 +635,14 @@ calls `SaomSetEngine()` twice warns once. Because it is Mata `printf`, `quietly`
   It cannot reload `unw_saom.do` in the same session (class `SaomGraph() already exists`), so the Mata code of the first part is reused.
 - `nwsaom ml` and `nwsaom bayes` have no Mata engine and stop with an error when the plugin is missing; they never warn.
 - The manual is labelled by the minor series (`\manualseries`), the examples by `\pkgversion`; a patch release changes only the latter (`manual/README.md`).
+
+## Mata's `&` and `|` do not short-circuit: a function call in a condition runs every time (found 2026-10-27, X2 speed)
+
+`useint = (C.hasratecov & cols(SaomSRTypes()) > 0 & want_score & SaomNativePluginVersion() >= 72)` in `SaomNetSimMany()` looked free for models without
+a rate covariate, but Mata evaluates every operand, so `SaomNativePluginVersion()` ran once per Robbins-Monro iteration. Although its result is cached, it first
+calls `SaomNativeAvailable()` and `SaomNativePluginPath()`, which do `findfile("nwsaom.ado")`, `fileexists()` and `st_global()`: about 200 microseconds per call, two thirds of the whole
+fit time of a small model (X2 of the article's extra benchmark: 0.77 s -> 0.26 s). It grows with the length of the adopath, which is why the benchmark machine showed it worst.
+- Rule: in the hot callbacks of `SaomRMCore()` (`SaomNetSimManyCB`, `SaomBatchRun`, ...) never put a function that touches the file system, the adopath, frames or `stata()` in a
+  `&`/`|` condition; use nested `if` (which does short-circuit), and hoist `st_global()` reads out of the loops.
+- How it was found: counters in a profiling build of the plugin (`clang ... -DSAOM_PROFILE`; `BATCHCLEAN|` appends them to the file named by the environment variable `SAOM_PROF_OUT`)
+  showed the time between two `BATCHRUN` calls ("glue") at 50 % of the fit; `timer on/off` calls inside the Mata source then located it (a `stata("timer on 11")` costs about 1 microsecond).

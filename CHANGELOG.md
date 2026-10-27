@@ -3,6 +3,16 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+Patch release in preparation (proposed 1.1.1). Works with nwcommands 3.6.0 and later (the Mata library `lnwsaom1.mlib` is rebuilt with Stata 17 against the unchanged core library). Results are unchanged: with a fixed seed every estimate, standard error and statistic is identical to the last digit to that of 1.1.0.
+
+### Changed
+- Faster estimation with the compiled plugin, most for two-mode networks and for fits that need many Robbins-Monro steps. The check of the plugin version (a look-up of the plugin file on the search path) was made once per step of phase 2; it is now made only where a rate covariate needs it. For the two-mode benchmark model (40 x 30, six effects) this alone halves the running time.
+- Two-mode networks in the plugin: an actor's free alternatives (the other mode) are kept as a list, and the degree effects (indegpopularity, outactivity, outiso, antiiniso, antiiniso2, in3plus) are evaluated directly, so a ministep no longer loops over the whole node set and no longer goes through the general effect dispatch. The random stream is unchanged.
+- The argument string of each plugin call is built with one vectorised conversion per block.
+- An older plugin binary (for example a Linux or Windows file that has not yet been rebuilt) works with the new library and gives the same numbers, only more slowly.
+
 ## [1.1.0] - 2026-10-26
 
 Minor release. Works with nwcommands 3.6.0 and later. The Mata library `lnwsaom1.mlib` is rebuilt (Stata 17) against the unchanged core library of 3.6.0.
