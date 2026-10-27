@@ -49,7 +49,7 @@ mk <- function(variant) {
       w[[k]] <- m
     }
   }
-  if (variant == 'v3s') {   # designed cases: (1,2) 10 at wave 1 only; (3,4) 10 at wave 2 only; (5,6) 10 at wave 1, 11 at wave 2; (7,8) 11 at waves 1 and 2, 10 at wave 3; (9,10) 11 at wave 3 only
+  if (variant %in% c('v3s', 'v3m', 'v6s')) {   # designed cases: (1,2) 10 at wave 1 only; (3,4) 10 at wave 2 only; (5,6) 10 at wave 1, 11 at wave 2; (7,8) 11 at waves 1 and 2, 10 at wave 3; (9,10) 11 at wave 3 only
     w[[1]][1,2] <- 10; w[[2]][3,4] <- 10; w[[1]][5,6] <- 10; w[[2]][5,6] <- 11; w[[1]][7,8] <- 11; w[[2]][7,8] <- 11; w[[3]][7,8] <- 10; w[[3]][9,10] <- 11
     for (a in 11:30) { w[[1]][a, a + 1] <- 10 + (a %% 2); w[[3]][a + 1, a] <- 10 + (a %% 3 == 0); if (a %% 2 == 0) w[[2]][a, a + 1] <- 11 }
   }
@@ -65,7 +65,7 @@ if (bip) {   # two-mode: 40 actors x 20 events; tm1: actors 1-10 cannot choose e
   waves <- w
 } else waves <- mk(variant)
 cchg <- NULL
-if (variant == 'v6') {    # composition change (RSiena sienaCompositionChange): actors 3 and 8 join at 1.4 and 2.3; actors 5 and 12 leave at 1.6 and 2.5; with structural values coded as in v3
+if (variant %in% c('v6', 'v6s')) {    # composition change (RSiena sienaCompositionChange): actors 3 and 8 join at 1.4 and 2.3; actors 5 and 12 leave at 1.6 and 2.5; with structural values coded as in v3
   jn <- rep(1, n); lv <- rep(3, n); jn[3] <- 1.4; jn[8] <- 2.3; lv[5] <- 1.6; lv[12] <- 2.5
   pres <- matrix(1, n, 3); for (a in 1:n) for (k in 1:3) pres[a, k] <- (ceiling(jn[a]) <= k) & (k <= trunc(lv[a]))
   orig <- waves
@@ -74,8 +74,9 @@ if (variant == 'v6') {    # composition change (RSiena sienaCompositionChange): 
   cchg <- lapply(1:n, function(a) c(jn[a], lv[a]))
   write.table(data.frame(jn = jn, lv = lv), file.path(out, "cc.csv"), row.names = FALSE, sep = ",")
 }
-if (variant %in% c('v5', 'm0')) {
+if (variant %in% c('v5', 'm0', 'v3m')) {
   miss <- matrix(0, n, n); miss[sample(n * n, 120)] <- 1; diag(miss) <- 0
+  if (variant == 'v3m') { miss[] <- 0; miss[5:7, ] <- 1; miss[, 20] <- 1; miss[11:13, 12:14] <- 1; diag(miss) <- 0 }   # deterministic
   # NA in wave 2 at the missing dyads (wave 1 and 3 complete)
   waves[[2]][miss == 1] <- NA
   write.table(miss, file.path(out, "miss2.csv"), row.names = FALSE, col.names = FALSE, sep = ",")
