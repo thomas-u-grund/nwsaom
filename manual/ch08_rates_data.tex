@@ -131,7 +131,7 @@ Actors may join or leave the network during the study. RSiena handles this with 
 
 \subsection{Whole-period presence: present()}
 
-\opt{present(varlist)} takes one 0/1 variable per wave, in temporal order (the same convention as \opt{behavior()}): 1 marks an actor as present (eligible to act and to be chosen as an alter) at that wave. An actor is treated as present for an inter-wave \emph{period} only if present at \emph{both} of its endpoint waves. Actors who join or leave exactly at an observation moment are therefore covered, which is the common case (a pupil enrolled between survey waves).
+\opt{present(varlist)} takes one 0/1 variable per wave, in temporal order (the same convention as \opt{behavior()}): 1 marks an actor as present (eligible to act and to be chosen as an alter) at that wave. An actor can act in an inter-wave \emph{period} if it is present at the wave at which the period starts, as in RSiena's \texttt{sienaCompositionChange()} for joins and leaves at an observation. A joiner who first appears at a wave therefore acts from the next period on, and a leaver who is present up to a wave still acts in the period that starts there. This is the common case (a pupil enrolled between survey waves).
 
 Composition change requires \emph{unconditional} estimation in RSiena (manual, Section~7.12.1) and \nwsaom{} uses it automatically, even without \opt{unconditional}: rates are estimated with the other parameters, only present actors get opportunities to act, and a rate's score counts only them. The fit runs in the native backend at about the speed of the same model without composition change.
 

@@ -11,6 +11,7 @@ nwsaom, wave1(netname) wave2(netname)  |  waves(namelist)
         [ covariate, structural, interaction and alias options ]
         [ behavior(...) and its effects ]
         [ composition change and missing data options ]
+        [ groups(varname) gwaves(spec) ]
         [ ratecov(varlist) ratecovcoef(numlist) nocenter ]
         [ symmetric symtype(string) ]
         [ unconditional rate0(numlist) theta0(numlist) k0(#) k3(#) firstg(#) seed(#) cores(#) ]
@@ -27,6 +28,8 @@ Every model needs the waves and the baseline effect \opt{outdegree}. Everything 
 \opt{wave1(netname)}, \opt{wave2(netname)} & The two waves of a model with exactly two waves. Both are required together; not combinable with \opt{waves()}. \\
 \opt{waves(namelist)} & Two or more waves in temporal order. The $W-1$ periods are chained into one pooled fit with one rate per period. \\
 \opt{tvcov(groups)} & Time-varying covariates (RSiena's \texttt{varCovar}). \opt{tvcov(a1 a2 a3 | s1 s2 s3)} declares covariates with one variable per wave; \texttt{|} separates covariates. Period $p$ uses the value of wave $p$ (the value of the last wave is not used). A covariate is named after its first variable without trailing digits (here \texttt{a} and \texttt{s}) and used under that name in \opt{nodeocov()}, \opt{nodeicov()}, \opt{nodecov()}, \opt{nodematch()}, \opt{simcov()} or their aliases, for example \opt{tvcov(a1 a2 a3) egox(a) simx(a)}. Centred by the mean over all periods. No missing values. Possible with \opt{behavior()} (network covariate effects only) and in two-mode networks; not with \opt{interact()}, \opt{symmetric} or \texttt{estat gof}. \\
+\opt{groups(\emph{varname})} & Joint estimation of several groups (RSiena's \texttt{sienaGroupCreate} and \texttt{siena07}): the observations are the actors of all groups, \emph{varname} gives the group of each actor, and the wave networks have no ties between groups. One set of effect parameters for all groups; every period of every group has its own rate (also of a behavior). Needs \opt{waves()}. Chapter~\ref{ch:groups}. \\
+\opt{gwaves(\emph{spec})} & With \opt{groups()}: the waves of the groups when they differ, \opt{gwaves(2: 1 2 | 3: 2 3)} (group value, colon, positions in \opt{waves()}); a group not named has all waves. \\
 \opt{actormode(\#)} & Two-mode networks: the mode whose nodes are the actors, 1 or 2; the default 2 is the rows of the affiliation matrix given to \texttt{nwset, bipartite}. \\
 \bottomrule
 \end{longtable}
@@ -121,7 +124,7 @@ Missing covariate values: for \opt{absdiffx()}, \opt{egoxaltx()}, \opt{altx()}, 
 
 \begin{longtable}{@{}>{\raggedright\arraybackslash}p{5.2cm}>{\raggedright\arraybackslash}p{9.8cm}@{}}
 \toprule Option & Meaning \\ \midrule \endhead
-\opt{present(varlist)} & Actors present at each wave: one 0/1 variable per wave. An actor is present in a period if it is present at both of its waves. \\
+\opt{present(varlist)} & Actors present at each wave: one 0/1 variable per wave. An actor can act in a period if it is present at the wave at which the period starts. \\
 \opt{joinat(varname)}, \opt{leaveat(varname)} & Joiners and leavers at fractional times within a period, exactly as RSiena's \opt{sienaCompositionChange()} option 1; time scale wave 1 = 1, last wave = $W$. A missing value means from the first wave, respectively to the last. One interval per actor. \\
 \opt{missnet(matlist)} & One 0/1 $n\times n$ matrix per wave marking missing dyads. \\
 \opt{missbeh(varlist)} & One 0/1 variable per wave marking missing behavior values; requires \opt{behavior()}. \\
@@ -190,10 +193,10 @@ Two networks on the same actors evolve together (RSiena's two dependent network 
 \begin{description}[nosep,style=nextline]
   \item[\texttt{estat gof}] Goodness of fit with RSiena's Mahalanobis-distance test for the outdegree, indegree and geodesic distributions. Options and the returned \texttt{r()} results are in \texttt{help nwsaom\_estat}.
   \item[\texttt{estat mems}] Micro effects on macro structure sensitivity analysis (Duxbury); \texttt{help nwsaom\_estat}.
-  \item[\texttt{estat score}, \texttt{estat timetest}, \texttt{estat importance}, \texttt{estat simulate}] Score-type tests, the test of time heterogeneity (with \opt{fixrates} as RSiena's \texttt{sienaTimeTest}), relative importance of effects and simulation from the fit; Chapter~\ref{ch:tools}.
+  \item[\texttt{estat score}, \texttt{estat timetest}, \texttt{estat importance}, \texttt{estat simulate}] Score-type tests, the test of time heterogeneity (with \opt{fixrates} as RSiena's \texttt{sienaTimeTest}), relative importance of effects and simulation from the fit; Chapter~\ref{ch:tools}. After a fit with \opt{groups()} only \texttt{estat score} and \texttt{estat timetest} are available (the latter adds a test per group and per period; Section~\ref{sec:groups-after}).
   \item[\texttt{nwsaom bayes}] Bayesian estimation after a fit; Section~\ref{sec:bayes}.
   \item[\texttt{nwsaom describe}] Description of the waves before a fit; Section~\ref{sec:describe}.
-  \item[\texttt{nwsaom meta}] Combines the same model fitted to several networks, the counterpart of RSiena's \texttt{siena08}; \texttt{help nwsaom\_meta}.
+  \item[\texttt{nwsaom meta}] Combines the same model fitted to several networks, the counterpart of RSiena's \texttt{siena08}; Section~\ref{sec:meta} and \texttt{help nwsaom\_meta}. The joint estimation of the groups is the option \opt{groups()}.
   \item[\texttt{nwsaom version}] Displays the installed release of \nwsaom{}, the version of the \texttt{nwcommands} core, the native plugin in use, the version of RSiena that the results were compared with and the license. It returns \texttt{r(version)}, \texttt{r(date)}, \texttt{r(core)} and \texttt{r(license)}; after estimation by the method of moments, \texttt{e(version)} holds the release that produced the results. Quote it when reporting an analysis. \texttt{nwversion} lists the core and all installed model packages. A specific release is installed from its tag: \opt{net install nwsaom, from(}\url{https://raw.githubusercontent.com/thomas-u-grund/nwsaom/v1.0.1/}\texttt{) replace}.
 \end{description}
 
@@ -205,6 +208,7 @@ The following list collects the restrictions that the program enforces and that 
   \item \opt{structural()}: two waves only, no \opt{behavior()}, no \opt{symmetric}, \opt{ratecov()} or network endowment/creation.
   \item \opt{ratecov()}: not with co-evolution; with \opt{symmetric} not together with \opt{present()}, \opt{joinat()} or \opt{leaveat()}, and not with co-evolution.
   \item \opt{tvcov()}: no missing values; not with \opt{interact()}, \opt{symmetric} or \texttt{estat gof}.
+  \item \opt{groups()}: not with \opt{ml}, \texttt{nwsaom bayes}, \opt{symmetric}, two-mode networks, several behaviors, \opt{structural()}, \opt{joinat()}/\opt{leaveat()}, \opt{behrate()}, the centered degree effects (\opt{inpopc}, \opt{outpopc}, \opt{outactc}, \opt{inactc}, \opt{degplus}, \opt{degplusc}), \opt{avdeg}, \opt{transtriads} or structural equivalence, and not followed by \texttt{estat gof}, \texttt{estat simulate} or \texttt{estat importance}; \opt{gwaves()} needs \opt{groups()} (Section~\ref{sec:groups-limits}).
   \item Several behaviors: not with \opt{symmetric}, \opt{ratecov()}, \opt{present()}, \opt{missnet()}/\opt{missbeh()}, \opt{structural()}, network endowment/creation, or \texttt{estat gof}/\texttt{estat mems}.
   \item \opt{joinat()}/\opt{leaveat()}: not with \opt{behsim} or endowment/creation effects in co-evolution models; not yet with \opt{endow()}/\opt{creation()}; with \opt{symmetric} not with \opt{ratecov()}.
   \item Networks with tie values other than 1 (valued networks with real shares or counts) and networks carrying \texttt{nwset}-style temporal metadata are rejected; a network flagged as valued whose ties are all 1 is accepted.

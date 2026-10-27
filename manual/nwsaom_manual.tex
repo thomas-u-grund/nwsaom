@@ -5,7 +5,7 @@
 \usepackage[margin=2.4cm]{geometry}
 \usepackage{graphicx}
 \usepackage{booktabs,longtable,array,amsmath,amssymb,xcolor,listings,hyperref,enumitem,titlesec}
-\hypersetup{colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black,pdftitle={nwsaom: Stochastic actor-oriented models in Stata. Manual for version 1.1},pdfauthor={Thomas U. Grund}}
+\hypersetup{colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black,pdftitle={nwsaom: Stochastic actor-oriented models in Stata. Manual for version 1.2},pdfauthor={Thomas U. Grund}}
 \lstdefinestyle{stata}{basicstyle=\ttfamily\small,backgroundcolor=\color{black!4},frame=single,rulecolor=\color{black!20},breaklines=true,columns=fullflexible,keepspaces=true,xleftmargin=2pt,xrightmargin=2pt,aboveskip=8pt,belowskip=8pt}
 \lstset{style=stata}
 \setlength{\emergencystretch}{3em}
@@ -24,9 +24,9 @@
   }
 \ExplSyntaxOff
 \input{gen_counts.tex}
-\newcommand{\manualseries}{1.1}
-% The manual is labelled by the minor series (valid for 1.1.x): change \manualseries only for a new minor or major release whose documented behaviour changed.
-\newcommand{\pkgversion}{1.1.1}
+\newcommand{\manualseries}{1.2}
+% The manual is labelled by the minor series (valid for 1.2.x): change \manualseries only for a new minor or major release whose documented behaviour changed.
+\newcommand{\pkgversion}{1.2.0}
 \newcommand{\pkgdate}{27 October 2026}
 % DOI of the archived manual (Zenodo); this is the only place it is defined.
 \newcommand{\manualdoi}{10.5281/zenodo.23623807}
@@ -35,7 +35,7 @@
 \date{Manual for version \manualseries\\ (listings checked with \texttt{nwsaom} \pkgversion, \pkgdate)}
 \begin{document}
 \maketitle
-\begin{quote}\noindent\textbf{How to cite.} This manual describes the series~\manualseries{} of \texttt{nwsaom} (it holds for all versions 1.1.x); the listings were checked with version~\pkgversion{} (\pkgdate). It is the citable reference for the package. Please cite it as:\par\smallskip
+\begin{quote}\noindent\textbf{How to cite.} This manual describes the series~\manualseries{} of \texttt{nwsaom} (it holds for all versions 1.2.x); the listings were checked with version~\pkgversion{} (\pkgdate). It is the citable reference for the package. Please cite it as:\par\smallskip
 \noindent Grund, T.~U. (2026). \emph{nwsaom: Stochastic actor-oriented models in Stata. Manual for version \manualseries.} Zenodo. \url{https://doi.org/\manualdoi}\par\smallskip
 \noindent The DOI is the one of all versions of the record. Please also report the exact version of the program that produced your results, as printed by \texttt{nwsaom version} (this manual: \pkgversion).
 \end{quote}
@@ -57,6 +57,7 @@
 \input{ch08_rates_data}
 \input{ch09_estimation}
 \input{ch14_tools}
+\input{ch15_groups}
 \input{ch10_validation}
 \input{ch11_missing}
 \input{ch12_technical}

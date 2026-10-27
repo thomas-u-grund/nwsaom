@@ -1,0 +1,396 @@
+\chapter{Several groups: joint estimation}\label{ch:groups}
+
+Many network panels consist of several independent groups of actors: school classes, teams, villages, organizations. Each group is a separate network with its own actors, observed at the same occasions (or at different ones). RSiena offers two ways to analyze such data: fit one model to all groups at once (\texttt{sienaGroupCreate} and \texttt{siena07}), or fit each group separately and combine the estimates (\texttt{siena08}). \nwsaom{} offers both. This chapter is about the first, the option \opt{groups()}; the second is \texttt{nwsaom meta} (Section~\ref{sec:meta}), and Section~\ref{sec:groups-vs-meta} says when to use which. All outputs below were produced with \nwsaom{} 1.2.0 and the core \texttt{nwcommands} 3.10.0 in Stata/BE~18 and give the same numbers in Stata~17; the data and do-files are described at the end of the chapter.
+
+\section{The idea}\label{sec:groups-idea}
+
+In a joint analysis the groups share \emph{one set of effect parameters}: the model assumes that actors in every group choose their ties by the same rule (the same weights for reciprocity, transitive closure, and so on). What is not shared is the speed of change. Every group, and every period of every group, has its own rate parameter, because classes differ in how much they change and the time between waves may differ. The statistics of all periods of all groups are added up when the coefficients are estimated, exactly as the periods of one group are in a model with three or more waves (Chapter~\ref{ch:start}). Two things follow.
+
+\begin{itemize}[nosep]
+  \item Small groups, each too small to estimate a model on its own, together can. The standard errors of the joint model reflect the pooled information of all groups.
+  \item The joint model does \emph{not} estimate how much the groups differ. If you want to know whether the groups behave differently, or if you suspect they do, use the meta-analysis, or let selected effects differ by a group indicator (Section~\ref{sec:groups-vs-meta}).
+\end{itemize}
+
+\section{The data layout}\label{sec:groups-layout}
+
+The groups are stacked in one data set. The observations (rows) are the actors of all groups, one variable says which group an actor belongs to, and each wave of the network is one nwcommands network on \emph{all} actors that has no tie between two different groups, that is, a block-diagonal adjacency matrix. A covariate is an ordinary variable of the data set; a dyadic covariate is a matrix that is block-diagonal like the networks. A tie between two groups stops the command with the number of such ties. The groups may have different numbers of actors (at least three each); they must have the same variables and the same network type. Figure~\ref{fig:groups-layout} sketches the layout for two groups.
+
+\begin{figure}[ht]
+\centering
+\small
+\begin{tabular}{@{}l c@{\qquad}c@{}}
+\toprule
+\multicolumn{1}{c}{data set (rows = actors)} & \multicolumn{2}{c}{wave network $W_t$ (block-diagonal)}\\
+\midrule
+\begin{tabular}{@{}rrr@{}} \texttt{group} & \texttt{alc1} & \texttt{x}\\ 1 & 3 & 0.5\\ 1 & 2 & 1.2\\ 1 & 4 & 0.7\\ 2 & 1 & 0.3\\ 2 & 5 & 1.1\\ 2 & 3 & 0.9\\ 2 & 2 & 0.1\end{tabular}
+& $\begin{pmatrix} A_1 & 0\\ 0 & A_2 \end{pmatrix}$
+& \begin{tabular}{@{}l@{}}$A_g$: ties among the actors\\ of group $g$ at wave $t$;\\ the zero blocks: no ties\\ between groups.\end{tabular}\\
+\bottomrule
+\end{tabular}
+\caption{The layout of a stacked data set for two groups.}\label{fig:groups-layout}
+\end{figure}
+
+The four school classes used below come as eight csv files (an adjacency matrix per class and wave). The following lines read them, remove the (few) ties of an actor to itself, and build the two stacked wave networks \texttt{w1} and \texttt{w2} and the group variable \texttt{class}:
+\begin{lstlisting}
+mata: B1 = J(0, 0, .); B2 = J(0, 0, .)
+local sizes ""
+forvalues s = 1/4 {
+    forvalues w = 1/2 {
+        quietly import delimited using "school`s'_wave`w'.csv", clear
+        local n = _N
+        quietly mkmat v1-v`n', matrix(X)
+        matrix X = X - diag(vecdiag(X))
+        mata: B`w' = blockdiag(B`w', st_matrix("X"))
+    }
+    local sizes "`sizes' `n'"
+}
+clear
+nwclear
+mata: st_matrix("G1", B1); st_matrix("G2", B2)
+quietly set obs `=rowsof(G1)'
+quietly generate byte class = .
+* ... class = 1 for the first 45 rows, 2 for the next 37, 3 for 33, 4 for 36
+nwset, mat(G1) directed name(w1) nooutput
+nwset, mat(G2) directed name(w2) nooutput
+\end{lstlisting}
+The same can be done from stacked edge lists with \texttt{nwfromedge}. The data are the classes N3401, N3403, N3404 and N3406 of the Dutch Social Behavior Data Set of Chris Baerveldt, which ship with RSiena (wave~1 and the second wave HN3401 \ldots{} HN3406); they have 45, 37, 33 and 36 pupils (Houtzager and Baerveldt 1999; Snijders and Baerveldt 2003).
+
+\section{The options \texorpdfstring{\opt{groups()}}{groups()} and \texorpdfstring{\opt{gwaves()}}{gwaves()}}\label{sec:groups-options}
+
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{5.2cm}>{\raggedright\arraybackslash}p{9.8cm}@{}}
+\toprule Option & Meaning \\ \midrule \endhead
+\opt{groups(\emph{varname})} & Joint estimation of several groups. \emph{varname} gives the group of each actor (a variable with at least two values; one value is refused, an ordinary fit is the one-group case). Needs \opt{waves()}, the compiled plugin, and the stacked layout above. \\
+\opt{gwaves(\emph{spec})} & Only with \opt{groups()}. The waves of the groups when they differ: \opt{gwaves(2: 1 2 | 3: 2 3)} says that group 2 was observed at the first two entries of \opt{waves()} and group 3 at the last two (group value, colon, indices into \opt{waves()}; at least two, increasing). A group not named has all waves. \\
+\bottomrule
+\end{longtable}
+
+\paragraph{How the rates are numbered.} Each period of each group has a rate. RSiena numbers the periods of the combined series, and the step from the last wave of one group to the first wave of the next is not a period; \nwsaom{} uses the same numbers, so that its rate rows can be matched to RSiena's output. Four groups with two waves each have the periods 1, 3, 5 and 7 (periods 2, 4 and 6 are the switches between classes): \texttt{period1 period3 period5 period7}. Three groups with three waves each give \texttt{period1 period2 period4 period5 period7 period8}. The matrices \texttt{e(rates\_group)} and \texttt{e(rates\_period)} give, for every rate column, the group (in the order of the values of the group variable) and RSiena's period number.
+
+\paragraph{What is shared and what is not.}
+\begin{itemize}[nosep]
+  \item \emph{Shared:} all effect parameters (including those of a behavior), the form of the model.
+  \item \emph{Not shared:} the rate of every period of every group (also the rate of a behavior). There is no option for a common rate across groups, as in RSiena; a rate covariate (\opt{ratecov()}) with a group indicator lets the rates depend on the group.
+  \item \emph{Computed for each group:} the constants that RSiena keeps per group. These are the similarity mean of a covariate (\opt{simx()}, with the range of the covariate over all groups), the balance mean (\opt{balance}), the mean, similarity mean and variance of a dependent behavior, and the centering of a dyadic covariate (by the mean of its off-diagonal cells within the group). An actor covariate is centered at its mean over \emph{all} actors of all groups, as RSiena does, so a variable that is constant within a group (group size, a group indicator) can be used with \opt{egox()}.
+  \item To let an effect \emph{differ} between groups, interact it with a group indicator (\opt{interact()}); this is the advice of the RSiena manual too.
+\end{itemize}
+Conditional estimation (the default for a network without behavior or composition change) and \opt{unconditional} both work. Composition change (\opt{present()}), missing data (\opt{missnet()}, \opt{missbeh()}) and changing covariates (\opt{tvcov()}) are given for all actors; a group uses the waves it has.
+
+\section{A first joint model}\label{sec:groups-first}
+
+The model of Chapter~\ref{ch:start}, \opt{outdegree reciprocity transtrip}, for the four classes at once. The only new option is \opt{groups(class)}.
+\begin{lstlisting}
+. tabulate class
+      class |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         45       29.80       29.80
+          2 |         37       24.50       54.30
+          3 |         33       21.85       76.16
+          4 |         36       23.84      100.00
+------------+-----------------------------------
+      Total |        151      100.00
+
+. nwsaom describe, waves(w1 w2)
+Network data: 2 waves, 151 actors, directed
+----------------------------------------------------------
+wave          ties     density   avg. degree
+1              246      0.0109         1.629
+2              335      0.0148         2.219
+----------------------------------------------------------
+period      kept  created dissolved  Jaccard   Hamming
+1->2         139      196       107    0.314       303
+----------------------------------------------------------
+
+. nwsaom, waves(w1 w2) groups(class) outdegree reciprocity transtrip seed(5)
+----------------------------------------------------------------------------------------------------
+SAOM (Method of Moments, conditional), waves: w1 w2
+Actors: 151                            Periods: 4
+Groups: 4 (variable class), actors per group: 45, 37, 33, 36; waves per group: 2, 2, 2, 2
+----------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+    w1_to_w2 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   outdegree |  -2.247226   .0808946   -27.78   0.000    -2.405776   -2.088675
+ reciprocity |    1.86988   .1595137    11.72   0.000     1.557239    2.182522
+   transtrip |   .4650632   .0590168     7.88   0.000     .3493924    .5807339
+------------------------------------------------------------------------------
+Rate parameters (estimated, one per inter-wave period):
+
+             |   period1    period3    period5    period7 
+-------------+-------------------------------------------
+        rate |    6.4599     5.3856     2.2902     8.1389 
+          se |    1.0048     1.3792     0.5385     1.9861 
+Overall maximum convergence ratio: 0.067 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): met
+\end{lstlisting}
+\nwsaom{} says in the header that there are four groups with 45, 37, 33 and 36 actors and two waves each. There is one coefficient table: the weights of the three effects are common to all 151 pupils. Ties in these classes are reciprocated and closed beyond what density alone gives (reciprocity 1.87, transitive triplets 0.47, both far from zero relative to their standard errors). There are \emph{four} rates, one for each class and its single period: pupils in class~4 (rate 8.1) had about three and a half times as many opportunities to change a tie between the two waves as pupils in class~3 (2.3), the rates of classes 1 and 2 lie in between (6.5 and 5.4). The rates are named \texttt{period1}, \texttt{period3}, \texttt{period5} and \texttt{period7} because RSiena numbers the switches (2, 4, 6) as periods that are skipped. The stored matrices say which column belongs to which group:
+\begin{lstlisting}
+. display "groups: " e(ngroups) "   actors: " e(N)
+groups: 4   actors: 151
+. matrix list e(groupn)
+e(groupn)[1,4]
+    c1  c2  c3  c4
+r1  45  37  33  36
+. matrix list e(rates_group)
+e(rates_group)[1,4]
+    period1  period3  period5  period7
+r1        1        2        3        4
+. matrix list e(rates_period)
+e(rates_period)[1,4]
+    period1  period3  period5  period7
+r1        1        3        5        7
+\end{lstlisting}
+
+\section{Joint model or meta-analysis?}\label{sec:groups-vs-meta}
+
+The same four classes fitted one by one give four sets of estimates. \texttt{nwsaom meta} combines them (Section~\ref{sec:meta}). The listing shows the separate fits, the meta-analysis (abridged to its first block), and the joint fit of the previous section next to them.
+\begin{lstlisting}
+. forvalues s = 1/4 {
+.     quietly nwsaom, wave1(school`s'_w1) wave2(school`s'_w2) outdegree reciprocity transtrip seed(5)
+.     estimates store school`s'
+. }
+. estimates table school1 school2 school3 school4, b(%7.3f) se(%7.3f)
+------------------------------------------------------
+    Variable | school1   school2   school3   school4  
+-------------+----------------------------------------
+   outdegree |  -2.269    -2.328    -3.340    -2.006  
+             |   0.116     0.206     0.451     0.137  
+ reciprocity |   1.561     2.589     2.230     1.541  
+             |   0.254     0.399     0.750     0.287  
+   transtrip |   0.468     1.133     1.067     0.494  
+             |   0.061     0.306     0.288     0.109  
+------------------------------------------------------
+                                          Legend: b/se
+. nwsaom meta school1 school2 school3 school4
+IWLS estimates (Snijders & Baerveldt 2003)
+--------------------------------------------------------------------------------
+      effect |   n      mean     s.e.       t       p       sd        Q    p(Q)
+-------------+------------------------------------------------------------------
+   outdegree |   4   -2.3772   0.2535   -9.38   0.003   0.5069     9.05   0.029
+ reciprocity |   4    1.8653   0.2664    7.00   0.006   0.5328     5.91   0.116
+   transtrip |   4    0.6958   0.1734    4.01   0.028   0.3468     8.39   0.039
+--------------------------------------------------------------------------------
+. matrix list cmp, format(%7.3f)
+cmp[3,3]
+            outdegree  reciprocity    transtrip
+avg_classes    -2.486        1.980        0.791
+  meta_IWLS    -2.377        1.865        0.696
+      joint    -2.247        1.870        0.465
+\end{lstlisting}
+The three rows are the simple average of the four class estimates, the random-effects mean of the meta-analysis, and the joint estimate. They agree on the picture (negative density effect, strong reciprocity, closure) and differ in detail. The standard errors tell the other part of the story: those of the joint model (0.08, 0.16, 0.06) are much smaller than those of the mean in the meta-analysis (0.25, 0.27, 0.17), because the joint model assumes that all classes have the same parameters, while the meta-analysis treats the parameters as varying between classes (estimated between-class standard deviations of 0.51, 0.53 and 0.35) and does not take the sameness for granted. The heterogeneity test $Q$ says that the classes do differ in outdegree and in transitive closure ($p=0.029$ and $0.039$). When such a test is clearly significant, the joint model's small standard errors are too optimistic.
+
+\paragraph{When to use which.}
+\begin{itemize}[nosep]
+  \item Use \textbf{joint estimation} when you believe that the groups follow the same process (the same parameters) and want one estimate with its standard error, when the groups are too small to be fitted one by one, or when you want a model that goes beyond the effects of single groups (a behavior co-evolving in all groups, Section~\ref{sec:groups-coev}).
+  \item Use the \textbf{meta-analysis} when the question is how much the groups differ, when you want to describe the population of groups (a mean effect and a between-group standard deviation), or when the groups differ in features that are not captured by the model. Each group must be large enough for its own fit to converge.
+  \item You can do both: the joint model is the first thing to try, the heterogeneity test of the meta-analysis checks it, and the joint model can then be extended by letting some effects differ. A joint model in which reciprocity may differ for class~2 adds an indicator of the class and its interaction with reciprocity:
+\end{itemize}
+\begin{lstlisting}
+. generate byte c2 = (class == 2)
+. nwsaom, waves(w1 w2) groups(class) outdegree reciprocity transtrip egox(c2) interact(egox_c2#reciprocity) seed(5)
+----------------------------------------------------------------------------------------------
+                    w1_to_w2 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-----------------------------+----------------------------------------------------------------
+                   outdegree |  -2.239454   .0868974   -25.77   0.000     -2.40977   -2.069138
+                 reciprocity |   1.885847    .163172    11.56   0.000     1.566036    2.205659
+                     egox_c2 |   .1364565   .1939773     0.70   0.482    -.2437321    .5166451
+                   transtrip |   .4965696   .0615531     8.07   0.000     .3759277    .6172114
+interact_egox_c2_reciprocity |   1.119204   .3962136     2.82   0.005     .3426394    1.895768
+----------------------------------------------------------------------------------------------
+\end{lstlisting}
+The interaction coefficient (1.12, $z=2.8$) is the difference of the reciprocity effect between class~2 and the other classes: pupils in class~2 reciprocate more than the others. (The main effect of the indicator, \texttt{egox\_c2}, is the difference in the tendency to send ties.)
+
+\section{Co-evolution of a behavior in several groups}\label{sec:groups-coev}
+
+A behavior is declared as usual with \opt{behavior()}; its effects are shared by all groups, and its rate (like the rate of the network) is estimated per period of each group. The example uses the 50 pupils of the Teenage Friends and Lifestyle Study (the data \texttt{s501}--\texttt{s503} and \texttt{s50a} of RSiena; Michell and Amos 1997; Pearson and West 2003) \emph{cut into three groups} of 15, 20 and 15 pupils (pupils 1--15, 16--35, 36--50, ties between the groups removed). This is a stand-in for three classes, not a real multi-group study; the data are the ones against which the implementation was validated. The behavior is alcohol use (1 to 5) at the three waves (\texttt{alc1 alc2 alc3}). The network effects \opt{behegox} and \opt{behaltx} are selection (a pupil's alcohol use affecting the ties he or she sends and receives), \opt{avalt} is influence (the average alcohol use of the friends), \opt{linear} and \opt{quadratic} are the shape.
+\begin{lstlisting}
+. nwsaom, waves(g1 g2 g3) groups(group) outdegree reciprocity transtrip ///
+>     behavior(alc1 alc2 alc3) linear quadratic avalt behegox behaltx seed(1)
+----------------------------------------------------------------------------------------------------
+SAOM co-evolution (Method of Moments), waves: g1 g2 g3
+Actors: 50                             Periods: 6
+Behavior: alc1 alc2 alc3
+Groups: 3 (variable group), actors per group: 15, 20, 15; waves per group: 3, 3, 3
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+     g1_to_g3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+--------------+----------------------------------------------------------------
+    outdegree |  -2.979649   .2695164   -11.06   0.000    -3.507892   -2.451407
+  reciprocity |    2.93249   .3884028     7.55   0.000     2.171235    3.693746
+    transtrip |   .6542929   .1518174     4.31   0.000     .3567362    .9518496
+      behegox |   .0223577   .1753387     0.13   0.899    -.3212998    .3660153
+      behaltx |   .0115348   .1772157     0.07   0.948    -.3358017    .3588713
+   beh_linear |   .3858774   .1753668     2.20   0.028     .0421649      .72959
+beh_quadratic |  -.2719056    .139211    -1.95   0.051    -.5447541    .0009429
+    beh_avalt |   .5038188   .3862251     1.30   0.192    -.2531685    1.260806
+-------------------------------------------------------------------------------
+Rate parameters (estimated, one per inter-wave period):
+
+             |   period1    period2    period4    period5    period7    period8 
+-------------+-----------------------------------------------------------------
+network_rate |    3.6297     1.9451     5.7289     2.3628     1.1390     2.3669 
+          se |    1.3939     0.9042     1.8273     0.6066     0.5659     1.0102 
+behavior_r~e |    1.2869     1.4586     1.8702     2.0337     0.6656     1.4133 
+          se |    0.5556     0.7007     0.6802     0.8578     0.3447     0.6553 
+Overall maximum convergence ratio: 0.200 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): met
+\end{lstlisting}
+Six periods, six network rates and six behavior rates: groups 1, 2 and 3 have the periods 1--2, 4--5 and 7--8. The effects are shared. The estimated influence of the friends' alcohol use (\texttt{beh\_avalt} 0.50, $z=1.3$) and the selection effects are not distinguishable from zero in these small groups.
+
+\paragraph{Groups observed at different waves.} The groups need not have been observed at the same occasions. Suppose that group~1 was observed at all three waves, group~2 only at the first two and group~3 only at the last two. The option \opt{gwaves()} gives the waves of the groups by their position in \opt{waves()}:
+\begin{lstlisting}
+. nwsaom, waves(g1 g2 g3) groups(group) gwaves(2: 1 2 | 3: 2 3) outdegree reciprocity transtrip seed(1)
+----------------------------------------------------------------------------------------------------
+SAOM (Method of Moments, conditional), waves: g1 g2 g3
+Actors: 50                             Periods: 4
+Groups: 3 (variable group), actors per group: 15, 20, 15; waves per group: 3, 2, 2
+----------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+    g1_to_g3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   outdegree |  -2.682548   .2634191   -10.18   0.000     -3.19884   -2.166256
+ reciprocity |   2.623762   .3910328     6.71   0.000     1.857352    3.390172
+   transtrip |    .554422   .1317472     4.21   0.000     .2962022    .8126417
+------------------------------------------------------------------------------
+Rate parameters (estimated, one per inter-wave period):
+
+             |   period1    period2    period4    period6 
+-------------+-------------------------------------------
+        rate |    3.1495     1.5944     5.2404     2.0249 
+          se |    1.0063     0.6410     1.3535     0.7708 
+Overall maximum convergence ratio: 0.038 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): met
+
+. matrix list e(groupwaves)
+e(groupwaves)[1,3]
+    c1  c2  c3
+r1   3   2   2
+. matrix list e(rates_period)
+e(rates_period)[1,4]
+    period1  period2  period4  period6
+r1        1        2        4        6
+\end{lstlisting}
+Four periods remain (two in group~1, one each in groups 2 and 3), numbered 1, 2, 4 and 6 because the period numbers of the combined series are kept: period 3 is the switch from group 1 to group 2, period 5 the switch from group~2 to group~3. The data of the actors must of course exist at the waves used: for group~3 the first wave is not used, and its values are ignored.
+
+\section{After the fit: time heterogeneity and score tests}\label{sec:groups-after}
+
+\texttt{estat timetest} and \texttt{estat score} work after a joint fit (a model without covariate effects is fitted unconditionally here; \texttt{estat timetest, fixrates} gives RSiena's \texttt{sienaTimeTest}). After a fit with groups the periods are the periods of all groups, so the test of time heterogeneity answers two questions: whether the effects are the same in all periods, and whether they are the same in all groups, because the periods of the same group are the periods of one class. The output has two more tables than for one group: a test per group and a test per period.
+\begin{lstlisting}
+. nwsaom, waves(g1 g2 g3) groups(group) outdegree reciprocity transtrip egox(alc) altx(alc) unconditional seed(1)
+(output omitted: outdegree -2.976, reciprocity 2.920, altx_alc 0.006, egox_alc -0.053, transtrip 0.652; six rates)
+. estat timetest, fixrates
+
+Test of time heterogeneity (score-type test; RSiena's sienaTimeTest)
+----------------------------------------------------------------------
+Joint test of all period-specific deviations:  c =   36.3357   d.f. = 25   p-value = 0.0667
+
+Test of each effect (is its parameter the same in all periods?)
+effect                           c  d.f.   p-value
+outdegree                    3.080     5    0.6876
+reciprocity                  2.672     5    0.7503
+altx_alc                    10.794     5    0.0556
+egox_alc                     8.384     5    0.1363
+transtrip                   11.680     5    0.0394
+
+Test of each group (are the parameters of the periods of the group the same as in the other groups?)
+group                            c  d.f.   p-value
+Group 1                      2.320     5    0.8033
+Group 2                     13.036    10    0.2217
+Group 3                     21.967    10    0.0153
+
+Test of each period (all effects)
+period                           c  d.f.   p-value
+Period 1                     2.320     5    0.8033
+Period 2                     6.085     5    0.2980
+Period 3                     8.021     5    0.1551
+Period 4                     7.133     5    0.2109
+Period 5                    18.300     5    0.0026
+Period 6                     4.452     5    0.4864
+\end{lstlisting}
+(The table of the period-specific deviations follows in the output and is omitted here.) The joint test is borderline ($p=0.067$); the effect of closure (\texttt{transtrip}) varies most, group~3 is the group that differs from the others ($p=0.015$), and period~5, which is the first period of group~3, is the period where the model fits worst ($p=0.003$). The periods are numbered 1 to 6 here (not with RSiena's numbers of the rates). The test per group follows RSiena (for the first group it is the test of the sum of the period dummies of each effect). The returned matrices are \texttt{r(group)} and \texttt{r(period)}. In RSiena 1.6.14 the test printed under the name \emph{group test} is the per-period test.
+
+The score test works as in one group (Chapter~\ref{ch:tools}): fit the restricted model with the effects held fixed at zero, then ask if the fixed effects are needed.
+\begin{lstlisting}
+. nwsaom, waves(g1 g2 g3) groups(group) outdegree reciprocity transtrip egox(alc) altx(alc) fix(egox(alc) altx(alc)) unconditional seed(1)
+(output omitted)
+. estat score
+
+Generalised score-type test of the model restricted by:
+  (1)  altx_alc                 =    0.0000
+  (2)  egox_alc                 =    0.0000
+------------------------------------------------------------
+Joint test:  c =    0.1870   d.f. = 2   p-value = 0.9107
+  (1) altx_alc separately: c =   0.0405  d.f. = 1  p-value = 0.8404   one-sided:  -0.2014
+  (2) egox_alc separately: c =   0.1719  d.f. = 1  p-value = 0.6785   one-sided:  -0.4146
+\end{lstlisting}
+The alcohol effects are not needed in the network model ($p=0.91$). In the fit of the restricted model the program prints that the convergence criteria are not met for the two fixed effects: their t-ratios are exactly the quantity the score test examines, not a failure of the estimation.
+
+\section{Agreement with RSiena}\label{sec:groups-rsiena}
+
+The examples were fitted in RSiena 1.6.14 (R~4.6.0) with \texttt{sienaGroupCreate} and \texttt{siena07}, the same data and effects, ten runs of each program with seeds 1 to 10. Table~\ref{tab:groups-agree} gives the means over the ten runs. The two programs agree to within the simulation error of a run (the standard deviation of the estimates over seeds is about 0.005--0.02 for the effects); the standard errors agree as well.
+
+\begin{table}[ht]
+\centering\small
+\caption{Joint estimates of \nwsaom{} and RSiena 1.6.14, means over ten runs each.}\label{tab:groups-agree}
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+Example & Parameter & \nwsaom{} & RSiena & Difference\\
+\midrule
+1 (four classes) & outdegree & $-2.247$ & $-2.248$ & 0.001\\
+& reciprocity & 1.868 & 1.870 & $-0.002$\\
+& transitive triplets & 0.465 & 0.464 & 0.000\\
+& rates (periods 1, 3, 5, 7) & 6.50, 5.38, 2.31, 8.17 & 6.51, 5.38, 2.31, 8.16 & $\le 0.015$\\
+\addlinespace
+3a (co-evolution) & outdegree & $-2.981$ & $-2.982$ & 0.001\\
+& reciprocity & 2.933 & 2.936 & $-0.003$\\
+& transitive triplets & 0.656 & 0.657 & $-0.001$\\
+& behavior ego (\texttt{behegox}) & 0.025 & 0.026 & $-0.001$\\
+& behavior alter (\texttt{behaltx}) & 0.009 & 0.006 & 0.003\\
+& linear shape & 0.388 & 0.384 & 0.003\\
+& quadratic shape & $-0.276$ & $-0.273$ & $-0.004$\\
+& average alter & 0.521 & 0.512 & 0.008\\
+& network rates (6) & 1.12 to 5.70 & 1.13 to 5.70 & $\le 0.02$\\
+& behavior rates (6) & 0.65 to 2.02 & 0.65 to 2.02 & $\le 0.015$\\
+\addlinespace
+3b (waves 3, 2, 2) & outdegree & $-2.680$ & $-2.677$ & $-0.003$\\
+& reciprocity & 2.618 & 2.615 & 0.002\\
+& transitive triplets & 0.558 & 0.556 & 0.002\\
+& rates (periods 1, 2, 4, 6) & 3.15, 1.63, 5.27, 2.01 & 3.18, 1.63, 5.28, 2.02 & $\le 0.026$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+For example~3b RSiena~1.6.14 itself stops with an error for a group object whose groups have different numbers of waves, although its manual allows them. The reference is therefore the equivalent object in which the first group is split into two groups of the same actors (waves 1--2 and 2--3) and the others are as before; without covariates and without effects that use group constants the model is the same, period by period.
+
+\begin{table}[ht]
+\centering\small
+\caption{Tests after the joint fit (example 4): $c$ is the chi-squared statistic, means over ten runs.}\label{tab:groups-tests}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Test & \nwsaom{} & RSiena & Difference\\
+\midrule
+Joint time test (25 d.f.) & 37.94 & 38.67 & $-0.74$\\
+Effect: outdegree / reciprocity (5 d.f.) & 3.12 / 2.94 & 3.19 / 3.01 & $-0.07$ / $-0.07$\\
+Effect: closure / altx / egox (5 d.f.) & 11.52 / 10.16 / 8.32 & 11.60 / 9.91 / 8.28 & $-0.08$ / 0.25 / 0.04\\
+Periods 1 to 6 (5 d.f.) & 2.2, 5.6, 8.8, 7.0, 17.8, 4.5 & 2.3, 5.5, 9.0, 6.6, 18.3, 4.5 & $\le 0.5$\\
+Score test of altx and egox (2 d.f.) & 0.17 & 0.18 & $-0.01$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Beyond these examples the implementation was compared with RSiena for a changing covariate, a rate covariate, an interaction, a dyadic covariate, joiners (composition change), missing ties, and a co-evolving behavior with average-alter, average-similarity, egoX/altX/simX and rate-covariate effects, in conditional and unconditional estimation (Chapter~\ref{ch:validation}).
+
+\section{What is not available with groups}\label{sec:groups-limits}
+
+The following stop with a message when combined with \opt{groups()}:
+\begin{itemize}[nosep]
+  \item maximum likelihood (\opt{ml}) and Bayesian estimation (\texttt{nwsaom bayes}), which run in separate parts of the program that do not yet know the group chain;
+  \item \texttt{estat gof}, \texttt{estat simulate} and \texttt{estat importance}, which simulate the whole network from the saved waves (\texttt{estat timetest} and \texttt{estat score} do work);
+  \item two-mode and non-directed networks, \texttt{nwsaom multinet} (several dependent networks) and several behaviors;
+  \item the effects that use a constant of the whole data set that is not yet computed for each group: the centered degree effects (\opt{inpopc}, \opt{outpopc}, \opt{outactc}, \opt{inactc}, \opt{degplus}, \opt{degplusc}), \opt{avdeg}, \opt{transtriads} and structural equivalence;
+  \item \opt{behrate()} (rate effects of a behavior by the network position; \opt{behratecov()} works), \opt{structural()}, \opt{joinat()} and \opt{leaveat()} (fractional times of joining or leaving; \opt{present()} works), \opt{tvdyadcov()} and the other time-varying dyadic covariates.
+\end{itemize}
+Constraints on effects (\texttt{higher}, \texttt{disjoint}, \texttt{atLeastOne}) are not supported with groups in RSiena either.
+
+\paragraph{A known difference from RSiena.} With groups, a model with missing behavior values together with the selection effects \opt{behegox} or \opt{behaltx} gives estimates that differ from RSiena's; in a single group the two programs agree and the cause of the difference in groups has not been found. Treat such models with caution. The comparison of composition change in groups used actors who join; actors who leave (together with a behavior) were not compared with RSiena.
+
+\paragraph{Files.} The data files, the do-file and the log of these examples are on the website, in the tutorial \emph{Several groups at once} (\url{https://nwcommands.org/nwsaom/}).

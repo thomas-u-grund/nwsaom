@@ -52,6 +52,7 @@ Behavior as covariate, selection & netbeh(samex): $-2.53/2.79/0.556$ against $-2
 Several dependent networks (multinet) & Targets equal, estimates agree within seed noise, with the exceptions listed below; 20 effects validated for non-directed members.\\
 Symmetric co-evolution & Simulation study, 40 replicates from known parameters: network rate $0.612$ (true $0.6$), behavior rate $1.60$ ($1.5$), outdegree $-1.44$ ($-1.4$), linear median $0.37$ ($0.3$), avAlt median $1.29$ ($1.5$).\\
 Multi-group meta-analysis (\texttt{nwsaom meta}) & 17 numbers identical to five decimals with RSiena's functions.\\
+Joint estimation of several groups (\opt{groups()}) & RSiena 1.6.14 (\texttt{sienaGroupCreate}, \texttt{siena07}), ten runs of each program, conditional and unconditional: the estimates, standard errors and rates agree within the simulation error for density, reciprocity, transitive triplets, 3-cycles, egoX, altX, simX, balance, a changing covariate, a rate covariate, an interaction, a dyadic covariate, composition change, missing ties and a co-evolving behavior (linear and quadratic shape, average alter, average similarity, egoX/altX/simX of the behavior, a behavior rate covariate). Largest difference of an effect in the examples of Chapter~\ref{ch:groups}: 0.008 (four classes: 0.002). Time test: joint $c$ 37.9 against 38.7, by effect and period within 0.5; score test 0.17 against 0.18.\\
 Rate effects of behaviors and two-mode networks & Structural rate effects of two-mode and non-directed networks, \texttt{ratecov()} with changing covariates and with the behavior as covariate, and the rate effects of a co-evolving behavior (\texttt{behrate()}, \opt{behratecov()}): observed statistics equal \texttt{siena07}'s and estimates within seed noise.\\
 Two-mode member in \texttt{nwsaom multinet} & The 21 two-mode cross effects of RSiena and their counterparts for a one-mode network that depends on a two-mode one: targets equal, estimates within the Monte Carlo error of both programs.\\
 Behavior in \texttt{nwsaom multinet} & Behavior effects of both networks, covariate and shape effects, endowment and creation of behavior effects, interactions of behavior effects, missing behavior values, and \texttt{netbeh:} effects (53 of 54 equal \texttt{siena07}'s estimates).\\
@@ -94,6 +95,13 @@ The following cases are the honest edge of the validation. They fall into four k
 \item Cycle4 endowment/creation estimates differ from RSiena by less than 0.1 with a standard error of 0.55 (six seeds each), judged to be noise.
 \item \texttt{estat gof}: RSiena reuses networks stored during the fit; \nwsaom{} simulates afresh (Chapter~\ref{ch:estimation}). The p-value of the correlation diagnostic in \texttt{nwsaom meta} uses the $t$ approximation, RSiena the exact (Edgeworth) value.
 \item The simulated statistic of a few endowment/creation effects uses the union of the dyads missing at either wave, where RSiena treats start-missing and end-missing dyads differently. The observed target is exact; the simulated statistic differs for a handful of ties. This is a stated approximation.
+\end{itemize}
+
+\subsection{Several groups}
+\begin{itemize}
+\item RSiena 1.6.14 stops with an error (\texttt{INTEGER()} applied to a non-list in \texttt{initializeFRAN}) for a group object whose groups have different numbers of waves, although its manual allows this. \opt{gwaves()} was therefore checked against the equivalent object of two-wave groups (uncentered covariates, no effects with group constants).
+\item With \opt{groups()}, missing behavior values together with the selection effects \opt{behegox} or \opt{behaltx} give estimates that differ from RSiena's; in a single group the two programs agree. The cause has not been found, so this combination is not claimed as validated. The comparison of composition change in groups used joiners; leavers (with a behavior) were not compared and are not claimed.
+\item Constraints (\texttt{higher}, \texttt{disjoint}, \texttt{atLeastOne}) are not supported by RSiena with groups, and \nwsaom{} does not offer them.
 \end{itemize}
 
 \subsection{Constants that differ by construction}

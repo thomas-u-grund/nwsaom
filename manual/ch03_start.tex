@@ -230,6 +230,8 @@ Result & Content \\
 \texttt{e(engine)} & \texttt{native} or \texttt{mata}: which simulator ran (Chapter~\ref{ch:technical}). \\
 \texttt{e(waves)} & The names of the waves. \\
 \texttt{e(nodes)}, \texttt{e(nwaves)} & Number of actors and of waves. \\
+\texttt{e(ngroups)}, \texttt{e(groupn)}, \texttt{e(groupwaves)}, \texttt{e(groupvar)} & With \opt{groups()}: the number of groups, the number of actors and of waves of each group (matrices $1\times$ groups) and the name of the group variable; \texttt{e(N)} is the total number of actors. \\
+\texttt{e(rates\_group)}, \texttt{e(rates\_period)} & With \opt{groups()}: for each column of \texttt{e(rates)} (and \texttt{e(rates\_beh)}) the group and RSiena's number of the period; the columns are named \texttt{period1}, \texttt{period2}, \texttt{period4}, \ldots. Chapter~\ref{ch:groups}. \\
 \bottomrule
 \end{tabular}
 \end{center}

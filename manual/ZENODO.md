@@ -1,3 +1,5 @@
+> Note (2026-10-27): for the 1.2 series the manual is relabelled "Manual for version 1.2" (new chapter 'Several groups: joint estimation'; version field 1.2.0 at the 1.2.0 release). The text below is the 1.1 record; change title, version and description accordingly when the 1.2 version is uploaded. Nothing has been uploaded.
+
 # Zenodo record for the nwsaom manual, Manual for version 1.1
 
 Metadata for ONE new version of the existing Zenodo record. Nothing has been uploaded.

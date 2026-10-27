@@ -126,19 +126,21 @@ Result & Content\\
 \texttt{e(tratio)} & $1\times$ nparam convergence $t$-ratios of the coefficients.\\
 \texttt{e(tconv)}, \texttt{e(tconv\_max)} & Convergence $t$-ratios of all parameters including rates; RSiena's overall maximum ratio (below 0.25 is good).\\
 \texttt{e(rate)}, \texttt{e(rate\_se)}, \texttt{e(rate\_tratio)} & Network rate, standard error and $t$-ratio (two-wave path; no $t$-ratio under conditional estimation).\\
-\texttt{e(rates)}, \texttt{e(rates\_se)}, \texttt{e(rate\_tratios)} & The same per period, $1\times(\text{waves}-1)$, for \opt{waves()}.\\
+\texttt{e(rates)}, \texttt{e(rates\_se)}, \texttt{e(rate\_tratios)} & The same per period, $1\times(\text{waves}-1)$, for \opt{waves()} (with \opt{groups()}: one column per period of each group).\\
 \texttt{e(rate\_beh)}, \texttt{e(rates\_beh)}, \ldots & Behavior rates of a co-evolution fit, with standard errors and $t$-ratios.\\
 \texttt{e(ratecoefs)} & \opt{ratecov()} fits: rate-covariate coefficients, with standard errors, $t$-ratios and a fixed indicator.\\
 \texttt{e(rsiena\_labels)} & RSiena's name of each coefficient, in the order of \texttt{e(b)}, separated by \texttt{|}.\\
 \texttt{e(conditional)}, \texttt{e(centered)} & 1 for conditional estimation; 1 if covariates were centred.\\
 \texttt{e(engine)}, \texttt{e(engine\_why)} & \texttt{native} or \texttt{mata}, and why Mata.\\
 \texttt{e(N)}, \texttt{e(nodes)}, \texttt{e(nwaves)} & Number of actors and waves.\\
+\texttt{e(ngroups)}, \texttt{e(groupn)}, \texttt{e(groupwaves)}, \texttt{e(groupvar)} & With \opt{groups()}: number of groups, actors and waves per group, name of the group variable (\texttt{e(N)} is the total number of actors).\\
+\texttt{e(rates\_group)}, \texttt{e(rates\_period)} & With \opt{groups()}: the group and RSiena's period number of each column of \texttt{e(rates)}; \texttt{e(rates)} has one column per period of each group, named \texttt{period1}, \texttt{period2}, \texttt{period4}, \ldots{} (Chapter~\ref{ch:groups}).\\
 \texttt{e(waves)}, \texttt{e(behavior)}, \texttt{e(symtype)} & Names of the waves and behaviors; model type of a non-directed fit.\\
 \texttt{e(estat\_cmd)} & Postestimation dispatch (\texttt{nwsaom\_estat}).\\
 \bottomrule
 \end{tabular}
 \end{center}
-Stored estimates can be combined across networks with \texttt{nwsaom meta}, the counterpart of RSiena's \texttt{siena08} (Chapter~\ref{ch:missing}, Section~\ref{sec:est-notimpl}).
+Stored estimates can be combined across networks with \texttt{nwsaom meta}, the counterpart of RSiena's \texttt{siena08} (Section~\ref{sec:meta}); several groups can also be estimated jointly with \opt{groups()} (Chapter~\ref{ch:groups}).
 
 \section{Goodness of fit: \texttt{estat gof}}
 \texttt{estat gof} implements the methodology of RSiena's \texttt{sienaGOF()} and \texttt{plot.sienaGOF()} (Lospinoso and Snijders 2019). For each auxiliary statistic (a user-chosen summary of the network, not a model term) it simulates \opt{nsim()} fresh replicates at the fitted coefficients and tests whether the observed wave is an outlier relative to the simulated distribution.

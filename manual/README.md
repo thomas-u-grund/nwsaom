@@ -1,13 +1,13 @@
 # The nwsaom manual
 
-`nwsaom_manual.pdf` is the user manual and reference of nwsaom ("Manual for version 1.1"). The LaTeX source is `nwsaom_manual.tex` with one file per chapter (`ch*.tex`, `app_*.tex`). `gen_*.tex` and `build_effects.py` generate the effect tables and counts from the effects inventory; do not edit the `gen_*.tex` files by hand.
+`nwsaom_manual.pdf` is the user manual and reference of nwsaom ("Manual for version 1.2"). The LaTeX source is `nwsaom_manual.tex` with one file per chapter (`ch*.tex`, `app_*.tex`). `gen_*.tex` and `build_effects.py` generate the effect tables and counts from the effects inventory; do not edit the `gen_*.tex` files by hand.
 
 ## Bumping the version
 
-The manual is labelled by the minor series (`\manualseries`, valid for 1.1.x). The exact version and date of the release that produced the listings are two more macros in `nwsaom_manual.tex` (written by `tools/set_version.py`):
+The manual is labelled by the minor series (`\manualseries`, valid for 1.2.x). The exact version and date of the release that produced the listings are two more macros in `nwsaom_manual.tex` (written by `tools/set_version.py`):
 
-    \newcommand{\manualseries}{1.1}
-    \newcommand{\pkgversion}{1.1.0}
+    \newcommand{\manualseries}{1.2}
+    \newcommand{\pkgversion}{1.2.0}
     \newcommand{\pkgdate}{26 October 2026}
 
 Change `\manualseries` only for a new minor or major release whose documented behaviour changed (and then upload a new Zenodo version, see `ZENODO.md`). For a patch release only the last two lines change. The tag in the installation example of `ch01_intro.tex` (`nwsaom/v1.1.0/`, inside a listing) is the only other place with the exact number.

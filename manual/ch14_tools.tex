@@ -32,7 +32,7 @@ period          up      down      same
 1->2            16         6        28
 2->3            18         9        23
 \end{lstlisting}
-A period with a Jaccard index below about 0.3 has few stable ties and carries little information about the change process; here the two periods are at 0.33 and 0.38. The results are in \texttt{r(periods)}, \texttt{r(waves)} and \texttt{r(behchange)}.
+A period with a Jaccard index below about 0.3 has few stable ties and carries little information about the change process; here the two periods are at 0.33 and 0.38. The results are in \texttt{r(periods)}, \texttt{r(waves)} and \texttt{r(behchange)}. For a two-mode network the ties are the attendances (the cells of the actors-by-events matrix), the density is taken over those cells and the average degree is the mean number of events per actor; the option \opt{actormode(\#)} names the mode of the actors (default 2, as in \texttt{nwsaom}), and \texttt{r(n\_actors)} and \texttt{r(n\_events)} hold the numbers of actors and events. The description of a stacked data set with groups (Chapter~\ref{ch:groups}) is that of the combined network; describe the groups one by one by making a network of each.
 
 \section{Holding effects fixed: \opt{fix()}}
 
@@ -64,7 +64,7 @@ Options: \opt{theta(\emph{matname})} replaces the coefficients (a row vector in 
 period          ties      mutual    transitive    behavior
 1          127.1 ( 116)    36.3 (  35)      72.0 (  88)
 \end{lstlisting}
-Internally the model is set up by a short call of \texttt{nwsaom} with all coefficients fixed, so every data option of \texttt{nwsaom} is understood.
+Internally the model is set up by a short call of \texttt{nwsaom} with all coefficients fixed, so every data option of \texttt{nwsaom} is understood. Both commands work for a two-mode model: the simulation runs on the actors-by-events network, the table shows the number of ties (attendances) only (the columns for mutual dyads and transitive triples are missing), and \opt{generate()} saves two-mode networks (one row per actor, one column per event). A \opt{theta()} matrix of the wrong shape stops with a message that says what was expected. After a fit with \opt{groups()}, \texttt{estat simulate} is not available.
 
 \section{Score-type tests: \texttt{estat score}}
 
@@ -197,6 +197,8 @@ Certainty R_H of the actors' choices:   0.5857   0.5785
 
 \section{Several groups: \texttt{nwsaom meta}}\label{sec:meta}
 
+This section is about the meta-analysis of separate fits. To estimate one model for all groups at once, use the option \opt{groups()} (Chapter~\ref{ch:groups}); Section~\ref{sec:groups-vs-meta} compares the two with the same data.
+
 When the same model is fitted to several networks of the same kind, for example school classes, the group estimates can be combined, which is what RSiena's \texttt{siena08} does. \texttt{nwsaom meta} takes the stored estimates (\texttt{estimates store}) of the same model fitted to each group, with the same effects in the same order. (The name \texttt{nwsaom\_meta}, used by earlier versions, still works.) For every effect it reports the combined mean and its standard error (an iteratively reweighted least squares estimate with a random effect for the group, Snijders and Baerveldt 2003), the estimated standard deviation between groups, a heterogeneity test $Q$, the maximum likelihood estimates of the mean and the between-group standard deviation with profile-likelihood intervals, and Fisher's combination of the one-sided tests.
 
 The following example runs with the data of the package. It makes four groups by simulating the model four times from the same start network at known coefficients (Section~\ref{sec:sim}), fits each group on its own, and combines the fits. The combined estimates should be close to the values used for the simulation ($-2.3$, 2 and 0.5).
@@ -216,8 +218,8 @@ IWLS estimates (Snijders & Baerveldt 2003)
  reciprocity |   4    1.8729   0.0691   27.09   0.000   0.1383     0.99   0.804
    transtrip |   4    0.4749   0.0121   39.27   0.000   0.0242     0.16   0.983
 \end{lstlisting}
-The combined means recover the coefficients, and no effect differs between the groups ($p(Q)$ between 0.48 and 0.98), as it should for groups simulated from the same model. In a real analysis a small $p(Q)$ for an effect means that the groups differ in that effect by more than their standard errors allow, and the estimated between-group standard deviation shows by how much. The full set of results is returned in \texttt{r(meta)}; the option \opt{rates} combines the rate parameters as well, and \opt{bound(\#)} excludes groups with a standard error of at least \# (default 10), as RSiena does. The results reproduce RSiena's functions to five decimals (Chapter~\ref{ch:validation}).
+The combined means recover the coefficients, and no effect differs between the groups ($p(Q)$ between 0.48 and 0.98), as it should for groups simulated from the same model. In a real analysis a small $p(Q)$ for an effect means that the groups differ in that effect by more than their standard errors allow, and the estimated between-group standard deviation shows by how much. The full set of results is returned in \texttt{r(meta)}; the option \opt{rates} combines the rate parameters as well, and \opt{bound(\#)} excludes groups with a standard error of at least \# (default 10), as RSiena does. The option \opt{rates} uses the standard errors of the rates, \texttt{e(rates\_se)}, of each fit (version 1.1 took them from a row that does not exist, so that every rate was dropped without a message); the rows are named \texttt{rate\_period1}, \texttt{rate\_period2}, \ldots. The matrices \texttt{r(theta)} and \texttt{r(se)} (one row per stored estimate, one column per effect) carry the names of the stored estimates and of the effects. The results reproduce RSiena's functions to five decimals (Chapter~\ref{ch:validation}).
 
 \section{What is not available}
 
-After \texttt{nwsaom multinet}, \texttt{estat score} and \texttt{estat timetest} are available, but \texttt{estat gof}, \texttt{estat importance} and \texttt{estat simulate} are not. The generalised method of moments of RSiena is not implemented (Chapter~\ref{ch:missing}). Maximum likelihood and Bayesian estimation are described in Chapter~\ref{ch:estimation}.
+After \texttt{nwsaom multinet}, \texttt{estat score} and \texttt{estat timetest} are available, but \texttt{estat gof}, \texttt{estat importance} and \texttt{estat simulate} are not. The same holds after a fit with \opt{groups()} (Chapter~\ref{ch:groups}), where \texttt{estat timetest} also reports a test per group and per period. The generalised method of moments of RSiena is not implemented (Chapter~\ref{ch:missing}). Maximum likelihood and Bayesian estimation are described in Chapter~\ref{ch:estimation}.

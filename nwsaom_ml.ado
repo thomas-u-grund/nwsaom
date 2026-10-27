@@ -1,4 +1,4 @@
-*! version 1.1.1  27oct2026 nwcommands: maximum likelihood estimation of a SAOM (Robbins-Monro on the score of the augmented data) after nwsaom
+*! version 1.2.0  27oct2026 nwcommands: maximum likelihood estimation of a SAOM (Robbins-Monro on the score of the augmented data) after nwsaom
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General

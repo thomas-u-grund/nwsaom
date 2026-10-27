@@ -3,7 +3,9 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.2.0] - 2026-10-27
+
+Minor release: joint estimation of several groups. Works with nwcommands 3.6.0 and later. The Mata libraries `lnwsaom1.mlib` and `lnwsaom2.mlib` are rebuilt (Stata 17) against the unchanged core library; the compiled plugin of this release is needed for groups (an older plugin gives a clear message), and everything else works with an older plugin, only slower where the new code paths apply.
 
 ### Added
 - Joint estimation of several groups: option `groups(varname)` (RSiena's `sienaGroupCreate()` + `siena07()`). The actors of all groups are the rows of the data set, `varname` gives the group, the wave networks have no ties between groups. One set of effect parameters for all groups, one rate per period of each group (also of a behavior), named with RSiena's period numbering (`period1 period2 period4 ...`); `e(rates_group)`, `e(rates_period)`, `e(ngroups)`, `e(groupn)`, `e(groupwaves)`, `e(groupvar)`. Conditional and unconditional method of moments.
@@ -21,7 +23,7 @@ project uses [Semantic Versioning](https://semver.org/).
 ### Changed
 - The checks of `symmetric`/`symtype()` live in `_nwsaom_symcheck.ado` (nwsaom.ado is at the size limit of one ado program).
 
-### Fixed
+### Fixed (continued)
 - `nwsaom describe` on a two-mode network counted the cells within the modes (it reported an undirected network with all 32 nodes of an 18 x 14 network); it now reports the actors, events, attendances, density over the actors-by-events cells and the average number of events per actor, also in `r()`. New option `actormode()`.
 - `estat simulate` and `nwsaom simulate` work after / for a two-mode model (the simulation runs on the actors-by-events network; `generate()` saves two-mode networks). A `theta()` matrix of the wrong shape gives a message instead of a conformability error.
 - `nwsaom meta, rates` took the standard errors of the rates from a row that does not exist, so every rate had a missing standard error and was silently excluded; it now uses `e(rates_se)`. `r(theta)` and `r(se)` carry the names of the stored estimates (rows) and of the effects (columns).
