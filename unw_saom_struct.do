@@ -524,4 +524,32 @@ real matrix SaomStructWeights(pointer(class nw_def scalar) scalar netobj) {
 	}
 	return(W)
 }
+
+/* several co-evolving behaviors: the network part of the targets and the observed distance of period pd (SaomMBInit()) */
+void SaomStructMBPd(struct SaomMBCtx scalar C, class SaomModel scalar M, real scalar pd) {
+	real matrix raw, A, B
+	class SaomGraph scalar Tg, Gs
+	raw = SaomStructRaw()
+	SaomStructPeriod(raw, pd, C.n, A, B)
+	if (rows(A) == 0 & rows(B) == 0) return
+	Tg = SaomStructPatched(*C.Gwaves[pd+1], A)
+	Gs = SaomStructPatched(*C.Gwaves[pd], B)
+	C.target[pd, 1..C.pNet] = M.full_statistic(Tg)
+	C.targetRateNet[pd] = SaomCountDiffering(Gs, Tg)
+	if (strtoreal(st_global("NWSAOM_TRACE")) == 5) {
+		st_matrix("__nwsaom_tr_target", C.target)
+		st_matrix("__nwsaom_tr_rate", C.targetRateNet)
+	}
+}
+
+/* co-evolution with ratecov(): the observed statistic of the covariate rate effects of period pd (sum over the changed dyads outside the structural ones) */
+real rowvector SaomStructRC(struct SaomCoevCtx scalar C, real scalar pd, real matrix rcA) {
+	real matrix raw, A, B
+	class SaomGraph scalar Tg, Gs
+	raw = SaomStructRaw()
+	SaomStructPeriod(raw, pd, C.n, A, B)
+	Tg = SaomStructPatched(*C.Gwaves[pd+1], A)
+	Gs = SaomStructPatched(*C.Gwaves[pd], B)
+	return(SaomCovariateDifferingSum(Gs, Tg, rcA, (C.hasmiss ? *C.missMaskNetPd[pd] : J(0, 0, 0))))
+}
 end

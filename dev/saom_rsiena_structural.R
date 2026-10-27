@@ -97,6 +97,16 @@ if (task == 'data') quit()
 arr <- function(ws) array(unlist(ws), dim = c(nrow(ws[[1]]), ncol(ws[[1]]), length(ws)))
 cvv <- (1:50 %% 4) + 0.5
 mkdata <- function(ws) {
+  if (Sys.getenv("MODEL", "std") == 'mb') {       # two co-evolving behaviors: alcohol and smoking of s50
+    net <- sienaDependent(arr(ws)); alc <- sienaDependent(as.matrix(s50a[, 1:3]), type = 'behavior'); smk <- sienaDependent(as.matrix(s50s[, 1:3]), type = 'behavior')
+    write.table(cbind(as.matrix(s50a[, 1:3]), as.matrix(s50s[, 1:3])), file.path(out, "beh2.csv"), row.names = FALSE, col.names = FALSE, sep = ",")
+    return(sienaDataCreate(net, alc, smk))
+  }
+  if (Sys.getenv("MODEL", "std") == 'coevrc') {   # one behavior and a covariate rate effect of the network
+    net <- sienaDependent(arr(ws)); beh <- sienaDependent(as.matrix(s50a[, 1:3]), type = 'behavior'); cvc <- coCovar(cvv, centered = TRUE)
+    write.table(as.matrix(s50a[, 1:3]), file.path(out, "beh.csv"), row.names = FALSE, col.names = FALSE, sep = ",")
+    return(sienaDataCreate(net, beh, cvc))
+  }
   if (Sys.getenv("MODEL", "std") == 'coev') {     # a co-evolving behavior: the alcohol scores of the first waves of s50
     nw <- length(ws); bb <- as.matrix(s50a[, 1:nw]); beh <- sienaDependent(bb, type = 'behavior')
     write.table(as.matrix(s50a[, 1:3]), file.path(out, "beh.csv"), row.names = FALSE, col.names = FALSE, sep = ",")
@@ -116,6 +126,13 @@ mkeff <- function(d, theta = NULL) {
   if (MODEL == 'endow') {   # reciprocity split into endowment and creation, outdegree and transitive triplets plain
     e <- includeEffects(e, recip, type = 'endow'); e <- includeEffects(e, recip, type = 'creation'); e <- includeEffects(e, recip, type = 'eval', include = FALSE)
     e <- includeEffects(e, transTrip)
+  } else if (MODEL == 'mb') {
+    e <- includeEffects(e, recip, transTrip)
+    e <- includeEffects(e, avAlt, interaction1 = 'net', name = 'alc'); e <- includeEffects(e, avAlt, interaction1 = 'net', name = 'smk')
+  } else if (MODEL == 'coevrc') {
+    e <- includeEffects(e, recip, transTrip)
+    e <- includeEffects(e, avAlt, interaction1 = 'net', name = 'beh')
+    e <- includeEffects(e, RateX, interaction1 = 'cvc', type = 'rate')
   } else if (MODEL == 'coev') {
     e <- includeEffects(e, recip, transTrip)
     e <- includeEffects(e, altX, simX, interaction1 = 'beh')
@@ -191,7 +208,7 @@ if (task == 'est') {
     res <- rbind(res, c(ans$theta, ans$tconv.max))
   }
   cat("ESTCOLS", gsub(" ", "_", e$effectName[e$include]), "tconv.max\n")
-  if (MODEL == 'coev') print(round(ans$theta, 3))
+  if (MODEL == 'coev') print(round(ans$theta, 3)); print(as.data.frame(e)[e$include, c('name','shortName','type')])
   print(round(res, 3))
   cat("MEAN", round(colMeans(res), 3), "\n")
   cat("SE", round(apply(res, 2, sd) / sqrt(nrow(res)), 3), "\n")

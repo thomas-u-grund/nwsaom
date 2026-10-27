@@ -13239,6 +13239,7 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 		for (pd=1; pd<=P; pd++) {
 			rcA = rcs[., ((pd-1) * nrcT + 1)..(pd * nrcT)]
 			if (C.nrcN > 0) C.targetRC[pd, 1..C.nrcN] = SaomCovariateDifferingSum(*Gwaves[pd], *Gwaves[pd+1], rcA[., 1..C.nrcN], (C.hasmiss ? *missMaskNetPd[pd] : J(0, 0, 0)))
+			if (C.nrcN > 0 & SaomStructOn()) C.targetRC[pd, 1..C.nrcN] = SaomStructRC(C, pd, rcA[., 1..C.nrcN])
 			if (C.nrcB > 0) C.targetRC[pd, (C.nrcN+1)..nrcT] = (abs(*Behwaves[pd+1] - *Behwaves[pd]) :* (1 :- C.missBehPd[., pd]))' * rcA[., (C.nrcN+1)..nrcT]
 		}
 	}
@@ -16544,10 +16545,13 @@ struct SaomMBCtx scalar SaomMBInit(
 			ratesBeh0[b,pd] = SaomBehaviorRateStart(*Behwaves[b,pd], *Behwaves[b,pd+1])
 		}
 		C.targetRateNet[pd] = SaomCountDiffering(*Gwaves[pd], Gend)
+		if (SaomStructOn()) SaomStructMBPd(C, M, pd)
 		ratesNet0[pd] = SaomRateStart(C.npresentPd[pd], C.targetRateNet[pd])
 	}
 
+	SaomStructNeedBatch(C.use_native)
 	if (C.use_native) SaomBatchSetupMB(Gwaves, C.P, C.cfg, C.codes, C.fnt, C.pB, Behwaves, behmin, behmax, simMean, overallMean, C.hastimed, C.presentPd, C.compEv)
+	if (SaomStructOn()) SaomStructSend(C.P, C.n)
 	ratesNet0out = ratesNet0
 	ratesBeh0out = rowshape(ratesBeh0, 1)
 	return(C)

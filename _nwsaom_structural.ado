@@ -28,7 +28,6 @@ program define _nwsaom_structural_build
 	local bad ""
 	if "`ml'" != "" local bad "`bad' ml"
 	if "`groups'" != "" local bad "`bad' groups()"
-	if "`behavior'" != "" & ("`mb'" == "1" | "`rate'" != "") local bad "`bad' behavior() with several behaviors or rate covariates"
 	if "`structural'" != "" & !(`tm' & "`structural'" == "__nwsaom_tm_structmat") local bad "`bad' structural()"
 	if "`bad'" != "" {
 		di "{err}structural zeros and ones (the codes 10 and 11 in the wave networks) are not yet supported together with:`bad'."

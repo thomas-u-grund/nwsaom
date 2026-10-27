@@ -393,6 +393,25 @@ assert DP[1,2] == 70 & DP[1,3] == 60 & DP[1,1] == 57 & abs(DP[1,4] - 0.305) < 0.
 assert DP[2,2] == 62 & DP[2,3] == 61 & DP[2,1] == 66
 di "PASS nwsaom describe with structural values"
 
+* two co-evolving behaviors (alcohol, smoking of s50) and a covariate rate effect with a behavior: the network part of the targets (RSiena: as without the behaviors:
+* outdegree 263, reciprocity 166 / 2, transitive triplets 225, distances 110 and 104) and the fits run (estimates agree with siena07 in dev/structural_harness)
+nwclear
+forvalues w = 1/3 {
+	nwset, mat(V3w`w') directed name(c`w') nooutput
+}
+import delimited "dev/saom_structural_beh2.csv", clear varnames(nonames)
+rename (v1 v2 v3 v4 v5 v6) (a1 a2 a3 s1 s2 s3)
+global NWSAOM_TRACE 5
+nwsaom, waves(c1 c2 c3) outdegree reciprocity transtrip behavior(a1 a2 a3 : linear quadratic avalt | s1 s2 s3 : linear quadratic avalt) k0(5) k3(30) seed(1)
+global NWSAOM_TRACE
+assert e(b)[1,1] < . & colsof(e(b)) == 9
+assert reldif(__nwsaom_tr_target[1,1] + __nwsaom_tr_target[2,1], 263) < 1e-9 & reldif(__nwsaom_tr_target[1,2] + __nwsaom_tr_target[2,2], 83) < 1e-9
+assert reldif(__nwsaom_tr_target[1,3] + __nwsaom_tr_target[2,3], 225) < 1e-9 & __nwsaom_tr_rate[1,1] == 110 & __nwsaom_tr_rate[1,2] == 104
+gen double cv = mod(_n, 4) + 0.5
+nwsaom, waves(c1 c2 c3) outdegree reciprocity transtrip behavior(a1 a2 a3) linear quadratic avalt ratecov(cv) k0(5) k3(30) seed(1)
+assert e(b)[1,1] < . & colsof(e(b)) == 6
+di "PASS several behaviors and rate covariates with a behavior run with codes"
+
 * ---- errors and gates
 nwclear
 nwset, mat(V3w1) directed name(g1) nooutput
