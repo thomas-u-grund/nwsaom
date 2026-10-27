@@ -9,8 +9,8 @@ capture program drop nwsaom_estat_impgroups
 program define nwsaom_estat_impgroups, rclass
 	syntax [, GROUP(integer 0)]
 	local G = e(ngroups)
-	if "`e(ratecov)'" != "" | e(has_behavior) == 1 {
-		di as err "estat importance after a fit with groups is available for network-only fits without {bf:ratecov()}."
+	if "`e(ratecov)'" != "" | "`e(present)'" != "" {
+		di as err "estat importance after a fit with groups is not available together with {bf:ratecov()}/{bf:present()}."
 		exit 198
 	}
 	if `group' < 0 | `group' > `G' {
@@ -28,6 +28,7 @@ program define nwsaom_estat_impgroups, rclass
 		capture matrix `ri' = r(ri)
 		capture matrix `sgp' = r(sigma_period)
 		capture mata: SaomModelSubsetEnd(__nwsaom_last_M)
+		if e(has_behavior) == 1 capture mata: SaomGroupsBehEnd()
 		if `rc' exit `rc'
 		capture return matrix ri_g`g' = `ri'
 		capture return matrix sigma_period_g`g' = `sgp'

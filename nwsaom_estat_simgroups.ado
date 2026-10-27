@@ -9,10 +9,6 @@ capture program drop nwsaom_estat_simgroups
 program define nwsaom_estat_simgroups, rclass
 	syntax [, NSIM(integer 100) SEED(integer -1) THETA(name) RATES(numlist >0) GENerate(name) GROUP(integer 0)]
 	local G = e(ngroups)
-	if "`e(ratecov)'" != "" | e(has_behavior) == 1 {
-		di as err "estat simulate after a fit with groups is available for network-only fits without {bf:ratecov()}."
-		exit 198
-	}
 	if `group' < 0 | `group' > `G' {
 		di as err "group() must be between 1 and `G'."
 		exit 198
@@ -50,6 +46,8 @@ program define nwsaom_estat_simgroups, rclass
 		capture matrix `sm' = r(sim)
 		capture matrix `ob' = r(obs)
 		capture mata: SaomModelSubsetEnd(__nwsaom_last_M)
+		if e(has_behavior) == 1 capture mata: SaomGroupsBehEnd()
+		if "`e(present)'" != "" capture mata: __nwsaom_last_present = J(0, 1, 0)
 		if `rc' exit `rc'
 		capture return matrix sim_g`g' = `sm'
 		capture return matrix obs_g`g' = `ob'

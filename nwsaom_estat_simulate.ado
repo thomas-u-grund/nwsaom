@@ -132,6 +132,7 @@ program define nwsaom_estat_simulate, rclass
 		local nperiods = `nwaves' - 1
 		forvalues pd = 1/`nperiods' {
 			local rate`pd' = r(rate`pd')
+			if `coev' local ratebeh`pd' = r(ratebeh`pd')
 			if "`rates'" != "" local rate`pd' : word `pd' of `rates'
 		}
 		local __sim_gname "__nwsaom_gofg_G"
@@ -141,6 +142,7 @@ program define nwsaom_estat_simulate, rclass
 	if "`e(ratecov)'" != "" {
 		mata: __nwsaom_sim_rcattr = st_data(1::`nodes', "`e(ratecov)'")
 		mata: __nwsaom_sim_rccoef = st_matrix("e(ratecoefs)")
+		if `grp' > 0 mata: __nwsaom_sim_rcattr = SaomGroupsRateCov("`e(ratecov)'", `=e(centered)', `grp')
 	}
 	if `coev' {
 		local pnet = e(p_net)
@@ -179,6 +181,7 @@ program define nwsaom_estat_simulate, rclass
 				mata: st_matrix("__nwsaom_sim_row", (`s', `pd', SaomSimSummary(__nwsaom_sim_G.to_dense(), `pd', mean(__nwsaom_sim_B.values))[3..6]))
 			}
 			else {
+				if `grp' > 0 & "`e(present)'" != "" mata: SaomGroupsPresSet(`grp', `pd')
 				mata: __nwsaom_sim_eng = SaomGofSimNet(__nwsaom_sim_G, __nwsaom_last_M, st_matrix("`bmat'"), `rate`pd'', `symtype', __nwsaom_sim_rcattr, __nwsaom_sim_rccoef)
 				mata: st_matrix("__nwsaom_sim_row", (`s', `pd', SaomSimSummary(__nwsaom_sim_G.to_dense(), `pd', .)[3..6]))
 			}
@@ -200,7 +203,8 @@ program define nwsaom_estat_simulate, rclass
 				if `coev' {
 					capture drop `generate'_`s'_p`pd'
 					quietly generate double `generate'_`s'_p`pd' = .
-					mata: st_store((1::`nodes'), "`generate'_`s'_p`pd'", __nwsaom_sim_B.values)
+					if `grp' > 0 mata: st_store(selectindex(SaomGroupsKept("groupid") :== `grp'), "`generate'_`s'_p`pd'", __nwsaom_sim_B.values)
+					else mata: st_store((1::`nodes'), "`generate'_`s'_p`pd'", __nwsaom_sim_B.values)
 				}
 			}
 		}

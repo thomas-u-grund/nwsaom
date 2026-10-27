@@ -256,7 +256,7 @@ Also available after {cmd:nwsaom multinet}, for the effects of all networks and 
 {pstd}
 After a fit with {opt groups()} the periods are the periods of all groups (RSiena's numbering) and the output has two more tables: a test per group (the dummies of the periods of the
 group; for the first group the sum of the dummies of each effect, as RSiena's group test) and a test per period (all effects at once; RSiena 1.6.14 reports this one under the name
-group test), returned in {cmd:r(group)} and {cmd:r(period)}. {cmd:estat score} works after such a fit; {cmd:estat gof}, {cmd:estat simulate} and {cmd:estat importance} run per group: they use the actors, waves, rates and covariate constants of one group ({opt group(#)}; by default all groups, one after the other). {cmd:estat gof} also reports the p-values of the groups combined by the inverse-normal method. They stop with a message after a fit with a behavior, {opt ratecov()} or {opt present()}.
+group test), returned in {cmd:r(group)} and {cmd:r(period)}. {cmd:estat score} works after such a fit; {cmd:estat gof}, {cmd:estat simulate} and {cmd:estat importance} run per group: they use the actors, waves, rates and covariate constants of one group ({opt group(#)}; by default all groups, one after the other). {cmd:estat gof} also reports the p-values of the groups combined by the inverse-normal method. They also work after a fit with a behavior (one behavior), {opt ratecov()} and {opt present()}; {cmd:estat importance} stops after {opt present()}, and all stop after a fit with {opt behratecov()}/{opt behrate()} together with a behavior.
 
 {marker estat_importance}{...}
 {title:estat importance}

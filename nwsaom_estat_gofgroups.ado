@@ -9,10 +9,6 @@ capture program drop nwsaom_estat_gofgroups
 program define nwsaom_estat_gofgroups, rclass
 	syntax [, NSIM(integer 50) SEED(integer -1) STATS(string) MAXDEG(integer 15) MAXDIST(integer 6) TWOTAILED NAME(string) JOIN(string) GROUP(integer 0)]
 	local G = e(ngroups)
-	if "`e(ratecov)'" != "" | e(has_behavior) == 1 | "`e(present)'" != "" {
-		di as err "estat gof after a fit with groups is available for network-only fits without {bf:ratecov()}/{bf:present()}."
-		exit 198
-	}
 	if `group' < 0 | `group' > `G' {
 		di as err "group() must be between 1 and `G'."
 		exit 198
@@ -34,6 +30,8 @@ program define nwsaom_estat_gofgroups, rclass
 			return scalar mhd_`s'_g`g' = r(mhd_`s')
 		}
 		capture mata: SaomModelSubsetEnd(__nwsaom_last_M)
+		if e(has_behavior) == 1 capture mata: SaomGroupsBehEnd()
+		if "`e(present)'" != "" capture mata: __nwsaom_last_present = J(0, 1, 0)
 		if `rc' exit `rc'
 	}
 	if `group' == 0 & `G' > 1 & "`join'" != "off" {

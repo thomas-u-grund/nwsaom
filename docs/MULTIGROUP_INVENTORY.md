@@ -37,7 +37,7 @@ alternatives of an actor to its own group. Status = state at the last commit of 
 | 27 | Bayesian (`sienaBayes`, `multi_siena`) | uses the group object; rates per group | `nwsaom bayes` refuses fits with groups | remaining: separate project |
 | 28 | Meta-analysis (`siena08`) | separate fits pooled | `nwsaom meta` | exists |
 | 29 | Time heterogeneity (`sienaTimeTest`) | period dummies over the glued periods; group test | `estat timetest` after a grouped fit: joint, effect, per-group and per-period tests; validated against sienaTimeTest | done |
-| 30 | Goodness of fit (`sienaGOF`) | per group via `groupName`; no pooled version | `estat gof` per group (`group(#)`; Liptak-combined p); network-only fits | done for network-only; validated vs sienaGOF (9 means within MC error); behavior, ratecov, present remain |
+| 30 | Goodness of fit (`sienaGOF`) | per group via `groupName`; no pooled version | `estat gof` per group (`group(#)`; Liptak-combined p); | done, incl. behavior, ratecov, present; validated vs sienaGOF (network 9 means, behavior 6 means, within MC error) |
 | 31 | Score tests / importance / simulate | via `sienaFit` objects | `estat score` done and validated; `estat importance`, `estat simulate`, `nwsaom simulate` work per group (network-only); importance checked against the group fitted alone (sienaRI has no group version) | partly |
 | 32 | Output | rate rows numbered by period of the glued series | done | done |
 | 33 | Effects object | `sienaGroupEffects`, `group`/`groupName`/`period` columns for rate rows | `e(rates_group)`, `e(rates_period)`, `e(groupn)`, `e(groupwaves)` | done |

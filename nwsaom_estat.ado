@@ -317,6 +317,7 @@ program define nwsaom_estat_gof, rclass
 		local nperiods = `nwaves' - 1
 		forvalues __pd = 1/`nperiods' {
 			local __gof_rate`__pd' = r(rate`__pd')
+			if `__gof_coev' local __gof_ratebeh`__pd' = r(ratebeh`__pd')
 		}
 		local __gof_gname "__nwsaom_gofg_G"
 	}
@@ -341,6 +342,7 @@ program define nwsaom_estat_gof, rclass
 	if "`e(ratecov)'" != "" {
 		mata: __nwsaom_gof_rcattr = st_data(1::`=e(nodes)', "`e(ratecov)'")
 		mata: __nwsaom_gof_rccoef = st_matrix("e(ratecoefs)")
+		if `grp' > 0 mata: __nwsaom_gof_rcattr = SaomGroupsRateCov("`e(ratecov)'", `=e(centered)', `grp')
 	}
 
 	// --- observed auxiliary-statistic vectors, POOLED (summed) across
@@ -492,6 +494,7 @@ program define nwsaom_estat_gof, rclass
 				// the fitted model, native when the plugin covers it
 				// (endowment/creation, structural(), ratecov(), present(),
 				// non-directed types)
+				if `grp' > 0 & "`e(present)'" != "" mata: SaomGroupsPresSet(`grp', `__pd')
 				mata: __nwsaom_gof_eng = SaomGofSimNet(__nwsaom_gof_Gwork, __nwsaom_last_M, st_matrix("`bmat'"), `__gof_rate`__pd'', `__gof_symtype', __nwsaom_gof_rcattr, __nwsaom_gof_rccoef)
 			}
 			// see the observed-side block above (harmonisation unit 26)

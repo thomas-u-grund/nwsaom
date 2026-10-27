@@ -23,10 +23,17 @@ program define nwsaom_gof_groupbegin, rclass
 		mata: SaomGroupsSubGraph(__nwsaom_last_G`=`s'+`q'', `group', __nwsaom_gofg_G`q')
 	}
 	local c 0
+	capture confirm matrix e(rates_beh)
+	local hasrb = (_rc == 0)
+	if `hasrb' {
+		tempname rb
+		matrix `rb' = e(rates_beh)
+	}
 	forvalues j = 1/`=colsof(`rg')' {
 		if `rg'[1, `j'] == `group' {
 			local ++c
 			return scalar rate`c' = `rt'[1, `j']
+			if `hasrb' return scalar ratebeh`c' = `rb'[1, `j']
 		}
 	}
 	return scalar nwaves = `nW'
@@ -34,4 +41,5 @@ program define nwsaom_gof_groupbegin, rclass
 	matrix `gnn' = e(groupn)
 	return scalar nodes = `gnn'[1, `group']
 	mata: SaomModelSubsetBegin(__nwsaom_last_M, `group')
+	if e(has_behavior) == 1 mata: SaomGroupsBehBegin(`group', `s', `nW')
 end

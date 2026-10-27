@@ -6,7 +6,7 @@ project uses [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
-- Postestimation after a fit with `groups()`: `estat gof` (per group, option `group(#)`, the p-values of the groups are combined by the inverse-normal method; RSiena's `sienaGOF(groupName=)`), `estat simulate` and `nwsaom simulate` (per group, `group(#)`, `generate()` saves the networks of each group as `<stub>_g#`, `rates()` takes one rate per period of all groups), `estat importance` (per group). Not yet for fits with a behavior, `ratecov` or `present()`.
+- Postestimation after a fit with `groups()`: `estat gof` (per group, option `group(#)`, the p-values of the groups are combined by the inverse-normal method; RSiena's `sienaGOF(groupName=)`), `estat simulate` and `nwsaom simulate` (per group, `group(#)`, `generate()` saves the networks of each group as `<stub>_g#`, `rates()` takes one rate per period of all groups), `estat importance` (per group). Also for fits with one behavior, `ratecov()` and `present()` (`estat importance` not with `present()`).
 
 ## [1.2.0] - 2026-10-27
 

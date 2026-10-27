@@ -18733,4 +18733,58 @@ real matrix SaomMLRun(pointer(class SaomGraph scalar) rowvector Gall, real scala
 	stata("plugin call saomnativesim, " + char(34) + "BATCHCLEAN|" + char(34))
 	return(out)
 }
+/* the co-evolving behavior of a fit with groups restricted to group h in place (waves s+1..s+nW of the virtual chain, the actors of the group, the group's simMean,
+   the rows of the behavior covariates); SaomGroupsBehEnd() puts the originals back */
+void SaomGroupsBehBegin(real scalar h, real scalar s, real scalar nW) {
+	external pointer(real colvector) rowvector __nwsaom_last_Behwaves
+	external class SaomBehaviorModel scalar __nwsaom_last_Mbeh
+	external transmorphic matrix __nwsaom_sub_Bw, __nwsaom_sub_Bsm, __nwsaom_sub_Bcov
+	external real matrix __saom_behcov
+	real colvector idx
+	real matrix b
+	pointer(real colvector) rowvector nb
+	real scalar q
+	idx = selectindex(SaomGroupsKept("groupid") :== h)
+	__nwsaom_sub_Bw = __nwsaom_last_Behwaves
+	__nwsaom_sub_Bsm = __nwsaom_last_Mbeh.simMean
+	nb = J(1, nW, NULL)
+	for (q=1; q<=nW; q++) nb[q] = &((*__nwsaom_last_Behwaves[s + q])[idx])
+	__nwsaom_last_Behwaves = nb
+	b = SaomGroupsKept("gbeh")
+	if (rows(b) >= 2) __nwsaom_last_Mbeh.setsimmean(b[2, h])
+	__nwsaom_sub_Bcov = __saom_behcov
+	if (rows(__saom_behcov) == rows(SaomGroupsKept("groupid"))) __saom_behcov = __saom_behcov[idx, .]
+}
+void SaomGroupsBehEnd() {
+	external pointer(real colvector) rowvector __nwsaom_last_Behwaves
+	external class SaomBehaviorModel scalar __nwsaom_last_Mbeh
+	external transmorphic matrix __nwsaom_sub_Bw, __nwsaom_sub_Bsm, __nwsaom_sub_Bcov
+	external real matrix __saom_behcov
+	if (findexternal("__nwsaom_sub_Bw") == NULL) return
+	__nwsaom_last_Behwaves = __nwsaom_sub_Bw
+	__nwsaom_last_Mbeh.setsimmean(__nwsaom_sub_Bsm)
+	__saom_behcov = __nwsaom_sub_Bcov
+	rmexternal("__nwsaom_sub_Bw")
+	rmexternal("__nwsaom_sub_Bsm")
+	rmexternal("__nwsaom_sub_Bcov")
+}
+
+/* the rate covariates (pooled-mean centred, as in the fit) of the actors of group h */
+real matrix SaomGroupsRateCov(string scalar vars, real scalar center, real scalar h) {
+	real colvector code
+	code = SaomGroupsKept("groupid")
+	return(SaomCovPrepMat(st_data(1::rows(code), vars), center)[selectindex(code :== h), .])
+}
+/* start-of-period presence of the actors of group h in its period pd, for the simulator (the activeStart rule of the fit) */
+void SaomGroupsPresSet(real scalar h, real scalar pd) {
+	external real matrix __nwsaom_last_present
+	external real matrix __nwsaom_presentmat
+	real colvector code, nw
+	real scalar s, q
+	code = SaomGroupsKept("groupid")
+	nw = SaomGroupsKept("groupw")
+	s = 0
+	for (q=1; q<h; q++) s = s + rowsum(nw[q, .] :> 0) - 1
+	__nwsaom_last_present = __nwsaom_presentmat[selectindex(code :== h), s + pd]
+}
 end
