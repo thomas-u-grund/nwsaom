@@ -2762,6 +2762,7 @@ program nwsaom, eclass
 				capture mata: mata drop __ns_missmaskbehpd`__pd'
 				if `__ns_hasmissbeh' {
 					mata: __ns_missmaskbehpd`__pd' = (__ns_missbeh_w`__pd1' :| __ns_missbeh_w`__pd2')
+					mata: SaomBehStartMissSet(`__pd', __ns_missbeh_w`__pd1')
 				}
 				else {
 					mata: __ns_missmaskbehpd`__pd' = J(`nodes', 1, 0)

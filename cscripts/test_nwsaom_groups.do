@@ -97,6 +97,15 @@ forvalues w = 1/3 {
 }
 save "__groups_comp.dta", replace
 
+import delimited "dev/saom_groups_mactors.csv", clear
+forvalues w = 1/3 {
+	preserve
+	import delimited "dev/saom_groups_w`w'.csv", clear varnames(nonames)
+	mkmat v*, matrix(Gmact`w')
+	restore
+}
+save "__groups_mact.dta", replace
+
 * the missing-tie masks and the dyadic covariate
 forvalues w = 1/3 {
 	matrix Mm`w' = J(50, 50, 0)
@@ -474,6 +483,39 @@ frame drop ref
 display "PASS: coevrate (uncond) agrees with RSiena"
 
 
+* ---- coevmiss
+nwclear
+use "__groups_mact.dta", clear
+forvalues w = 1/3 {
+	nwset, mat(Gmact`w') name(g`w') nooutput
+}
+frame create ref
+frame ref: import delimited "dev/saom_rsiena_groups_coevmiss_cond0.csv", clear
+__gfit, opts(outdegree reciprocity transtrip behavior(alc1 alc2 alc3) linear quadratic avalt behegox behaltx missbeh(bm1 bm2 bm3)) uncond
+__gchk outdegree "outdegree (density)" 0.12 0
+__gchk reciprocity "reciprocity" 0.12 0
+__gchk transtrip "transitive triplets" 0.12 0
+__gchk behegox "alc ego" 0.12 0
+__gchk behaltx "alc alter" 0.12 0
+__gchk beh_linear "alc linear shape" 0.12 0
+__gchk beh_quadratic "alc quadratic shape" 0.12 0
+__gchk beh_avalt "alc average alter" 0.12 0
+__gchk period1 "constant net rate (period 1)" 0.1 0.08
+__gchk bperiod1 "rate alc (period 1)" 0.1 0.08
+__gchk period2 "constant net rate (period 2)" 0.1 0.08
+__gchk bperiod2 "rate alc (period 2)" 0.1 0.08
+__gchk period4 "constant net rate (period 4)" 0.1 0.08
+__gchk bperiod4 "rate alc (period 4)" 0.1 0.08
+__gchk period5 "constant net rate (period 5)" 0.1 0.08
+__gchk bperiod5 "rate alc (period 5)" 0.1 0.08
+__gchk period7 "constant net rate (period 7)" 0.1 0.08
+__gchk bperiod7 "rate alc (period 7)" 0.1 0.08
+__gchk period8 "constant net rate (period 8)" 0.1 0.08
+__gchk bperiod8 "rate alc (period 8)" 0.1 0.08
+frame drop ref
+display "PASS: coevmiss (uncond) agrees with RSiena"
+
+
 * ---- coevcomp
 nwclear
 use "__groups_comp.dta", clear
@@ -564,3 +606,4 @@ assert colsof(e(rates)) == 2
 display "PASS: refusals and no group state after a grouped fit"
 erase "__groups_base.dta"
 erase "__groups_comp.dta"
+erase "__groups_mact.dta"

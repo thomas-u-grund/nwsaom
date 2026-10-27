@@ -5218,6 +5218,7 @@ void SaomBRReset() {
 	__saom_brdatv = J(0, 0, 0)
 }
 void SaomRatesReset() {
+	rmexternal("__nwsaom_bsm")
 	SaomRateTVReset()
 	SaomBRReset()
 	SaomGroupsReset()
@@ -6285,6 +6286,7 @@ real rowvector stat_saom_behsim(class SaomGraph scalar G, class SaomTermData sca
 	ties = G.all_ties()
 	tot = 0
 	for (k=1; k<=rows(ties); k++) {
+		if (rows(td.levels) == rows(td.attr)) if (td.levels[ties[k,1]] | td.levels[ties[k,2]]) continue
 		tot = tot + 1 - abs(td.attr[ties[k,1]] - td.attr[ties[k,2]]) / td.decay - td.center
 	}
 	return(tot)
@@ -6329,6 +6331,36 @@ void SaomBehSimSetValue(class SaomModel scalar M, real scalar i, real scalar v){
 		(*ptd).attr = a
 	}
 }
+/* the dependent behavior as covariate of a network effect: RSiena skips, in the statistic, a tie whose covariate value is MISSING at the start of the period
+   (CovariateDependentNetworkEffect::missing(), tieStatistic()); the ministep contributions use the imputed value. __nwsaom_bsm (n x P) holds those flags. */
+void SaomBehStartMissSet(real scalar pd, real colvector col) {
+	pointer(real matrix) scalar p
+	p = findexternal("__nwsaom_bsm")
+	if (pd == 1 | p == NULL) {
+		rmexternal("__nwsaom_bsm")
+		p = crexternal("__nwsaom_bsm")
+		*p = col
+	}
+	else *p = (*p, col)
+}
+real matrix SaomBehStartMiss() {
+	pointer(real matrix) scalar p
+	p = findexternal("__nwsaom_bsm")
+	if (p == NULL) return(J(0, 0, 0))
+	return(*p)
+}
+void SaomBehStartMissSync(class SaomModel scalar M, real scalar pd) {
+	real matrix b
+	real scalar t
+	pointer(class SaomTermData scalar) scalar ptd
+	b = SaomBehStartMiss()
+	if (cols(b) < pd) return
+	for (t=1; t<=M.nterms; t++) {
+		if (!(M.names[t] == "behsim" | M.names[t] == "behegox" | M.names[t] == "behaltx" | M.names[t] == "behegoplusalt")) continue
+		ptd = M.td[t]
+		(*ptd).levels = b[., pd]
+	}
+}
 real scalar SaomHasBehSim(class SaomModel scalar M){
 	real scalar t
 	for (t=1; t<=M.nterms; t++) if (_saom_isdynname(M.names[t])) return(1)
@@ -6340,7 +6372,10 @@ real rowvector stat_saom_behegox(class SaomGraph scalar G, class SaomTermData sc
 	real scalar k, tot
 	ties = G.all_ties()
 	tot = 0
-	for (k=1; k<=rows(ties); k++) tot = tot + td.attr[ties[k,1]] - td.center
+	for (k=1; k<=rows(ties); k++) {
+		if (rows(td.levels) == rows(td.attr)) if (td.levels[ties[k,1]]) continue
+		tot = tot + td.attr[ties[k,1]] - td.center
+	}
 	return(tot)
 }
 real rowvector change_saom_behegox(class SaomGraph scalar G, real scalar i, real scalar j, class SaomTermData scalar td){
@@ -6353,7 +6388,10 @@ real rowvector stat_saom_behaltx(class SaomGraph scalar G, class SaomTermData sc
 	real scalar k, tot
 	ties = G.all_ties()
 	tot = 0
-	for (k=1; k<=rows(ties); k++) tot = tot + td.attr[ties[k,2]] - td.center
+	for (k=1; k<=rows(ties); k++) {
+		if (rows(td.levels) == rows(td.attr)) if (td.levels[ties[k,2]]) continue
+		tot = tot + td.attr[ties[k,2]] - td.center
+	}
 	return(tot)
 }
 real rowvector change_saom_behaltx(class SaomGraph scalar G, real scalar i, real scalar j, class SaomTermData scalar td){
@@ -6366,7 +6404,10 @@ real rowvector stat_saom_behegoplusalt(class SaomGraph scalar G, class SaomTermD
 	real scalar k, tot
 	ties = G.all_ties()
 	tot = 0
-	for (k=1; k<=rows(ties); k++) tot = tot + td.attr[ties[k,1]] + td.attr[ties[k,2]] - 2 * td.center
+	for (k=1; k<=rows(ties); k++) {
+		if (rows(td.levels) == rows(td.attr)) if (td.levels[ties[k,1]] | td.levels[ties[k,2]]) continue
+		tot = tot + td.attr[ties[k,1]] + td.attr[ties[k,2]] - 2 * td.center
+	}
 	return(tot)
 }
 real rowvector change_saom_behegoplusalt(class SaomGraph scalar G, real scalar i, real scalar j, class SaomTermData scalar td){
@@ -13146,6 +13187,7 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 		Behpend.init(*Behwaves[pd+1], behminval, behmaxval, C.overallMeanPd[pd], C.simMeanPd[pd])
 		SaomGroupsSync(M, pd)
 		if (hasbehsim) SaomBehSimSync(M, *Behwaves[pd])		// lagged: starting behavior
+		if (hasbehsim) SaomBehStartMissSync(M, pd)
 		if (C.hasmiss) C.target[pd,.] = (SaomMaskedStatistic(Gpend, M, *missMaskNetPd[pd]), SaomCoevStatBeh(Behpend, *C.GpStat[pd], Mbeh, C.missBehPd[.,pd]))
 		else C.target[pd,.] = (M.full_statistic(Gpend), SaomCoevStatBeh(Behpend, *C.GpStat[pd], Mbeh, missBehZero))
 		C.target[pd,.] = SaomBehaviorPatchEndowCreation(Mbeh, C.target[pd,.], C.pNet, *Behwaves[pd],
@@ -15678,7 +15720,8 @@ void SaomBatchSetup(pointer(class SaomGraph scalar) rowvector Gwaves, real scala
 
 	real matrix E, t, EV, attrmat
 	real scalar k
-	real scalar n, pd, nattr, nbeh, nrows, i, junk, sframe, ntv, grpcol
+	real scalar n, pd, nattr, nbeh, nrows, i, junk, sframe, ntv, grpcol, hasms
+	real matrix bsm
 	string rowvector names
 	string scalar origframe, argstr
 
@@ -15710,11 +15753,14 @@ void SaomBatchSetup(pointer(class SaomGraph scalar) rowvector Gwaves, real scala
 		if (nbeh > 0) for (pd=1; pd<=P; pd++) names = names, "mb" + strofreal(pd)
 	}
 	if (haspresent) for (pd=1; pd<=P; pd++) names = names, "pr" + strofreal(pd)
+	bsm = SaomBehStartMiss()
+	hasms = (nbeh > 0 & hasmiss & cols(bsm) == P)
 	ntv = cols(cfg.tvcol)
 	for (k=1; k<=ntv; k++) for (pd=1; pd<=P; pd++) names = names, "tv" + strofreal(k) + "_" + strofreal(pd)
 	sframe = (rows(cfg.structpairs) > 40)
 	if (sframe) names = names, ("st_i", "st_j")
 	if (rows(EV) > 0) names = names, ("ev_p", "ev_t", "ev_a", "ev_k")
+	if (hasms) for (pd=1; pd<=P; pd++) names = names, "ms" + strofreal(pd)
 	names = names, SaomBehDyNames(n)
 
 	origframe = st_framecurrent()
@@ -15735,6 +15781,7 @@ void SaomBatchSetup(pointer(class SaomGraph scalar) rowvector Gwaves, real scala
 	for (k=1; k<=ntv; k++) for (pd=1; pd<=P; pd++) st_store((1::n), "tv" + strofreal(k) + "_" + strofreal(pd), cfg.tvmat[., (k-1)*P + pd])
 	if (sframe) st_store((1::rows(cfg.structpairs)), ("st_i", "st_j"), cfg.structpairs)
 	if (rows(EV) > 0) st_store((1::rows(EV)), ("ev_p", "ev_t", "ev_a", "ev_k"), EV)
+	if (hasms) for (pd=1; pd<=P; pd++) st_store((1::n), "ms" + strofreal(pd), bsm[., pd])
 
 	argstr = "BATCHSETUP" + SaomBatchSlotTag() + "|" + strofreal(n) + " " + strofreal(P) + " " + strofreal(nattr) + " " + strofreal(cols(cfg.termcodes))
 	for (i=1; i<=cols(cfg.termcodes); i++) argstr = argstr + " " + strofreal(cfg.termcodes[i]) + " " + strofreal(cfg.attridx[i]) + " " + strofreal(cfg.p1[i], "%25.17g")
@@ -15757,7 +15804,8 @@ void SaomBatchSetup(pointer(class SaomGraph scalar) rowvector Gwaves, real scala
 	argstr = argstr + SaomBehCovTrailer(n)
 	argstr = argstr + SaomBehDyTrailer(n)
 	argstr = argstr + SaomSRTrailer() + SaomBehVarTrailer() + SaomRCTVTrailer() + SaomBRTrailer()
-	if (grpcol > 0) argstr = argstr + " " + strofreal(grpcol) + SaomGroupsTrailer(P) + SaomGroupsBehTrailer(P)
+	if (grpcol > 0 | hasms) argstr = argstr + " " + strofreal(grpcol) + (grpcol > 0 ? SaomGroupsTrailer(P) + SaomGroupsBehTrailer(P) : "")
+	if (hasms) argstr = argstr + " 1"
 
 	stata("capture program saomnativesim, plugin using(" + char(34) + SaomNativePluginPath() + char(34) + ")")
 	if (strtoreal(st_global("NWSAOM_TRACE")) == 4) printf("TRACE BATCHSETUP argument string: %f characters\n", strlen(argstr))
