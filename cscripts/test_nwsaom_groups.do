@@ -757,6 +757,34 @@ __gchk bperiod5 "rate alc (period 5)" 0.1 0.08
 frame drop ref
 display "PASS: behrate() with groups agrees with RSiena"
 
+* ---- non-directed networks (symmetric): two model types, RSiena modelType 2 (forcing, the default), 3 and 6 (pairwise; without transitivity, with which RSiena's own runs diverge here)
+forvalues w = 1/3 {
+	preserve
+	import delimited "dev/saom_groups_sym_w`w'.csv", clear varnames(nonames)
+	mkmat v*, matrix(Gsym`w')
+	restore
+}
+foreach mt in 2 3 6 {
+	nwclear
+	use "__groups_base.dta", clear
+	forvalues w = 1/3 {
+		nwset, mat(Gsym`w') undirected name(g`w') nooutput
+	}
+	frame create ref
+	frame ref: import delimited "dev/saom_rsiena_groups_sym`mt'_cond0.csv", clear
+	__gfit, opts(symmetric symtype(`mt') outdegree `=cond(`mt' < 4, "transtriads", "")' degplusc egox(alc)) uncond
+	* modelType 6: several of the 10 RSiena runs end with non-converged rates (2.6, 6.1), so only the better determined quantities are compared, with a wide tolerance
+	__gchk outdegree "degree (density)" `=cond(`mt' == 6, 0.3, 0.15)' 0
+	if `mt' < 4 __gchk transtriads "transitive triads" 0.15 0
+	__gchk degplusc "degree act+pop (centrd)" `=cond(`mt' == 6, 0.2, 0.12)' 0
+	__gchk egox_alc "alc ego" `=cond(`mt' == 6, 0.6, 0.15)' 0
+	foreach k in 1 2 4 5 7 8 {
+		if `mt' < 6 | `k' == 7 __gchk period`k' "constant net rate (period `k')" 0.1 0.1
+	}
+	frame drop ref
+	display "PASS: symmetric, modelType `mt', agrees with RSiena"
+}
+
 * ---- constants that RSiena keeps per group: the average degree (centred degree effects), the structmean (structural equivalence), the average degrees of ownx() effects
 foreach f in degc sequiv ownass {
 	nwclear
@@ -800,7 +828,7 @@ foreach x in 1 2 3 {
 display "PASS: per-group data constants equal RSiena's"
 
 * what stops with a message
-foreach o in "structural(Md)" "symmetric" "ml" {
+foreach o in "structural(Md)" "ml" {
 	capture nwsaom, waves(g1 g2 g3) groups(group) outdegree `o' k3(20)
 	assert _rc != 0
 }

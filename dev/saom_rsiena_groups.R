@@ -13,6 +13,7 @@ grp <- c(rep(1, 15), rep(2, 20), rep(3, 15))
 waves <- list(s501, s502, s503)
 blk <- function(m) { m[outer(grp, grp, "!=")] <- 0; m }
 waves <- lapply(waves, blk)
+if (feat == 'sym') waves <- lapply(waves, function(m) { m <- 1 * ((m + t(m)) > 0); diag(m) <- 0; m })          # non-directed networks; the model type is MODELTYPE (default 2 = forcing, nwsaom's default)
 # RSiena 1.6.14 stops (INTEGER() ... not a 'list' in initializeFRAN) for a group object whose groups have different numbers of waves, so the
 # reference for 'unequal' is the equivalent object with two-wave groups only: group 1 (waves 1,2,3) = two groups (1,2) and (2,3) of the same
 # actors, group 2 has waves 1,2, group 3 waves 2,3. With uncentred covariates and without effects that use group constants (balance, simX)
@@ -106,6 +107,7 @@ if (feat == 'coevsim') { eff <- includeEffects(eff, transTrip); eff <- includeEf
 if (feat == 'coevrate') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, avAlt, name = 'alc', interaction1 = 'net'); eff <- includeEffects(eff, RateX, name = 'alc', interaction1 = 'ccv', type = 'rate') }
 if (feat %in% c('coev', 'coevcomp', 'coevmiss')) { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, altX, interaction1 = 'alc'); eff <- includeEffects(eff, avAlt, name = 'alc', interaction1 = 'net') }
 if (feat == 'coevbr') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, avAlt, name = 'alc', interaction1 = 'net'); eff <- includeEffects(eff, outRate, avExposure, name = 'alc', interaction1 = 'net', type = 'rate') }   # rate effects of the behavior (behrate()); needs a small first gain
+if (feat == 'sym') { if (as.integer(Sys.getenv('MODELTYPE', '2')) < 4) eff <- includeEffects(eff, transTriads); eff <- includeEffects(eff, degPlus.c); eff <- includeEffects(eff, egoX, interaction1 = 'alc') }
 if (feat == 'dyad') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, X, interaction1 = "D"); }
 if (feat == 'timed') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, altX, interaction1 = "alc") }
 if (feat == 'degc') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, inPop.c, outAct.c) }            # centred degree effects: the average degree is a property of the group
@@ -113,7 +115,8 @@ if (feat == 'sequiv') { eff <- includeEffects(eff, transTrip); eff <- includeEff
 if (feat == 'ownass') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, outInAss); eff <- setEffect(eff, outInAss, parameter = 2) }
 res <- NULL; ttres <- NULL; sres <- NULL
 for (s in 1:nseed) {
-  alg <- sienaAlgorithmCreate(projname = NULL, cond = cond, seed = s, n3 = 2000, nsub = 4, firstg = if (feat == 'coevbr') 0.1 else 0.2)
+  alg <- if (feat == 'sym') sienaAlgorithmCreate(projname = NULL, cond = cond, seed = s, n3 = 2000, nsub = 4, modelType = c(net = as.integer(Sys.getenv('MODELTYPE', '2'))))
+         else sienaAlgorithmCreate(projname = NULL, cond = cond, seed = s, n3 = 2000, nsub = 4, firstg = if (feat == 'coevbr') 0.1 else 0.2)
   a <- siena07(alg, data = gd, effects = eff, batch = TRUE, verbose = FALSE, silent = TRUE, returnDeps = FALSE)
   ef <- a$effects[a$effects$include, ]
   th <- data.frame(seed = s, name = ef$effectName, theta = a$theta, se = sqrt(diag(a$covtheta)))
