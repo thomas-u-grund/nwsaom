@@ -3,7 +3,7 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.1.1] - 2026-10-27
 
 Patch release in preparation (proposed 1.1.1). Works with nwcommands 3.6.0 and later (the Mata library `lnwsaom1.mlib` is rebuilt with Stata 17 against the unchanged core library). Results are unchanged: with a fixed seed every estimate, standard error and statistic is identical to the last digit to that of 1.1.0.
 
