@@ -27,7 +27,6 @@ program define _nwsaom_structural_build
 	// the combinations that are not supported yet
 	local bad ""
 	if "`ml'" != "" local bad "`bad' ml"
-	if "`symmetric'`symtype'" != "" local bad "`bad' symmetric"
 	if "`groups'" != "" local bad "`bad' groups()"
 	if "`behavior'" != "" & ("`mb'" == "1" | "`rate'" != "") local bad "`bad' behavior() with several behaviors or rate covariates"
 	if "`structural'" != "" & !(`tm' & "`structural'" == "__nwsaom_tm_structmat") local bad "`bad' structural()"

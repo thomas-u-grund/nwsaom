@@ -14,7 +14,7 @@ nseed <- if (length(args) >= 4) as.integer(args[4]) else 8
 n3 <- if (length(args) >= 5) as.integer(args[5]) else 500
 dir.create(out, showWarnings = FALSE, recursive = TRUE)
 base <- lapply(list(s501, s502, s503), function(m) { m[is.na(m)] <- 0; m })
-ALG <- function(...) if (sym) sienaAlgorithmCreate(..., modelType = c(net = 6)) else sienaAlgorithmCreate(...)
+ALG <- function(...) if (sym) sienaAlgorithmCreate(..., modelType = c(net = as.numeric(Sys.getenv('MT', '6')))) else sienaAlgorithmCreate(...)
 n <- 50
 set.seed(20261027)
 mk <- function(variant) {
@@ -61,7 +61,9 @@ bip <- grepl("^tm", variant)
 if (sym) {   # non-directed relation: the symmetrized s50 waves; structural codes given for both directions (value 10 or 11 per pair), independent per wave
   w <- lapply(1:3, function(k) as.matrix(read.csv(sprintf("dev/saom_rsiena_symmulti_w%d.csv", k))))
   up <- which(upper.tri(diag(n)), arr.ind = TRUE)
-  if (variant != 'sy0') for (k in 1:3) { m <- w[[k]]; pick <- sample(nrow(up), round(0.03 * nrow(up))); val <- sample(c(10, 11), length(pick), replace = TRUE)
+  if (variant == 'sy3s') for (k in 1:3) { m <- w[[k]]; for (i in seq(2, 40, by = 3)) { cd <- 10 + ((i + k) %% 2); m[i, i + 1] <- cd; m[i + 1, i] <- cd }
+    if (k == 2) { m[20, 21] <- 11; m[21, 20] <- 11 }; w[[k]] <- m }
+  if (!(variant %in% c('sy0', 'sy3s'))) for (k in 1:3) { m <- w[[k]]; pick <- sample(nrow(up), round(0.03 * nrow(up))); val <- sample(c(10, 11), length(pick), replace = TRUE)
     m[up[pick, , drop = FALSE]] <- val; m[up[pick, 2:1, drop = FALSE]] <- val; w[[k]] <- m }
   waves <- w
 }

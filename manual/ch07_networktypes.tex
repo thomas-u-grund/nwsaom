@@ -100,7 +100,7 @@ For \texttt{forcing}, glasgow waves 1--2 symmetrised, density and density plus \
 \item \textbf{The RSiena confirmation quirk.} RSiena's \texttt{confirmation} model also computes the confirmation step for the no-change option, which changes nothing but adds to the scores behind the derivative estimate; \nwsaom{} leaves it out.
 \item \textbf{No automatic symmetrisation.} Data are never symmetrised by the estimator.
 \item \textbf{Rejected effects} listed above; \opt{degplus}, \opt{degplusc} and \opt{transtriads} are only available for non-directed relations, \opt{outpopc} and \opt{inactc} only for directed ones.
-\item \textbf{Structural zeros and ones} (the codes 10 and 11 in the wave networks, and \opt{structural()}) are not yet combinable with \opt{symmetric}.
+\item \textbf{Structural zeros and ones} (the codes 10 and 11 in the wave networks, and \opt{structural()}) are combinable with \opt{symmetric} when the codes are given for both directions.
 \item \textbf{Degenerate effects.} \texttt{degabsdiffx} and \texttt{degposdiffx} with the behavior as covariate in a non-directed network are available and equal \texttt{siena07}'s statistics; their estimates have large standard errors in both programs. \opt{higher} with a behavior or a changing covariate equals the density statistic in a non-directed network and is not identified (\texttt{siena07} reports a standard error of NA, \nwsaom{} stops).
 \end{itemize}
 

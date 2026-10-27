@@ -22,6 +22,8 @@ forvalues w = 1/3 {
 	mkmat v1-v50, matrix(B`w')
 	import delimited "dev/saom_twomode_w`w'.csv", clear varnames(1)
 	mkmat v1-v20, matrix(T`w')
+	import delimited "dev/saom_rsiena_symmulti_w`w'.csv", clear varnames(1)
+	mkmat v1-v50, matrix(Y`w')
 }
 clear
 
@@ -91,6 +93,20 @@ void sc_variants() {
 	}
 }
 sc_variants()
+// sy3s: symmetric relation with codes for both directions of the pair (i, i+1), i = 2, 5, ..., 38, value 10 or 11 by (i + wave)
+for (w=1; w<=3; w++) {
+	M = st_matrix("Y" + strofreal(w))
+	for (i=2; i<=40; i=i+3) {
+		cd = 10 + mod(i + w, 2)
+		M[i, i+1] = cd
+		M[i+1, i] = cd
+	}
+	if (w == 2) {
+		M[20, 21] = 11
+		M[21, 20] = 11
+	}
+	st_matrix("SYw" + strofreal(w), M)
+}
 // v6s: v3s with the composition change (actors 3 and 8 join at 1.4 and 2.3, 5 and 12 leave at 1.6 and 2.5); the rows and columns of an absent actor are those of the nearest present wave
 jn = J(50, 1, 1)
 lv = J(50, 1, 3)
@@ -239,7 +255,7 @@ di "PASS structural targets with a co-evolving behavior"
 * targets) against RSiena's (siena07 simOnly, means of 10 seeds of 1000 simulations)
 mata:
 mata set matastrict off
-void sc_sim(real scalar cond, real scalar K, real rowvector par, string scalar ref, real scalar usepres, real scalar tmflag) {
+void sc_sim(real scalar cond, real scalar K, real rowvector par, string scalar ref, real scalar usepres, real scalar tmflag, real scalar symctx) {
 	struct SaomNetCtx scalar C
 	external class SaomGraph scalar __nwsaom_last_G1, __nwsaom_last_G2, __nwsaom_last_G3
 	external class SaomModel scalar __nwsaom_last_M
@@ -254,7 +270,7 @@ void sc_sim(real scalar cond, real scalar K, real rowvector par, string scalar r
 	pres = J(0, 0, 0)
 	if (usepres) pres = *findexternal("__nwsaom_compstart")
 	fnt = *findexternal("__nwsaom_last_fntype")
-	SaomNetCtxInit(C, Gw, __nwsaom_last_M, pres, J(1, 0, NULL), fnt, J(0, 0, 0), 0, (tmflag ? st_matrix("__nwsaom_tm_structmat") : J(0, 0, 0)))
+	SaomNetCtxInit(C, Gw, __nwsaom_last_M, pres, J(1, 0, NULL), fnt, J(0, 0, 0), symctx, (tmflag ? st_matrix("__nwsaom_tm_structmat") : J(0, 0, 0)))
 	SaomNetSimMany(C, __nwsaom_last_M, par, K, 0, Z, S)
 	SaomBatchCleanup()
 	mm = mean(Z)
@@ -271,7 +287,7 @@ void sc_sim(real scalar cond, real scalar K, real rowvector par, string scalar r
 end
 capture program drop sc_sim
 program define sc_sim
-	syntax , pref(string) spec(string) theta0(string) par(string) ref(string) [tm cc]
+	syntax , pref(string) spec(string) theta0(string) par(string) ref(string) [tm cc symctx(integer 0)]
 	nwclear
 	forvalues w = 1/3 {
 		if "`tm'" != "" nwset, mat(`pref'w`w') bipartite name(c`w') nooutput
@@ -291,7 +307,7 @@ program define sc_sim
 	}
 	quietly nwsaom, waves(c1 c2 c3) `mopt' `spec' theta0(`theta0') rate0(4 4) fix(_all) k0(1) k3(10) seed(1)
 	set seed 1
-	mata: sc_sim(0, 2500, (`par'), "`ref'", ("`cc'" != ""), ("`tm'" != ""))
+	mata: sc_sim(0, 2500, (`par'), "`ref'", ("`cc'" != ""), ("`tm'" != ""), `symctx')
 end
 * frozen egos (RSiena: rates -0.045 1.417; outdegree 3.191 ...)
 sc_sim, pref(V4) spec(outdegree reciprocity indegpopularity outactivity transtrip cycle3) theta0(-1.7 0.6 0.25 -0.067 0.4 0.02) par(-1.7, 0.6, 0.25, -0.067, 0.4, 0.02, 4, 4) ref(3.191 -4.545 3.191 2.692 -2.612 -2.837 -0.045 1.417)
@@ -305,6 +321,18 @@ di "PASS simulation with composition change agrees with RSiena"
 sc_sim, pref(W1) tm spec(outdegree indegpopularity outactivity cycle4) theta0(-1.5 0.3 0.02 0.05) par(-1.5, 0.3, 0.02, 0.05, 4, 4) ref(-0.484 -0.713 0.421 1.176 -2.879 3.010)
 di "PASS simulation in a two-mode network agrees with RSiena"
 
+* non-directed relation (symmetric data, codes given for both directions; RSiena modelType 6 = joint, 2 = forcing): targets and simulation
+sc_targets, pref(SY) spec(symmetric symtype(joint) outdegree transties indegpopularity)
+assert reldif(__sc_t[1,1], 340) < 1e-9
+assert abs(__sc_t[1,2] - 676.0265) < 1e-3
+assert reldif(__sc_t[1,3], 232) < 1e-9
+assert __nwsaom_tr_rate[1,1] == 134 & __nwsaom_tr_rate[1,2] == 128
+di "PASS structural targets in a non-directed relation"
+sc_sim, pref(SY) symctx(1) spec(symmetric symtype(joint) outdegree transties indegpopularity) theta0(-1.2 0.1 0.3) par(-1.2, 0.1, 0.3, 49, 49) ref(13.925 11.591 11.894 11.808 12.893)
+di "PASS simulation in a non-directed relation (joint) agrees with RSiena"
+sc_sim, pref(SY) symctx(4) spec(symmetric symtype(forcing) outdegree transties indegpopularity) theta0(-1.2 0.1 0.3) par(-1.2, 0.1, 0.3, 1, 1) ref(4.519 4.587 1.148 -4.09 -3.5)
+di "PASS simulation in a non-directed relation (forcing) agrees with RSiena"
+
 * ---- errors and gates
 nwclear
 nwset, mat(V3w1) directed name(g1) nooutput
@@ -317,8 +345,6 @@ nwset, mat(BAD) directed name(gbad) nooutput
 capture nwsaom, waves(g1 gbad g3) outdegree reciprocity k3(20)
 assert _rc == 198
 * not yet supported together with structural values
-capture nwsaom, waves(g1 g2 g3) outdegree reciprocity symmetric k3(20)
-assert _rc == 198
 capture nwsaom, waves(g1 g2 g3) outdegree reciprocity ml k3(20)
 assert _rc == 198
 capture nwsaom describe, waves(g1 g2 g3)
