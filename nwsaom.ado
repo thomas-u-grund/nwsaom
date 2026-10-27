@@ -445,6 +445,7 @@ program nwsaom, eclass
 	// original wave1()/wave2() path always ran, generalized to N waves.
 	local nodes = .
 	local __ns_ntm 0
+	local __ns_scodes 0
 	forvalues __w = 1/`__nwsaom_nwaves' {
 		local __wname : word `__w' of `__ns_wavelist'
 		_nwsyntax `__wname', max(1) other(w`__w')
@@ -453,7 +454,8 @@ program nwsaom, eclass
 			di "{err}nwsaom estimates on ordinary static wave snapshots; no wave() network may itself carry {bf:nwset}-style temporal metadata (build an explicit static slice first, e.g. via {bf:nwattime})."
 			error 198
 		}
-		_nwsaom_chkbin, netobj(`w`__w'netobj') name(`__wname') valued(`w`__w'valued')
+		_nwsaom_chkbin, netobj(`w`__w'netobj') name(`__wname') valued(`w`__w'valued') wave(`__w')
+		local __ns_scodes = `__ns_scodes' + r(nstruct)
 		if `__w' == 1 local nodes = `w1nodes'
 		else if `w`__w'nodes' != `nodes' {
 			di "{err}every wave must have the same number of nodes - nwsaom always uses a FIXED, common actor set across every wave; an actor not present at every wave still needs a row in each wave's own network, marked absent via {bf:present()}, not omitted from the network itself."
@@ -907,6 +909,7 @@ program nwsaom, eclass
 		mata: __nwsaom_last_G`__w'.init(`nodes', 1)
 		if `__nwsaom_tm' mata: __nwsaom_bridge_twomode(`w`__w'netobj', __nwsaom_last_G`__w', __nwsaom_tm_isactor)
 		else mata: __nwsaom_bridge_from_netobj(`w`__w'netobj', __nwsaom_last_G`__w')
+		if `__ns_scodes' mata: SaomStructFix(`w`__w'netobj', __nwsaom_last_G`__w', `__w', `__nwsaom_tm', `=cond(`__nwsaom_tm', "__nwsaom_tm_isactor", "J(1,0,0)")')
 	}
 
 	// --- missnet(): impute missing dyads via last-observation-carried-
@@ -965,6 +968,8 @@ program nwsaom, eclass
 			error 198
 		}
 	}
+	// structural zeros and ones (the codes 10 and 11 in the wave networks, RSiena): the per-wave sets, the gates for the combinations not yet supported
+	if `__ns_scodes' _nwsaom_structural build, nodes(`nodes') nwaves(`__nwsaom_nwaves') hasmissnet(`__ns_hasmissnet') tm(`__nwsaom_tm') ml(`ml') symmetric(`symmetric') symtype(`symtype') groups(`groups') behavior(`behavior') structural(`structural')
 
 	// multi-wave path only: assemble the pointer array
 	// SaomEstimateRMMulti() needs (the standard "collection of class

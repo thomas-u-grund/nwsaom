@@ -5222,6 +5222,8 @@ void SaomRatesReset() {
 	SaomRateTVReset()
 	SaomBRReset()
 	SaomGroupsReset()
+	if (SaomStructOn()) SaomStructKeepLast(); else rmexternal("__nwsaom_last_sset")
+	SaomStructReset()
 }
 real scalar SaomBRAddData(real matrix vals) {
 	external real rowvector __saom_brdattv
@@ -8288,6 +8290,9 @@ void SaomNetCtxInit(struct SaomNetCtx scalar C, pointer(class SaomGraph scalar) 
 		if (cols(SaomSRTypes()) > 0) C.targetRateCov[pd, (C.hasratecov - cols(SaomSRTypes()) + 1)..C.hasratecov] = SaomCovariateDifferingSum(*Gwaves[pd], *Gwaves[pd+1], SaomStructRateAttr(*Gwaves[pd], SaomSRTypes()), J(0, 0, 0))
 	}
 
+	// structural zeros and ones (the codes 10 and 11 of the wave networks): targets and distances of the periods (unw_saom_struct.do)
+	if (SaomStructOn()) SaomStructTargets(C, M, Gwaves, fntype, missMaskPd)
+
 	// native dispatch, decided once per fit. Endowment/creation gating
 	// and structural zeros/ones exist only in Mata. The distance
 	// statistic comes from the plugin from protocol 5 on; with an older
@@ -8323,6 +8328,10 @@ void SaomNetCtxInit(struct SaomNetCtx scalar C, pointer(class SaomGraph scalar) 
 	else if (!C.cfg.eligible) why = C.cfg.whynot
 	else why = "native plugin too old for this model"
 	SaomSetEngine(C.use_native, why)
+	if (SaomStructOn() & ver < 150) {
+		errprintf("nwsaom: structural zeros and ones (the codes 10 and 11) need the native plugin of this release (update nwsaom: net install ... replace); there is no Mata implementation.\n")
+		exit(198)
+	}
 	C.native_netdist = (ver >= 5)
 	C.perok = (ver >= 18)
 	// the threaded batch path: every model from protocol 11 on
@@ -8369,6 +8378,11 @@ void SaomNetCtxInit(struct SaomNetCtx scalar C, pointer(class SaomGraph scalar) 
 		SaomBatchSetup(Gwaves, C.P, C.cfg, J(1, 0, 0), J(1, 0, NULL), 0, 0, 0, 0,
 			C.hasmiss, C.missDyadsPd, J(C.n, C.P, 0), C.haspresent, C.presentPd,
 			J(1, 0, 0), C.symtype, (C.hasratecov ? C.ratecovattr : J(0, 0, 0)), C.compEv)
+		if (SaomStructOn()) SaomStructSend(C.P, C.n)
+	}
+	else if (SaomStructOn()) {
+		errprintf("nwsaom: structural zeros and ones (the codes 10 and 11) need the native plugin of this release (update nwsaom: net install ... replace); there is no Mata implementation.\n")
+		exit(198)
 	}
 }
 
@@ -18634,3 +18648,4 @@ real matrix SaomMLRun(pointer(class SaomGraph scalar) rowvector Gall, real scala
 	return(out)
 }
 end
+do unw_saom_struct.do
