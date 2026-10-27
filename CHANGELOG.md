@@ -3,6 +3,14 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- `nwsaom describe` on a two-mode network counted the cells within the modes (it reported an undirected network with all 32 nodes of an 18 x 14 network); it now reports the actors, events, attendances, density over the actors-by-events cells and the average number of events per actor, also in `r()`. New option `actormode()`.
+- `estat simulate` and `nwsaom simulate` work after / for a two-mode model (the simulation runs on the actors-by-events network; `generate()` saves two-mode networks). A `theta()` matrix of the wrong shape gives a message instead of a conformability error.
+- `nwsaom meta, rates` took the standard errors of the rates from a row that does not exist, so every rate had a missing standard error and was silently excluded; it now uses `e(rates_se)`. `r(theta)` and `r(se)` carry the names of the stored estimates (rows) and of the effects (columns).
+- The refusal of `reciprocity` for a non-directed network no longer prints a second line "invalid syntax".
+
 ## [1.1.1] - 2026-10-27
 
 Patch release in preparation (proposed 1.1.1). Works with nwcommands 3.6.0 and later (the Mata library `lnwsaom1.mlib` is rebuilt with Stata 17 against the unchanged core library). Results are unchanged: with a fixed seed every estimate, standard error and statistic is identical to the last digit to that of 1.1.0.

@@ -996,7 +996,7 @@ program nwsaom, eclass
 		}
 		if "`reciprocity'" != "" {
 			di "{err}{bf:reciprocity} is not meaningful under {bf:symmetric} - every tie is reciprocated by construction once both directions are forced equal, so this effect's own statistic is a constant (RSiena itself does not offer {bf:recip} for a non-directed dependent variable)."
-			error 198
+			exit 198
 		}
 		// symtype(): the model type of the non-directed relation, named
 		// or as RSiena's modelType number (NetworkModelType enum,

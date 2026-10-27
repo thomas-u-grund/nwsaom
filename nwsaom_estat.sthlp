@@ -199,7 +199,10 @@ simulation that {cmd:estat gof} uses. With {opt theta()} (a row vector in the or
 {opt rates()} (one rate per period; {opt ratesbeh()} for the behavior) the model is simulated at coefficients
 of your choice, which is the simulation-only mode (RSiena's {cmd:siena07} with {cmd:simOnly}). {opt generate(stub)}
 saves the simulated networks as {cmd:nwcommands} networks named {it:stub}{cmd:_}{it:s}{cmd:_p}{it:period}; after a
-co-evolution fit the simulated behavior is saved as variables of the same names.
+co-evolution fit the simulated behavior is saved as variables of the same names. After a two-mode fit the simulation
+runs on the actors-by-events network; the table shows the number of ties (attendances) only, {cmd:r(sim)} and
+{cmd:r(obs)} leave the mutual-dyad and transitive-triple columns missing, and {opt generate()} saves two-mode networks
+(one row per actor, one column per event).
 
 {pstd}
 Returns {cmd:r(sim)} (one row per simulation and period: simulation, period, number of ties, mutual dyads,

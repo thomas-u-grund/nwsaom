@@ -20,7 +20,7 @@
 {phang}{opt bound(#)} excludes group estimates with a standard error of at least # (default 10), as RSiena.{p_end}
 {phang}{opt alpha(#)} the level of the profile-likelihood intervals (default 0.05).{p_end}
 {phang}{opt maxit(#)} maximum number of IWLS iterations (default 20).{p_end}
-{phang}{opt rates} also combines the rate parameters ({cmd:e(rates)}, one per period; the standard errors of conditional fits are not comparable).{p_end}
+{phang}{opt rates} also combines the rate parameters ({cmd:e(rates)} with their standard errors {cmd:e(rates_se)}, one per period; RSiena's {cmd:siena08} does the same, so combine them only when the rates are comparable across the groups, for example the same time span between the waves). The fits must have the same number of periods. The rows are named {cmd:rate_period1}, {cmd:rate_period2}, ... in the table and in {cmd:r(theta)}, {cmd:r(se)} and {cmd:r(meta)}.{p_end}
 {phang}{opt notable} suppresses the output; the results are in {cmd:r()}.{p_end}
 
 {title:Dialog box}
