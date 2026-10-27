@@ -9575,6 +9575,10 @@ void SaomGroupsRegister(class SaomModel scalar M) {
 			reg = reg \ (t, 1)
 			val = val \ SaomGroupsBehGet()[1, .]
 		}
+		else if (nm == "behsim" & rows(SaomGroupsBehGet()) > 0) {
+			reg = reg \ (t, 1)
+			val = val \ SaomGroupsBehGet()[2, .]
+		}
 		else if (strpos(nm, "balance") == 1) {
 			reg = reg \ (t, 2)
 			pbal = findexternal("__nwsaom_groupbal")

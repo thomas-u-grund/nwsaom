@@ -30,6 +30,10 @@ if (feat %in% c('comp', 'coevcomp')) {                                     # act
     waves[[w]][a, ] <- orig[[wn]][a, ]; waves[[w]][, a] <- orig[[wn]][, a]
   }
 }
+s50b <- as.matrix(s50a[, 1:3])                             # behavior / changing covariate values; absent actors take the nearest present wave
+if (feat %in% c('comp', 'coevcomp')) for (a in 1:50) for (w in 1:3) if (present[a, w] == 0) { pw <- which(present[a, ] == 1); s50b[a, w] <- s50b[a, pw[which.min(abs(pw - w))]] }
+bmiss <- matrix(0, 50, 3)
+if (feat %in% c('coevmiss', 'coevmiss0')) { bmiss[5, 2] <- 1; bmiss[25, 1] <- 1; bmiss[45, 3] <- 1; bmiss[30, 2] <- 1 }
 miss <- list(NULL, NULL, NULL)
 if (feat == 'miss') {                                     # all out-ties of actor 20 (group 2) at wave 2 and of actor 45 (group 3) at wave 3 are missing
   mm <- lapply(1:3, function(w) matrix(0, 50, 50))
@@ -45,14 +49,15 @@ for (w in 1:3) {
 D0 <- outer(s50a[, 1], s50a[, 1], function(a, b) as.numeric(abs(a - b) <= 1)); diag(D0) <- 0
 D0 <- D0 * outer(grp, grp, "==")
 write.table(D0, file.path(out, "dyad.csv"), row.names = FALSE, col.names = FALSE, sep = ",")
-actors <- data.frame(group = grp, alc = s50a[, 1], alc1 = s50a[, 1], alc2 = s50a[, 2], alc3 = s50a[, 3], p1 = present[, 1], p2 = present[, 2], p3 = present[, 3])
+ccv <- (1:50 %% 4) + 0.5 * (s50a[, 2] > 2)
+actors <- data.frame(group = grp, ccv = ccv, alc = s50a[, 1], alc1 = s50b[, 1], alc2 = s50b[, 2], alc3 = s50b[, 3], p1 = present[, 1], p2 = present[, 2], p3 = present[, 3], bm1 = bmiss[, 1], bm2 = bmiss[, 2], bm3 = bmiss[, 3])
 write.csv(actors, file.path(out, "actors.csv"), row.names = FALSE)
 mk <- function(gi) {
   g <- gsets[[gi]]; i <- which(grp == g); ws <- gw[[gi]]
   arr <- array(unlist(lapply(ws, function(w) waves[[w]][i, i])), dim = c(length(i), length(i), length(ws)))
   if (feat == 'miss') for (k in seq_along(ws)) { m <- miss[[ws[k]]][i, i]; a <- arr[, , k]; a[m == 1] <- NA; arr[, , k] <- a }
   net <- sienaDependent(arr, allowOnly = FALSE)
-  if (feat %in% c('coev', 'coevq', 'coevsim', 'coevcomp')) alc <- sienaDependent(as.matrix(s50a[i, ws]), type = 'behavior', allowOnly = FALSE)
+  if (feat %in% c('coev', 'coevq', 'coevsim', 'coevcomp', 'coevmiss', 'coevmiss0', 'coevrate')) alc <- sienaDependent({ bb <- s50b[i, ws, drop = FALSE]; bb[bmiss[i, ws, drop = FALSE] == 1] <- NA; bb }, type = 'behavior', allowOnly = FALSE)
   else if (feat == 'tvcov') alc <- varCovar(as.matrix(s50a[i, ws]))
   else alc <- coCovar(s50a[i, 1], centered = (feat != 'unequal'))
   if (feat == 'dyad') { D <- coDyadCovar(D0[i, i]); return(sienaDataCreate(net, alc, D)) }
@@ -62,6 +67,7 @@ mk <- function(gi) {
     return(sienaDataCreate(net, alc, cc))
   }
   if (feat == 'coevcomp') { ch <- lapply(i, function(a) { p <- present[a, ws]; w1 <- which(p == 1); c(min(w1), max(w1)) }); cc <- sienaCompositionChange(ch); return(sienaDataCreate(net, alc, cc)) }
+  if (feat == 'coevrate') { ccv <- coCovar(ccv[i]); return(sienaDataCreate(net, alc, ccv)) }
   sienaDataCreate(net, alc)
 }
 gd <- sienaGroupCreate(lapply(seq_along(gsets), mk))
@@ -72,9 +78,10 @@ if (feat %in% c('unequal', 'comp', 'miss')) { eff <- includeEffects(eff, transTr
 if (feat == 'tvcov') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, altX, simX, interaction1 = "alc") }
 if (feat == 'ratecov') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, interaction1 = "alc"); eff <- includeEffects(eff, RateX, interaction1 = "alc", type = "rate") }
 if (feat == 'inter') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, interaction1 = "alc"); eff <- includeInteraction(eff, egoX, recip, interaction1 = c("alc", "")) }
-if (feat == 'coevq') { eff <- includeEffects(eff, transTrip) }
+if (feat %in% c('coevq', 'coevmiss0')) { eff <- includeEffects(eff, transTrip); if (feat == 'coevmiss0') eff <- includeEffects(eff, avAlt, name = 'alc', interaction1 = 'net') }
 if (feat == 'coevsim') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, avSim, name = 'alc', interaction1 = 'net'); eff <- includeEffects(eff, simX, interaction1 = 'alc') }
-if (feat %in% c('coev', 'coevcomp')) { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, altX, interaction1 = 'alc'); eff <- includeEffects(eff, avAlt, name = 'alc', interaction1 = 'net') }
+if (feat == 'coevrate') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, avAlt, name = 'alc', interaction1 = 'net'); eff <- includeEffects(eff, RateX, name = 'alc', interaction1 = 'ccv', type = 'rate') }
+if (feat %in% c('coev', 'coevcomp', 'coevmiss')) { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, altX, interaction1 = 'alc'); eff <- includeEffects(eff, avAlt, name = 'alc', interaction1 = 'net') }
 if (feat == 'dyad') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, X, interaction1 = "D"); }
 res <- NULL
 for (s in 1:nseed) {
