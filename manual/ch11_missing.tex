@@ -60,7 +60,7 @@ nwset, mat(g2m) directed name(g2)
 nwsaom, wave1(g1) wave2(g2) outdegree reciprocity transtrip seed(1)
 \end{lstlisting}
 
-\paragraph{Scope.} One directed one-mode network or one two-mode network, any number of waves, the method of moments. Not yet with a co-evolving behavior, \opt{groups()}, \opt{symmetric}, \texttt{nwsaom multinet}, \opt{ml} and \texttt{nwsaom bayes}; \texttt{estat gof}, \texttt{mems}, \texttt{simulate}, \texttt{importance}, \texttt{score}, \texttt{timetest} and \texttt{nwsaom describe} stop with a message after or for such data. The code runs in the native plugin only (there is no Mata implementation).
+\paragraph{Scope.} One directed one-mode network or one two-mode network, any number of waves, the method of moments. One co-evolving behavior is possible (without rate covariates). Not yet with several behaviors, \opt{groups()}, \opt{symmetric}, \texttt{nwsaom multinet}, \opt{ml} and \texttt{nwsaom bayes}; \texttt{estat gof}, \texttt{mems}, \texttt{simulate}, \texttt{importance}, \texttt{score}, \texttt{timetest} and \texttt{nwsaom describe} stop with a message after or for such data. The code runs in the native plugin only (there is no Mata implementation).
 
 \paragraph{The older option \opt{structural(matname)}.} It takes one 0/1 matrix of dyads that are fixed in both periods and need the same observed value at both waves; two waves, network only. It is kept for compatibility, is replaced by the codes, and cannot be combined with them.
 

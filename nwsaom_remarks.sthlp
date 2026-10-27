@@ -1033,8 +1033,8 @@ dyads change from wave to wave.{p_end}
 
 {pstd}
 {bf:Scope.} One directed one-mode or two-mode network, any number of waves, method of moments (conditional or unconditional),
-with or without missing data, composition change, covariates, interactions, endowment/creation and rate covariates. Not yet with a co-evolving
-behavior, {cmd:groups()}, {opt symmetric} networks, {cmd:nwsaom multinet}/{cmd:multiplex}, {cmd:ml}, {cmd:nwsaom bayes}; and the commands that
+with or without missing data, composition change, covariates, interactions, endowment/creation and rate covariates, and with one co-evolving
+behavior (without rate covariates). Not yet with several behaviors, {cmd:groups()}, {opt symmetric} networks, {cmd:nwsaom multinet}/{cmd:multiplex}, {cmd:ml}, {cmd:nwsaom bayes}; and the commands that
 work on a fitted model ({cmd:estat gof}, {cmd:mems}, {cmd:simulate}, {cmd:importance}, {cmd:score}, {cmd:timetest}) and {cmd:nwsaom describe} do not yet know the codes:
 they stop with a message instead of ignoring them.
 
