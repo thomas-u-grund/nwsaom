@@ -28,7 +28,7 @@ mk <- function(variant) {
     one <- pick[1:round(0.03 * nrow(d))]; zero <- setdiff(pick, one)
     for (k in 1:3) { m <- w[[k]]; m[d[one, ]] <- 11; m[d[zero, ]] <- 10; w[[k]] <- m }
   }
-  if (variant %in% c('v3', 'v5')) {
+  if (variant %in% c('v3', 'v5', 'v6')) {
     d <- which(row(diag(n)) != col(diag(n)), arr.ind = TRUE)
     for (k in 1:3) {
       m <- w[[k]]
@@ -64,6 +64,16 @@ if (bip) {   # two-mode: 40 actors x 20 events; tm1: actors 1-10 cannot choose e
     w[[k]] <- m }
   waves <- w
 } else waves <- mk(variant)
+cchg <- NULL
+if (variant == 'v6') {    # composition change (RSiena sienaCompositionChange): actors 3 and 8 join at 1.4 and 2.3; actors 5 and 12 leave at 1.6 and 2.5; with structural values coded as in v3
+  jn <- rep(1, n); lv <- rep(3, n); jn[3] <- 1.4; jn[8] <- 2.3; lv[5] <- 1.6; lv[12] <- 2.5
+  pres <- matrix(1, n, 3); for (a in 1:n) for (k in 1:3) pres[a, k] <- (ceiling(jn[a]) <= k) & (k <= trunc(lv[a]))
+  orig <- waves
+  for (a in 1:n) for (k in 1:3) if (pres[a, k] == 0) { pw <- which(pres[a, ] == 1); wn <- pw[which.min(abs(pw - k))]; waves[[k]][a, ] <- orig[[wn]][a, ]; waves[[k]][, a] <- orig[[wn]][, a] }
+  for (k in 1:3) diag(waves[[k]]) <- 0
+  cchg <- lapply(1:n, function(a) c(jn[a], lv[a]))
+  write.table(data.frame(jn = jn, lv = lv), file.path(out, "cc.csv"), row.names = FALSE, sep = ",")
+}
 if (variant %in% c('v5', 'm0')) {
   miss <- matrix(0, n, n); miss[sample(n * n, 120)] <- 1; diag(miss) <- 0
   # NA in wave 2 at the missing dyads (wave 1 and 3 complete)
@@ -74,20 +84,25 @@ for (k in 1:3) { m <- waves[[k]]; m[is.na(m)] <- 0; write.table(m, file.path(out
 if (task == 'data') quit()
 arr <- function(ws) array(unlist(ws), dim = c(nrow(ws[[1]]), ncol(ws[[1]]), length(ws)))
 mkdata <- function(ws) {
+  if (!bip && !is.null(cchg)) return(sienaDataCreate(sienaDependent(arr(ws)), sienaCompositionChange(cchg)))
   if (!bip) return(sienaDataCreate(sienaDependent(arr(ws))))
   A <- sienaNodeSet(40, nodeSetName = "A"); B <- sienaNodeSet(20, nodeSetName = "B")
   sienaDataCreate(sienaDependent(arr(ws), type = "bipartite", nodeSet = c("A", "B")), nodeSets = list(A, B))
 }
 # the standard effect list
+MODEL <- Sys.getenv("MODEL", "std")
 mkeff <- function(d, theta = NULL) {
   e <- getEffects(d)
-  if (bip) e <- includeEffects(e, cycle4, inPopSqrt, outAct)
+  if (MODEL == 'endow') {   # reciprocity split into endowment and creation, outdegree and transitive triplets plain
+    e <- includeEffects(e, recip, type = 'endow'); e <- includeEffects(e, recip, type = 'creation'); e <- includeEffects(e, recip, type = 'eval', include = FALSE)
+    e <- includeEffects(e, transTrip)
+  } else if (bip) e <- includeEffects(e, cycle4, inPopSqrt, outAct)
   else e <- includeEffects(e, recip, transTrip, cycle3, inPopSqrt, outAct)
   e
 }
 if (task == 'targets') {
   tot <- NULL
-  for (p in 1:2) {
+  for (p in if (is.null(cchg)) 1:2 else integer(0)) {
     d <- mkdata(waves[p:(p + 1)])
     nm <- attr(d$depvars[[1]], 'distance'); cat("DIST", p, nm, "\n")
     e <- mkeff(d)
@@ -106,7 +121,11 @@ if (task == 'sim') {
   cnd <- Sys.getenv("COND", "0") == "1"
   d3 <- mkdata(waves)
   e <- mkeff(d3)
-  if (bip) {
+  if (MODEL == 'endow') {
+    ee <- unclass(e)
+    set <- function(sn, ty, v) e$initialValue[ee$shortName == sn & ee$type == ty & ee$include] <<- v
+    set('density', 'eval', -1.7); set('recip', 'endow', 0.5); set('recip', 'creation', 0.8); set('transTrip', 'eval', 0.3)
+  } else if (bip) {
     e$initialValue[e$shortName == 'density'] <- -1.5; e$initialValue[e$shortName == 'inPopSqrt'] <- 0.3
     e$initialValue[e$shortName == 'outAct'] <- 0.02; e$initialValue[e$shortName == 'cycle4'] <- 0.05
   } else {
