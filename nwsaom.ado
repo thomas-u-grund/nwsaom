@@ -1017,7 +1017,7 @@ program nwsaom, eclass
 			}
 			mata: __nwsaom_presentmat[.,`__w'] = st_data(1::`nodes', "`__wpres'")
 		}
-		mata: __ns_present1 = __nwsaom_presentmat[.,1] :* __nwsaom_presentmat[.,2]
+		mata: __ns_present1 = __nwsaom_presentmat[.,1]
 	}
 	// groups(): joint estimation of several groups (RSiena's sienaGroupCreate()); the groups are glued into one chain of virtual waves, see _nwsaom_groups.ado
 	local __ns_isgrp = ("`groups'" != "")
@@ -2762,6 +2762,7 @@ program nwsaom, eclass
 				capture mata: mata drop __ns_missmaskbehpd`__pd'
 				if `__ns_hasmissbeh' {
 					mata: __ns_missmaskbehpd`__pd' = (__ns_missbeh_w`__pd1' :| __ns_missbeh_w`__pd2')
+					mata: SaomBehStartMissSet(`__pd', __ns_missbeh_w`__pd1')
 				}
 				else {
 					mata: __ns_missmaskbehpd`__pd' = J(`nodes', 1, 0)

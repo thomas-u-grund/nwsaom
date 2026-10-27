@@ -25,8 +25,8 @@ alternatives of an actor to its own group. Status = state at the last commit of 
 | 15 | Several dependent networks / behaviours | allowed | `multinet`, `multiplex` and several behaviors have no `groups()` | remaining |
 | 16 | Conditional estimation | default for one dependent variable without composition change | done (network only); validated | done |
 | 17 | Unconditional estimation | yes | done; validated | done |
-| 18 | Composition change per group | allowed | `present()` (joiners and leavers at the waves) done and validated; `joinat()`/`leaveat()` (fractional times) refused | partly: fractional times remaining |
-| 19 | Missing data per group | as single group | `missnet()`, `missbeh()` done; validated for ties and for behavior effects; missing behavior with `behegox`/`behaltx` differs from RSiena | partly: one open difference |
+| 18 | Composition change per group | allowed | `present()` (joiners and leavers at the waves, RSiena's activeStart rule) done and validated; `joinat()`/`leaveat()` (fractional times) refused | partly: fractional times (`joinat`/`leaveat`) remaining |
+| 19 | Missing data per group | as single group | `missnet()`, `missbeh()` done and validated (ties, behavior effects, behegox/behaltx with missing behavior) | done |
 | 20 | Changing covariates | centring over all values of all groups | `tvcov()` done; validated | done |
 | 21 | Interactions | `includeInteraction` as usual | `interact()` done; validated (egoX x reciprocity) | done |
 | 22 | Rate covariates | `RateX`: one shared parameter | `ratecov()` done; validated | done |
@@ -52,4 +52,4 @@ alternatives of an actor to its own group. Status = state at the last commit of 
 - Post-estimation: `estat gof`, `estat simulate`, `estat importance` (rows 30, 31): they simulate the whole network from the saved waves; for groups the simulation has to run on the actors of one group with that group's constants.
 - Model types: two-mode and non-directed networks, several dependent networks or behaviors (rows 15, 34, 35): each has its own engine path (embedding, pairwise ministeps, multinet slots) that does not yet know the group chain.
 - Effects whose constants are pooled over the data (centred degree effects, `avdeg`, `transtriads`, structural equivalence; row 13): the plugin takes one constant per term; the per-period table exists now, the constants of these effects are not yet computed per group.
-- `joinat()`/`leaveat()`, `behrate()`, `structural()` (rows 18, 23, 36). Missing behavior values together with `behegox`/`behaltx` (row 19) differ from RSiena in groups and agree in one group: cause not found.
+- `joinat()`/`leaveat()`, `behrate()`, `structural()` (rows 18, 23, 36).
