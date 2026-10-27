@@ -646,3 +646,21 @@ fit time of a small model (X2 of the article's extra benchmark: 0.77 s -> 0.26 s
   `&`/`|` condition; use nested `if` (which does short-circuit), and hoist `st_global()` reads out of the loops.
 - How it was found: counters in a profiling build of the plugin (`clang ... -DSAOM_PROFILE`; `BATCHCLEAN|` appends them to the file named by the environment variable `SAOM_PROF_OUT`)
   showed the time between two `BATCHRUN` calls ("glue") at 50 % of the fit; `timer on/off` calls inside the Mata source then located it (a `stata("timer on 11")` costs about 1 microsecond).
+
+
+## Joint estimation of groups (`groups()`): how it works, and what it must not be confused with (2026-10-27)
+
+- `groups(var)` is NOT run as several separate fits and NOT as one big network with a rate dummy. nwsaom.ado (hook before the missing-data block) calls `_nwsaom_groups build`, which
+  replaces the wave graphs `__nwsaom_last_G1..` by a chain of G*(W-1)+1 "virtual waves" (`SaomGroupsWave()`, unw_saom.do): at virtual wave k the block of group h is at its wave
+  min(max(k-s_h,1),W); groups that are finished or not yet started are carried unchanged, so they cancel in every statistic's deviation. Period (h-1)*(W-1)+m is period m of group h; the
+  presence matrix (`SaomGroupsPresent()`) makes only group h's actors act in its periods; the plugin (protocol 141, extra attribute column + trailing BATCHSETUP token) restricts the alternatives
+  of an actor to its own group. The estimator then is the ordinary multi-wave one, so the per-period rates, the summed statistics and the derivative matrix are exactly RSiena's.
+- The state is the Mata externals `__nwsaom_groupmode` and `__nwsaom_groupid`; `SaomRatesReset()` removes them at the start and the end of every `nwsaom` call. A new BATCHSETUP caller that
+  builds its own frame must not be run while they exist.
+- Conditional estimation is normally switched off when `present` removes actors (composition change); `SaomNetCtxInit()` skips that rule in group mode, because the "absent" actors are only
+  other groups.
+- Do not use `present()` to emulate groups from the ado level: the engine takes the target statistics from the full end wave and the simulation starts from the start wave, so a group that
+  appears at a wave but was absent at the previous one gives a constant that does not cancel. The chain with carried blocks avoids this.
+- Mata cannot assign a class instance to a global with `mata: x = f()`; create the instance first (`x = SaomGraph()`) and fill it. An eclass program cannot `return` r() values: the e() part lives in `_nwsaom_groupspost.ado`.
+- `gettoken sub 0 : 0` keeps the comma in `sub` when the subcommand is followed by `,`: use `parse(" ,")`.
+- Reference: `dev/saom_rsiena_groups.R` (RSiena 1.6.14); the test is `cscripts/test_nwsaom_groups.do`.

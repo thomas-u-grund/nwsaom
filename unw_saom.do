@@ -5204,6 +5204,7 @@ void SaomBRReset() {
 void SaomRatesReset() {
 	SaomRateTVReset()
 	SaomBRReset()
+	SaomGroupsReset()
 }
 real scalar SaomBRAddData(real matrix vals) {
 	external real rowvector __saom_brdattv
@@ -8200,7 +8201,7 @@ void SaomNetCtxInit(struct SaomNetCtx scalar C, pointer(class SaomGraph scalar) 
 	// RSiena (initializeFRAN()): conditional estimation is not used with
 	// composition change
 	if (C.cond) {
-		if (C.haspresent) if (min(C.npresentPd) < C.n) C.cond = 0
+		if (C.haspresent & !SaomGroupsMode()) if (min(C.npresentPd) < C.n) C.cond = 0
 		if (C.hastimed) C.cond = 0
 	}
 	C.ptot = C.p + (C.cond ? 0 : C.P) + C.hasratecov
@@ -8262,6 +8263,12 @@ void SaomNetCtxInit(struct SaomNetCtx scalar C, pointer(class SaomGraph scalar) 
 	C.perok = (ver >= 18)
 	// the threaded batch path: every model from protocol 11 on
 	C.use_batch = C.use_native & (!C.hastimed | ver >= 27) & (ver >= 5) & ((!C.hasratecov & C.symtype == 0 & !C.hasnetgate & !C.hasstructural) | ver >= 11)
+	if (SaomGroupsMode()) {
+		if (!C.use_batch | ver < 141) {
+			errprintf("nwsaom: groups() needs the native plugin of this release (update nwsaom: net install ... replace); there is no Mata implementation.\n")
+			exit(198)
+		}
+	}
 	if (SaomRateTVCount() > 0) {
 		if (!C.use_batch | ver < 71) {
 			errprintf("nwsaom: a changing covariate in ratecov() needs a newer native plugin (update nwcommands and nwsaom); there is no Mata implementation.\n")
@@ -9001,6 +9008,132 @@ real scalar SaomCondRequested(){
 	if (pc == NULL) return(0)
 	if (*pc == .) return(0)
 	return(*pc != 0)
+}
+
+/* ===================================================================
+   Joint estimation of several groups (RSiena's sienaGroupCreate() + siena07()), network-only method of moments.
+
+   The actors of all groups are stacked (actor i of the data set belongs to group grp[i]); a wave network is block-diagonal.
+   Every group has the same number of waves W, so P = W - 1 periods. The groups are glued one after the other: the
+   estimator sees ONE chain of G*(W-1)+1 "virtual waves" whose period (g-1)*(W-1)+m is period m of group g. At virtual wave
+   k the block of group h holds its wave c_h(k) = min(max(k - s_h, 1), W), s_h = (h-1)*(W-1): groups that have not started
+   are at their first wave, groups that are finished stay at their last wave. In period pd only the actors of the group of
+   pd act (presence matrix) and the alternatives of an actor are the other actors of its group (plugin protocol 141), so the
+   other blocks are carried unchanged and cancel from the deviation of every statistic. The effects are shared by all
+   periods (statistics summed over all periods of all groups, as in RSiena), each period has its own rate, so the rates are
+   group-specific. The switch from the last wave of a group to the first wave of the next one is not a period.
+   =================================================================== */
+real scalar SaomGroupsMode() {
+	pointer(real scalar) scalar p
+	p = findexternal("__nwsaom_groupmode")
+	if (p == NULL) return(0)
+	return(*p != 0)
+}
+
+void SaomGroupsReset() {
+	rmexternal("__nwsaom_groupmode")
+	rmexternal("__nwsaom_groupid")
+}
+
+/* the group codes of the actors (n x 1, the values 1..G in the order of the sorted group variable) or the externals' removal */
+real colvector SaomGroupsId() {
+	pointer(real colvector) scalar p
+	p = findexternal("__nwsaom_groupid")
+	if (p == NULL) return(J(0, 1, 0))
+	return(*p)
+}
+
+/* checks the groups against the wave networks (no tie between two groups, every group has at least two actors), stores the group
+   codes and the mode flag; returns G. Errors with a message. */
+real scalar SaomGroupsSet(pointer(class SaomGraph scalar) rowvector Gw, real colvector grp) {
+	real colvector lv, code
+	real matrix t
+	pointer(real scalar) scalar pm
+	pointer(real colvector) scalar pg
+	real scalar G, h, w, bad, n
+
+	n = rows(grp)
+	if (n != (*Gw[1]).n) {
+		errprintf("nwsaom: groups(): the group variable has %g observations but the networks have %g actors.\n", n, (*Gw[1]).n)
+		exit(198)
+	}
+	if (any(grp :>= .)) {
+		errprintf("nwsaom: groups(): the group variable has missing values.\n")
+		exit(198)
+	}
+	lv = uniqrows(grp)
+	G = rows(lv)
+	if (G < 2) {
+		errprintf("nwsaom: groups(): the group variable takes only one value; fit a single group without groups().\n")
+		exit(198)
+	}
+	code = J(n, 1, .)
+	for (h=1; h<=G; h++) code[selectindex(grp :== lv[h])] = J(sum(grp :== lv[h]), 1, h)
+	for (h=1; h<=G; h++) {
+		if (sum(code :== h) < 3) {
+			errprintf("nwsaom: groups(): group %g (value %g) has fewer than 3 actors.\n", h, lv[h])
+			exit(198)
+		}
+	}
+	for (w=1; w<=cols(Gw); w++) {
+		t = (*Gw[w]).all_ties()
+		if (rows(t) == 0) continue
+		bad = sum(code[t[., 1]] :!= code[t[., 2]])
+		if (bad > 0) {
+			errprintf("nwsaom: groups(): wave %g has %g tie(s) between actors of different groups; the networks of the waves must have no ties between groups (the groups are separate actor sets).\n", w, bad)
+			exit(198)
+		}
+	}
+	rmexternal("__nwsaom_groupmode")
+	rmexternal("__nwsaom_groupid")
+	pm = crexternal("__nwsaom_groupmode")
+	*pm = 1
+	pg = crexternal("__nwsaom_groupid")
+	*pg = code
+	return(G)
+}
+
+real rowvector SaomGroupsSizes() {
+	real colvector code
+	real scalar h
+	real rowvector out
+	code = SaomGroupsId()
+	out = J(1, max(code), 0)
+	for (h=1; h<=cols(out); h++) out[h] = sum(code :== h)
+	return(out)
+}
+
+/* virtual wave k (1..G*(W-1)+1) of the glued chain, see above */
+void SaomGroupsWave(pointer(class SaomGraph scalar) rowvector Gw, real scalar k, class SaomGraph scalar V) {
+	real colvector code
+	real matrix t
+	real scalar W, G, h, c, n, i
+	code = SaomGroupsId()
+	W = cols(Gw)
+	G = max(code)
+	n = (*Gw[1]).n
+	V.init(n, (*Gw[1]).directed)
+	for (h=1; h<=G; h++) {
+		c = min((max((k - (h-1)*(W-1), 1)), W))
+		t = (*Gw[c]).all_ties()
+		if (rows(t) == 0) continue
+		t = select(t, code[t[., 1]] :== h)
+		for (i=1; i<=rows(t); i++) V.toggle(t[i, 1], t[i, 2])
+	}
+}
+
+/* n x (G*(W-1)+1) presence matrix of the virtual waves: group h is present at the waves of its own periods (the product of two
+   adjacent columns is the activity of a period) */
+real matrix SaomGroupsPresent(real scalar W) {
+	real colvector code
+	real matrix pm
+	real scalar G, h, Wv
+	code = SaomGroupsId()
+	G = max(code)
+	Wv = G*(W-1) + 1
+	pm = J(rows(code), Wv, 0)
+	for (h=1; h<=G; h++) pm[selectindex(code :== h), ((h-1)*(W-1)+1)..(h*(W-1)+1)] = J(sum(code :== h), W, 1)
+	return(pm)
 }
 
 /* closed-form starting rate (RSiena's effects.r): n_active*(0.2 +
@@ -15001,9 +15134,9 @@ void SaomBatchSetup(pointer(class SaomGraph scalar) rowvector Gwaves, real scala
 	real matrix missBehPd, real scalar haspresent, real matrix presentPd,
 	| real rowvector behfntype, real scalar symtype, real matrix rcattr, pointer(real matrix) rowvector compEv) {
 
-	real matrix E, t, EV
+	real matrix E, t, EV, attrmat
 	real scalar k
-	real scalar n, pd, nattr, nbeh, nrows, i, junk, sframe, ntv
+	real scalar n, pd, nattr, nbeh, nrows, i, junk, sframe, ntv, grpcol
 	string rowvector names
 	string scalar origframe, argstr
 
@@ -15014,6 +15147,14 @@ void SaomBatchSetup(pointer(class SaomGraph scalar) rowvector Gwaves, real scala
 		if (rows(t) > 0) E = E \ (J(rows(t), 1, pd), t)
 	}
 	nattr = cols(cfg.attrmat)
+	grpcol = 0
+	attrmat = cfg.attrmat
+	if (SaomGroupsMode()) {
+		// protocol 141: the group of every actor is one more attribute column (the last one)
+		attrmat = (rows(attrmat) > 0 ? attrmat : J(n, 0, 0)), SaomGroupsId()
+		nattr = nattr + 1
+		grpcol = nattr
+	}
 	nbeh = cols(behtermcodes)
 	EV = J(0, 4, 0)
 	if (args() >= 18) for (pd=1; pd<=P; pd++) if (compEv[pd] != NULL) if (rows(*compEv[pd]) > 0) EV = EV \ (J(rows(*compEv[pd]), 1, pd), *compEv[pd])
@@ -15042,7 +15183,7 @@ void SaomBatchSetup(pointer(class SaomGraph scalar) rowvector Gwaves, real scala
 	junk = st_addvar("double", names)
 	SaomBehDyStore(n)
 	if (rows(E) > 0) st_store((1::rows(E)), ("e_pd", "e_i", "e_j"), E)
-	for (i=1; i<=nattr; i++) st_store((1::n), "a" + strofreal(i), cfg.attrmat[1::n, i])
+	for (i=1; i<=nattr; i++) st_store((1::n), "a" + strofreal(i), attrmat[1::n, i])
 	if (nbeh > 0) for (pd=1; pd<=P; pd++) st_store((1::n), "b" + strofreal(pd), *Behwaves[pd])
 	if (hasmiss) {
 		if (rows(missDyadsPd) > 0) st_store((1::rows(missDyadsPd)), ("m_pd", "m_i", "m_j"), missDyadsPd)
@@ -15074,6 +15215,7 @@ void SaomBatchSetup(pointer(class SaomGraph scalar) rowvector Gwaves, real scala
 	argstr = argstr + SaomBehCovTrailer(n)
 	argstr = argstr + SaomBehDyTrailer(n)
 	argstr = argstr + SaomSRTrailer() + SaomBehVarTrailer() + SaomRCTVTrailer() + SaomBRTrailer()
+	if (grpcol > 0) argstr = argstr + " " + strofreal(grpcol)
 
 	stata("capture program saomnativesim, plugin using(" + char(34) + SaomNativePluginPath() + char(34) + ")")
 	if (strtoreal(st_global("NWSAOM_TRACE")) == 4) printf("TRACE BATCHSETUP argument string: %f characters\n", strlen(argstr))

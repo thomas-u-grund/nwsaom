@@ -126,6 +126,10 @@ program define nwsaom_estat, rclass
 	_nwsaom_libcheck
 	gettoken subcmd rest : 0, parse(" ,")
 	local subcmd = lower(trim("`subcmd'"))
+	if `"`e(cmd)'"' == "nwsaom" & e(ngroups) < . {
+		di as err "estat `subcmd' is not yet available after a fit with groups()."
+		exit 198
+	}
 	if `"`e(cmd)'"' == "nwsaom_multinet" & !inlist("`subcmd'", "score", "timetest") {
 		di as err "estat `subcmd' is not yet available after nwsaom multinet (available: {bf:score}, {bf:timetest})."
 		exit 198

@@ -2,7 +2,7 @@
 
 <!--version-->**Version 1.1.1** (released 27 October 2026)<!--/version-->
 
-`nwsaom` fits stochastic actor-oriented models (SAOM, Snijders 2001) to longitudinal network panels declared with `nwset`: network-only and network-behavior co-evolution, one-mode, two-mode and multiplex/multi-network data, covariates, rate effects, composition change, method of moments (conditional and unconditional), maximum likelihood and Bayesian estimation, meta-analysis over several groups, goodness of fit and time-heterogeneity tests. The simulation and estimation engine runs in a native plugin. A manual ("Manual for version 1.1", PDF in `manual/`, archived at Zenodo under the DOI 10.5281/zenodo.23623807 of all versions) and an inventory of the RSiena effects with their status in `docs/`.
+`nwsaom` fits stochastic actor-oriented models (SAOM, Snijders 2001) to longitudinal network panels declared with `nwset`: network-only and network-behavior co-evolution, one-mode, two-mode and multiplex/multi-network data, covariates, rate effects, composition change, method of moments (conditional and unconditional), maximum likelihood and Bayesian estimation, meta-analysis over several groups, joint estimation of several groups (`groups()`), goodness of fit and time-heterogeneity tests. The simulation and estimation engine runs in a native plugin. A manual ("Manual for version 1.1", PDF in `manual/`, archived at Zenodo under the DOI 10.5281/zenodo.23623807 of all versions) and an inventory of the RSiena effects with their status in `docs/`.
 
 Part of the nwcommands family of Stata packages for network analysis. nwsaom is a separate package with its
 own repository; it needs the core package nwcommands but no other model package.

@@ -11,6 +11,8 @@ f _nwsaom_getrates.ado
 f _nwsaom_libcheck.ado
 f _nwsaom_mnbeh.ado
 f _nwsaom_nx.ado
+f _nwsaom_groups.ado
+f _nwsaom_groupspost.ado
 f _nwsaom_postengine.ado
 f _nwsaom_rates.ado
 f _nwsaom_rsnotes.ado

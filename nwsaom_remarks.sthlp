@@ -487,6 +487,33 @@ s50 with alcohol (density, reciprocity, one split): the eight observed statistic
 -5.978/5.799) are identical to RSiena's and the estimates agree (altX -0.38/0.26 (-0.38/0.26), egoX -2.15/2.16 (-2.15/2.15), sameX 0.11/0.17
 (0.09/0.20), simX 0.47/0.68 (0.52/0.63)).
 
+{marker groups}{...}
+{title:Several groups: joint estimation}
+{pstd}
+{cmd:groups(}{it:varname}{cmd:)} estimates ONE model for several groups of actors (school classes, organisations), as RSiena does for a group of data sets made
+with {cmd:sienaGroupCreate()} and fitted with {cmd:siena07()}. The groups are separate actor sets stacked in one data set: the observations are the actors of all groups,
+{it:varname} says which group an actor belongs to, and each wave network (made, for example, with {cmd:nwfromedge} from stacked edge lists) has no ties between groups; a tie between
+two groups stops the command with the number of such ties. Actor covariates are ordinary variables of the data set.
+
+{pstd}
+All groups have the same number of waves, {cmd:waves(w1 w2 w3)}. The parameters of the effects are shared by all groups: the statistics are summed over all periods of all groups,
+as in RSiena. Each period of each group has its own rate parameter (RSiena's default for groups). The rates are named as RSiena numbers the periods of the combined series:
+the step from the last wave of one group to the first wave of the next is not a period and is skipped, so three groups with three waves give {cmd:period1 period2 period4 period5
+period7 period8}. {cmd:e(rates)} has one column per period, {cmd:e(rates_group)} and {cmd:e(rates_period)} give the group and RSiena's period number of each column,
+{cmd:e(ngroups)}, {cmd:e(groupn)} (actors per group) and {cmd:e(groupvar)} describe the groups, {cmd:e(N)} is the total number of actors. Conditional (the default) and
+{opt unconditional} estimation both work.
+
+{pstd}
+Actor covariates are centred at their mean over all actors of all groups, so a variable that is constant within a group (group size, a group indicator) can be used with
+{cmd:egox()}. To let a parameter differ between groups, use an interaction of the effect with a group indicator, as the RSiena manual recommends.
+
+{pstd}
+Not yet available with {opt groups()} (the command stops with a message): a behavior (co-evolution), time-varying covariates, {opt present()}/{opt joinat()}/{opt leaveat()}, missing data,
+{opt structural()}, covariate rates, non-directed relations, two-mode networks, dyadic covariates, {opt balance}, {opt simx()} (RSiena computes the similarity mean and the balance mean
+per group), {opt interact()} and {opt ml}; {cmd:estat} and {cmd:nwsaom bayes} after a fit with groups. Groups with different numbers of waves are not yet possible.
+Validation against RSiena 1.6.14 (three groups of 15, 20 and 15 actors cut out of the s50 data, density, reciprocity, transitive triplets, 3-cycles, egoX and altX of alcohol, ten
+runs each): the estimates, the standard errors and the six rates agree within the simulation error, conditional and unconditional.
+
 {marker tvcov}{...}
 {pstd}
 {bf:Time-varying covariates.} {cmd:tvcov(}{it:a1 a2 a3}{cmd:)} (several: separated by '|') declares a covariate that changes between

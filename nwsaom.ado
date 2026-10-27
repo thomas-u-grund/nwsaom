@@ -138,7 +138,7 @@ program nwsaom, eclass
 		RATECOV(string) RATECOVCOEF(string) BEHRATECOV(string) BEHRATE(string) BEHRATECOEF(string) SYMMETRIC SYMTYPE(string) ///
 		RATE0(numlist >0) THETA0(string) FIX(string) K0(integer 50) K3(integer 1000) ///
 		FIRSTG(real 0.2) SEED(integer -1) CORES(integer 0) UNCONDitional NOCENTER ///
-		ENDOW(string) CREATION(string) ACTORMODE(integer 0) TVCOV(string) DETail ]
+		ENDOW(string) CREATION(string) ACTORMODE(integer 0) TVCOV(string) DETail GROUPS(string) ]
 	set more off
 	mata: SaomRatesReset()
 
@@ -1107,6 +1107,20 @@ program nwsaom, eclass
 			mata: __nwsaom_presentmat[.,`__w'] = st_data(1::`nodes', "`__wpres'")
 		}
 		mata: __ns_present1 = __nwsaom_presentmat[.,1] :* __nwsaom_presentmat[.,2]
+	}
+	// groups(): joint estimation of several groups (RSiena's sienaGroupCreate()); the groups are glued into one chain of virtual waves, see _nwsaom_groups.ado
+	local __ns_isgrp = ("`groups'" != "")
+	local __ns_gW = 0
+	if `__ns_isgrp' {
+		local __ns_gbad ""
+		foreach __o in behavior tvcov present joinat leaveat missnet missbeh structural ratecov behratecov behrate symmetric symtype balance simcov simx simrecipx dyadcov dyadcovrecip tvdyadcov tvdyadcovrecip tvdyadx dyadx ownx netx netbeh ml interact {
+			if `"``__o''"' != "" local __ns_gbad "`__ns_gbad' `__o'"
+		}
+		_nwsaom_groups build, groups(`groups') nodes(`nodes') nwaves(`__nwsaom_nwaves') multi(`__ns_multi') tm(`__nwsaom_tm') coev(`__nwsaom_coev') bad(`__ns_gbad')
+		local __ns_gW = `__nwsaom_nwaves'
+		local __nwsaom_nwaves = r(nwaves)
+		local __ns_gpn "`r(pnames)'"
+		local __ns_haspresent = 1
 	}
 	capture mata: mata drop __nwsaom_compstart __nwsaom_compev
 	if `__ns_hastimed' {
@@ -3550,7 +3564,7 @@ program nwsaom, eclass
 	matrix rownames `V' = `__ns_coefnames'
 
 	local __ns_depname : word 1 of `__ns_wavelist'
-	local __ns_lastwave : word `__nwsaom_nwaves' of `__ns_wavelist'
+	local __ns_lastwave : word `=cond(`__ns_isgrp', `__ns_gW', `__nwsaom_nwaves')' of `__ns_wavelist'
 	local __ns_depname "`__ns_depname'_to_`__ns_lastwave'"
 
 	// harmonisation unit 18: e(V), real RSiena's own sandwich-formula
@@ -3829,6 +3843,13 @@ program nwsaom, eclass
 			local __ns_periodnames "`__ns_periodnames' period`__p'"
 			if !`__ns_iscond' local __ns_tconvnames "`__ns_tconvnames' rate_period`__p'"
 		}
+		if `__ns_isgrp' {
+			local __ns_periodnames "`__ns_gpn'"
+			local __ns_tconvnames "`__ns_coefnames'"
+			foreach __pn of local __ns_gpn {
+				if !`__ns_iscond' local __ns_tconvnames "`__ns_tconvnames' rate_`__pn'"
+			}
+		}
 		if `__ns_hasratecov' {
 			if `__ns_nratecov' > 1 {
 				foreach __v of local __ns_rclist {
@@ -3851,6 +3872,7 @@ program nwsaom, eclass
 		di as text "{hline}"
 		di as text "SAOM (Method of Moments, " as result cond(`__ns_iscond', "conditional", "unconditional") as text "), waves: " as result "`__ns_wavelist'"
 		di as text "Actors: " as result `nodes' _col(40) as text "Periods: " as result `=`__nwsaom_nwaves'-1'
+		if `__ns_isgrp' _nwsaom_groups show, groups(`groups') w(`__ns_gW')
 		if `__nwsaom_tm' di as text "Two-mode network: " as result `__nwsaom_tm_na' as text " actors choose among " as result `__nwsaom_tm_ne' as text " events"
 		di as text "{hline}"
 		ereturn display
@@ -3863,6 +3885,7 @@ program nwsaom, eclass
 		ereturn matrix rates_se = `ratese'
 		ereturn matrix tconv = `tconv'
 		ereturn scalar tconv_max = `__ns_tconvmax'
+		if `__ns_isgrp' _nwsaom_groupspost, groups(`groups') w(`__ns_gW')
 		if `__ns_hasratecov' {
 			// same layout as the two-wave path: e(ratecoef*) for one variable, e(ratecoefs*) always
 			tempname __rcb __rcse __rctr __rcfx

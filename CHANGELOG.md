@@ -3,6 +3,11 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- Joint estimation of several groups: option `groups(varname)` (RSiena's `sienaGroupCreate()` + `siena07()`). The actors of all groups are the rows of the data set, `varname` gives the group, the wave networks have no ties between groups; the groups need the same number of waves. One set of effect parameters for all groups, one rate per period of each group, named with RSiena's period numbering (`period1 period2 period4 ...`); `e(rates_group)`, `e(rates_period)`, `e(ngroups)`, `e(groupn)`, `e(groupvar)`. Network-only method of moments, conditional and unconditional, with actor covariates. The compiled plugin restricts the alternatives of an actor to its own group (needs the plugin of this release; there is no Mata fallback). Not yet with a behavior, time-varying covariates, composition change, missing data, `structural()`, rate covariates, non-directed or two-mode networks, dyadic covariates, `balance`, `simx()`, `interact()`, `ml`, `estat` and `nwsaom bayes`.
+
 ## [1.1.1] - 2026-10-27
 
 Patch release in preparation (proposed 1.1.1). Works with nwcommands 3.6.0 and later (the Mata library `lnwsaom1.mlib` is rebuilt with Stata 17 against the unchanged core library). Results are unchanged: with a fixed seed every estimate, standard error and statistic is identical to the last digit to that of 1.1.0.

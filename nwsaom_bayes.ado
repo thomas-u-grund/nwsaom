@@ -20,6 +20,10 @@ program nwsaom_bayes, eclass
 		SEED(integer -1) PRIORMEANETA(numlist) PRIORSIGETA(numlist >0) RATEPRIORMEAN(numlist) RATEPRIORSD(real 1) GIBBSRATES PRIORRATE(numlist min=2 max=2 >=0) ///
 		FRAME(name) LEVEL(cilevel) NOTABLE NOHEADER]
 
+	if `"`e(cmd)'"' == "nwsaom" & e(ngroups) < . {
+		di as err "nwsaom bayes is not yet available after a fit with groups()."
+		exit 198
+	}
 	if !inlist(`"`e(cmd)'"', "nwsaom", "nwsaom_bayes") {
 		di as err "nwsaom bayes works on the model of the last nwsaom fit; run nwsaom first."
 		exit 301
