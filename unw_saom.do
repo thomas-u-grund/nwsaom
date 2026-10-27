@@ -13211,6 +13211,7 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 
 		if (C.hasmiss) C.targetRateNet[pd] = SaomCountDifferingMasked(Gp, Gpend, *missMaskNetPd[pd])
 		else C.targetRateNet[pd] = SaomCountDiffering(Gp, Gpend)
+		if (SaomStructOn()) SaomStructCoevPd(C, M, pd, (args() >= 15 ? fntype : J(1, 0, 0)))
 		C.targetRateBeh[pd] = sum(abs((*Behwaves[pd+1] - *Behwaves[pd]) :* (1 :- C.missBehPd[.,pd])))
 
 		ratesNet0[pd] = C.npresentPd[pd] * (0.2 + 2*C.targetRateNet[pd]) / (C.npresentPd[pd]*(C.npresentPd[pd]-1) + 1)
@@ -13228,6 +13229,8 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 			C.simMean, C.overallMean, C.hasmiss, C.missDyadsPd, C.missBehPd, C.haspresent, C.presentPd,
 			C.cfgBeh.fntype, C.symtype, (C.nrcN > 0 ? C.rcattr : J(0, 0, 0)), C.compEv)
 	}
+	SaomStructNeedBatch(C.use_batch)
+	if (SaomStructOn()) SaomStructSend(P, n)
 	// the observed statistics of the covariate rate effects, from the start values of the plugin (one implementation of every effect)
 	C.targetRC = J(P, max((nrcT, 1)), 0)
 	if (nrcT > 0) {

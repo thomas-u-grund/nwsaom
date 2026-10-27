@@ -326,6 +326,44 @@ void SaomStructTargets(struct SaomNetCtx scalar C, class SaomModel scalar M, poi
 	}
 }
 
+/* ---- co-evolution with one behavior: the network part of the targets and the observed network distance of period pd (called inside the per-period loop of
+   SaomEstimateRMCoevMulti(), after the ordinary values were computed) ---- */
+void SaomStructCoevPd(struct SaomCoevCtx scalar C, class SaomModel scalar M, real scalar pd, real rowvector fntype) {
+	real matrix raw, A, B, mk, mkfull
+	class SaomGraph scalar Tg, Gs
+
+	raw = SaomStructRaw()
+	SaomStructPeriod(raw, pd, C.n, A, B)
+	if (rows(A) == 0 & rows(B) == 0) return
+	Tg = SaomStructPatched(*C.Gwaves[pd+1], A)
+	Gs = SaomStructPatched(*C.Gwaves[pd], B)
+	if (C.hasmiss) {
+		mkfull = *C.missMaskNetPd[pd]
+		mk = SaomStructClearMask(mkfull, A, B)
+		C.target[pd, 1..C.pNet] = SaomMaskedStatistic(Tg, M, mk)
+		C.targetRateNet[pd] = SaomCountDifferingMasked(Gs, Tg, mkfull)
+	}
+	else {
+		mkfull = J(0, 0, 0)
+		C.target[pd, 1..C.pNet] = M.full_statistic(Tg)
+		C.targetRateNet[pd] = SaomCountDiffering(Gs, Tg)
+	}
+	if (C.hasnetgate) C.target[pd, 1..C.pNet] = SaomNetworkPatchEndowCreation(M, fntype, C.target[pd, 1..C.pNet], *C.Gwaves[pd], Tg, mkfull)
+	if (strtoreal(st_global("NWSAOM_TRACE")) == 5) {
+		st_matrix("__nwsaom_tr_target", C.target)
+		st_matrix("__nwsaom_tr_rate", C.targetRateNet)
+	}
+}
+
+/* the plugin needs the batch path for the sets; version and path checks of a context that sends them */
+void SaomStructNeedBatch(real scalar use_batch) {
+	if (!SaomStructOn()) return
+	if (!use_batch | SaomNativePluginVersion() < 150) {
+		errprintf("nwsaom: structural zeros and ones (the codes 10 and 11) need the native plugin of this release (update nwsaom: net install ... replace); there is no Mata implementation.\n")
+		exit(198)
+	}
+}
+
 /* ---- the rows for the plugin: (pd, i, j, kind).  kind 1: dyad fixed during the period (pd = 0: in every period), 2 / 3: end value zero / one.
    Dyads fixed in every period are sent once (pd = 0) ---- */
 real matrix SaomStructRows(real scalar P, real scalar n) {

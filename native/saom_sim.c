@@ -4927,7 +4927,7 @@ static long saom_sf_elig(const model_t *M, long n, const double *pres, unsigned 
 static void saom_sf_override(const model_t *M, graph_t *g);
 static void saom_sf_free(void **pm);
 /* the total rate of the network / of the behavior and the grand rate (simulate_period() locals) */
-#define SAOM_NETTOT (P->hasratecov ? (symB ? rate * symGfac_rc : rate * totw_rc) : (double)nnet * rate)
+#define SAOM_NETTOT (P->hasratecov ? (symB ? rate * symGfac_rc : rate * totw_rc) : ((symB && sfl && n > 1) ? (double)nnet * (double)(nnet - 1) / (double)(n - 1) * rate : (double)nnet * rate))
 #define SAOM_BEHTOT (hasbrc ? rateBeh * totwb : (double)npresent * (M->nbehterms > 0 ? rateBeh : 0.0))
 #define SAOM_SETGRAND() do { grandRate = SAOM_NETTOT + SAOM_BEHTOT; if (M->nbeh > 1) for (b = 1; b < M->nbeh; b++) grandRate += (double)npresent * P->xrateBeh[b]; } while (0)
 
@@ -5245,6 +5245,7 @@ static int simulate_period(const model_t *M, const period_t *PD, const simparams
 					   logic unchanged. */
 					long actor;
 					long alter;
+					int skipB = 0;		/* protocol 150: the pair is a structural dyad of the actor: no change, no score (RSiena: calculateModelTypeBProbabilities() returns false) */
 					int ij_exists, accepted;
 					double u_actor = 0.0, u_alter = 0.0, prob, pEgo = 0.0, pAlt = 0.0;
 					double chg_actor[MAXTERMS], chg_alter[MAXTERMS];
@@ -5292,9 +5293,14 @@ static int simulate_period(const model_t *M, const period_t *PD, const simparams
 					else {
 						/* RSiena (calculateModelTypeBProbabilities()): the alter is drawn in proportion to the alters' RATES, which are 0 for an
 						   inactive actor - unlike the directed and the unilateral models, where inactive actors stay among the alters */
-						if (PD->haspresent) { do { alter = presentIdxArr[(long)(rng_unif(&rng) * (double)npresent)]; } while (alter == actor); }
+						if (netIdx) {	/* protocol 150: the alters are drawn in proportion to their rates: the egos that can act */
+							if (nnet < 2) { alter = (actor == 1) ? 2 : 1; skipB = 1; }
+							else { do { alter = netIdx[(long)(rng_unif(&rng) * (double)nnet)]; } while (alter == actor); }
+						}
+						else if (PD->haspresent) { do { alter = presentIdxArr[(long)(rng_unif(&rng) * (double)npresent)]; } while (alter == actor); }
 						else { do { alter = 1 + (long)(rng_unif(&rng) * (double)n); } while (alter == actor); }
 					}
+					if (sfl && saom_sf_isfixed(M, actor, alter)) skipB = 1;
 					ij_exists = has_edge(&g, actor, alter);
 					for (k = 0; k < M->nterms; k++) {
 						double cv_actor = saom_eval_change((int)k, (int *)M->termcodes, (int *)M->attridx, (double *)M->p1, attrs, &g, actor, alter, ij_exists, NULL, NULL);
@@ -5322,8 +5328,8 @@ static int simulate_period(const model_t *M, const period_t *PD, const simparams
 						prob = ij_exists ? (pEgo + pAlt - pEgo * pAlt) : (pEgo * pAlt);
 					}
 					else prob = stable_logistic(u_actor + u_alter);
-					accepted = (rng_unif(&rng) < prob);
-					if (P->want_score) {
+					accepted = (rng_unif(&rng) < prob) && !skipB;
+					if (P->want_score && !skipB) {
 						/* d log P(outcome) / d theta for the model type (the
 						   score-function Jacobian of phases 1 and 3) */
 						for (k = 0; k < M->nterms; k++) {

@@ -23,13 +23,13 @@ end
 capture program drop _nwsaom_structural_build
 program define _nwsaom_structural_build
 	version 14
-	syntax , NODES(integer) NWAVES(integer) HASMISSNET(integer) TM(integer) [ML(string) SYMMETRIC(string) SYMTYPE(string) GROUPS(string) BEHAVIOR(string) STRUCTURAL(string)]
+	syntax , NODES(integer) NWAVES(integer) HASMISSNET(integer) TM(integer) [ML(string) SYMMETRIC(string) SYMTYPE(string) GROUPS(string) BEHAVIOR(string) STRUCTURAL(string) MB(string) RATE(string)]
 	// the combinations that are not supported yet
 	local bad ""
 	if "`ml'" != "" local bad "`bad' ml"
 	if "`symmetric'" != "" | "`symtype'" != "" local bad "`bad' symmetric"
 	if "`groups'" != "" local bad "`bad' groups()"
-	if "`behavior'" != "" local bad "`bad' behavior()"
+	if "`behavior'" != "" & ("`mb'" == "1" | "`rate'" != "") local bad "`bad' behavior() with several behaviors or rate covariates"
 	if "`structural'" != "" & !(`tm' & "`structural'" == "__nwsaom_tm_structmat") local bad "`bad' structural()"
 	if "`bad'" != "" {
 		di "{err}structural zeros and ones (the codes 10 and 11 in the wave networks) are not yet supported together with:`bad'."

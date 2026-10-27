@@ -216,6 +216,25 @@ assert abs(__sc_t[1,2] - 2252.1366) < 1e-3
 assert __nwsaom_tr_rate[1,1] == 140 & __nwsaom_tr_rate[1,2] == 114
 di "PASS structural targets in a two-mode network"
 
+* co-evolution with a behavior (alcohol of s50): the network part of the targets and the distances (RSiena: outdegree 263, reciprocity 166, transitive triplets 225,
+* altX -4.806667, simX 21.13602)
+nwclear
+forvalues w = 1/3 {
+	nwset, mat(V3w`w') directed name(c`w') nooutput
+}
+import delimited "dev/saom_structural_beh.csv", clear varnames(nonames)
+rename (v1 v2 v3) (a1 a2 a3)
+global NWSAOM_TRACE 5
+quietly nwsaom, waves(c1 c2 c3) behavior(a1 a2 a3) outdegree reciprocity transtrip behaltx behsim linear quadratic avalt k0(2) k3(10) seed(1)
+global NWSAOM_TRACE
+assert reldif(__nwsaom_tr_target[1,1] + __nwsaom_tr_target[2,1], 263) < 1e-9
+assert reldif(__nwsaom_tr_target[1,2] + __nwsaom_tr_target[2,2], 83) < 1e-9
+assert reldif(__nwsaom_tr_target[1,3] + __nwsaom_tr_target[2,3], 225) < 1e-9
+assert abs(__nwsaom_tr_target[1,4] + __nwsaom_tr_target[2,4] - 21.13602) < 1e-4
+assert abs(__nwsaom_tr_target[1,5] + __nwsaom_tr_target[2,5] + 4.806667) < 1e-4
+assert __nwsaom_tr_rate[1,1] == 110 & __nwsaom_tr_rate[1,2] == 104
+di "PASS structural targets with a co-evolving behavior"
+
 * ---- simulation at fixed parameters (unconditional): the convergence t-ratios (mean / sd of the deviation of the simulated statistics and distances from the
 * targets) against RSiena's (siena07 simOnly, means of 10 seeds of 1000 simulations)
 mata:
