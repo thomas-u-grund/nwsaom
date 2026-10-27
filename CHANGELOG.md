@@ -6,7 +6,16 @@ project uses [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
-- Joint estimation of several groups: option `groups(varname)` (RSiena's `sienaGroupCreate()` + `siena07()`). The actors of all groups are the rows of the data set, `varname` gives the group, the wave networks have no ties between groups; the groups need the same number of waves. One set of effect parameters for all groups, one rate per period of each group, named with RSiena's period numbering (`period1 period2 period4 ...`); `e(rates_group)`, `e(rates_period)`, `e(ngroups)`, `e(groupn)`, `e(groupvar)`. Network-only method of moments, conditional and unconditional, with actor covariates. The compiled plugin restricts the alternatives of an actor to its own group (needs the plugin of this release; there is no Mata fallback). Not yet with a behavior, time-varying covariates, composition change, missing data, `structural()`, rate covariates, non-directed or two-mode networks, dyadic covariates, `balance`, `simx()`, `interact()`, `ml`, `estat` and `nwsaom bayes`.
+- Joint estimation of several groups: option `groups(varname)` (RSiena's `sienaGroupCreate()` + `siena07()`). The actors of all groups are the rows of the data set, `varname` gives the group, the wave networks have no ties between groups. One set of effect parameters for all groups, one rate per period of each group (also of a behavior), named with RSiena's period numbering (`period1 period2 period4 ...`); `e(rates_group)`, `e(rates_period)`, `e(ngroups)`, `e(groupn)`, `e(groupwaves)`, `e(groupvar)`. Conditional and unconditional method of moments.
+- `gwaves()`: groups with different numbers of waves.
+- Works with actor covariates (centred over all groups), dyadic covariates (centred within the group), changing covariates, rate covariates, interactions, composition change (`present()`), missing network and behavior data, and a co-evolving behavior (linear, quadratic, average alter, average similarity, egoX/altX/simX of the behavior, behavior rate covariates).
+- The constants that RSiena keeps per group are per group here: similarity mean of a covariate, balance mean, mean/similarity mean/variance of a behavior, centring of dyadic covariates. `simx()` and `balance` therefore work with groups.
+- `estat timetest` after a fit with groups: joint, effect-wise, per-group and per-period tests; `estat score` after such a fit.
+- The compiled plugin restricts the alternatives of an actor to its own group and takes per-period constants (needs the plugin of this release; there is no Mata fallback for groups).
+- Not yet with groups: `estat gof`/`simulate`/`importance`, `nwsaom bayes`, `ml`, `structural()`, `joinat()`/`leaveat()`, two-mode and non-directed networks, several behaviors, the centred degree effects, `avdeg`, `transtriads`.
+
+### Changed
+- The checks of `symmetric`/`symtype()` live in `_nwsaom_symcheck.ado` (nwsaom.ado is at the size limit of one ado program).
 
 ## [1.1.1] - 2026-10-27
 

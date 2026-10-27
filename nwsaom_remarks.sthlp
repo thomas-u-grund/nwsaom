@@ -493,26 +493,42 @@ s50 with alcohol (density, reciprocity, one split): the eight observed statistic
 {cmd:groups(}{it:varname}{cmd:)} estimates ONE model for several groups of actors (school classes, organisations), as RSiena does for a group of data sets made
 with {cmd:sienaGroupCreate()} and fitted with {cmd:siena07()}. The groups are separate actor sets stacked in one data set: the observations are the actors of all groups,
 {it:varname} says which group an actor belongs to, and each wave network (made, for example, with {cmd:nwfromedge} from stacked edge lists) has no ties between groups; a tie between
-two groups stops the command with the number of such ties. Actor covariates are ordinary variables of the data set.
+two groups stops the command with the number of such ties. Covariates are ordinary variables of the data set (dyadic covariates: block-diagonal matrices).
 
 {pstd}
-All groups have the same number of waves, {cmd:waves(w1 w2 w3)}. The parameters of the effects are shared by all groups: the statistics are summed over all periods of all groups,
-as in RSiena. Each period of each group has its own rate parameter (RSiena's default for groups). The rates are named as RSiena numbers the periods of the combined series:
-the step from the last wave of one group to the first wave of the next is not a period and is skipped, so three groups with three waves give {cmd:period1 period2 period4 period5
-period7 period8}. {cmd:e(rates)} has one column per period, {cmd:e(rates_group)} and {cmd:e(rates_period)} give the group and RSiena's period number of each column,
-{cmd:e(ngroups)}, {cmd:e(groupn)} (actors per group) and {cmd:e(groupvar)} describe the groups, {cmd:e(N)} is the total number of actors. Conditional (the default) and
-{opt unconditional} estimation both work.
+{bf:Waves.} By default all groups have the waves given in {cmd:waves()}. With {cmd:gwaves(}{it:value}{cmd:: }{it:indices} [{cmd:|} ...]{cmd:)} a group has only some of them (at least two, in
+increasing order), so groups may have different numbers of waves, as in RSiena. The step from the last wave of a group to the first wave of the next is not a period.
 
 {pstd}
-Actor covariates are centred at their mean over all actors of all groups, so a variable that is constant within a group (group size, a group indicator) can be used with
-{cmd:egox()}. To let a parameter differ between groups, use an interaction of the effect with a group indicator, as the RSiena manual recommends.
+{bf:Parameters.} The parameters of the effects are shared by all groups: the statistics are summed over all periods of all groups, as in RSiena. Each period of each group has its own
+rate parameter, also the rate of a behavior (RSiena's default for groups; there is no common-rate option in RSiena either). The rates are named as RSiena numbers the periods of the
+combined series, skipping the switching steps: three groups with three waves give {cmd:period1 period2 period4 period5 period7 period8}. {cmd:e(rates)} (and {cmd:e(rates_beh)}) has
+one column per period, {cmd:e(rates_group)} and {cmd:e(rates_period)} give the group and RSiena's period number of each column, {cmd:e(ngroups)}, {cmd:e(groupn)} (actors per group),
+{cmd:e(groupwaves)} and {cmd:e(groupvar)} describe the groups, {cmd:e(N)} is the total number of actors. Conditional (the default for a network without behavior or composition change)
+and {opt unconditional} estimation both work. To let a parameter differ between groups use an interaction of the effect with a group indicator, as the RSiena manual recommends.
 
 {pstd}
-Not yet available with {opt groups()} (the command stops with a message): a behavior (co-evolution), time-varying covariates, {opt present()}/{opt joinat()}/{opt leaveat()}, missing data,
-{opt structural()}, covariate rates, non-directed relations, two-mode networks, dyadic covariates, {opt balance}, {opt simx()} (RSiena computes the similarity mean and the balance mean
-per group), {opt interact()} and {opt ml}; {cmd:estat} and {cmd:nwsaom bayes} after a fit with groups. Groups with different numbers of waves are not yet possible.
-Validation against RSiena 1.6.14 (three groups of 15, 20 and 15 actors cut out of the s50 data, density, reciprocity, transitive triplets, 3-cycles, egoX and altX of alcohol, ten
-runs each): the estimates, the standard errors and the six rates agree within the simulation error, conditional and unconditional.
+{bf:Constants that RSiena keeps per group} are computed per group here too: the similarity mean of a covariate ({cmd:simx()}, with the covariate's range of the group), the balance mean
+({cmd:balance}), the mean of a dependent behavior (its centring), its similarity mean and variance, and the centring of a dyadic covariate (by the mean of its off-diagonal cells within the group).
+Actor covariates are centred at their mean over all actors of all groups, so a variable that is constant within a group (group size, a group indicator) can be used with {cmd:egox()}.
+
+{pstd}
+{bf:Composition change and missing data} ({cmd:present()}, {cmd:missnet()}, {cmd:missbeh()}) are given for all actors; a group uses the waves it has. As in a single group, an actor that is
+absent at a wave must carry the ties (and behavior value) of the nearest wave where it is present, and conditional estimation is then not used. A changing covariate ({cmd:tvcov()}) is
+given for the waves of {cmd:waves()}; each group uses the values of its own periods.
+
+{pstd}
+{bf:After the fit.} {cmd:estat timetest} gives, besides the joint and effect-wise tests, a test per group and per period (RSiena's sienaTimeTest with its group test), and
+{cmd:estat score} works for a model with {cmd:fix()}. Not yet available with {opt groups()}: {cmd:estat gof}, {cmd:estat simulate}, {cmd:estat importance}, {cmd:nwsaom bayes}, {opt ml},
+{opt structural()}, {opt joinat()}/{opt leaveat()}, two-mode and non-directed networks, several behaviors, {cmd:tvdyadcov()} and the other time-varying dyadic covariates, and effects that
+use the number of actors or averages of the whole data set (the centred degree effects, {cmd:avdeg}, {cmd:transtriads}). The command stops with a message for each of them.
+
+{pstd}
+{bf:Validation.} Against RSiena 1.6.14 (three groups of 15, 20 and 15 actors cut out of the s50 data, ten runs of each program, conditional and unconditional estimation) the estimates,
+standard errors and rates agree within the simulation error for: density, reciprocity, transitive triplets, 3-cycles, egoX, altX, simX, balance, a changing covariate, a rate covariate, an
+interaction, a dyadic covariate, joiners (composition change), missing ties, and a co-evolving behavior (linear and quadratic shape, average alter, average similarity, egoX/altX/simX
+of the behavior, a behavior rate covariate, composition change). RSiena 1.6.14 itself stops with an error for groups with different numbers of waves; that case was checked against the
+equivalent object made of two-wave groups.
 
 {marker tvcov}{...}
 {pstd}
