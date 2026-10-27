@@ -8625,7 +8625,10 @@ void SaomNetSimMany(struct SaomNetCtx scalar C, class SaomModel scalar M,
 	if (C.use_batch) {
 		doperb = doper & C.perok
 		// structural rate effects change during the period: the rate score's compensator is the plugin's time integral of the total rate (protocol 72)
-		useint = (C.hasratecov & cols(SaomSRTypes()) > 0 & want_score & SaomNativePluginVersion() >= 72)
+		// Mata's & does not short-circuit: the plugin probe (a file-system lookup of the plugin) must only run when the rest holds,
+		// not once per Robbins-Monro iteration
+		useint = 0
+		if (C.hasratecov) if (cols(SaomSRTypes()) > 0) if (want_score) useint = (SaomNativePluginVersion() >= 72)
 		out = SaomBatchRun(C.P, p, 0, par[1..p], J(1, 0, 0), par[(p+1)..(p+C.P)], J(1, 0, 0), J(1, 0, 0), K, want_score, 0, rcc, doperb, useint)
 		Z[., 1..p] = out[., 1..p] :- colsum(C.target)
 		if (want_score) S[., 1..p] = out[., (p+1)..(2*p)]
@@ -8776,10 +8779,11 @@ struct SaomNetFit scalar SaomRMCore(transmorphic C, pointer(function) scalar sim
 	real rowvector par, par1, dev, prevdev, prod0, prod1, ac, stdcap, thav, fchange, changestep, thprev, m3
 	real rowvector rmfixed, rmfixedDec, userfix, fm
 	real scalar ptot, k, nsub, subphase, gain, reduceg, n2min0, maxRatio, thavn, nit, maxacor
-	real scalar attempt, diverged, kp1
+	real scalar attempt, diverged, kp1, trace
 	real rowvector n2minimum, n2maximum
 
 	ptot = cols(par0)
+	trace = (strtoreal(st_global("NWSAOM_TRACE")) == 1)
 
 	// --- Phase 1: Jacobian by the score-function method. As RSiena (phase1.r): if the diagonal of the
 	// derivative matrix has a non-positive element and phase 1 has fewer than 200 replicates, a new phase 1
@@ -8904,7 +8908,7 @@ struct SaomNetFit scalar SaomRMCore(transmorphic C, pointer(function) scalar sim
 				for (k=1; k<=ptot; k++) if (israte[k] & par[k] < 0.5*thprev[k]) par[k] = 0.5*thprev[k]
 				thav = thav + par
 				thavn = thavn + 1
-				if (strtoreal(st_global("NWSAOM_TRACE")) == 1) if (nit <= 3 | mod(nit, 25) == 0) {
+				if (trace) if (nit <= 3 | mod(nit, 25) == 0) {
 					printf("TRACE sub %f it %f gain %5.3f par =", subphase, nit, gain)
 					par
 					printf("TRACE    dev =")
@@ -15113,12 +15117,13 @@ real matrix SaomBatchRun(real scalar P, real scalar pNet, real scalar pBeh,
 
 	seed = floor(runiform(1,1) * 2147483647)
 	argstr = "BATCHRUN|" + strofreal(K) + " " + strofreal(seed, "%12.0f") + " " + strofreal(SaomCores()) + " " + strofreal(want_score) + " " + strofreal(condmode)
-	for (i=1; i<=pNet; i++) argstr = argstr + " " + strofreal(thetaNet[i], "%25.17g")
-	for (i=1; i<=pBeh; i++) argstr = argstr + " " + strofreal(thetaBeh[i], "%25.17g")
-	for (i=1; i<=P; i++) argstr = argstr + " " + strofreal(ratesNet[i], "%25.17g")
-	for (i=1; i<=P; i++) argstr = argstr + " " + strofreal((cols(ratesBeh) ? ratesBeh[i] : 0), "%25.17g")
-	for (i=1; i<=P; i++) argstr = argstr + " " + strofreal((cols(targets) ? targets[i] : 0), "%25.17g")
-	for (i=1; i<=nrc; i++) argstr = argstr + " " + strofreal(ratecoef[i], "%25.17g")
+	// one vectorised strofreal() per block: the same text as the element-wise loops (blanks are separators for the plugin)
+	if (pNet > 0) argstr = argstr + " " + invtokens(strofreal(thetaNet[1..pNet], "%25.17g"))
+	if (pBeh > 0) argstr = argstr + " " + invtokens(strofreal(thetaBeh[1..pBeh], "%25.17g"))
+	argstr = argstr + " " + invtokens(strofreal(ratesNet[1..P], "%25.17g"))
+	argstr = argstr + " " + invtokens(strofreal((cols(ratesBeh) ? ratesBeh[1..P] : J(1, P, 0)), "%25.17g"))
+	argstr = argstr + " " + invtokens(strofreal((cols(targets) ? targets[1..P] : J(1, P, 0)), "%25.17g"))
+	if (nrc > 0) argstr = argstr + " " + invtokens(strofreal(ratecoef[1..nrc], "%25.17g"))
 	if (doper | dowint) argstr = argstr + " " + strofreal(doper)
 	if (dowint) argstr = argstr + " 1"
 
