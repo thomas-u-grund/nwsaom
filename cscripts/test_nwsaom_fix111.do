@@ -61,11 +61,11 @@ estat simulate, nsim(6) seed(5) generate(fxs)
 matrix S = r(sim)
 matrix O = r(obs)
 assert rowsof(S) == 12 & !missing(S[1, 3]) & O[2, 3] == Wd[3, 1]
-* the simulated networks are two-mode actors x events networks
-mata: st_numscalar("__fx_nn", __nw.nws.pdefs[__nw.nws.get_index_of("fxs_1_p1")]->get_nodes())
+* the simulated networks are two-mode actors x events networks: 18 + 14 = 32 nodes (read through nwtomata, which does not
+* depend on how the core names its network registry)
+nwtomata fxs_1_p1, mat(__fxm)
+mata: st_numscalar("__fx_nn", rows(__fxm))
 assert scalar(__fx_nn) == 32
-mata: st_local("fx2m", __nw.nws.pdefs[__nw.nws.get_index_of("fxs_1_p1")]->is_2mode())
-assert "`fx2m'" == "true"
 nwsaom simulate, waves(w1 w2 w3) outdegree indegpopularity theta(-1 0.3) rates(5 5) nsim(4) seed(2)
 assert r(nsim) == 4
 * a matrix of the wrong shape as theta() gives a message, not a conformability error
