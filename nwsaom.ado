@@ -712,6 +712,11 @@ program nwsaom, eclass
 	// follow-on, not a correctness gap; the Mata fallback is fully
 	// certified (dev/saom_structural_crosscheck.do).
 	local __ns_hasstructural = 0
+	local __ns_ustruct ""
+	if "`structural'" != "" & !`__nwsaom_tm' {
+		local __ns_ustruct "`structural'"
+		local structural ""
+	}
 	if "`structural'" != "" {
 		if `__ns_multi' & !`__nwsaom_tm' {
 			di "{err}option {bf:structural()} is v1 scope: exactly two waves ({bf:wave1()}/{bf:wave2()}, not {bf:waves()})."
@@ -969,7 +974,7 @@ program nwsaom, eclass
 		}
 	}
 	// structural zeros and ones (the codes 10 and 11 in the wave networks, RSiena): the per-wave sets, the gates for the combinations not yet supported
-	if `__ns_scodes' _nwsaom_structural build, nodes(`nodes') nwaves(`__nwsaom_nwaves') hasmissnet(`__ns_hasmissnet') tm(`__nwsaom_tm') ml(`ml') symmetric(`symmetric') symtype(`symtype') groups(`groups') behavior(`behavior') structural(`structural') mb(`__ns_mb') rate(`ratecov'`behratecov'`behrate')
+	if `__ns_scodes' | "`__ns_ustruct'" != "" _nwsaom_structural build, ustruct(`__ns_ustruct') nodes(`nodes') nwaves(`__nwsaom_nwaves') hasmissnet(`__ns_hasmissnet') tm(`__nwsaom_tm') ml(`ml') symmetric(`symmetric') symtype(`symtype') groups(`groups') behavior(`behavior') structural(`structural') mb(`__ns_mb') rate(`ratecov'`behratecov'`behrate')
 
 	// multi-wave path only: assemble the pointer array
 	// SaomEstimateRMMulti() needs (the standard "collection of class

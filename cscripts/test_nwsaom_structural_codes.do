@@ -412,6 +412,31 @@ nwsaom, waves(c1 c2 c3) outdegree reciprocity transtrip behavior(a1 a2 a3) linea
 assert e(b)[1,1] < . & colsof(e(b)) == 6
 di "PASS several behaviors and rate covariates with a behavior run with codes"
 
+* the older option structural(matname) is converted to the per-wave lists (deprecated alias): three waves now, and the same numbers as the codes (V1)
+nwclear
+mata:
+M1 = st_matrix("V1w1")
+st_matrix("MASKV1", (M1 :>= 10))
+for (w=1; w<=3; w++) {
+	M = st_matrix("V1w" + strofreal(w))
+	st_matrix("ZZ" + strofreal(w), (M :== 1) :| (M :== 11))
+}
+end
+forvalues w = 1/3 {
+	nwset, mat(ZZ`w') directed name(c`w') nooutput
+}
+global NWSAOM_TRACE 5
+quietly nwsaom, waves(c1 c2 c3) outdegree reciprocity transtrip cycle3 indegpopularity outactivity structural(MASKV1) k0(2) k3(10) seed(1)
+global NWSAOM_TRACE
+matrix __sc_t = J(1, colsof(__nwsaom_tr_target), 0)
+forvalues p = 1/2 {
+	forvalues j = 1/6 {
+		matrix __sc_t[1,`j'] = __sc_t[1,`j'] + __nwsaom_tr_target[`p',`j']
+	}
+}
+sc_check6 152 57 230.0136 374 121 123 72 58
+di "PASS structural(matname) converted to the codes (three waves)"
+
 * ---- errors and gates
 nwclear
 nwset, mat(V3w1) directed name(g1) nooutput

@@ -1040,7 +1040,7 @@ the simulated networks have the end-structural dyads at their end value (RSiena'
 
 {pstd}
 {bf:The older option} {opt structural(matname)} marks dyads by a 0/1 matrix that is the same in all periods and needs the same observed value at every wave. It
-is kept for compatibility (two waves, network-only) and is replaced by the codes 10 and 11 in the wave networks; it cannot be combined with them.
+is deprecated and replaced by the codes 10 and 11 in the wave networks: the matrix is converted to the codes of every wave (a note is printed), so it works with {opt waves()} and the other options too; the value of a marked dyad is its value in the data, which must be the same at every wave.
 
 {marker estimation}{...}
 {title:Estimation}

@@ -1400,8 +1400,9 @@ assert _rc == 198
 capture nwsaom, wave1(structw1) wave2(structw2) outdegree reciprocity structural(structfrozen) symmetric k0(5) k3(20) seed(1)
 assert _rc == 198
 gen byte grp = mod(_n,2)
+* structural(matname) is converted to the per-wave lists of the codes 10 and 11 (deprecated alias): ratecov() works with it now
 capture nwsaom, wave1(structw1) wave2(structw2) outdegree reciprocity ratecov(grp) structural(structfrozen) k0(5) k3(20) seed(1)
-assert _rc == 198
+assert _rc == 0
 
 di as text "nwsaom.ado structural() (structural zeros/ones) PASS"
 

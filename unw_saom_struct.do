@@ -552,4 +552,53 @@ real rowvector SaomStructRC(struct SaomCoevCtx scalar C, real scalar pd, real ma
 	Gs = SaomStructPatched(*C.Gwaves[pd], B)
 	return(SaomCovariateDifferingSum(Gs, Tg, rcA, (C.hasmiss ? *C.missMaskNetPd[pd] : J(0, 0, 0))))
 }
+
+/* the older option structural(matname): a 0/1 n x n matrix of dyads that are fixed in all periods, with the same observed value at every wave.  Converted to the rows (wave, i, j, value) of the codes */
+void SaomStructFromMask(string scalar name, pointer(class SaomGraph scalar) rowvector Gw, real scalar n) {
+	real matrix S, add, raw
+	real scalar w, i, j, v, W, k
+	real matrix first
+
+	S = st_matrix(name)
+	if (rows(S) != n | cols(S) != n) {
+		errprintf("option structural() matrix must be %g x %g (one row/column per actor) - %s is not.\n", n, n, name)
+		exit(198)
+	}
+	if (any((S :!= 0) :& (S :!= 1))) {
+		errprintf("option structural() matrix must be coded 0/1 (1 = dyad fixed) - %s has a value outside {0,1}.\n", name)
+		exit(198)
+	}
+	if (sum(diagonal(S)) != 0) {
+		errprintf("option structural() matrix must have an all-zero diagonal (no self-ties).\n")
+		exit(198)
+	}
+	W = cols(Gw)
+	raw = SaomStructRaw()
+	first = J(n, n, .)
+	for (w=1; w<=W; w++) {
+		add = J(0, 4, 0)
+		for (i=1; i<=n; i++) {
+			for (j=1; j<=n; j++) {
+				if (S[i,j] != 1) continue
+				v = (*Gw[w]).has_edge(i, j)
+				if (w == 1) first[i,j] = v
+				else if (first[i,j] != v) {
+					errprintf("option structural() marks a dyad as fixed whose observed value differs between the waves - a structural dyad given by the matrix must hold the SAME value at every wave (use the codes 10 and 11 in the wave networks for values that change).\n")
+					exit(198)
+				}
+				add = add \ (w, i, j, v)
+			}
+		}
+		if (rows(add) > 0) {
+			// a dyad that already carries a code of this wave keeps it
+			if (rows(raw) > 0) {
+				k = rows(add)
+				add = select(add, !SaomStructInSet(SaomStructKeys(add[., 2..4] , n), SaomStructKeys(SaomStructWave(raw, w), n)))
+			}
+			raw = raw \ add
+		}
+	}
+	if (rows(raw) > 0) raw = raw[order(raw, (1, 2, 3)), .]
+	SaomStructSetRaw(raw)
+}
 end

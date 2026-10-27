@@ -23,7 +23,7 @@ end
 capture program drop _nwsaom_structural_build
 program define _nwsaom_structural_build
 	version 14
-	syntax , NODES(integer) NWAVES(integer) HASMISSNET(integer) TM(integer) [ML(string) SYMMETRIC(string) SYMTYPE(string) GROUPS(string) BEHAVIOR(string) STRUCTURAL(string) MB(string) RATE(string)]
+	syntax , [USTRUCT(string)] NODES(integer) NWAVES(integer) HASMISSNET(integer) TM(integer) [ML(string) SYMMETRIC(string) SYMTYPE(string) GROUPS(string) BEHAVIOR(string) STRUCTURAL(string) MB(string) RATE(string)]
 	// the combinations that are not supported yet
 	local bad ""
 	if "`ml'" != "" local bad "`bad' ml"
@@ -32,6 +32,15 @@ program define _nwsaom_structural_build
 	if "`bad'" != "" {
 		di "{err}structural zeros and ones (the codes 10 and 11 in the wave networks) are not yet supported together with:`bad'."
 		error 198
+	}
+	// structural(matname), the older way: converted to the per-wave lists of the codes (the value of a marked dyad is the value of the data)
+	if "`ustruct'" != "" {
+		di as txt "(note: structural(matname) is deprecated; it is replaced by the codes 10 and 11 in the wave networks and converted to them here)"
+		local ptrs ""
+		forvalues w = 1/`nwaves' {
+			local ptrs "`ptrs'`=cond(`w' > 1, ",", "")'&__nwsaom_last_G`w'"
+		}
+		mata: SaomStructFromMask("`ustruct'", (`ptrs'), `nodes')
 	}
 	// missing data: a dyad that is missing at a wave takes the structural code of the previous wave (RSiena)
 	if `hasmissnet' {

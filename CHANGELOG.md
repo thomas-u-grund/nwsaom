@@ -16,7 +16,7 @@ Structural zeros and ones: RSiena's codes 10 and 11 in the wave networks. Needs 
 - Postestimation after a fit with codes: `nwsaom describe` (counts of the codes per wave, RSiena's print01Report numbers; the distance leaves out the structural dyads, the kept/created/dissolved table and the Jaccard index include them as RSiena's), `estat gof` (observed network with the start-structural dyads at their start value), `estat simulate`/`nwsaom simulate` and `estat mems` (new single-call command of the plugin), `estat importance` (structural choices excluded), `estat score`, `estat timetest`. `estat simulate` agrees with `siena07` simulations (tie counts and mutual dyads after each period).
 
 ### Changed
-- `structural(matname)` (a 0/1 matrix, two waves) is the older way to mark structural dyads and is kept; the codes 10 and 11 replace it and cannot be combined with it.
+- `structural(matname)` (a 0/1 matrix) is deprecated: it is converted to the per-wave lists of the codes 10 and 11 (a note is printed), so it now works with `waves()`, behaviors, `ratecov()`, endowment/creation and the other options; the value of a marked dyad is its value in the data and must be the same at every wave. The two-mode structure of the program itself still uses its internal mask. Removal planned for 2.0.
 - The check of the tie values (`_nwsaom_chkbin`) accepts 1, 10 and 11 and names the offending value and dyad otherwise. The 1.0.10 text above that the program "does not accept 10 and 11 yet" described its state then; the comment in `_nwsaom_chkbin.ado` that quoted RSiena's message as if both were accepted is corrected.
 
 ## [1.2.0] - 2026-10-27

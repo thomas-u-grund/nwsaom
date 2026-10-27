@@ -363,7 +363,7 @@ to {opt leaveat()}; a missing value means from the first wave / to the last wave
 {synopt:{opth missbeh(varlist)}}Missing behavior data: one 0/1 variable per wave, same "one variable per wave" convention as {opt present()}, marking
 which actors' behavior value is missing at that wave. Requires {opt behavior()}. Optional - omitting it means every actor's value is fully observed.
 See {help nwsaom_remarks##missingdata:Missing data} in nwsaom_remarks{p_end}
-{synopt:{opt structural(matname)}}Older way to mark structural zeros/ones: ONE 0/1 n x n MATRIX (zero diagonal) of dyads whose tie value is fixed in both periods; two waves, network-only. Replaced by the codes
+{synopt:{opt structural(matname)}}Deprecated way to mark structural zeros/ones: ONE 0/1 n x n MATRIX (zero diagonal) of dyads whose tie value is fixed in all periods (converted to the codes of every wave). Replaced by the codes
 10 (structural zero) and 11 (structural one) in the wave networks, which {cmd:nwsaom} detects without any option and which may change from wave to wave. See {help nwsaom_remarks##structural:Structural zeros/ones} in
 nwsaom_remarks{p_end}
 
