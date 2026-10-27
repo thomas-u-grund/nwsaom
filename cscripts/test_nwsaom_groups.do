@@ -113,8 +113,8 @@ mkmat v*, matrix(Md)
 restore
 
 * ---- base
-use "__groups_base.dta", clear
 nwclear
+use "__groups_base.dta", clear
 forvalues w = 1/3 {
 	nwset, mat(Gbase`w') name(g`w') nooutput
 }
@@ -156,8 +156,8 @@ display "PASS: base (uncond) agrees with RSiena"
 
 
 * ---- balsim
-use "__groups_base.dta", clear
 nwclear
+use "__groups_base.dta", clear
 forvalues w = 1/3 {
 	nwset, mat(Gbase`w') name(g`w') nooutput
 }
@@ -197,8 +197,8 @@ display "PASS: balsim (uncond) agrees with RSiena"
 
 
 * ---- unequal
-use "__groups_base.dta", clear
 nwclear
+use "__groups_base.dta", clear
 forvalues w = 1/3 {
 	nwset, mat(Gbase`w') name(g`w') nooutput
 }
@@ -234,8 +234,8 @@ display "PASS: unequal (uncond) agrees with RSiena"
 
 
 * ---- tvcov
-use "__groups_base.dta", clear
 nwclear
+use "__groups_base.dta", clear
 forvalues w = 1/3 {
 	nwset, mat(Gbase`w') name(g`w') nooutput
 }
@@ -259,8 +259,8 @@ display "PASS: tvcov (uncond) agrees with RSiena"
 
 
 * ---- ratecov
-use "__groups_base.dta", clear
 nwclear
+use "__groups_base.dta", clear
 forvalues w = 1/3 {
 	nwset, mat(Gbase`w') name(g`w') nooutput
 }
@@ -283,8 +283,8 @@ display "PASS: ratecov (uncond) agrees with RSiena"
 
 
 * ---- inter
-use "__groups_base.dta", clear
 nwclear
+use "__groups_base.dta", clear
 forvalues w = 1/3 {
 	nwset, mat(Gbase`w') name(g`w') nooutput
 }
@@ -307,8 +307,8 @@ display "PASS: inter (uncond) agrees with RSiena"
 
 
 * ---- dyad
-use "__groups_base.dta", clear
 nwclear
+use "__groups_base.dta", clear
 forvalues w = 1/3 {
 	nwset, mat(Gbase`w') name(g`w') nooutput
 }
@@ -330,8 +330,8 @@ display "PASS: dyad (uncond) agrees with RSiena"
 
 
 * ---- miss
-use "__groups_base.dta", clear
 nwclear
+use "__groups_base.dta", clear
 forvalues w = 1/3 {
 	nwset, mat(Gbase`w') name(g`w') nooutput
 }
@@ -354,8 +354,8 @@ display "PASS: miss (uncond) agrees with RSiena"
 
 
 * ---- comp
-use "__groups_comp.dta", clear
 nwclear
+use "__groups_comp.dta", clear
 forvalues w = 1/3 {
 	nwset, mat(Gcomp`w') name(g`w') nooutput
 }
@@ -378,8 +378,8 @@ display "PASS: comp (uncond) agrees with RSiena"
 
 
 * ---- coev
-use "__groups_base.dta", clear
 nwclear
+use "__groups_base.dta", clear
 forvalues w = 1/3 {
 	nwset, mat(Gbase`w') name(g`w') nooutput
 }
@@ -411,8 +411,8 @@ display "PASS: coev (uncond) agrees with RSiena"
 
 
 * ---- coevsim
-use "__groups_base.dta", clear
 nwclear
+use "__groups_base.dta", clear
 forvalues w = 1/3 {
 	nwset, mat(Gbase`w') name(g`w') nooutput
 }
@@ -443,8 +443,8 @@ display "PASS: coevsim (uncond) agrees with RSiena"
 
 
 * ---- coevrate
-use "__groups_base.dta", clear
 nwclear
+use "__groups_base.dta", clear
 forvalues w = 1/3 {
 	nwset, mat(Gbase`w') name(g`w') nooutput
 }
@@ -475,8 +475,8 @@ display "PASS: coevrate (uncond) agrees with RSiena"
 
 
 * ---- coevcomp
-use "__groups_comp.dta", clear
 nwclear
+use "__groups_comp.dta", clear
 forvalues w = 1/3 {
 	nwset, mat(Gcomp`w') name(g`w') nooutput
 }
@@ -508,8 +508,8 @@ display "PASS: coevcomp (uncond) agrees with RSiena"
 
 
 * ---- the rest of the contract: e() results, refusals, state after the fit
-use "__groups_base.dta", clear
 nwclear
+use "__groups_base.dta", clear
 forvalues w = 1/3 {
 	nwset, mat(Gbase`w') name(g`w') nooutput
 }
@@ -527,13 +527,14 @@ display "PASS: e() results of a fit with groups"
 * estat timetest and estat score after a fit with groups
 nwsaom, waves(g1 g2 g3) groups(group) outdegree reciprocity transtrip egox(alc) altx(alc) k0(30) k3(1000) seed(1) cores(1) unconditional
 estat timetest, fixrates
-assert r(df) == 30
+assert r(df) == 25
 matrix gt = r(group)
 matrix pt = r(period)
 assert rowsof(gt) == 3 & rowsof(pt) == 6
 nwsaom, waves(g1 g2 g3) groups(group) outdegree reciprocity transtrip egox(alc) altx(alc) fix(egox(alc) altx(alc)) k0(30) k3(1000) seed(1) cores(1) unconditional
 estat score
 assert r(df) == 2
+assert r(chi2) < 1.5
 display "PASS: estat timetest and estat score after a fit with groups"
 
 * what stops with a message
@@ -549,7 +550,7 @@ assert _rc == 198
 capture nwsaom, waves(g1 g2 g3) groups(group) outdegree gwaves(9: 1 2) k3(20)
 assert _rc != 0
 * a tie between two groups
-mata: M = st_matrix("G2"); M[1, 20] = 1; st_matrix("Gx", M)
+mata: M = st_matrix("Gbase2"); M[1, 20] = 1; st_matrix("Gx", M)
 nwset, mat(Gx) name(gx) nooutput
 capture nwsaom, waves(g1 gx g3) groups(group) outdegree k3(20)
 assert _rc == 198

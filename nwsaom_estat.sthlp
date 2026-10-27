@@ -250,6 +250,11 @@ effect of a network whose changes are close to random, where the default gives t
 {pstd}
 Also available after {cmd:nwsaom multinet}, for the effects of all networks and of the behavior.
 
+{pstd}
+After a fit with {opt groups()} the periods are the periods of all groups (RSiena's numbering) and the output has two more tables: a test per group (the dummies of the periods of the
+group; for the first group the sum of the dummies of each effect, as RSiena's group test) and a test per period (all effects at once; RSiena 1.6.14 reports this one under the name
+group test), returned in {cmd:r(group)} and {cmd:r(period)}. {cmd:estat score} works after such a fit; {cmd:estat gof}, {cmd:estat simulate} and {cmd:estat importance} stop with a message.
+
 {marker estat_importance}{...}
 {title:estat importance}
 
