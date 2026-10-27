@@ -9096,7 +9096,107 @@ real scalar SaomGroupsMode() {
 	return(*p != 0)
 }
 
+/* after a fit with groups the group tables stay available for the estat commands: copies of the live externals under the prefix __nwsaom_gk_ */
+void SaomGroupsKeep() {
+	string rowvector nm
+	pointer(real matrix) scalar p, q
+	real scalar i
+	nm = ("groupid", "groupw", "gcreg", "gcval", "gbeh", "groupbal")
+	for (i=1; i<=cols(nm); i++) {
+		rmexternal("__nwsaom_gk_" + nm[i])
+		p = findexternal("__nwsaom_" + nm[i])
+		if (p == NULL) continue
+		q = crexternal("__nwsaom_gk_" + nm[i])
+		*q = *p
+	}
+}
+real matrix SaomGroupsKept(string scalar nm) {
+	pointer(real matrix) scalar p
+	p = findexternal("__nwsaom_gk_" + nm)
+	if (p == NULL) return(J(0, 0, 0))
+	return(*p)
+}
+
+/* the subgraph of the actors of group h (rows idx) of a virtual-wave graph */
+void SaomGroupsSubGraph(class SaomGraph scalar Gsrc, real scalar h, class SaomGraph scalar Gdst) {
+	real colvector code, idx, pos
+	real matrix t
+	real scalar i
+	code = SaomGroupsKept("groupid")
+	idx = selectindex(code :== h)
+	pos = J(rows(code), 1, 0)
+	pos[idx] = 1::rows(idx)
+	Gdst.init(rows(idx), Gsrc.directed)
+	t = Gsrc.all_ties()
+	if (rows(t) == 0) return
+	t = select(t, code[t[., 1]] :== h)
+	for (i=1; i<=rows(t); i++) Gdst.toggle(pos[t[i, 1]], pos[t[i, 2]])
+}
+
+/* the model of a fit with groups restricted to the actors of group h, in place: the actor-level data of every term are cut down to the group and the constants
+   that RSiena keeps per group take the values of the group. SaomModelSubsetEnd() puts the originals back. */
+void SaomModelSubsetBegin(class SaomModel scalar M, real scalar h) {
+	external transmorphic scalar __nwsaom_sub_A
+	real colvector code, idx
+	real matrix wl, reg, val, tmp
+	real rowvector pg, perh
+	real scalar t, N, r, q, Pt, Ph, nT
+	string rowvector fld
+	pointer(class SaomTermData scalar) scalar tdp
+	code = SaomGroupsKept("groupid")
+	wl = SaomGroupsKept("groupw")
+	reg = SaomGroupsKept("gcreg")
+	val = SaomGroupsKept("gcval")
+	N = rows(code)
+	idx = selectindex(code :== h)
+	pg = J(1, 0, 0)
+	for (q=1; q<=rows(wl); q++) pg = pg, J(1, rowsum(wl[q, .] :> 0) - 1, q)
+	Pt = cols(pg)
+	perh = selectindex(pg :== h)
+	__nwsaom_sub_A = asarray_create()
+	for (t=1; t<=M.nterms; t++) {
+		tdp = M.td[t]
+		asarray(__nwsaom_sub_A, "attr" + strofreal(t), (*tdp).attr)
+		asarray(__nwsaom_sub_A, "levels" + strofreal(t), (*tdp).levels)
+		asarray(__nwsaom_sub_A, "ecm" + strofreal(t), (*tdp).edgecovmat)
+		asarray(__nwsaom_sub_A, "ecp" + strofreal(t), (*tdp).edgecovpd)
+		asarray(__nwsaom_sub_A, "apd" + strofreal(t), (*tdp).attrpd)
+		asarray(__nwsaom_sub_A, "cen" + strofreal(t), (*tdp).center)
+		asarray(__nwsaom_sub_A, "dec" + strofreal(t), (*tdp).decay)
+		if (rows((*tdp).attr) == N) (*tdp).attr = (*tdp).attr[idx, .]
+		if (rows((*tdp).levels) == N & cols((*tdp).levels) == 1) (*tdp).levels = (*tdp).levels[idx, .]
+		if (rows((*tdp).edgecovmat) == N & cols((*tdp).edgecovmat) == N) (*tdp).edgecovmat = (*tdp).edgecovmat[idx, idx]
+		if (rows((*tdp).edgecovpd) > 0 | rows((*tdp).attrpd) > 0) {
+			errprintf("nwsaom: estat after a fit with groups is not available together with changing covariates.\n")
+			exit(198)
+		}
+	}
+	for (r=1; r<=rows(reg); r++) {
+		tdp = M.td[reg[r, 1]]
+		if (reg[r, 2] == 1) (*tdp).center = val[r, h]
+		else (*tdp).decay = val[r, h]
+	}
+}
+void SaomModelSubsetEnd(class SaomModel scalar M) {
+	external transmorphic scalar __nwsaom_sub_A
+	real scalar t
+	pointer(class SaomTermData scalar) scalar tdp
+	if (findexternal("__nwsaom_sub_A") == NULL) return
+	for (t=1; t<=M.nterms; t++) {
+		tdp = M.td[t]
+		(*tdp).attr = asarray(__nwsaom_sub_A, "attr" + strofreal(t))
+		(*tdp).levels = asarray(__nwsaom_sub_A, "levels" + strofreal(t))
+		(*tdp).edgecovmat = asarray(__nwsaom_sub_A, "ecm" + strofreal(t))
+		(*tdp).edgecovpd = asarray(__nwsaom_sub_A, "ecp" + strofreal(t))
+		(*tdp).attrpd = asarray(__nwsaom_sub_A, "apd" + strofreal(t))
+		(*tdp).center = asarray(__nwsaom_sub_A, "cen" + strofreal(t))
+		(*tdp).decay = asarray(__nwsaom_sub_A, "dec" + strofreal(t))
+	}
+	rmexternal("__nwsaom_sub_A")
+}
+
 void SaomGroupsReset() {
+	if (SaomGroupsMode()) SaomGroupsKeep()
 	rmexternal("__nwsaom_groupmode")
 	rmexternal("__nwsaom_groupid")
 	rmexternal("__nwsaom_groupw")

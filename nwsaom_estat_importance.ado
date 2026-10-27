@@ -22,7 +22,7 @@
 capture program drop nwsaom_estat_importance
 program define nwsaom_estat_importance, rclass
 	_nwsaom_libcheck
-	syntax
+	syntax [, GRP(integer 0)]
 
 	if `"`e(cmd)'"' != "nwsaom" {
 		di as err "last nwsaom estimates not found"
@@ -41,6 +41,13 @@ program define nwsaom_estat_importance, rclass
 	}
 	local nwaves = e(nwaves)
 	local nper = `nwaves' - 1
+	local __imp_gname "__nwsaom_last_G"
+	if `grp' > 0 {
+		nwsaom_gof_groupbegin, group(`grp')
+		local nwaves = r(nwaves)
+		local nper = `nwaves' - 1
+		local __imp_gname "__nwsaom_gofg_G"
+	}
 	tempname b V
 	matrix `b' = e(b)
 	matrix `V' = e(V)
@@ -48,7 +55,7 @@ program define nwsaom_estat_importance, rclass
 	local p : word count `names'
 	local gs ""
 	forvalues pd = 1/`nper' {
-		local gs `gs'`=cond(`pd' > 1, ", ", "")'&__nwsaom_last_G`pd'
+		local gs `gs'`=cond(`pd' > 1, ", ", "")'&`__imp_gname'`pd'
 	}
 	mata: __nwsaom_imp_Gs = (`gs')
 	if `coev' {

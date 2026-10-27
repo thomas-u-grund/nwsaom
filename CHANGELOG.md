@@ -3,6 +3,11 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- Postestimation after a fit with `groups()`: `estat gof` (per group, option `group(#)`, the p-values of the groups are combined by the inverse-normal method; RSiena's `sienaGOF(groupName=)`), `estat simulate` and `nwsaom simulate` (per group, `group(#)`, `generate()` saves the networks of each group as `<stub>_g#`, `rates()` takes one rate per period of all groups), `estat importance` (per group). Not yet for fits with a behavior, `ratecov` or `present()`.
+
 ## [1.2.0] - 2026-10-27
 
 Minor release: joint estimation of several groups. Works with nwcommands 3.6.0 and later. The Mata libraries `lnwsaom1.mlib` and `lnwsaom2.mlib` are rebuilt (Stata 17) against the unchanged core library; the compiled plugin of this release is needed for groups (an older plugin gives a clear message), and everything else works with an older plugin, only slower where the new code paths apply.

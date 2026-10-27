@@ -126,7 +126,22 @@ program define nwsaom_estat, rclass
 	_nwsaom_libcheck
 	gettoken subcmd rest : 0, parse(" ,")
 	local subcmd = lower(trim("`subcmd'"))
-	if `"`e(cmd)'"' == "nwsaom" & e(ngroups) < . & !inlist("`subcmd'", "timetest", "score") {
+	if `"`e(cmd)'"' == "nwsaom" & e(ngroups) < . & "`subcmd'" == "gof" & !strpos(`"`rest'"', "grp(") {
+		nwsaom_estat_gofgroups `rest'
+		return add
+		exit
+	}
+	if `"`e(cmd)'"' == "nwsaom" & e(ngroups) < . & "`subcmd'" == "simulate" & !strpos(`"`rest'"', "grp(") {
+		nwsaom_estat_simgroups `rest'
+		return add
+		exit
+	}
+	if `"`e(cmd)'"' == "nwsaom" & e(ngroups) < . & "`subcmd'" == "importance" & !strpos(`"`rest'"', "grp(") {
+		nwsaom_estat_impgroups `rest'
+		return add
+		exit
+	}
+	if `"`e(cmd)'"' == "nwsaom" & e(ngroups) < . & !inlist("`subcmd'", "timetest", "score", "gof", "simulate", "importance") {
 		di as err "estat `subcmd' is not yet available after a fit with groups()."
 		exit 198
 	}
@@ -185,7 +200,7 @@ end
 capture program drop nwsaom_estat_gof
 program define nwsaom_estat_gof, rclass
 	syntax [, NSIM(integer 50) SEED(integer -1) STATS(string) MAXDEG(integer 15) ///
-		MAXDIST(integer 6) TWOTAILED NAME(string) JOIN(string)]
+		MAXDIST(integer 6) TWOTAILED NAME(string) JOIN(string) GRP(integer 0)]
 
 	// harmonisation unit 162: real RSiena's own `join=FALSE' (sienaGOF()'s
 	// non-default option) - a SEPARATE MHD test per wave-period instead of
@@ -293,6 +308,18 @@ program define nwsaom_estat_gof, rclass
 		local __gof_ratebeh1 = e(rate_beh)
 	}
 
+	// one group of a fit with groups (called by nwsaom_estat_gofgroups): the graphs and the model of that group, its rates
+	local __gof_gname "__nwsaom_last_G"
+	if `grp' > 0 {
+		nwsaom_gof_groupbegin, group(`grp')
+		local nodes = r(nodes)
+		local nwaves = r(nwaves)
+		local nperiods = `nwaves' - 1
+		forvalues __pd = 1/`nperiods' {
+			local __gof_rate`__pd' = r(rate`__pd')
+		}
+		local __gof_gname "__nwsaom_gofg_G"
+	}
 	capture mata: mata drop __nwsaom_gof_cfg
 	if `__gof_coev' {
 		// harmonisation unit 26: co-evolution is Mata-only in v1 (no
@@ -367,7 +394,7 @@ program define nwsaom_estat_gof, rclass
 		// clobbered with a to_dense() 6x6 matrix by exactly this
 		// mechanism). Explicit, namespaced Mata names side-step the
 		// entire Stata-tempname-recycling risk.
-		mata: __nwsaom_gof_densemat = __nwsaom_last_G`__pdend'.to_dense()
+		mata: __nwsaom_gof_densemat = `__gof_gname'`__pdend'.to_dense()
 		foreach __gof_s of local stats {
 			if "`__gof_s'" == "outdegree" {
 				mata: __nwsaom_gof_thisval = saom_gof_degdist(__nwsaom_gof_densemat, `maxdeg')
@@ -439,7 +466,7 @@ program define nwsaom_estat_gof, rclass
 		}
 		forvalues __pd = 1/`nperiods' {
 			mata: __nwsaom_gof_Gwork = SaomGraph()
-			mata: SaomCopyGraph(__nwsaom_last_G`__pd', __nwsaom_gof_Gwork)
+			mata: SaomCopyGraph(`__gof_gname'`__pd', __nwsaom_gof_Gwork)
 			if `__gof_coev' {
 				// N-wave extension: seed THIS period's own simulation from
 				// THIS period's own starting wave

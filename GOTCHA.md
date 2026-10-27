@@ -2,6 +2,10 @@
 
 Known, already diagnosed pitfalls. Entries copied from the nwcommands notes at the time of the split; some mention the core package.
 
+## Group postestimation works by subsetting the saved model in place
+
+After a fit with `groups()` the externals `__nwsaom_group*` are removed at the end of the call; `SaomGroupsKeep()` first copies them to `__nwsaom_gk_*`. `estat gof/simulate/importance` run per group through `nwsaom_gof_groupbegin` (builds `__nwsaom_gofg_G<q>`, calls `SaomModelSubsetBegin`) and must always end with `SaomModelSubsetEnd` or the saved model stays cut to one group. The wrappers call `nwsaom_estat <sub>, grp(#)` (cross-file ado programs get evicted; reach them through the dispatcher). Covariates with missing values are imputed by the overall mean in the group fit but by the group mean in a single-group fit, so only structural effects agree exactly with the group fitted alone.
+
 ## Mata libraries must be built with the OLDEST supported Stata (Stata 17), never a newer one
 
 The 2026-10-25 releases (core 3.5.0, nwsaom 1.0.7, nwergm 1.2.0, nwdynam 1.1.0, nwrem 1.0.5) shipped `.mlib` files built with Stata 18.
