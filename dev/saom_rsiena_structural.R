@@ -56,13 +56,13 @@ mk <- function(variant) {
   w
 }
 waves <- mk(variant)
-if (variant == 'v5') {
+if (variant %in% c('v5', 'm0')) {
   miss <- matrix(0, n, n); miss[sample(n * n, 120)] <- 1; diag(miss) <- 0
   # NA in wave 2 at the missing dyads (wave 1 and 3 complete)
   waves[[2]][miss == 1] <- NA
   write.table(miss, file.path(out, "miss2.csv"), row.names = FALSE, col.names = FALSE, sep = ",")
 }
-for (k in 1:3) write.table(waves[[k]], file.path(out, sprintf("w%d.csv", k)), row.names = FALSE, col.names = FALSE, sep = ",")
+for (k in 1:3) { m <- waves[[k]]; m[is.na(m)] <- 0; write.table(m, file.path(out, sprintf("w%d.csv", k)), row.names = FALSE, col.names = FALSE, sep = ",") }
 if (task == 'data') quit()
 arr <- function(ws) array(unlist(ws), dim = c(n, n, length(ws)))
 # the standard effect list
