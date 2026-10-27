@@ -31,6 +31,7 @@ program define nwsaom_estat_timetest, rclass
 		exit 301
 	}
 	local nwaves = e(nwaves)
+	if e(ngroups) < . local nwaves = colsof(e(rates)) + 1
 	if `nwaves' < 3 {
 		di as err "estat timetest needs at least three waves (two periods)."
 		exit 198
@@ -58,7 +59,15 @@ program define nwsaom_estat_timetest, rclass
 			exit 198
 		}
 	}
-	mata: SaomTimeTestRun(`nper', strtoreal(tokens("`flags'")), `p', ("`fixrates'" != ""))
+	if e(ngroups) < . {
+		tempname rgm
+		matrix `rgm' = e(rates_group) \ J(1, `nper', 1)
+		forvalues q = 1/`nper' {
+			matrix `rgm'[2, `q'] = `q'
+		}
+		mata: SaomTimeTestRun(`nper', strtoreal(tokens("`flags'")), `p', ("`fixrates'" != ""), st_matrix("`rgm'"))
+	}
+	else mata: SaomTimeTestRun(`nper', strtoreal(tokens("`flags'")), `p', ("`fixrates'" != ""))
 	tempname joint eff ind
 	matrix `joint' = __nwsaom_tt_joint
 	matrix `eff' = __nwsaom_tt_effect
@@ -81,6 +90,26 @@ program define nwsaom_estat_timetest, rclass
 		local nm : word `k' of `names'
 		di as res %-24s "`nm'" %10.3f `eff'[`j', 1] %6.0f `eff'[`j', 2] %10.4f chi2tail(`eff'[`j', 2], `eff'[`j', 1])
 		local rows `rows' `nm'
+	}
+	if e(ngroups) < . {
+		tempname gt
+		matrix `gt' = __nwsaom_tt_group
+		di
+		di as txt "Test of each group (are the parameters of the periods of the group the same as in the other groups?)"
+		di as txt %-24s "group" %10s "c" %6s "d.f." %10s "p-value"
+		forvalues g = 1/`=rowsof(`gt')' {
+			di as res %-24s "Group `g'" %10.3f `gt'[`g', 1] %6.0f `gt'[`g', 2] %10.4f chi2tail(`gt'[`g', 2], `gt'[`g', 1])
+		}
+		return matrix group = `gt'
+		tempname pt
+		matrix `pt' = __nwsaom_tt_periodtest
+		di
+		di as txt "Test of each period (all effects)"
+		di as txt %-24s "period" %10s "c" %6s "d.f." %10s "p-value"
+		forvalues g = 1/`=rowsof(`pt')' {
+			di as res %-24s "Period `g'" %10.3f `pt'[`g', 1] %6.0f `pt'[`g', 2] %10.4f chi2tail(`pt'[`g', 2], `pt'[`g', 1])
+		}
+		return matrix period = `pt'
 	}
 	di
 	di as txt "Period-specific deviations (one-step estimates) and separate tests"

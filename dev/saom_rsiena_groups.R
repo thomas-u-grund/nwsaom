@@ -83,7 +83,7 @@ if (feat == 'coevsim') { eff <- includeEffects(eff, transTrip); eff <- includeEf
 if (feat == 'coevrate') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, avAlt, name = 'alc', interaction1 = 'net'); eff <- includeEffects(eff, RateX, name = 'alc', interaction1 = 'ccv', type = 'rate') }
 if (feat %in% c('coev', 'coevcomp', 'coevmiss')) { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, altX, interaction1 = 'alc'); eff <- includeEffects(eff, avAlt, name = 'alc', interaction1 = 'net') }
 if (feat == 'dyad') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, X, interaction1 = "D"); }
-res <- NULL
+res <- NULL; ttres <- NULL
 for (s in 1:nseed) {
   alg <- sienaAlgorithmCreate(projname = NULL, cond = cond, seed = s, n3 = 2000, nsub = 4)
   a <- siena07(alg, data = gd, effects = eff, batch = TRUE, verbose = FALSE, silent = TRUE, returnDeps = FALSE)
@@ -94,6 +94,13 @@ for (s in 1:nseed) {
     th <- rbind(rr, th)
   }
   res <- rbind(res, th)
+  if (Sys.getenv('RSIENA_TT') == '1') {      # time heterogeneity: sienaTimeTest() with the group test (rates held fixed, as sienaTimeTest does)
+    tt <- sienaTimeTest(a)
+    ttres <- rbind(ttres, data.frame(seed = s, what = 'joint', k = 0, c = tt$JointTest[1], df = tt$JointTest[2]))
+    ttres <- rbind(ttres, data.frame(seed = s, what = 'effect', k = seq_len(nrow(tt$EffectTest)), c = tt$EffectTest[, 1], df = tt$EffectTest[, 2]))
+    ttres <- rbind(ttres, data.frame(seed = s, what = 'group', k = seq_len(nrow(tt$GroupTest)), c = tt$GroupTest[, 1], df = tt$GroupTest[, 2]))
+  }
 }
+if (!is.null(ttres)) write.csv(ttres, file.path(out, 'rsiena_tt.csv'), row.names = FALSE)
 write.csv(res, file.path(out, paste0("rsiena_", feat, "_cond", as.integer(cond), ".csv")), row.names = FALSE)
 print(aggregate(cbind(theta, se) ~ name, res, mean))

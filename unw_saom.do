@@ -15248,11 +15248,11 @@ void SaomScoreRun(real rowvector test) {
    d z_(k,p) / d theta_j = D_p[k,j], d z_(k,p) / d delta_(j,q) = 1(p = q) D_q[k,j].
    Results in Stata matrices: __nwsaom_tt_joint (c, df), __nwsaom_tt_effect (neff x 2), __nwsaom_tt_indiv (ndummies x 3: c, onestep delta,
    period), and the effect indices in __nwsaom_tt_eff. effects: 1 x ptot 0/1 of the effects to test. */
-void SaomTimeTestRun(real scalar nper, real rowvector effects, real scalar neffpar, real scalar fixrates) {
+void SaomTimeTestRun(real scalar nper, real rowvector effects, real scalar neffpar, real scalar fixrates, | real matrix grp) {
 	external real matrix __nwsaom_score_Zp, __nwsaom_score_Sp
 	external real rowvector __nwsaom_score_fix, __nwsaom_score_par, __nwsaom_score_qf
 	real matrix Zq2, Dq2
-	real scalar ptot, K, q, j, k, i, ne, nd, N, idx
+	real scalar ptot, K, q, j, k, i, ne, nd, N, idx, r
 	real matrix Dq, Ztot, Daug, Saug, Zaug, Zq, Sq, Dsum, D2, res, effres
 	real rowvector maug, eff, test, redundant, ev, jt, one, dq, os, tt
 	real colvector dumq, dumj, keep
@@ -15330,6 +15330,37 @@ void SaomTimeTestRun(real scalar nper, real rowvector effects, real scalar neffp
 	os[keep] = (-luinv(Daug[keep, keep]) * maug[keep]')'
 	for (i=1; i<=nd; i++) res[i, 2] = os[ptot + i]
 	st_matrix("__nwsaom_tt_indiv", res)
+	// several groups (RSiena's GroupTest): per group the partial score test of the dummies of its periods, the other dummies left out; the first group
+	// contains the reference period, so it gets the transformed test of the sum of the dummies of every effect
+	if (args() >= 5) if (cols(grp) == nper) for (r=1; r<=rows(grp); r++) {
+		real matrix gres, AA, A1, Dg, Sg
+		real rowvector mg, tg
+		real scalar g, G2, nn, jj, qq
+		real rowvector gp
+		gp = grp[r, .]
+		real colvector nullidx
+		G2 = max(gp)
+		gres = J(G2, 2, .)
+		for (g=2; g<=G2; g++) {
+			tt = J(1, N, 0)
+			for (j=1; j<=ne; j++) for (qq=2; qq<=nper; qq++) if (gp[qq] == g) tt[ptot + (j-1)*(nper-1) + (qq-1)] = 1
+			one = SaomScoreEval(Daug, Saug, maug, tt, redundant :| (test :& !tt))
+			gres[g, .] = (one[1], sum(tt))
+		}
+		nullidx = selectindex(!redundant[1..ptot])'
+		nn = rows(nullidx)
+		A1 = J(nn, N, 0)
+		for (jj=1; jj<=nn; jj++) A1[jj, nullidx[jj]] = 1
+		AA = A1 \ J(ne, N, 0)
+		for (j=1; j<=ne; j++) for (qq=2; qq<=nper; qq++) AA[nn + j, ptot + (j-1)*(nper-1) + (qq-1)] = 1
+		Dg = AA * Daug * AA'
+		Sg = AA * Saug * AA'
+		mg = (AA * maug')'
+		tg = (J(1, nn, 0), J(1, ne, 1))
+		one = SaomScoreEval(Dg, Sg, mg, tg, J(1, nn + ne, 0))
+		gres[1, .] = (one[1], ne)
+		st_matrix((r == 1 ? "__nwsaom_tt_group" : "__nwsaom_tt_periodtest"), gres)
+	}
 	st_matrix("__nwsaom_tt_eff", eff)
 	st_matrix("__nwsaom_tt_onestep", __nwsaom_score_par + os[1..ptot])
 }
