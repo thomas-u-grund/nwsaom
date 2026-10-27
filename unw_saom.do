@@ -11670,7 +11670,7 @@ void SaomMNAddEff(class SaomModel scalar M, string scalar eff, string scalar vn,
    __nwsaom_mn_nA (actors; 0 = no two-mode member), __nwsaom_mn_tm1/2 (the member is two-mode), __nwsaom_mn_nsr (senders and receivers of both members).
    =================================================================== */
 /* a wave of the member `slot': a one-mode network (nOne nodes; embedded in n) or a two-mode one (actors of mode actmode first) */
-void SaomMNAddWave(pointer(class nw_def scalar) scalar netobj, real scalar n, real scalar slot, real scalar tm, real scalar actmode, real scalar nOne) {
+void SaomMNAddWave(pointer(class nw_def scalar) scalar netobj, real scalar n, real scalar slot, real scalar tm, real scalar actmode, real scalar nOne, | real scalar key) {
 	external pointer(class SaomGraph scalar) rowvector __nwsaom_mn_Gs1, __nwsaom_mn_Gs2
 	class SaomGraph scalar G
 	real rowvector isact, ia, ie, inv
@@ -11699,6 +11699,7 @@ void SaomMNAddWave(pointer(class nw_def scalar) scalar netobj, real scalar n, re
 			for (k=1; k<=rows(nb); k++) G.toggle(i, nb[k])
 		}
 	}
+	if (args() >= 7) if (key > 0) SaomStructFix(netobj, G, key, 0, J(1, 0, 0))
 	if (slot == 1) __nwsaom_mn_Gs1 = (__nwsaom_mn_Gs1, &(G))
 	else __nwsaom_mn_Gs2 = (__nwsaom_mn_Gs2, &(G))
 }
@@ -12054,7 +12055,8 @@ struct SaomMNFit scalar SaomEstimateMN(pointer(class SaomGraph scalar) rowvector
 	SaomSetBatchSlot(1)
 	SaomBatchSetup(G2, P, cfg2, J(1, 0, 0), J(1, 0, NULL), 0, 0, 0, 0, 0, J(0, 3, 0), J(n, P, 0), 0, J(n, P, 1), J(1, 0, 0), (args() >= 11 ? 4 * sym2 : 0), J(0, 0, 0), noev)
 	SaomSetBatchSlot(0)
-	SaomMNObs(G1, G2, P, p1, p2, C.target, C.tr1, C.tr2)
+	SaomStructSendMN(P, n)
+	SaomStructMNObs(G1, G2, P, p1, p2, C.target, C.tr1, C.tr2)
 	rate10 = J(1, P, 0)
 	rate20 = J(1, P, 0)
 	for (pd=1; pd<=P; pd++) {

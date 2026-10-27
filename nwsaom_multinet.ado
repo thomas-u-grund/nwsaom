@@ -153,13 +153,21 @@ program define nwsaom_multinet, eclass
 	// a two-mode (bipartite) member: the actors (mode actormode(), default 2 = the rows of the affiliation matrix of nwset, bipartite) choose among the events;
 	// every member is embedded in the graph on all nodes of the two-mode network (actors first), see SaomMNAddWave()
 	local __tmany = 0
+	local __mnsc 0
+	mata: SaomStructReset()
 	forvalues __s = 1/2 {
 		local __tm`__s' = 0
 		forvalues __w = 1/`nw`__s'' {
 			local __wname : word `__w' of `net`__s''
 			_nwsyntax `__wname', max(1) other(mn`__s'_`__w')
-			_nwsaom_chkbin, netobj(`mn`__s'_`__w'netobj') name(`__wname') valued(`mn`__s'_`__w'valued')
+			_nwsaom_chkbin, netobj(`mn`__s'_`__w'netobj') name(`__wname') valued(`mn`__s'_`__w'valued') wave(`=100*(`__s'-1)+`__w'')
+			local __mnsc_`__s'_`__w' = r(nstruct)
+			local __mnsc = `__mnsc' + r(nstruct)
 			local __wtm = ("`mn`__s'_`__w'is2mode'" == "true")
+			if r(nstruct) > 0 & (`__wtm' | "`sym`__s''" != "" | "`behavior'" != "") {
+				di "{err}structural zeros and ones (the codes 10 and 11) are not yet supported in nwsaom multinet for a two-mode or non-directed network, or together with behavior()."
+				error 198
+			}
 			if `__w' == 1 local __tm`__s' = `__wtm'
 			else if `__wtm' != `__tm`__s'' {
 				di "{err}the waves of net`__s'() mix two-mode and one-mode networks."
@@ -235,9 +243,10 @@ program define nwsaom_multinet, eclass
 				error 198
 			}
 			if !`__tmany' local __nA`__s' = `mn`__s'_`__w'nodes'
-			mata: SaomMNAddWave(`mn`__s'_`__w'netobj', `nodes', `__s', `__tm`__s'', `actormode', `__nA`__s'')
+			mata: SaomMNAddWave(`mn`__s'_`__w'netobj', `nodes', `__s', `__tm`__s'', `actormode', `__nA`__s'', `=cond(`__mnsc_`__s'_`__w'' > 0, 100*(`__s'-1)+`__w', 0)')
 		}
 	}
+	if `__mnsc' > 0 mata: SaomStructBuild(`nw1', `nodes')
 	if "`behavior'" != "" {
 		local nb : word count `behavior'
 		if `nb' != `nw1' {

@@ -271,11 +271,13 @@ real matrix SaomStructCounts(real scalar W) {
 }
 
 /* ---- the derived sets of period pd (1 .. W-1): A = S_pd (i, j, v); B = the dyads of S_{pd+1} that are not in S_pd (i, j, v) ---- */
-void SaomStructPeriod(real matrix raw, real scalar pd, real scalar n, real matrix A, real matrix B) {
+void SaomStructPeriod(real matrix raw, real scalar pd, real scalar n, real matrix A, real matrix B, | real scalar off) {
 	real matrix Sn
 	real colvector in
-	A = SaomStructWave(raw, pd)
-	Sn = SaomStructWave(raw, pd + 1)
+	real scalar o
+	o = (args() >= 6 ? off : 0)
+	A = SaomStructWave(raw, o + pd)
+	Sn = SaomStructWave(raw, o + pd + 1)
 	if (rows(Sn) == 0) B = J(0, 3, 0)
 	else if (rows(A) == 0) B = Sn
 	else {
@@ -600,5 +602,104 @@ void SaomStructFromMask(string scalar name, pointer(class SaomGraph scalar) rowv
 	}
 	if (rows(raw) > 0) raw = raw[order(raw, (1, 2, 3)), .]
 	SaomStructSetRaw(raw)
+}
+
+/* ---- multinet: member s (1, 2) keeps its sets in the waves 100 * (s - 1) + w of the raw store ---- */
+void SaomStructMNObs(pointer(class SaomGraph scalar) rowvector G1, pointer(class SaomGraph scalar) rowvector G2, real scalar P, real scalar p1, real scalar p2,
+	real matrix target, real rowvector tr1, real rowvector tr2) {
+	real matrix raw, A, B
+	pointer(class SaomGraph scalar) rowvector E1, E2
+	class SaomGraph scalar Tg, Gs
+	real scalar pd, n
+
+	if (!SaomStructOn()) {
+		SaomMNObs(G1, G2, P, p1, p2, target, tr1, tr2)
+		return
+	}
+	raw = SaomStructRaw()
+	n = (*G1[1]).n
+	E1 = G1
+	E2 = G2
+	for (pd=1; pd<=P; pd++) {
+		SaomStructPeriod(raw, pd, n, A, B, 0)
+		E1[pd+1] = &(SaomStructPatched(*G1[pd+1], A))
+		SaomStructPeriod(raw, pd, n, A, B, 100)
+		E2[pd+1] = &(SaomStructPatched(*G2[pd+1], A))
+	}
+	SaomMNObs(E1, E2, P, p1, p2, target, tr1, tr2)
+	for (pd=1; pd<=P; pd++) {
+		SaomStructPeriod(raw, pd, n, A, B, 0)
+		Gs = SaomStructPatched(*G1[pd], B)
+		tr1[pd] = SaomCountDiffering(Gs, *E1[pd+1])
+		SaomStructPeriod(raw, pd, n, A, B, 100)
+		Gs = SaomStructPatched(*G2[pd], B)
+		tr2[pd] = SaomCountDiffering(Gs, *E2[pd+1])
+	}
+	if (strtoreal(st_global("NWSAOM_TRACE")) == 5) {
+		st_matrix("__nwsaom_tr_target", target)
+		st_matrix("__nwsaom_tr_rate", (tr1 \ tr2))
+	}
+}
+
+/* the rows (pd, i, j, kind) of member s for the plugin */
+real matrix SaomStructRowsMN(real scalar P, real scalar n, real scalar off) {
+	real matrix raw, A, B, rows_, common, ex
+	real colvector in
+	real scalar pd
+	pointer(real matrix) rowvector As
+
+	raw = SaomStructRaw()
+	As = J(1, P, NULL)
+	for (pd=1; pd<=P; pd++) {
+		SaomStructPeriod(raw, pd, n, A, B, off)
+		As[pd] = &(A :+ 0)
+	}
+	common = *As[1]
+	for (pd=2; pd<=P; pd++) {
+		if (rows(common) == 0) break
+		in = SaomStructInSet(SaomStructKeys(common, n), SaomStructKeys(*As[pd], n))
+		common = select(common, in)
+	}
+	rows_ = J(0, 4, 0)
+	if (rows(common) > 0) rows_ = (J(rows(common), 1, 0), common[., 1..2], J(rows(common), 1, 1))
+	for (pd=1; pd<=P; pd++) {
+		A = *As[pd]
+		if (rows(A) > 0 & rows(common) > 0) {
+			in = SaomStructInSet(SaomStructKeys(A, n), SaomStructKeys(common, n))
+			ex = select(A, !in)
+		}
+		else ex = A
+		if (rows(ex) > 0) rows_ = rows_ \ (J(rows(ex), 1, pd), ex[., 1..2], J(rows(ex), 1, 1))
+		SaomStructPeriod(raw, pd, n, A, B, off)
+		if (rows(B) > 0) rows_ = rows_ \ (J(rows(B), 1, pd), B[., 1..2], 2 :+ B[., 3])
+	}
+	return(rows_)
+}
+
+void SaomStructSendMN(real scalar P, real scalar n) {
+	real matrix X
+	real scalar slot, junk
+	string scalar origframe
+	string rowvector names
+
+	if (!SaomStructOn()) return
+	if (SaomNativePluginVersion() < 150) {
+		errprintf("nwsaom: structural zeros and ones need the native plugin of this release (update nwsaom: net install ... replace).\n")
+		exit(198)
+	}
+	names = ("s_pd", "s_i", "s_j", "s_k")
+	for (slot=0; slot<=1; slot++) {
+		X = SaomStructRowsMN(P, n, 100 * slot)
+		origframe = st_framecurrent()
+		stata("capture frame drop __saom_struct")
+		stata("frame create __saom_struct")
+		st_framecurrent("__saom_struct")
+		st_addobs(max((rows(X), 1)))
+		junk = st_addvar("double", names)
+		if (rows(X) > 0) st_store((1::rows(X)), names, X)
+		stata("plugin call saomnativesim " + invtokens(names) + ", " + char(34) + "STRUCTSETS" + strofreal(slot) + "|" + strofreal(n) + " " + strofreal(P) + " " + strofreal(rows(X)) + char(34))
+		st_framecurrent(origframe)
+		stata("capture frame drop __saom_struct")
+	}
 }
 end

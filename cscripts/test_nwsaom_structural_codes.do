@@ -437,6 +437,25 @@ forvalues p = 1/2 {
 sc_check6 152 57 230.0136 374 121 123 72 58
 di "PASS structural(matname) converted to the codes (three waves)"
 
+* nwsaom multinet: codes in the first network (cross-network effects crprod / crprodrecip); RSiena targets: net 263 166 225 crprod 81, adv 478 106 102, distances 110 104 / 158 160
+nwclear
+forvalues w = 1/3 {
+	nwset, mat(V3w`w') directed name(na`w') nooutput
+	import delimited "dev/saom_mn_b`w'.csv", clear varnames(1)
+	mkmat v1-v50, matrix(MB`w')
+	clear
+	nwset, mat(MB`w') directed name(nb`w') nooutput
+}
+global NWSAOM_TRACE 5
+quietly nwsaom multinet, net1(na1 na2 na3) net2(nb1 nb2 nb3) eff1(outdegree reciprocity transtrip) eff2(outdegree reciprocity) cross1(crprod) cross2(crprodrecip) k0(2) k3(10) seed(1)
+global NWSAOM_TRACE
+foreach pair in "1 263" "2 83" "3 225" "4 81" "5 478" "6 53" "7 102" {
+	tokenize `pair'
+	assert reldif(__nwsaom_tr_target[1,`1'] + __nwsaom_tr_target[2,`1'], `2') < 1e-9
+}
+assert __nwsaom_tr_rate[1,1] == 110 & __nwsaom_tr_rate[1,2] == 104 & __nwsaom_tr_rate[2,1] == 158 & __nwsaom_tr_rate[2,2] == 160
+di "PASS structural codes in nwsaom multinet (targets agree with RSiena)"
+
 * ---- errors and gates
 nwclear
 nwset, mat(V3w1) directed name(g1) nooutput

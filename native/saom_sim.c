@@ -6858,6 +6858,7 @@ static void model_nsr(const model_t *M, long *nS, long *nR, long *off) {
 	long *blocked;
 	unsigned char *isS;
 	*off = 0;
+	if (M->sflag) { *nS = n; *nR = n; return; }	/* protocol 150: user structural dyads; a two-mode member does not combine with them */
 	if (M->nstruct <= 0 || !M->struct_off) { *nS = n; *nR = n; return; }
 	blocked = (long *)calloc((size_t)(n + 1), sizeof(long));
 	isS = (unsigned char *)calloc((size_t)(n + 1), 1);
@@ -7103,10 +7104,13 @@ static int simulate_period_mn(int nnet, const model_t **Ms, const period_t **PDs
 	}
 	for (net = 0; net < nnet; net++) {
 		const model_t *M = Ms[net];
+		if (M->sflag && M->sov_n > 0) saom_sf_override(M, &g[net]);	/* protocol 150: the dyads structural at the end of the period take their end value */
 		saom_tl_xg = &g0[(net + 1) % nnet];
 		if (hasb) { attrs[net][M->nattr + 1] = behc0; if (M->has_behsim) attrs[net][M->nattr] = (double *)PDs[0]->beh0; }		/* the statistics of the terms with the behavior as covariate use the STARTING behavior */
 		for (k = 0; k < M->nterms; k++) R[net].stat[k] = saom_eval_stat((int)k, (int *)M->termcodes, (int *)M->attridx, (double *)M->p1, attrs[net], &g[net]);
-		R[net].netdist = (double)mn_count_diff(&g[net], &g0[net]);
+		{ long q2, adj2 = 0;
+		  R[net].netdist = (double)mn_count_diff(&g[net], &g0[net]);
+		  if (M->sflag && M->sov_n > 0) { for (q2 = 0; q2 < M->sov_n; q2++) if ((has_edge(&g[net], M->sov_i[q2], M->sov_j[q2]) ? 1 : 0) != (has_edge(&g0[net], M->sov_i[q2], M->sov_j[q2]) ? 1 : 0)) adj2++; R[net].netdist -= (double)adj2; } }
 	}
 	if (hasb) {
 		/* the behavior statistics: the END behavior on the STARTING network (the first, or the second for the BEHNET2 terms) */
@@ -7188,6 +7192,7 @@ static int simulate_period_mn(int nnet, const model_t **Ms, const period_t **PDs
 typedef struct {
 	int nnet;
 	const model_t *M[MAXNETS];
+	const model_t *Mpd[MAXNETS];		/* protocol 150: per-period model copies of network k (structural sets) or NULL */
 	const period_t *per[MAXNETS];		/* per[k] = the P periods of network k */
 	const simparams_t *prm[MAXNETS];	/* prm[k] = P entries */
 	long K, P;
@@ -7207,9 +7212,10 @@ static void mn_worker_loop(mn_job_t *J) {
 			long k = u / J->P, pd = u % J->P;
 			const period_t *pds[MAXNETS];
 			const simparams_t *pss[MAXNETS];
+			const model_t *Mq[MAXNETS];
 			int q;
-			for (q = 0; q < J->nnet; q++) { pds[q] = &J->per[q][pd]; pss[q] = &J->prm[q][pd]; }
-			simulate_period_mn(J->nnet, J->M, pds, pss, unit_seed(J->seed, k, pd), &J->res[u * J->nnet]);
+			for (q = 0; q < J->nnet; q++) { pds[q] = &J->per[q][pd]; pss[q] = &J->prm[q][pd]; Mq[q] = J->Mpd[q] ? &J->Mpd[q][pd] : J->M[q]; }
+			simulate_period_mn(J->nnet, Mq, pds, pss, unit_seed(J->seed, k, pd), &J->res[u * J->nnet]);
 		}
 	}
 }
@@ -7291,7 +7297,7 @@ static ST_retcode mn_run(char *arg) {
 	if (nthreads <= 0) nthreads = saom_physical_cores();
 	res = (simres_t *)calloc((size_t)(K * P * nnet), sizeof(simres_t));
 	J.nnet = nnet; J.K = K; J.P = P; J.seed = seed; J.res = res;
-	for (net = 0; net < nnet; net++) { J.M[net] = &batch_states[net].M; J.per[net] = batch_states[net].per; J.prm[net] = prm[net]; }
+	for (net = 0; net < nnet; net++) { J.M[net] = &batch_states[net].M; J.Mpd[net] = batch_states[net].Mpd; J.per[net] = batch_states[net].per; J.prm[net] = prm[net]; }
 	mn_run_units(&J, nthreads);
 	W = 0;
 	for (net = 0; net < nnet; net++) W += 2 * batch_states[net].M.nterms + 3;
@@ -7882,6 +7888,16 @@ STDLL stata_call(int argc, char *argv[]) {
 		strcpy(buf, argv[0] + (argv[0][10] == '|' ? 11 : 12));
 		batch_cur = &batch_states[slot];
 		rc = batch_setup(buf);
+		batch_cur = &batch_states[0];
+		free(buf);
+		return rc;
+	}
+	if (strncmp(argv[0], "STRUCTSETS", 10) == 0 && argv[0][10] >= '0' && argv[0][10] < '0' + MAXNETS && argv[0][11] == '|') {
+		char *buf = (char *)malloc(strlen(argv[0]) + 1);
+		ST_retcode rc;
+		batch_cur = &batch_states[argv[0][10] - '0'];
+		strcpy(buf, argv[0] + 12);
+		rc = saom_sf_set(buf);
 		batch_cur = &batch_states[0];
 		free(buf);
 		return rc;
