@@ -33,6 +33,11 @@ program define nwsaom_describe, rclass
 	forvalues w = 1/`nw' {
 		local nm : word `w' of `waves'
 		_nwsyntax `nm', max(1)
+		mata: st_local("__d_big", strofreal(`netobj'->get_maximum() >= 10))
+		if `__d_big' {
+			di as err "nwsaom describe does not yet describe networks with structural zeros or ones (the codes 10 and 11); {bf:`nm'} holds tie values of 10 or more."
+			exit 198
+		}
 		local nodes`w' = `nodes'
 		local dir`w' = ("`directed'" == "true")
 		local obj`w' `netobj'

@@ -134,6 +134,13 @@ program define nwsaom_estat, rclass
 		di as err "estat `subcmd' is not yet available after nwsaom multinet (available: {bf:score}, {bf:timetest})."
 		exit 198
 	}
+	if `"`e(cmd)'"' == "nwsaom" {
+		mata: st_numscalar("__nwsaom_sflast", SaomStructLastOn())
+		if scalar(__nwsaom_sflast) == 1 {
+			di as err "estat `subcmd' is not yet available after a fit with structural zeros or ones (the codes 10 and 11 in the wave networks)."
+			exit 198
+		}
+	}
 	if "`e(tvcov)'" != "" {
 		di as err "estat `subcmd' is not yet available after a fit with time-varying covariates ({bf:tvcov()})."
 		exit 198

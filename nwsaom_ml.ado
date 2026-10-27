@@ -24,6 +24,11 @@ program nwsaom_ml, eclass
 		di as err "no fitted nwsaom model available."
 		exit 498
 	}
+	mata: st_numscalar("__nwsaom_sflast", SaomStructLastOn())
+	if scalar(__nwsaom_sflast) == 1 {
+		di as err "maximum likelihood estimation is not yet available with structural zeros or ones (the codes 10 and 11 in the wave networks)."
+		exit 198
+	}
 	if e(twomode) == 1 | `"`e(symtype)'"' != "" | `"`e(ratecov)'"' != "" {
 		di as err "maximum likelihood estimation covers one directed one-mode network with at most one co-evolving behavior, without two-mode data, non-directed models or rate covariates."
 		exit 198
