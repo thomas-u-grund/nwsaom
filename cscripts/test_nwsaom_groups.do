@@ -677,8 +677,50 @@ assert r(df) == 2
 assert r(chi2) < 1.5
 display "PASS: estat timetest and estat score after a fit with groups"
 
+* ---- constants that RSiena keeps per group: the average degree (centred degree effects), the structmean (structural equivalence), the average degrees of ownx() effects
+foreach f in degc sequiv ownass {
+	nwclear
+	use "__groups_base.dta", clear
+	forvalues w = 1/3 {
+		nwset, mat(Gbase`w') name(g`w') nooutput
+	}
+	frame create ref
+	frame ref: import delimited "dev/saom_rsiena_groups_`f'_cond0.csv", clear
+	if "`f'" == "degc" {
+		__gfit, opts(outdegree reciprocity transtrip inpopc outactc) uncond
+		__gchk inpopc "indegree-popularity (centrd)" 0.12 0
+		__gchk outactc "outdegree-activity (centrd)" 0.12 0
+	}
+	if "`f'" == "sequiv" {
+		__gfit, opts(outdegree reciprocity transtrip ownx(instructeq)) uncond
+		__gchk nat_instructeq "in-struct equivalence" 0.12 0
+	}
+	if "`f'" == "ownass" {
+		__gfit, opts(outdegree reciprocity transtrip ownx(outinass:2)) uncond
+		__gchk nat_outinass "out-in degree^(1/2) assortativity" 0.12 0
+	}
+	__gchk outdegree "outdegree (density)" 0.15 0
+	__gchk reciprocity "reciprocity" 0.12 0
+	__gchk transtrip "transitive triplets" 0.12 0
+	__gchk period1 "constant net rate (period 1)" 0.1 0.08
+	__gchk period7 "constant net rate (period 7)" 0.1 0.08
+	frame drop ref
+	display "PASS: `f' agrees with RSiena"
+}
+* the per-group constants themselves, against the values of the data objects of RSiena (dev/saom_rsiena_groups.R: structmean, average degree, average reciprocal degree)
+nwsaom, waves(g1 g2 g3) groups(group) outdegree ownx(instructeq) k3(20) seed(1) cores(1) unconditional
+mata: nc = SaomGroupsNetConst(SaomGroupsKept("groupid"), rowsum(SaomGroupsKept("groupw") :> 0))
+mata: st_matrix("__nc", nc)
+foreach x in 1 2 3 {
+	local want : word `x' of 1.333333 1.566667 1.666667
+	assert abs(__nc[1, `x'] - `want') < 1e-5
+	local want : word `x' of 0.1805861 0.1760234 0.1956044
+	assert abs(__nc[3, `x'] - `want') < 1e-5
+}
+display "PASS: per-group data constants equal RSiena's"
+
 * what stops with a message
-foreach o in "structural(Md)" "symmetric" "joinat(p1) leaveat(p2)" "inpopc" "ml" {
+foreach o in "structural(Md)" "symmetric" "joinat(p1) leaveat(p2)" "ml" {
 	capture nwsaom, waves(g1 g2 g3) groups(group) outdegree `o' k3(20)
 	assert _rc != 0
 }
@@ -694,10 +736,9 @@ mata: M = st_matrix("Gbase2"); M[1, 20] = 1; st_matrix("Gx", M)
 nwset, mat(Gx) name(gx) nooutput
 capture nwsaom, waves(g1 gx g3) groups(group) outdegree k3(20)
 assert _rc == 198
-* estat gof is refused clearly, and a later ordinary fit is not affected by the group state
+* estat gof works per group, and a later ordinary fit is not affected by the group state
 nwsaom, waves(g1 g2 g3) groups(group) outdegree reciprocity k0(10) k3(50) seed(1) cores(1)
-capture estat gof
-assert _rc != 0
+estat gof, nsim(5) seed(1) group(1) stats(outdegree)
 nwsaom, waves(g1 g2 g3) outdegree reciprocity k0(10) k3(50) seed(1) cores(1)
 assert missing(e(ngroups))
 assert colsof(e(rates)) == 2

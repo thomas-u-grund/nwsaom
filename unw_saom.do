@@ -5747,7 +5747,8 @@ real scalar SaomNativeNetStat(class SaomGraph scalar G, real scalar code, real s
 	return(st_numscalar("__saom_netstat_val"))
 }
 real rowvector stat_saom_nat(class SaomGraph scalar G, class SaomTermData scalar td) {
-	real colvector a
+	real colvector a, nact
+	real matrix ties
 	real scalar dyn
 	dyn = (td.levels[2] != 0)
 	if (rows(td.edgecovmat) == G.n | (rows(td.edgecovmat) == 2 * G.n & td.levels[1] == 259)) return(SaomNativeNetStat(G, td.levels[1], td.decay, J(G.n, 1, 0), td.edgecovmat))
@@ -5765,6 +5766,12 @@ real rowvector stat_saom_nat(class SaomGraph scalar G, class SaomTermData scalar
 	}
 	a = (dyn ? td.attr :- td.center : td.attr)
 	if (dyn & rows(td.levels) >= 3) return(SaomNativeNetStat(G, td.levels[1] + 1000, td.decay, a, J(0, 0, 0), td.levels[3]))
+	if (td.levels[1] == 281 & !dyn & SaomGroupsMode()) {
+		// inStructEq in groups: (n - 2) * structmean uses the number of actors of the group of the tie (RSiena: the group is its own data object); a[3] = structmean of the period's group
+		nact = SaomGroupsNact()
+		ties = G.all_ties()
+		if (rows(nact) > 0 & rows(ties) > 0) return(SaomNativeNetStat(G, td.levels[1], td.decay, a) :+ a[3] * sum(nact[ties[., 1]] :- G.n))
+	}
 	return(SaomNativeNetStat(G, td.levels[1] + (dyn ? 1000 : 0), td.decay, a))
 }
 real rowvector change_saom_nat(class SaomGraph scalar G, real scalar i, real scalar j, class SaomTermData scalar td) {
@@ -8328,7 +8335,7 @@ void SaomNetCtxInit(struct SaomNetCtx scalar C, pointer(class SaomGraph scalar) 
 	// the threaded batch path: every model from protocol 11 on
 	C.use_batch = C.use_native & (!C.hastimed | ver >= 27) & (ver >= 5) & ((!C.hasratecov & C.symtype == 0 & !C.hasnetgate & !C.hasstructural) | ver >= 11)
 	if (SaomGroupsMode()) {
-		if (!C.use_batch | ver < 142) {
+		if (!C.use_batch | ver < 144) {
 			errprintf("nwsaom: groups() needs the native plugin of this release (update nwsaom: net install ... replace); there is no Mata implementation.\n")
 			exit(198)
 		}
@@ -9143,6 +9150,9 @@ void SaomModelSubsetBegin(class SaomModel scalar M, real scalar h) {
 	real scalar t, N, r, q, Pt, Ph, nT
 	string rowvector fld
 	pointer(class SaomTermData scalar) scalar tdp
+	real matrix nc
+	real colvector col
+	nc = J(0, 0, 0)
 	code = SaomGroupsKept("groupid")
 	wl = SaomGroupsKept("groupw")
 	reg = SaomGroupsKept("gcreg")
@@ -9163,7 +9173,14 @@ void SaomModelSubsetBegin(class SaomModel scalar M, real scalar h) {
 		asarray(__nwsaom_sub_A, "apd" + strofreal(t), (*tdp).attrpd)
 		asarray(__nwsaom_sub_A, "cen" + strofreal(t), (*tdp).center)
 		asarray(__nwsaom_sub_A, "dec" + strofreal(t), (*tdp).decay)
-		if (rows((*tdp).attr) == N) (*tdp).attr = (*tdp).attr[idx, .]
+		if (rows((*tdp).attrpd) > 0 & SaomGroupsIsDg(tdp, M.names[t])) {
+			if (rows(nc) == 0) nc = SaomGroupsNetConst(code, rowsum(wl :> 0))
+			col = J(rows(idx), 1, 0)
+			col[1::3] = nc[., h]
+			(*tdp).attr = col
+			(*tdp).attrpd = J(0, 0, 0)
+		}
+		else if (rows((*tdp).attr) == N) (*tdp).attr = (*tdp).attr[idx, .]
 		if (rows((*tdp).levels) == N & cols((*tdp).levels) == 1) (*tdp).levels = (*tdp).levels[idx, .]
 		if (rows((*tdp).edgecovmat) == N & cols((*tdp).edgecovmat) == N) (*tdp).edgecovmat = (*tdp).edgecovmat[idx, idx]
 		if (rows((*tdp).edgecovpd) > 0 | rows((*tdp).attrpd) > 0) {
@@ -9702,7 +9719,13 @@ void SaomGroupsRegister(class SaomModel scalar M) {
 	pointer(class SaomTermData scalar) scalar tdp
 	pointer(real rowvector) scalar pbal
 	string scalar nm
+	real matrix nc
+	real colvector col
+	real matrix ap
+	real rowvector pg
+	real scalar q
 	if (!SaomGroupsMode()) return
+	nc = J(0, 0, 0)
 	G = max(SaomGroupsId())
 	reg = J(0, 2, 0)
 	val = J(0, G, 0)
@@ -9725,6 +9748,24 @@ void SaomGroupsRegister(class SaomModel scalar M) {
 			reg = reg \ (t, 2)
 			pbal = findexternal("__nwsaom_groupbal")
 			val = val \ *pbal
+		}
+		else if (anyof(("inpopc", "outpopc", "outactc", "inactc", "degplus", "degplusc"), nm)) {
+			// RSiena (NetworkLongitudinalData::calculateProperties): the average degree is a property of the data object of the group
+			if (rows(nc) == 0) nc = SaomGroupsNetConst(SaomGroupsId(), SaomGroupsNW())
+			reg = reg \ (t, 2)
+			val = val \ (nc[1, .] :* (nm == "degplusc" ? 2 : 1))
+		}
+		else if (SaomGroupsIsDg(tdp, nm)) {
+			// ownx() effects and instructeq: average degree, average reciprocal degree and structmean in the first three rows of the dummy column, per period
+			if (rows(nc) == 0) nc = SaomGroupsNetConst(SaomGroupsId(), SaomGroupsNW())
+			pg = SaomGroupsPeriodGroup()
+			col = (*tdp).attr
+			ap = J(rows(col), cols(pg), 0)
+			for (q=1; q<=cols(pg); q++) {
+				col[1::3] = nc[., pg[q]]
+				ap[., q] = col
+			}
+			(*tdp).attrpd = ap
 		}
 	}
 	rmexternal("__nwsaom_gcreg")
@@ -18786,5 +18827,48 @@ void SaomGroupsPresSet(real scalar h, real scalar pd) {
 	s = 0
 	for (q=1; q<h; q++) s = s + rowsum(nw[q, .] :> 0) - 1
 	__nwsaom_last_present = __nwsaom_presentmat[selectindex(code :== h), s + pd]
+}
+/* 3 x G: for every group the average degree over all its waves (RSiena's NetworkLongitudinalData::calculateProperties(), a property of the data object of the group), the average
+   reciprocal degree, and RSiena's structmean (calcStructmean() of the group: sums over its waves 1 .. W-1); from the glued waves __nwsaom_last_Gwaves */
+real matrix SaomGroupsNetConst(real colvector code, real colvector nw) {
+	external pointer(class SaomGraph scalar) rowvector __nwsaom_last_Gwaves
+	real matrix res, t
+	real colvector d
+	real scalar G, h, q, s, n, ties, rec, sma, smb, k, i
+	G = rows(nw)
+	res = J(3, G, 0)
+	s = 0
+	for (h=1; h<=G; h++) {
+		n = sum(code :== h)
+		ties = 0
+		rec = 0
+		sma = 0
+		smb = 0
+		for (q=1; q<=nw[h]; q++) {
+			t = (*__nwsaom_last_Gwaves[s + q]).all_ties()
+			if (rows(t) > 0) t = select(t, code[t[., 1]] :== h)
+			ties = ties + rows(t)
+			for (k=1; k<=rows(t); k++) rec = rec + (*__nwsaom_last_Gwaves[s + q]).has_edge(t[k, 2], t[k, 1])
+			if (q < nw[h]) {
+				d = J(rows(code), 1, 0)
+				for (k=1; k<=rows(t); k++) d[t[k, 1]] = d[t[k, 1]] + 1
+				d = select(d, code :== h)
+				sma = sma + sum(2 :* d :* (n - 1 :- d))
+				smb = smb + n * (n - 1) * (n - 2)
+			}
+		}
+		res[1, h] = ties / (n * nw[h])
+		res[2, h] = rec / (n * nw[h])
+		res[3, h] = (smb > 0 ? sma / smb : 0)
+		s = s + nw[h] - 1
+	}
+	return(res)
+}
+/* 1 when the term is an own-network effect of ownx()/instructeq (RegDg: name nat_<effect>, a dummy column that carries the data constants in its first three rows) */
+real scalar SaomGroupsIsDg(pointer(class SaomTermData scalar) scalar tdp, string scalar nm) {
+	if (substr(nm, 1, 4) != "nat_" | strpos(substr(nm, 5, .), "_") > 0) return(0)
+	if (rows((*tdp).levels) != 2 | cols((*tdp).attr) != 1) return(0)
+	if (rows((*tdp).attr) < 4) return(0)
+	return(all((*tdp).attr[4::rows((*tdp).attr)] :== 0) & (*tdp).levels[1] >= 260 & (*tdp).levels[2] == 0)
 }
 end

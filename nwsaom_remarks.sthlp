@@ -509,7 +509,7 @@ and {opt unconditional} estimation both work. To let a parameter differ between 
 
 {pstd}
 {bf:Constants that RSiena keeps per group} are computed per group here too: the similarity mean of a covariate ({cmd:simx()}, with the covariate's range of the group), the balance mean
-({cmd:balance}), the mean of a dependent behavior (its centring), its similarity mean and variance, and the centring of a dyadic covariate (by the mean of its off-diagonal cells within the group).
+({cmd:balance}), the average degree of the centred degree effects ({cmd:inpopc}, {cmd:outpopc}, {cmd:outactc}, {cmd:inactc}), the average degrees and the structural-equivalence mean of the {cmd:ownx()} effects, the mean of a dependent behavior (its centring), its similarity mean and variance, and the centring of a dyadic covariate (by the mean of its off-diagonal cells within the group).
 Actor covariates are centred at their mean over all actors of all groups, so a variable that is constant within a group (group size, a group indicator) can be used with {cmd:egox()}.
 
 {pstd}

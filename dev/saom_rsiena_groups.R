@@ -1,7 +1,7 @@
 # Multi-group reference: RSiena sienaGroupCreate() + siena07() on three groups cut out of the s50 data (actors 1-15, 16-35, 36-50).
 # Writes the stacked data (wave matrices block-diagonal, actors.csv) for nwsaom and the RSiena estimates.
 # Usage: Rscript dev/saom_rsiena_groups.R <outdir> [cond 0/1] [seeds] [feature]
-# feature: base | balsim | unequal (group 2 has waves 1,2 and group 3 waves 2,3) | tvcov | comp (composition change) | miss (missing ties)
+# feature: degc | sequiv | ownass (group-level data constants) | base | balsim | unequal (group 2 has waves 1,2 and group 3 waves 2,3) | tvcov | comp (composition change) | miss (missing ties)
 #          | ratecov | inter (interaction) | dyad (dyadic covariate)
 library(RSiena)
 args <- commandArgs(TRUE)
@@ -95,6 +95,9 @@ if (feat == 'coevsim') { eff <- includeEffects(eff, transTrip); eff <- includeEf
 if (feat == 'coevrate') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, avAlt, name = 'alc', interaction1 = 'net'); eff <- includeEffects(eff, RateX, name = 'alc', interaction1 = 'ccv', type = 'rate') }
 if (feat %in% c('coev', 'coevcomp', 'coevmiss')) { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, altX, interaction1 = 'alc'); eff <- includeEffects(eff, avAlt, name = 'alc', interaction1 = 'net') }
 if (feat == 'dyad') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, X, interaction1 = "D"); }
+if (feat == 'degc') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, inPop.c, outAct.c) }            # centred degree effects: the average degree is a property of the group
+if (feat == 'sequiv') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, inStructEq) }                    # structural equivalence: structmean of the group
+if (feat == 'ownass') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, outInAss); eff <- setEffect(eff, outInAss, parameter = 2) }
 res <- NULL; ttres <- NULL; sres <- NULL
 for (s in 1:nseed) {
   alg <- sienaAlgorithmCreate(projname = NULL, cond = cond, seed = s, n3 = 2000, nsub = 4)

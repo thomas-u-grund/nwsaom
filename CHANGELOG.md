@@ -5,6 +5,9 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- The constants that RSiena keeps per group are now per group for the centred degree effects (`inpopc`, `outpopc`, `outactc`, `inactc`, `degplus`, `degplusc`: average degree of the group) and for the `ownx()` effects (average degrees, structural-equivalence mean, size of the group in `instructeq`), so these effects can be used with `groups()`. Needs the compiled plugin of this release (protocol 144).
+
 ### Added
 - Postestimation after a fit with `groups()`: `estat gof` (per group, option `group(#)`, the p-values of the groups are combined by the inverse-normal method; RSiena's `sienaGOF(groupName=)`), `estat simulate` and `nwsaom simulate` (per group, `group(#)`, `generate()` saves the networks of each group as `<stub>_g#`, `rates()` takes one rate per period of all groups), `estat importance` (per group). Also for fits with one behavior, `ratecov()` and `present()` (`estat importance` not with `present()`).
 

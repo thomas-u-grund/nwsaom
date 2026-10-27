@@ -2,6 +2,10 @@
 
 Known, already diagnosed pitfalls. Entries copied from the nwcommands notes at the time of the split; some mention the core package.
 
+## Which constants are per group in RSiena (and here)
+
+`averageInDegree`/`averageOutDegree` (recomputed by `NetworkLongitudinalData::calculateProperties()` from the group's own networks over all its waves), `structmean` and `balmean` (from the group's data object) are PER GROUP in `siena07`; the group-level attributes set in `sienaGroupCreate()` serve the report only. A term whose constant comes from the data must therefore get one value per group: `td.decay` through `SaomGroupsRegister()` (kind 2, `p1` per period) or, for a term with a dummy attribute column (`ownx()`), a per-period `attrpd`. The Mata twin of the observed statistic is evaluated on the whole glued graph, so a statistic that contains the number of actors (`inStructEq`) needs the group size in Mata (`stat_saom_nat`) as in the plugin (`g->grpn`), or the targets and the simulated statistics disagree and phase 2 diverges.
+
 ## Group postestimation works by subsetting the saved model in place
 
 After a fit with `groups()` the externals `__nwsaom_group*` are removed at the end of the call; `SaomGroupsKeep()` first copies them to `__nwsaom_gk_*`. `estat gof/simulate/importance` run per group through `nwsaom_gof_groupbegin` (builds `__nwsaom_gofg_G<q>`, calls `SaomModelSubsetBegin`) and must always end with `SaomModelSubsetEnd` or the saved model stays cut to one group. The wrappers call `nwsaom_estat <sub>, grp(#)` (cross-file ado programs get evicted; reach them through the dispatcher). Covariates with missing values are imputed by the overall mean in the group fit but by the group mean in a single-group fit, so only structural effects agree exactly with the group fitted alone.
