@@ -64,6 +64,17 @@ void SaomStructKeepLast() {
 	q = crexternal("__nwsaom_last_sset")
 	*q = *p
 }
+/* put the sets of the last fit back as the working sets (tests that rebuild a fit context by hand) */
+void SaomStructRestoreLast() {
+	pointer(real matrix) scalar q
+	pointer(real scalar) scalar p
+	q = findexternal("__nwsaom_last_sset")
+	if (q == NULL) return
+	SaomStructSetRaw(*q)
+	p = findexternal("__nwsaom_sset_on")
+	if (p == NULL) p = crexternal("__nwsaom_sset_on")
+	*p = 1
+}
 real scalar SaomStructLastOn() {
 	pointer(real matrix) scalar q
 	q = findexternal("__nwsaom_last_sset")
