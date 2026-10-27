@@ -27,7 +27,7 @@ program define _nwsaom_structural_build
 	// the combinations that are not supported yet
 	local bad ""
 	if "`ml'" != "" local bad "`bad' ml"
-	if "`symmetric'" != "" | "`symtype'" != "" local bad "`bad' symmetric"
+	if "`symmetric'`symtype'" != "" local bad "`bad' symmetric"
 	if "`groups'" != "" local bad "`bad' groups()"
 	if "`behavior'" != "" & ("`mb'" == "1" | "`rate'" != "") local bad "`bad' behavior() with several behaviors or rate covariates"
 	if "`structural'" != "" & !(`tm' & "`structural'" == "__nwsaom_tm_structmat") local bad "`bad' structural()"
@@ -39,6 +39,13 @@ program define _nwsaom_structural_build
 	if `hasmissnet' {
 		forvalues w = 2/`nwaves' {
 			mata: SaomStructCarry(`w', __ns_missnet_w`w', `nodes')
+		}
+	}
+	if "`symmetric'`symtype'" != "" {
+		mata: st_local("symbad", strofreal(SaomStructSymCheck(`nwaves', `nodes')))
+		if `symbad' {
+			di "{err}in a non-directed relation the structural codes (10 and 11) must be given for both directions of a dyad, with the same value (wave `symbad' has a code that is not mirrored); RSiena would treat the network as directed."
+			error 198
 		}
 	}
 	mata: SaomStructBuild(`nwaves', `nodes')

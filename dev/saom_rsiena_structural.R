@@ -14,6 +14,7 @@ nseed <- if (length(args) >= 4) as.integer(args[4]) else 8
 n3 <- if (length(args) >= 5) as.integer(args[5]) else 500
 dir.create(out, showWarnings = FALSE, recursive = TRUE)
 base <- lapply(list(s501, s502, s503), function(m) { m[is.na(m)] <- 0; m })
+ALG <- function(...) if (sym) sienaAlgorithmCreate(..., modelType = c(net = 6)) else sienaAlgorithmCreate(...)
 n <- 50
 set.seed(20261027)
 mk <- function(variant) {
@@ -55,7 +56,15 @@ mk <- function(variant) {
   }
   w
 }
+sym <- grepl("^sy", variant)
 bip <- grepl("^tm", variant)
+if (sym) {   # non-directed relation: the symmetrized s50 waves; structural codes given for both directions (value 10 or 11 per pair), independent per wave
+  w <- lapply(1:3, function(k) as.matrix(read.csv(sprintf("dev/saom_rsiena_symmulti_w%d.csv", k))))
+  up <- which(upper.tri(diag(n)), arr.ind = TRUE)
+  if (variant != 'sy0') for (k in 1:3) { m <- w[[k]]; pick <- sample(nrow(up), round(0.03 * nrow(up))); val <- sample(c(10, 11), length(pick), replace = TRUE)
+    m[up[pick, , drop = FALSE]] <- val; m[up[pick, 2:1, drop = FALSE]] <- val; w[[k]] <- m }
+  waves <- w
+}
 if (bip) {   # two-mode: 40 actors x 20 events; tm1: actors 1-10 cannot choose events 1-5 (10 in all waves), actor 11 is frozen, event 20 cannot be chosen by anybody; tm3: changing sets
   w <- lapply(1:3, function(k) as.matrix(read.csv(sprintf("dev/saom_twomode_w%d.csv", k))))
   for (k in 1:3) { m <- w[[k]]
@@ -63,7 +72,7 @@ if (bip) {   # two-mode: 40 actors x 20 events; tm1: actors 1-10 cannot choose e
     if (variant == 'tm3') { m[12:14, 6:8] <- 0; if (k == 1) m[15:18, 1:3] <- 10; if (k == 2) m[16:20, 2:4] <- 11; if (k == 3) m[1:3, 6:9] <- 10 }
     w[[k]] <- m }
   waves <- w
-} else waves <- mk(variant)
+} else if (!sym) waves <- mk(variant)
 cchg <- NULL
 if (variant %in% c('v6', 'v6s')) {    # composition change (RSiena sienaCompositionChange): actors 3 and 8 join at 1.4 and 2.3; actors 5 and 12 leave at 1.6 and 2.5; with structural values coded as in v3
   jn <- rep(1, n); lv <- rep(3, n); jn[3] <- 1.4; jn[8] <- 2.3; lv[5] <- 1.6; lv[12] <- 2.5
@@ -93,8 +102,8 @@ mkdata <- function(ws) {
     return(sienaDataCreate(net, beh))
   }
   if (Sys.getenv("MODEL", "std") == 'ratecov') { cvc <- coCovar(cvv, centered = TRUE); return(sienaDataCreate(sienaDependent(arr(ws)), cvc)) }
-  if (!bip && !is.null(cchg)) return(sienaDataCreate(sienaDependent(arr(ws)), sienaCompositionChange(cchg)))
-  if (!bip) return(sienaDataCreate(sienaDependent(arr(ws))))
+  if (!bip && !is.null(cchg)) { net <- sienaDependent(arr(ws)); return(sienaDataCreate(net, sienaCompositionChange(cchg))) }
+  if (!bip) { net <- sienaDependent(arr(ws)); return(sienaDataCreate(net)) }
   A <- sienaNodeSet(40, nodeSetName = "A"); B <- sienaNodeSet(20, nodeSetName = "B")
   sienaDataCreate(sienaDependent(arr(ws), type = "bipartite", nodeSet = c("A", "B")), nodeSets = list(A, B))
 }
@@ -112,7 +121,8 @@ mkeff <- function(d, theta = NULL) {
   } else if (MODEL == 'ratecov') {
     e <- includeEffects(e, recip, transTrip, cycle3, inPopSqrt, outAct)
     e <- includeEffects(e, RateX, interaction1 = 'cvc', type = 'rate')
-  } else if (bip) e <- includeEffects(e, cycle4, inPopSqrt, outAct)
+  } else if (sym) e <- includeEffects(e, transTies, inPopSqrt)
+  else if (bip) e <- includeEffects(e, cycle4, inPopSqrt, outAct)
   else e <- includeEffects(e, recip, transTrip, cycle3, inPopSqrt, outAct)
   e
 }
@@ -122,13 +132,13 @@ if (task == 'targets') {
     d <- mkdata(waves[p:(p + 1)])
     nm <- attr(d$depvars[[1]], 'distance'); cat("DIST", p, nm, "\n")
     e <- mkeff(d)
-    ans <- siena07(sienaAlgorithmCreate(projname = NULL, seed = 1, n3 = 10, nsub = 0, cond = FALSE), data = d, effects = e, batch = TRUE, silent = TRUE)
+    ans <- siena07(ALG(projname = NULL, seed = 1, n3 = 10, nsub = 0, cond = FALSE), data = d, effects = e, batch = TRUE, silent = TRUE)
     tg <- ans$targets
     for (k in seq_along(tg)) cat("TARGET", p, gsub(" ", "_", ans$effects$effectName[k]), round(tg[k], 6), "\n")
   }
   d3 <- mkdata(waves)
   e <- mkeff(d3)
-  ans <- siena07(sienaAlgorithmCreate(projname = NULL, seed = 1, n3 = 10, nsub = 0, cond = FALSE), data = d3, effects = e, batch = TRUE, silent = TRUE)
+  ans <- siena07(ALG(projname = NULL, seed = 1, n3 = 10, nsub = 0, cond = FALSE), data = d3, effects = e, batch = TRUE, silent = TRUE)
   for (k in seq_along(ans$targets)) cat("TARGET", 0, gsub(" ", "_", ans$effects$effectName[k]), round(ans$targets[k], 6), "\n")
   cat("DISTANCES", attr(d3$depvars[[1]], 'distance'), "\n")
 }
@@ -137,7 +147,9 @@ if (task == 'sim') {
   cnd <- Sys.getenv("COND", "0") == "1"
   d3 <- mkdata(waves)
   e <- mkeff(d3)
-  if (MODEL == 'endow') {
+  if (sym) {
+    e$initialValue[e$shortName == 'density'] <- -1.2; e$initialValue[e$shortName == 'transTies'] <- 0.3; e$initialValue[e$shortName == 'inPopSqrt'] <- 0.1
+  } else if (MODEL == 'endow') {
     ee <- unclass(e)
     set <- function(sn, ty, v) e$initialValue[ee$shortName == sn & ee$type == ty & ee$include] <<- v
     set('density', 'eval', -1.7); set('recip', 'endow', 0.5); set('recip', 'creation', 0.8); set('transTrip', 'eval', 0.3)
@@ -150,12 +162,12 @@ if (task == 'sim') {
   e$initialValue[e$shortName == 'inPopSqrt'] <- th['indegpopularity']; e$initialValue[e$shortName == 'outAct'] <- th['outactivity']
   e$initialValue[e$shortName == 'transTrip'] <- th['transtrip']; e$initialValue[e$shortName == 'cycle3'] <- th['cycle3']
   }
-  e$initialValue[e$shortName == 'Rate'] <- 4
+  e$initialValue[e$shortName == 'Rate'] <- if (sym) 1 else 4
   if (MODEL == 'ratecov') e$initialValue[e$shortName == 'RateX'] <- as.numeric(Sys.getenv('RCC', '0.3'))
   e$fix[e$include] <- TRUE
   res <- NULL
   for (s in 1:nseed) {
-    ans <- siena07(sienaAlgorithmCreate(projname = NULL, seed = 100 + s, n3 = n3, nsub = 0, cond = cnd, simOnly = TRUE), data = d3, effects = e, batch = TRUE, silent = TRUE)
+    ans <- siena07(ALG(projname = NULL, seed = 100 + s, n3 = n3, nsub = 0, cond = cnd, simOnly = TRUE), data = d3, effects = e, batch = TRUE, silent = TRUE)
     res <- rbind(res, colMeans(ans$sf) / apply(ans$sf, 2, sd))
   }
   cat("SIMCOLS", gsub(" ", "_", e$effectName[e$include]), "\n")
@@ -170,8 +182,8 @@ if (task == 'est') {
   e <- mkeff(d3)
   res <- NULL
   for (s in 1:nseed) {
-    ans <- siena07(sienaAlgorithmCreate(projname = NULL, seed = 200 + s, n3 = n3, nsub = 4, cond = cnd), data = d3, effects = e, batch = TRUE, silent = TRUE)
-    ans <- siena07(sienaAlgorithmCreate(projname = NULL, seed = 300 + s, n3 = n3, nsub = 1, cond = cnd), data = d3, effects = e, prevAns = ans, batch = TRUE, silent = TRUE)
+    ans <- siena07(ALG(projname = NULL, seed = 200 + s, n3 = n3, nsub = 4, cond = cnd), data = d3, effects = e, batch = TRUE, silent = TRUE)
+    ans <- siena07(ALG(projname = NULL, seed = 300 + s, n3 = n3, nsub = 1, cond = cnd), data = d3, effects = e, prevAns = ans, batch = TRUE, silent = TRUE)
     res <- rbind(res, c(ans$theta, ans$tconv.max))
   }
   cat("ESTCOLS", gsub(" ", "_", e$effectName[e$include]), "tconv.max\n")

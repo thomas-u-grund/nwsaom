@@ -222,6 +222,25 @@ void SaomStructCarry(real scalar w, real matrix mask, real scalar n) {
 	SaomStructSetRaw(keep)
 }
 
+/* non-directed relation: the codes must be given for both directions with the same value (RSiena: otherwise the network is directed).  Returns the first offending wave, 0 if fine */
+real scalar SaomStructSymCheck(real scalar W, real scalar n) {
+	real matrix raw, S, Sr
+	real colvector in, k1, k2
+	real scalar w
+	raw = SaomStructRaw()
+	for (w=1; w<=W; w++) {
+		S = SaomStructWave(raw, w)
+		if (rows(S) == 0) continue
+		Sr = (S[., 2], S[., 1], S[., 3])
+		k1 = SaomStructKeys(S, n)
+		k2 = SaomStructKeys(Sr, n)
+		if (any(SaomStructInSet(k2, k1) :== 0)) return(w)
+		// the same value: sort both by key and compare
+		if (any(S[order(k1, 1), 3] :!= Sr[order(k2, 1), 3])) return(w)
+	}
+	return(0)
+}
+
 /* ---- finish: sort, check, switch on ---- */
 void SaomStructBuild(real scalar W, real scalar n) {
 	real matrix raw
