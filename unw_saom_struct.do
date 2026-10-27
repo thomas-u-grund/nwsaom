@@ -440,4 +440,88 @@ void SaomStructSend(real scalar P, real scalar n) {
 	st_framecurrent(origframe)
 	stata("capture frame drop __saom_struct")
 }
+
+/* ---- postestimation (single-call simulations): the period the next simulation belongs to ---- */
+void SaomStructPeriodSet(real scalar pd) {
+	pointer(real scalar) scalar p
+	p = findexternal("__nwsaom_sf_pd")
+	if (p == NULL) p = crexternal("__nwsaom_sf_pd")
+	*p = pd
+}
+real scalar SaomStructPeriodGet() {
+	pointer(real scalar) scalar p
+	p = findexternal("__nwsaom_sf_pd")
+	if (p == NULL) return(0)
+	return(*p)
+}
+
+/* the observed end network of period pd with the dyads that were structural at the start set to their start value (RSiena: sparseMatrixExtraction()), dense */
+real matrix SaomStructObsDense(class SaomGraph scalar Gend, real scalar pd) {
+	real matrix raw, A, B
+	class SaomGraph scalar Tg
+	if (!SaomStructOn()) return(Gend.to_dense())
+	raw = SaomStructRaw()
+	SaomStructPeriod(raw, pd, Gend.n, A, B)
+	Tg = SaomStructPatched(Gend, A)
+	return(Tg.to_dense())
+}
+
+/* install the sets of period pd for the NEXT single-call simulation of the plugin (STRUCTSET1|) */
+void SaomStructSend1(real scalar n) {
+	real matrix raw, A, B, X
+	real scalar pd, junk
+	string scalar origframe
+	string rowvector names
+
+	if (!SaomStructOn()) return
+	pd = SaomStructPeriodGet()
+	if (pd < 1) return
+	if (SaomNativePluginVersion() < 150) {
+		errprintf("nwsaom: structural zeros and ones need the native plugin of this release (update nwsaom: net install ... replace).\n")
+		exit(198)
+	}
+	raw = SaomStructRaw()
+	SaomStructPeriod(raw, pd, n, A, B)
+	X = J(0, 4, 0)
+	if (rows(A) > 0) X = (J(rows(A), 1, pd), A[., 1..2], J(rows(A), 1, 1))
+	if (rows(B) > 0) X = X \ (J(rows(B), 1, pd), B[., 1..2], 2 :+ B[., 3])
+	names = ("s_pd", "s_i", "s_j", "s_k")
+	origframe = st_framecurrent()
+	stata("capture frame drop __saom_struct")
+	stata("frame create __saom_struct")
+	st_framecurrent("__saom_struct")
+	st_addobs(max((rows(X), 1)))
+	junk = st_addvar("double", names)
+	if (rows(X) > 0) st_store((1::rows(X)), names, X)
+	stata("capture program saomnativesim, plugin using(" + char(34) + SaomNativePluginPath() + char(34) + ")")
+	stata("plugin call saomnativesim " + invtokens(names) + ", " + char(34) + "STRUCTSET1|" + strofreal(n) + " " + strofreal(rows(X)) + char(34))
+	st_framecurrent(origframe)
+	stata("capture frame drop __saom_struct")
+}
+
+/* estat importance: the choices that are available in period pd (1 = available): the dyads that are structural at the start are excluded (RSiena: NA) */
+real matrix SaomStructAvail(real scalar pd, real scalar n, real matrix mk0) {
+	real matrix raw, A, B, m
+	real scalar k
+	m = (rows(mk0) > 0 ? mk0 : J(n, n, 1))
+	raw = SaomStructRaw()
+	SaomStructPeriod(raw, pd, n, A, B)
+	for (k=1; k<=rows(A); k++) m[A[k,1], A[k,2]] = 0
+	return(m)
+}
+
+/* the n x n matrix of tie values of a network (0 = no tie); used by nwsaom describe, which must see the codes 10 and 11 */
+real matrix SaomStructWeights(pointer(class nw_def scalar) scalar netobj) {
+	real scalar n, i
+	real matrix W
+	real colvector nb
+	n = netobj->get_nodes()
+	W = J(n, n, 0)
+	for (i=1; i<=n; i++) {
+		nb = netobj->neighbors(i)
+		if (rows(nb) == 0) continue
+		W[i, nb] = netobj->edge_weight_row(i)
+	}
+	return(W)
+}
 end

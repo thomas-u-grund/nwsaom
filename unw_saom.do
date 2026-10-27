@@ -15493,7 +15493,7 @@ void SaomImportanceCore(pointer(class SaomGraph scalar) rowvector Gstart, real s
 	struct SaomNativeConfig scalar cfg
 	struct SaomBehaviorNativeConfig scalar cfgB
 	pointer(real matrix) rowvector Cm, Cb
-	real matrix expRI, expI, sigmas, st0, X0, mk, expRIb, expIb, sigmasb
+	real matrix expRI, expI, sigmas, st0, X0, mk, mkw, expRIb, expIb, sigmasb
 	real rowvector RH, RHb
 	real colvector eRI, eI, sg
 	real scalar n, K, Kb, w, k, junk, ver, rh, overallMean
@@ -15556,10 +15556,11 @@ void SaomImportanceCore(pointer(class SaomGraph scalar) rowvector Gstart, real s
 	}
 	for (w=1; w<=P; w++) {
 		Cm = J(1, K, NULL)
+		mkw = (SaomStructOn() ? SaomStructAvail(w, n, mk) : mk)
 		for (k=1; k<=K; k++) {
 			stata("plugin call saomnativesim " + invtokens("c" :+ strofreal(1..n)) + ", " + char(34) + "CONTRIBK|" + strofreal(w) + " " + strofreal(k) + char(34))
 			X0 = st_data((1::n), (1..n))
-			if (rows(mk) > 0) X0 = X0 :/ mk
+			if (rows(mkw) > 0) X0 = X0 :/ mkw
 			Cm[k] = &(X0 :+ 0)
 		}
 		SaomImpPeriod(Cm, theta, eRI, eI, sg, rh)
@@ -15633,9 +15634,14 @@ real scalar SaomGofSimNet(class SaomGraph scalar G, class SaomModel scalar M,
 	if (native) {
 		if (hasfn) cfg.fntype = fn
 		if (hasst) cfg.structpairs = SaomMaskToDyadList(st :== 1)
+		SaomStructSend1(G.n)
 		if (rows(rcattr) > 0) r = SaomSimulateIntervalNative(G, M, cfg, theta, rate, 1, 0, J(0, 2, 0), (haspr ? pr : J(0, 1, 0)), symtype, rcattr, rccoef)
 		else r = SaomSimulateIntervalNative(G, M, cfg, theta, rate, 1, 0, J(0, 2, 0), (haspr ? pr : J(0, 1, 0)), symtype)
 		return(1)
+	}
+	if (SaomStructOn()) {
+		errprintf("estat gof/simulate with structural zeros and ones needs the native plugin of this release (no Mata implementation).\n")
+		exit(198)
 	}
 	if (symtype != 0) {
 		errprintf("estat gof needs the native (C) simulator for a non-directed fit.\n")
@@ -15661,8 +15667,13 @@ real scalar SaomGofSimCoev(class SaomGraph scalar G, class SaomModel scalar M, r
 	native = cfg.eligible & cfgBeh.eligible & SaomNativeAvailable()
 	if (native) native = (SaomNativePluginVersion() >= (any(cfgBeh.fntype :!= 0) ? 12 : 3))
 	if (native) {
+		SaomStructSend1(G.n)
 		r = SaomSimulateIntervalCoevNative(G, M, cfg, thetaNet, Beh, Mbeh, cfgBeh, thetaBeh, rateNet, rateBeh, 1)
 		return(1)
+	}
+	if (SaomStructOn()) {
+		errprintf("estat gof/simulate with structural zeros and ones needs the native plugin of this release (no Mata implementation).\n")
+		exit(198)
 	}
 	rm = SaomSimulateIntervalCoev(G, M, thetaNet, Beh, Mbeh, thetaBeh, rateNet, rateBeh)
 	return(0)

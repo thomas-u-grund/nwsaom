@@ -1034,9 +1034,9 @@ dyads change from wave to wave.{p_end}
 {pstd}
 {bf:Scope.} One directed one-mode or two-mode network, any number of waves, method of moments (conditional or unconditional),
 with or without missing data, composition change, covariates, interactions, endowment/creation and rate covariates, and with one co-evolving
-behavior (without rate covariates). In a non-directed ({opt symmetric}) relation the codes must be given for both directions of a dyad, with the same value; all model types work. Not yet with several behaviors, {cmd:groups()}, {cmd:nwsaom multinet}/{cmd:multiplex}, {cmd:ml}, {cmd:nwsaom bayes}; and the commands that
-work on a fitted model ({cmd:estat gof}, {cmd:mems}, {cmd:simulate}, {cmd:importance}, {cmd:score}, {cmd:timetest}) and {cmd:nwsaom describe} do not yet know the codes:
-they stop with a message instead of ignoring them.
+behavior (without rate covariates). In a non-directed ({opt symmetric}) relation the codes must be given for both directions of a dyad, with the same value; all model types work. Not yet with several behaviors, {cmd:groups()}, {cmd:nwsaom multinet}/{cmd:multiplex}, {cmd:ml}, {cmd:nwsaom bayes}. {cmd:nwsaom describe} counts the structural zeros and ones of each wave and leaves them out of the distance (RSiena's data report);
+{cmd:estat gof}, {cmd:simulate}/{cmd:nwsaom simulate}, {cmd:mems}, {cmd:importance}, {cmd:score} and {cmd:timetest} work after a fit with codes: the observed end network has the start-structural dyads at their start value,
+the simulated networks have the end-structural dyads at their end value (RSiena's gof), the choices of structural dyads are left out of the importance.
 
 {pstd}
 {bf:The older option} {opt structural(matname)} marks dyads by a 0/1 matrix that is the same in all periods and needs the same observed value at every wave. It

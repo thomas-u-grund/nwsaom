@@ -248,3 +248,67 @@ static ST_retcode saom_sf_set(char *arg) {
 	free(keys); free(k0); free(rpd); free(ri); free(rj); free(rk);
 	return 0;
 }
+
+/* ---- single-call interface (estat gof / simulate / mems ...): STRUCTSET1|n nrows installs the fixed dyads (kind 1) and the end values (kind 2/3) of ONE period for the NEXT
+   single simulation call, which consumes them.  Frame variables s_pd s_i s_j s_k as for STRUCTSET (s_pd ignored). ---- */
+static struct {
+	int active;
+	long na, nb;
+	long *akey;
+	long *bi, *bj;
+	unsigned char *bv;
+	sf_csr_t csr;
+	int hascsr;
+} sf1;
+
+static void sf1_release(void) {
+	free(sf1.akey); free(sf1.bi); free(sf1.bj); free(sf1.bv);
+	if (sf1.hascsr) sf_csr_free(&sf1.csr);
+	memset(&sf1, 0, sizeof(sf1));
+}
+
+static ST_retcode saom_sf_set1(char *arg) {
+	long n, nrows, r;
+	char *tok0;
+	sf1_release();
+	tok0 = strtok(arg, " \t");
+	if (!tok0) { SF_error("saom_sim: STRUCTSET1 empty\n"); return 198; }
+	n = (long)atof(tok0);
+	nrows = next_long();
+	sf1.akey = (long *)malloc((size_t)(nrows > 0 ? nrows : 1) * sizeof(long));
+	sf1.bi = (long *)malloc((size_t)(nrows > 0 ? nrows : 1) * sizeof(long));
+	sf1.bj = (long *)malloc((size_t)(nrows > 0 ? nrows : 1) * sizeof(long));
+	sf1.bv = (unsigned char *)malloc((size_t)(nrows > 0 ? nrows : 1));
+	for (r = 0; r < nrows; r++) {
+		ST_double a, b, c, d;
+		long i, j, k;
+		SF_vdata(1, r + 1, &a); SF_vdata(2, r + 1, &b); SF_vdata(3, r + 1, &c); SF_vdata(4, r + 1, &d);
+		(void)a;
+		i = (long)b; j = (long)c; k = (long)d;
+		if (i < 1 || i > n || j < 1 || j > n || i == j || k < 1 || k > 3) { sf1_release(); SF_error("saom_sim: STRUCTSET1 invalid row\n"); return 198; }
+		if (k == 1) sf1.akey[sf1.na++] = (i - 1) * n + (j - 1);
+		else { sf1.bi[sf1.nb] = i; sf1.bj[sf1.nb] = j; sf1.bv[sf1.nb] = (k == 3); sf1.nb++; }
+	}
+	sf1.active = 1;
+	return 0;
+}
+
+/* called by the single-call interface after the model is parsed: merge the installed sets into M (the model is local to the call) */
+static void sf1_attach(model_t *M) {
+	long n = M->n, m, nb0;
+	long *keys;
+	if (!sf1.active) return;
+	nb0 = (M->struct_off && M->nstruct > 0) ? M->nstruct : 0;
+	keys = (long *)malloc((size_t)(nb0 + sf1.na + 1) * sizeof(long));
+	m = sf_base_keys(M, n, keys);
+	memcpy(keys + m, sf1.akey, (size_t)sf1.na * sizeof(long));
+	m = sf_unique(keys, m + sf1.na);
+	sf_csr_build(&sf1.csr, n, m, keys);
+	sf1.hascsr = 1;
+	free(keys);
+	/* the model's own lists (from the trailer) stay allocated and are freed by the caller; the merged ones are ours */
+	M->struct_off = sf1.csr.off; M->struct_j = sf1.csr.j; M->fr_off = sf1.csr.fro; M->fr_j = sf1.csr.frj;
+	M->nstruct = sf1.csr.cnt;
+	M->sflag = 1;
+	M->sov_n = sf1.nb; M->sov_i = sf1.bi; M->sov_j = sf1.bj; M->sov_v = sf1.bv;
+}

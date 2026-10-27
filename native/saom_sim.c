@@ -4926,6 +4926,7 @@ static int saom_sf_isfixed(const model_t *M, long i, long j);
 static long saom_sf_elig(const model_t *M, long n, const double *pres, unsigned char *eligf, long *idx);
 static void saom_sf_override(const model_t *M, graph_t *g);
 static void saom_sf_free(void **pm);
+struct model_s; static void sf1_attach(struct model_s *M); static void sf1_release(void);
 /* the total rate of the network / of the behavior and the grand rate (simulate_period() locals) */
 #define SAOM_NETTOT (P->hasratecov ? (symB ? rate * symGfac_rc : rate * totw_rc) : ((symB && sfl && n > 1) ? (double)nnet * (double)(nnet - 1) / (double)(n - 1) * rate : (double)nnet * rate))
 #define SAOM_BEHTOT (hasbrc ? rateBeh * totwb : (double)npresent * (M->nbehterms > 0 ? rateBeh : 0.0))
@@ -7548,7 +7549,12 @@ static ST_retcode legacy_call(char *arg0) {
 		}
 	}
 
+	{ long *so0 = M.struct_off, *sj0 = M.struct_j, *fo0 = M.fr_off, *fj0 = M.fr_j;
+	sf1_attach(&M);
 	simulate_period(&M, &PD, &P, rngseed, 1, &R);
+	/* the merged lists belong to sf1 (released below); the model's own lists are freed with the call's other memory */
+	M.struct_off = so0; M.struct_j = sj0; M.fr_off = fo0; M.fr_j = fj0; M.sflag = 0; M.sov_n = 0;
+	sf1_release(); }
 
 	if (P.want_score) {
 		for (k = 0; k < M.nterms; k++) {
@@ -7877,6 +7883,14 @@ STDLL stata_call(int argc, char *argv[]) {
 		batch_cur = &batch_states[slot];
 		rc = batch_setup(buf);
 		batch_cur = &batch_states[0];
+		free(buf);
+		return rc;
+	}
+	if (strncmp(argv[0], "STRUCTSET1|", 11) == 0) {
+		char *buf = (char *)malloc(strlen(argv[0]) + 1);
+		ST_retcode rc;
+		strcpy(buf, argv[0] + 11);
+		rc = saom_sf_set1(buf);
 		free(buf);
 		return rc;
 	}

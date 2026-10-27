@@ -145,7 +145,7 @@ program define nwsaom_estat_simulate, rclass
 	matrix `obs' = J(`nperiods', 6, .)
 	forvalues pd = 1/`nperiods' {
 		local pe = `pd' + 1
-		mata: st_matrix("__nwsaom_sim_row", SaomSimSummary(__nwsaom_last_G`pe'.to_dense(), `pd', `=cond(`coev', "mean(*__nwsaom_last_Behwaves[`pe'])", ".")'))
+		mata: st_matrix("__nwsaom_sim_row", SaomSimSummary(SaomStructObsDense(__nwsaom_last_G`pe', `pd'), `pd', `=cond(`coev', "mean(*__nwsaom_last_Behwaves[`pe'])", ".")'))
 		forvalues c = 1/6 {
 			if `tm' & inlist(`c', 4, 5) continue
 			matrix `obs'[`pd', `c'] = __nwsaom_sim_row[1, `c']
@@ -158,6 +158,7 @@ program define nwsaom_estat_simulate, rclass
 			local ++row
 			mata: __nwsaom_sim_G = SaomGraph()
 			mata: SaomCopyGraph(__nwsaom_last_G`pd', __nwsaom_sim_G)
+			mata: SaomStructPeriodSet(`pd')
 			if `coev' {
 				mata: __nwsaom_sim_B = SaomBehavior()
 				mata: __nwsaom_sim_B.init(*__nwsaom_last_Behwaves[`pd'], __nwsaom_beh_minval, __nwsaom_beh_maxval, `behoverall', __nwsaom_last_Mbeh.simMean)

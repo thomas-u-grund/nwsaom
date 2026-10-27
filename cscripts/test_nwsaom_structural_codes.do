@@ -333,6 +333,66 @@ di "PASS simulation in a non-directed relation (joint) agrees with RSiena"
 sc_sim, pref(SY) symctx(4) spec(symmetric symtype(forcing) outdegree transties indegpopularity) theta0(-1.2 0.1 0.3) par(-1.2, 0.1, 0.3, 1, 1) ref(4.519 4.587 1.148 -4.09 -3.5)
 di "PASS simulation in a non-directed relation (forcing) agrees with RSiena"
 
+* ---- postestimation after a fit with codes
+* estat simulate (tie counts of the simulated networks after each period, with the end values of the dyads that are structural at the end applied; RSiena
+* simOnly, 3000 simulations: ties 151.65 / 163.27, mutual dyads 23.60 / 26.62; theta -1.7 0.6 0.4, rate 4)
+nwclear
+forvalues w = 1/3 {
+	nwset, mat(V3w`w') directed name(c`w') nooutput
+}
+quietly nwsaom, waves(c1 c2 c3) outdegree reciprocity transtrip theta0(-1.7 0.6 0.4) rate0(4 4) fix(_all) k3(10) seed(1)
+estat simulate, nsim(390) seed(2) rates(4 4)
+matrix SS = r(sim)
+matrix SM = J(1, 4, 0)
+forvalues r = 1/780 {
+	local pd = SS[`r', 2]
+	matrix SM[1, 2*`pd'-1] = SM[1, 2*`pd'-1] + SS[`r', 3] / 390
+	matrix SM[1, 2*`pd'] = SM[1, 2*`pd'] + SS[`r', 4] / 390
+}
+assert abs(SM[1,1] - 151.65) < 2.5 & abs(SM[1,3] - 163.27) < 2.5
+assert abs(SM[1,2] - 23.60) < 1.0 & abs(SM[1,4] - 26.62) < 1.0
+* estat gof, mems, score, timetest run (the observed statistics use the end network with the start-structural dyads set to their start value)
+estat gof, nsim(10) seed(4242)
+nwsaom, waves(c1 c2 c3) outdegree reciprocity transtrip theta0(-1.7 0.6 0.4) fix(transtrip) k0(5) k3(30) seed(3)
+estat score
+estat timetest
+* estat importance: for constant structural zeros the codes and the older structural() mask give the same importance
+nwclear
+nwset, mat(V1w1) directed name(d1) nooutput
+nwset, mat(V1w2) directed name(d2) nooutput
+quietly nwsaom, wave1(d1) wave2(d2) outdegree reciprocity transtrip theta0(-1.7 0.6 0.4) fix(_all) k3(20) seed(1)
+quietly estat importance
+matrix RIc = r(ri)
+mata:
+M1 = st_matrix("V1w1")
+M2 = st_matrix("V1w2")
+st_matrix("MASK", (M1 :>= 10))
+st_matrix("Z1", (M1 :== 1) :| (M1 :== 11))
+st_matrix("Z2", (M2 :== 1) :| (M2 :== 11))
+end
+nwset, mat(Z1) directed name(e1) nooutput
+nwset, mat(Z2) directed name(e2) nooutput
+quietly nwsaom, wave1(e1) wave2(e2) outdegree reciprocity transtrip theta0(-1.7 0.6 0.4) fix(_all) k3(20) seed(1) structural(MASK)
+quietly estat importance
+matrix RIm = r(ri)
+assert mreldif(RIc, RIm) < 1e-9
+di "PASS postestimation after a fit with codes (simulate agrees with RSiena, gof/score/timetest run, importance equals the mask route)"
+
+* nwsaom describe (RSiena print01Report: ties, structural counts per wave, the table of the periods, the distance leaves out the structural dyads)
+nwclear
+forvalues w = 1/3 {
+	nwset, mat(V3w`w') directed name(c`w') nooutput
+}
+nwsaom describe, waves(c1 c2 c3)
+matrix DW = r(waves)
+matrix DP = r(periods)
+assert DW[1,1] == 117 & DW[2,1] == 127 & DW[3,1] == 128
+assert DW[1,4] == 12 & DW[1,5] == 11 & DW[2,4] == 1 & DW[2,5] == 12 & DW[3,4] == 14 & DW[3,5] == 8
+assert DP[1,5] == 110 & DP[2,5] == 104
+assert DP[1,2] == 70 & DP[1,3] == 60 & DP[1,1] == 57 & abs(DP[1,4] - 0.305) < 0.001
+assert DP[2,2] == 62 & DP[2,3] == 61 & DP[2,1] == 66
+di "PASS nwsaom describe with structural values"
+
 * ---- errors and gates
 nwclear
 nwset, mat(V3w1) directed name(g1) nooutput
@@ -347,15 +407,9 @@ assert _rc == 198
 * not yet supported together with structural values
 capture nwsaom, waves(g1 g2 g3) outdegree reciprocity ml k3(20)
 assert _rc == 198
-capture nwsaom describe, waves(g1 g2 g3)
-assert _rc == 198
 * a fit runs; its postestimation commands that do not know the codes yet refuse
 nwsaom, waves(g1 g2 g3) outdegree reciprocity transtrip k0(5) k3(30) seed(3)
 assert e(b)[1,1] < .
-foreach sub in gof mems simulate importance score timetest {
-	capture estat `sub'
-	assert _rc == 198
-}
 capture nwsaom_ml
 assert _rc == 198
 capture nwsaom bayes

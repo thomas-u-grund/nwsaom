@@ -137,6 +137,9 @@ program define nwsaom_estat, rclass
 	if `"`e(cmd)'"' == "nwsaom" {
 		mata: st_numscalar("__nwsaom_sflast", SaomStructLastOn())
 		if scalar(__nwsaom_sflast) == 1 {
+			mata: SaomStructRestoreLast()
+		}
+		if scalar(__nwsaom_sflast) == 1 & !inlist("`subcmd'", "gof", "mems", "simulate", "importance", "score", "timetest") {
 			di as err "estat `subcmd' is not yet available after a fit with structural zeros or ones (the codes 10 and 11 in the wave networks)."
 			exit 198
 		}
@@ -374,7 +377,7 @@ program define nwsaom_estat_gof, rclass
 		// clobbered with a to_dense() 6x6 matrix by exactly this
 		// mechanism). Explicit, namespaced Mata names side-step the
 		// entire Stata-tempname-recycling risk.
-		mata: __nwsaom_gof_densemat = __nwsaom_last_G`__pdend'.to_dense()
+		mata: __nwsaom_gof_densemat = SaomStructObsDense(__nwsaom_last_G`__pdend', `__pd')
 		foreach __gof_s of local stats {
 			if "`__gof_s'" == "outdegree" {
 				mata: __nwsaom_gof_thisval = saom_gof_degdist(__nwsaom_gof_densemat, `maxdeg')
@@ -447,6 +450,7 @@ program define nwsaom_estat_gof, rclass
 		forvalues __pd = 1/`nperiods' {
 			mata: __nwsaom_gof_Gwork = SaomGraph()
 			mata: SaomCopyGraph(__nwsaom_last_G`__pd', __nwsaom_gof_Gwork)
+			mata: SaomStructPeriodSet(`__pd')
 			if `__gof_coev' {
 				// N-wave extension: seed THIS period's own simulation from
 				// THIS period's own starting wave
@@ -1115,6 +1119,7 @@ program define nwsaom_estat_mems, rclass
 			mata: __nwsaom_mems_theta_s[1,`__mems_effpos'] = __nwsaom_mems_theta_s[1,`__mems_effpos'] * (`__mems_ival')
 			mata: __nwsaom_mems_Gwork = SaomGraph()
 			mata: SaomCopyGraph(__nwsaom_last_G1, __nwsaom_mems_Gwork)
+			mata: SaomStructPeriodSet(1)
 			// the fitted model (endowment/creation, structural(),
 			// ratecov(), present()), native when the plugin covers it
 			// (2026-10-01; before, the plain model)
