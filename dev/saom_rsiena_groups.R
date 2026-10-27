@@ -69,7 +69,7 @@ if (feat == 'balsim') { eff <- includeEffects(eff, balance); eff <- includeEffec
 if (feat %in% c('unequal', 'comp', 'miss')) { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, altX, interaction1 = "alc") }
 if (feat == 'tvcov') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, altX, simX, interaction1 = "alc") }
 if (feat == 'ratecov') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, interaction1 = "alc"); eff <- includeEffects(eff, RateX, interaction1 = "alc", type = "rate") }
-if (feat == 'inter') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, altX, interaction1 = "alc"); eff <- includeInteraction(eff, egoX, recip, interaction1 = c("alc", "")) }
+if (feat == 'inter') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, interaction1 = "alc"); eff <- includeInteraction(eff, egoX, recip, interaction1 = c("alc", "")) }
 if (feat == 'dyad') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, X, interaction1 = "D"); }
 res <- NULL
 for (s in 1:nseed) {

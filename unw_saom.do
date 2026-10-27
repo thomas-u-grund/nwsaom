@@ -4821,7 +4821,7 @@ real rowvector change_saom_egoxaltx(class SaomGraph scalar G, real scalar i, rea
 	return(G.has_edge(i,j) ? -d : d)
 }
 real matrix SaomDyadPrep(real matrix X, real scalar center, real scalar m) {
-	real matrix W, ok
+	real matrix W, ok, Wg, okg
 	real scalar n, i
 
 	n = rows(X)
@@ -4831,6 +4831,22 @@ real matrix SaomDyadPrep(real matrix X, real scalar center, real scalar m) {
 	W = editmissing(X, 0)
 	for (i=1; i<=n; i++) W[i,i] = 0
 	// (a missing cell stays missing under :* 0 in Mata, hence editmissing() first)
+	if (center & SaomGroupsMode()) {
+		// several groups (RSiena): a dyadic covariate is centred by the mean of its non-missing off-diagonal cells WITHIN each group
+		real colvector code, idx
+		real scalar h, mh
+		code = SaomGroupsId()
+		if (rows(code) == n) {
+			Wg = J(n, n, 0)
+			for (h=1; h<=max(code); h++) {
+				idx = selectindex(code :== h)
+				okg = ok[idx, idx]
+				mh = (sum(okg) > 0 ? sum(select(vec(X[idx, idx]), vec(okg))) / sum(okg) : 0)
+				Wg[idx, idx] = (W[idx, idx] :- mh) :* okg
+			}
+			return(Wg)
+		}
+	}
 	if (center) W = (W :- m) :* ok
 	else W = W :* ok
 	return(W)

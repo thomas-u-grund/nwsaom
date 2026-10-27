@@ -1113,7 +1113,7 @@ program nwsaom, eclass
 	local __ns_gW = 0
 	if `__ns_isgrp' {
 		local __ns_gbad ""
-		foreach __o in behavior joinat leaveat missbeh structural behratecov behrate symmetric symtype inpopc outpopc outactc inactc degplus degplusc avdeg transtriads dyadcov dyadcovrecip tvdyadcov tvdyadcovrecip tvdyadx dyadx ownx netx netbeh ml interact {
+		foreach __o in behavior joinat leaveat missbeh structural behratecov behrate symmetric symtype inpopc outpopc outactc inactc degplus degplusc avdeg transtriads tvdyadcov tvdyadcovrecip tvdyadx dyadx ownx netx netbeh ml {
 			if `"``__o''"' != "" local __ns_gbad "`__ns_gbad' `__o'"
 		}
 		_nwsaom_groups build, groups(`groups') nodes(`nodes') nwaves(`__nwsaom_nwaves') multi(`__ns_multi') tm(`__nwsaom_tm') coev(`__nwsaom_coev') haspres(`__ns_haspresent') hasmissnet(`__ns_hasmissnet') gwaves(`gwaves') bad(`__ns_gbad') tvcov(`"`tvcov'"')
