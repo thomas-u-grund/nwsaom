@@ -75,7 +75,7 @@ mk <- function(gi) {
   arr <- array(unlist(lapply(ws, function(w) waves[[w]][i, i])), dim = c(length(i), length(i), length(ws)))
   if (feat == 'miss') for (k in seq_along(ws)) { m <- miss[[ws[k]]][i, i]; a <- arr[, , k]; a[m == 1] <- NA; arr[, , k] <- a }
   net <- sienaDependent(arr, allowOnly = FALSE)
-  if (feat %in% c('coev', 'coevq', 'coevsim', 'coevcomp', 'coevmiss', 'coevmiss0', 'coevrate')) alc <- sienaDependent({ bb <- s50b[i, ws, drop = FALSE]; bb[bmiss[i, ws, drop = FALSE] == 1] <- NA; bb }, type = 'behavior', allowOnly = FALSE)
+  if (feat %in% c('coev', 'coevq', 'coevsim', 'coevcomp', 'coevmiss', 'coevmiss0', 'coevrate', 'coevbr')) alc <- sienaDependent({ bb <- s50b[i, ws, drop = FALSE]; bb[bmiss[i, ws, drop = FALSE] == 1] <- NA; bb }, type = 'behavior', allowOnly = FALSE)
   else if (feat == 'tvcov') alc <- varCovar(as.matrix(s50a[i, ws]))
   else alc <- coCovar(s50a[i, 1], centered = (feat != 'unequal'))
   if (feat == 'dyad') { D <- coDyadCovar(D0[i, i]); return(sienaDataCreate(net, alc, D)) }
@@ -105,6 +105,7 @@ if (feat %in% c('coevq', 'coevmiss0')) { eff <- includeEffects(eff, transTrip); 
 if (feat == 'coevsim') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, avSim, name = 'alc', interaction1 = 'net'); eff <- includeEffects(eff, simX, interaction1 = 'alc') }
 if (feat == 'coevrate') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, avAlt, name = 'alc', interaction1 = 'net'); eff <- includeEffects(eff, RateX, name = 'alc', interaction1 = 'ccv', type = 'rate') }
 if (feat %in% c('coev', 'coevcomp', 'coevmiss')) { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, altX, interaction1 = 'alc'); eff <- includeEffects(eff, avAlt, name = 'alc', interaction1 = 'net') }
+if (feat == 'coevbr') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, avAlt, name = 'alc', interaction1 = 'net'); eff <- includeEffects(eff, outRate, avExposure, name = 'alc', interaction1 = 'net', type = 'rate') }   # rate effects of the behavior (behrate()); needs a small first gain
 if (feat == 'dyad') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, X, interaction1 = "D"); }
 if (feat == 'timed') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, altX, interaction1 = "alc") }
 if (feat == 'degc') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, inPop.c, outAct.c) }            # centred degree effects: the average degree is a property of the group
@@ -112,7 +113,7 @@ if (feat == 'sequiv') { eff <- includeEffects(eff, transTrip); eff <- includeEff
 if (feat == 'ownass') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, outInAss); eff <- setEffect(eff, outInAss, parameter = 2) }
 res <- NULL; ttres <- NULL; sres <- NULL
 for (s in 1:nseed) {
-  alg <- sienaAlgorithmCreate(projname = NULL, cond = cond, seed = s, n3 = 2000, nsub = 4)
+  alg <- sienaAlgorithmCreate(projname = NULL, cond = cond, seed = s, n3 = 2000, nsub = 4, firstg = if (feat == 'coevbr') 0.1 else 0.2)
   a <- siena07(alg, data = gd, effects = eff, batch = TRUE, verbose = FALSE, silent = TRUE, returnDeps = FALSE)
   ef <- a$effects[a$effects$include, ]
   th <- data.frame(seed = s, name = ef$effectName, theta = a$theta, se = sqrt(diag(a$covtheta)))

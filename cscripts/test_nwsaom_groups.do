@@ -736,6 +736,27 @@ capture nwsaom, waves(g1 g2 g3) outdegree gwaves(1: 1 2 3) k3(20)
 assert _rc == 198
 display "PASS: gwaves() without groups() stops"
 
+* ---- coevbr: a rate effect of the behavior that depends on the network (behrate())
+nwclear
+use "__groups_base.dta", clear
+forvalues w = 1/3 {
+	nwset, mat(Gbase`w') name(g`w') nooutput
+}
+frame create ref
+frame ref: import delimited "dev/saom_rsiena_groups_coevbr_cond0.csv", clear
+__gfit, opts(outdegree reciprocity transtrip behavior(alc1 alc2 alc3) linear quadratic avalt behrate(outrate avexposure) firstg(0.1)) uncond
+__gchk outdegree "outdegree (density)" 0.12 0
+__gchk reciprocity "reciprocity" 0.12 0
+__gchk transtrip "transitive triplets" 0.12 0
+__gchk beh_avalt "alc average alter" 0.12 0
+__gchk brc_outrate "outdegree effect on rate alc" 0.12 0
+__gchk brc_avexposure "average exposure effect on rate alc" 0.15 0
+__gchk period1 "constant net rate (period 1)" 0.1 0.08
+__gchk bperiod1 "rate alc (period 1)" 0.1 0.08
+__gchk bperiod5 "rate alc (period 5)" 0.1 0.08
+frame drop ref
+display "PASS: behrate() with groups agrees with RSiena"
+
 * ---- constants that RSiena keeps per group: the average degree (centred degree effects), the structmean (structural equivalence), the average degrees of ownx() effects
 foreach f in degc sequiv ownass {
 	nwclear
