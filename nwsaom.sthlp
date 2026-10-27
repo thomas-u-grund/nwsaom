@@ -462,12 +462,13 @@ parameter whose t-ratio is 0.1 or more in absolute value; the full information i
 {title:Describing the data before a fit: nwsaom describe}
 
 {p 8 17 2}
-{cmd:nwsaom describe,} {opt waves(namelist)} [{opt beh:avior(varlist)}]
+{cmd:nwsaom describe,} {opt waves(namelist)} [{opt beh:avior(varlist)} {opt actormode(#)}]
 
 {p 4 4 2}
 Prints what RSiena prints before an estimation: for every wave the number of ties, the density and the average degree; for every period the numbers of ties kept, created and dissolved, the Jaccard index and the Hamming distance; and, with {opt behavior()}, the mean of the behavior in every wave and the numbers of actors whose behavior goes up, down or stays the same.
 A period with a Jaccard index below about 0.3 has few stable ties and carries little information about the change process.
-Results are in {cmd:r(periods)}, {cmd:r(waves)} and {cmd:r(behchange)}.
+For a two-mode network the ties are the attendances (cells of the actors-by-events matrix), the density is taken over those cells and the average degree is the mean number of events per actor; {opt actormode(#)} names the mode of the actors (default 2, as in {cmd:nwsaom}).
+Results are in {cmd:r(periods)}, {cmd:r(waves)}, {cmd:r(behchange)} and, for a two-mode network, {cmd:r(n_actors)} and {cmd:r(n_events)}.
 
 {marker meta}{...}
 {title:Several groups: nwsaom meta}

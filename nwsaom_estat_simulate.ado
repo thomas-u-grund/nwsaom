@@ -32,10 +32,8 @@ program define nwsaom_estat_simulate, rclass
 		di as err "last nwsaom estimates not found"
 		exit 301
 	}
-	if "`e(twomode)'" == "1" {
-		di as err "estat simulate is not yet available after a two-mode (bipartite) fit."
-		exit 198
-	}
+	// a two-mode fit is simulated on its embedding (actors choose among events; every other dyad is structurally zero)
+	local tm = ("`e(twomode)'" == "1")
 	capture mata: __nwsaom_last_M.nparam()
 	if _rc {
 		di as err "no fitted nwsaom model available for simulation - re-run nwsaom before estat simulate."
@@ -60,8 +58,8 @@ program define nwsaom_estat_simulate, rclass
 			di as err "theta(): matrix `theta' not found."
 			exit 111
 		}
-		if colsof(`theta') != colsof(`bmat') {
-			di as err "theta() must be a row vector with " colsof(`bmat') " coefficient(s), in the order of e(b)."
+		if colsof(`theta') != colsof(`bmat') | rowsof(`theta') != 1 {
+			di as err "theta() must be a row vector with " colsof(`bmat') " coefficient(s), in the order of e(b) (a 1 x " colsof(`bmat') " matrix, not a network or covariate matrix; matrix `theta' is " rowsof(`theta') " x " colsof(`theta') ")."
 			exit 198
 		}
 		matrix `bmat' = `theta'
@@ -149,6 +147,7 @@ program define nwsaom_estat_simulate, rclass
 		local pe = `pd' + 1
 		mata: st_matrix("__nwsaom_sim_row", SaomSimSummary(__nwsaom_last_G`pe'.to_dense(), `pd', `=cond(`coev', "mean(*__nwsaom_last_Behwaves[`pe'])", ".")'))
 		forvalues c = 1/6 {
+			if `tm' & inlist(`c', 4, 5) continue
 			matrix `obs'[`pd', `c'] = __nwsaom_sim_row[1, `c']
 		}
 	}
@@ -171,12 +170,20 @@ program define nwsaom_estat_simulate, rclass
 				mata: st_matrix("__nwsaom_sim_row", (`s', `pd', SaomSimSummary(__nwsaom_sim_G.to_dense(), `pd', .)[3..6]))
 			}
 			forvalues c = 1/6 {
+				if `tm' & inlist(`c', 4, 5) continue
 				matrix `sim'[`row', `c'] = __nwsaom_sim_row[1, `c']
 			}
 			if "`generate'" != "" {
+				if `tm' {
+					// the actors x events matrix, as a two-mode network (the rows are the actors, the columns the events, each in the order of the nodes)
+					mata: st_matrix("__nwsaom_sim_mat", __nwsaom_sim_G.to_dense()[selectindex(__nwsaom_tm_isactor), selectindex(1 :- __nwsaom_tm_isactor)])
+					nwset, mat(__nwsaom_sim_mat) bipartite name(`generate'_`s'_p`pd') nooutput
+				}
+				else {
 				mata: st_matrix("__nwsaom_sim_mat", __nwsaom_sim_G.to_dense())
 				if `symtype' != 0 nwset, mat(__nwsaom_sim_mat) undirected name(`generate'_`s'_p`pd') nooutput
 				else nwset, mat(__nwsaom_sim_mat) directed name(`generate'_`s'_p`pd') nooutput
+				}
 				if `coev' {
 					capture drop `generate'_`s'_p`pd'
 					quietly generate double `generate'_`s'_p`pd' = .
@@ -192,12 +199,15 @@ program define nwsaom_estat_simulate, rclass
 	matrix colnames `obs' = sim period ties mutual transitive behmean
 	di as txt "Simulation from the fitted model: " as res `nsim' as txt " replication(s) of " as res `nperiods' as txt " period(s)."
 	di as txt "Mean over replications (observed end wave in brackets):"
-	di as txt %-8s "period" %12s "ties" %12s "mutual" %14s "transitive" %12s "behavior"
+	if `tm' di as txt "(two-mode network: " e(n_actors) " actors x " e(n_events) " events; ties are attendances)"
+	if `tm' di as txt %-8s "period" %12s "ties" %12s "behavior"
+	else di as txt %-8s "period" %12s "ties" %12s "mutual" %14s "transitive" %12s "behavior"
 	forvalues pd = 1/`nperiods' {
 		mata: st_numscalar("__nwsaom_sim_m3", mean(select(st_matrix("`sim'")[., 3], st_matrix("`sim'")[., 2] :== `pd')))
 		mata: st_numscalar("__nwsaom_sim_m4", mean(select(st_matrix("`sim'")[., 4], st_matrix("`sim'")[., 2] :== `pd')))
 		mata: st_numscalar("__nwsaom_sim_m5", mean(select(st_matrix("`sim'")[., 5], st_matrix("`sim'")[., 2] :== `pd')))
-		di as res %-8.0f `pd' %8.1f __nwsaom_sim_m3 as txt " (" as res %4.0f `obs'[`pd', 3] as txt ")" ///
+		if `tm' di as res %-8.0f `pd' %8.1f __nwsaom_sim_m3 as txt " (" as res %4.0f `obs'[`pd', 3] as txt ")" _continue
+		else di as res %-8.0f `pd' %8.1f __nwsaom_sim_m3 as txt " (" as res %4.0f `obs'[`pd', 3] as txt ")" ///
 			as res %8.1f __nwsaom_sim_m4 as txt " (" as res %4.0f `obs'[`pd', 4] as txt ")" ///
 			as res %10.1f __nwsaom_sim_m5 as txt " (" as res %4.0f `obs'[`pd', 5] as txt ")" _continue
 		if `coev' {

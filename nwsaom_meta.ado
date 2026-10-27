@@ -40,12 +40,16 @@ program nwsaom_meta, rclass
 		if "`rates'" != "" {
 			capture confirm matrix e(rates)
 			if !_rc {
-				tempname rt
+				tempname rt rts
 				matrix `rt' = e(rates)
+				// the standard errors of the rates are in e(rates_se) (not a second row of e(rates)); missing when not available
+				capture confirm matrix e(rates_se)
+				if !_rc matrix `rts' = e(rates_se)
+				else matrix `rts' = J(1, colsof(`rt'), .)
 				local np = colsof(`rt')
 				forvalues j = 1/`np' {
 					matrix `b' = `b', `rt'[1, `j']
-					matrix `SE' = `SE', `rt'[2, `j']
+					matrix `SE' = `SE', `rts'[1, `j']
 					local cn "`cn' rate_period`j'"
 				}
 				local nb = colsof(`b')
@@ -75,6 +79,11 @@ program nwsaom_meta, rclass
 		local rn "`rn' `c'"
 	}
 	matrix rownames `M' = `rn'
+	// the group results carry the names of the stored estimates (rows) and of the effects (columns)
+	matrix rownames `B' = `namelist'
+	matrix rownames `R' = `namelist'
+	matrix colnames `B' = `rn'
+	matrix colnames `R' = `rn'
 	matrix colnames `M' = n_used corr corr_p iwls_mean iwls_se iwls_t iwls_p iwls_sd Tsq Tsq_p Q Q_p ml_mean ml_se mu_lo mu_hi ml_sd sd_lo sd_hi fisher_right fisher_right_p fisher_left fisher_left_p level
 	if "`notable'" == "" {
 		di

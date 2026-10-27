@@ -19,7 +19,7 @@ capture program drop nwsaom_describe
 program define nwsaom_describe, rclass
 	version 14
 	_nwsaom_libcheck
-	syntax , WAVES(string) [ BEHavior(string) ]
+	syntax , WAVES(string) [ BEHavior(string) ACTORMODE(integer 2) ]
 	local nw : word count `waves'
 	if `nw' < 2 {
 		di as err "waves() needs at least two networks."
@@ -27,6 +27,7 @@ program define nwsaom_describe, rclass
 	}
 	tempname P W
 	local n0 = .
+	local ntm 0
 	matrix `P' = J(`=`nw'-1', 6, .)
 	matrix `W' = J(`nw', 3, .)
 	forvalues w = 1/`nw' {
@@ -35,6 +36,7 @@ program define nwsaom_describe, rclass
 		local nodes`w' = `nodes'
 		local dir`w' = ("`directed'" == "true")
 		local obj`w' `netobj'
+		if "`is2mode'" == "true" local ++ntm
 		if `w' == 1 local n0 = `nodes'
 		if `nodes' != `n0' {
 			di as err "all waves need the same number of nodes."
@@ -45,23 +47,58 @@ program define nwsaom_describe, rclass
 			exit 198
 		}
 	}
-	local div = cond(`dir1', 1, 2)
+	// a two-mode network: the ties are the cells of the actors x events matrix (as nwsaom models them), not the cells within a mode
+	local tm 0
+	tempname ISA
+	if `ntm' > 0 {
+		if `ntm' < `nw' {
+			di as err "the waves mix two-mode and one-mode networks."
+			exit 198
+		}
+		if !inlist(`actormode', 1, 2) {
+			di as err "actormode() must be 1 or 2 (the mode whose nodes are the actors)."
+			exit 198
+		}
+		local tm 1
+		mata: `ISA' = (`obj1'->get_modes() :== "`actormode'")
+		mata: st_local("na", strofreal(sum(`ISA')))
+		local ne = `n0' - `na'
+		if `na' == 0 | `ne' == 0 {
+			capture mata: mata drop `ISA'
+			di as err "the two-mode network needs nodes in both modes."
+			exit 198
+		}
+	}
+	local div = cond(`tm', 1, cond(`dir1', 1, 2))
 	tempname MA MB
 	forvalues w = 1/`nw' {
 		mata: `MA' = (*`obj`w''->get_matrix_mod(0, `dir1')) :!= 0
-		mata: _diag(`MA', 0)
+		if `tm' mata: `MA' = `MA'[selectindex(`ISA'), selectindex(1 :- `ISA')]
+		else mata: _diag(`MA', 0)
 		mata: st_numscalar("__nwsd_ties", sum(`MA') / `div')
 		local ties = scalar(__nwsd_ties)
 		matrix `W'[`w', 1] = `ties'
-		matrix `W'[`w', 2] = `ties' / (`n0' * (`n0' - 1) / `div')
-		matrix `W'[`w', 3] = `ties' * `div' / `n0'
+		if `tm' {
+			matrix `W'[`w', 2] = `ties' / (`na' * `ne')
+			matrix `W'[`w', 3] = `ties' / `na'
+		}
+		else {
+			matrix `W'[`w', 2] = `ties' / (`n0' * (`n0' - 1) / `div')
+			matrix `W'[`w', 3] = `ties' * `div' / `n0'
+		}
 	}
 	forvalues w = 1/`=`nw'-1' {
 		local w2 = `w' + 1
 		mata: `MA' = (*`obj`w''->get_matrix_mod(0, `dir1')) :!= 0
 		mata: `MB' = (*`obj`w2''->get_matrix_mod(0, `dir1')) :!= 0
-		mata: _diag(`MA', 0)
-		mata: _diag(`MB', 0)
+		if `tm' {
+			mata: `MA' = `MA'[selectindex(`ISA'), selectindex(1 :- `ISA')]
+			mata: `MB' = `MB'[selectindex(`ISA'), selectindex(1 :- `ISA')]
+		}
+		else {
+			mata: _diag(`MA', 0)
+			mata: _diag(`MB', 0)
+		}
 		mata: st_numscalar("__nwsd_k", sum(`MA' :& `MB') / `div')
 		mata: st_numscalar("__nwsd_c", sum(!`MA' :& `MB') / `div')
 		mata: st_numscalar("__nwsd_d", sum(`MA' :& !`MB') / `div')
@@ -75,9 +112,10 @@ program define nwsaom_describe, rclass
 		matrix `P'[`w', 5] = `cre' + `dis'
 		matrix `P'[`w', 6] = cond(`kept' + `dis' > 0, `kept' / (`kept' + `dis'), .)
 	}
-	capture mata: mata drop `MA' `MB'
+	capture mata: mata drop `MA' `MB' `ISA'
 	di
-	di as txt "Network data: " as res `nw' as txt " waves, " as res `n0' as txt " actors, " as res cond(`dir1', "directed", "undirected")
+	if `tm' di as txt "Network data: " as res `nw' as txt " waves, two-mode network, " as res `na' as txt " actors (mode `actormode') x " as res `ne' as txt " events; ties are attendances (actor-event cells), density is over the " as res `na' * `ne' as txt " cells"
+	else di as txt "Network data: " as res `nw' as txt " waves, " as res `n0' as txt " actors, " as res cond(`dir1', "directed", "undirected")
 	di as txt "{hline 58}"
 	di as txt %-8s "wave" %10s "ties" %12s "density" %14s "avg. degree"
 	forvalues w = 1/`nw' {
@@ -94,6 +132,11 @@ program define nwsaom_describe, rclass
 	matrix colnames `W' = ties density avgdegree
 	return matrix periods = `P'
 	return matrix waves = `W'
+	return scalar twomode = `tm'
+	if `tm' {
+		return scalar n_actors = `na'
+		return scalar n_events = `ne'
+	}
 	if "`behavior'" != "" {
 		local nb : word count `behavior'
 		if `nb' != `nw' {
