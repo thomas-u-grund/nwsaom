@@ -190,6 +190,11 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
+#if defined(_MSC_VER)
+#define SAOM_FORCEINLINE static __forceinline
+#else
+#define SAOM_FORCEINLINE static inline __attribute__((always_inline))
+#endif
 #if defined(_MSC_VER) && !defined(__thread)
 #define __thread __declspec(thread)
 #endif
@@ -4584,7 +4589,7 @@ static const long *saom_alt_list(const model_t *M, long n, long actor, const dou
    `presentArr'): chg[k*(n+1)+j] receives term k's change statistic, u[j] the utility (sum over k of theta[k]*chg,
    accumulated in term order), and the maximum utility (including "stay" = 0) is returned.  Entries of chg and u for nodes
    outside the list are not touched (callers never read them). */
-static inline __attribute__((always_inline)) double eval_core(const model_t *M, const simparams_t *P, graph_t *g,
+SAOM_FORCEINLINE double eval_core(const model_t *M, const simparams_t *P, graph_t *g,
 	double **attrs, long actor, const long *fl, long nfl, const int lst, double *tt_arr, double *c3_arr,
 	double *chg, double *u, unsigned char *ijx) {
 
