@@ -138,7 +138,7 @@ program nwsaom, eclass
 		RATECOV(string) RATECOVCOEF(string) BEHRATECOV(string) BEHRATE(string) BEHRATECOEF(string) SYMMETRIC SYMTYPE(string) ///
 		RATE0(numlist >0) THETA0(string) FIX(string) K0(integer 50) K3(integer 1000) ///
 		FIRSTG(real 0.2) SEED(integer -1) CORES(integer 0) UNCONDitional NOCENTER ///
-		ENDOW(string) CREATION(string) ACTORMODE(integer 0) TVCOV(string) DETail GROUPS(string) ]
+		ENDOW(string) CREATION(string) ACTORMODE(integer 0) TVCOV(string) DETail GROUPS(string) GWAVES(string) ]
 	set more off
 	mata: SaomRatesReset()
 
@@ -1113,13 +1113,14 @@ program nwsaom, eclass
 	local __ns_gW = 0
 	if `__ns_isgrp' {
 		local __ns_gbad ""
-		foreach __o in behavior tvcov present joinat leaveat missnet missbeh structural ratecov behratecov behrate symmetric symtype balance simcov simx simrecipx dyadcov dyadcovrecip tvdyadcov tvdyadcovrecip tvdyadx dyadx ownx netx netbeh ml interact {
+		foreach __o in behavior joinat leaveat missbeh structural behratecov behrate symmetric symtype inpopc outpopc outactc inactc degplus degplusc avdeg transtriads dyadcov dyadcovrecip tvdyadcov tvdyadcovrecip tvdyadx dyadx ownx netx netbeh ml interact {
 			if `"``__o''"' != "" local __ns_gbad "`__ns_gbad' `__o'"
 		}
-		_nwsaom_groups build, groups(`groups') nodes(`nodes') nwaves(`__nwsaom_nwaves') multi(`__ns_multi') tm(`__nwsaom_tm') coev(`__nwsaom_coev') bad(`__ns_gbad')
+		_nwsaom_groups build, groups(`groups') nodes(`nodes') nwaves(`__nwsaom_nwaves') multi(`__ns_multi') tm(`__nwsaom_tm') coev(`__nwsaom_coev') haspres(`__ns_haspresent') hasmissnet(`__ns_hasmissnet') gwaves(`gwaves') bad(`__ns_gbad') tvcov(`"`tvcov'"')
 		local __ns_gW = `__nwsaom_nwaves'
 		local __nwsaom_nwaves = r(nwaves)
 		local __ns_gpn "`r(pnames)'"
+		if `"`tvcov'"' != "" local tvcov `"`r(tvcov)'"'
 		local __ns_haspresent = 1
 	}
 	capture mata: mata drop __nwsaom_compstart __nwsaom_compev
@@ -1197,6 +1198,7 @@ program nwsaom, eclass
 	mata: __nwsaom_last_Gbases = (`__ns_baseptrlist')
 	// RSiena's balanceMean skips the missing network entries of every period-base wave
 	local __ns_balmean "saom_balance_mean(__nwsaom_last_Gbases)"
+	if `__ns_isgrp' local __ns_balmean "SaomGroupsBalMean()"
 	if `__ns_hasmissnet' {
 		local __ns_balmaskptrlist ""
 		forvalues __w = 1/`__ns_nbases' {

@@ -6579,8 +6579,10 @@ real scalar saom_balance_mean(pointer(class SaomGraph scalar) rowvector Gbases, 
 real rowvector stat_saom_balance(class SaomGraph scalar G, class SaomTermData scalar td){
 	real matrix ties
 	real scalar k, i, j, n, b0, D, tot
+	real colvector nact
 
 	n = G.n
+	nact = SaomGroupsNact()
 	b0 = td.decay
 	ties = G.all_ties()
 	tot = 0
@@ -6588,7 +6590,7 @@ real rowvector stat_saom_balance(class SaomGraph scalar G, class SaomTermData sc
 		i = ties[k,1]
 		j = ties[k,2]
 		D = (G.degree_out(i)-1) + (G.degree_out(j) - (G.has_edge(j,i)?1:0)) - 2*G.shared_partners_osp(i,j)
-		tot = tot + ((n-2)*b0 - D)
+		tot = tot + (((rows(nact) > 0 ? nact[i] : n)-2)*b0 - D)
 	}
 	return(tot)
 }
@@ -6706,8 +6708,11 @@ void SaomCheckCovarianceFinite(real matrix V) {
 
 real rowvector change_saom_balance(class SaomGraph scalar G, real scalar i, real scalar j, class SaomTermData scalar td){
 	real scalar n, b0, val
+	real colvector nact
 
 	n = G.n
+	nact = SaomGroupsNact()
+	if (rows(nact) > 0) n = nact[i]
 	b0 = td.decay
 	val = (n-2)*b0 - G.degree_out(j) ///
 		+ 2*G.shared_partners_osp(i,j) + 2*G.shared_partners_otp(i,j) ///
@@ -8173,6 +8178,7 @@ void SaomNetCtxInit(struct SaomNetCtx scalar C, pointer(class SaomGraph scalar) 
 	real scalar pd, ver
 	real matrix mdt
 
+	SaomGroupsRegister(M)
 	C.Gwaves = Gwaves
 	C.P = cols(Gwaves) - 1
 	C.n = (*Gwaves[1]).n
@@ -8201,7 +8207,7 @@ void SaomNetCtxInit(struct SaomNetCtx scalar C, pointer(class SaomGraph scalar) 
 	// RSiena (initializeFRAN()): conditional estimation is not used with
 	// composition change
 	if (C.cond) {
-		if (C.haspresent & !SaomGroupsMode()) if (min(C.npresentPd) < C.n) C.cond = 0
+		if (C.haspresent & (!SaomGroupsMode() | SaomGroupsHasPres())) if (min(C.npresentPd) < C.n) C.cond = 0
 		if (C.hastimed) C.cond = 0
 	}
 	C.ptot = C.p + (C.cond ? 0 : C.P) + C.hasratecov
@@ -8211,6 +8217,7 @@ void SaomNetCtxInit(struct SaomNetCtx scalar C, pointer(class SaomGraph scalar) 
 	C.targetRateCov = J(C.P, max((C.hasratecov, 1)), 0)
 	for (pd=1; pd<=C.P; pd++) {
 		if (C.hastv) SaomTVSync(M, pd)
+		SaomGroupsSync(M, pd)
 		if (C.hasmiss) {
 			C.target[pd,.] = SaomMaskedStatistic(*Gwaves[pd+1], M, *missMaskPd[pd])
 			C.targetRate[pd] = SaomCountDifferingMasked(*Gwaves[pd], *Gwaves[pd+1], *missMaskPd[pd])
@@ -8264,7 +8271,7 @@ void SaomNetCtxInit(struct SaomNetCtx scalar C, pointer(class SaomGraph scalar) 
 	// the threaded batch path: every model from protocol 11 on
 	C.use_batch = C.use_native & (!C.hastimed | ver >= 27) & (ver >= 5) & ((!C.hasratecov & C.symtype == 0 & !C.hasnetgate & !C.hasstructural) | ver >= 11)
 	if (SaomGroupsMode()) {
-		if (!C.use_batch | ver < 141) {
+		if (!C.use_batch | ver < 142) {
 			errprintf("nwsaom: groups() needs the native plugin of this release (update nwsaom: net install ... replace); there is no Mata implementation.\n")
 			exit(198)
 		}
@@ -9011,17 +9018,19 @@ real scalar SaomCondRequested(){
 }
 
 /* ===================================================================
-   Joint estimation of several groups (RSiena's sienaGroupCreate() + siena07()), network-only method of moments.
+   Joint estimation of several groups (RSiena's sienaGroupCreate() + siena07()).
 
    The actors of all groups are stacked (actor i of the data set belongs to group grp[i]); a wave network is block-diagonal.
-   Every group has the same number of waves W, so P = W - 1 periods. The groups are glued one after the other: the
-   estimator sees ONE chain of G*(W-1)+1 "virtual waves" whose period (g-1)*(W-1)+m is period m of group g. At virtual wave
-   k the block of group h holds its wave c_h(k) = min(max(k - s_h, 1), W), s_h = (h-1)*(W-1): groups that have not started
-   are at their first wave, groups that are finished stay at their last wave. In period pd only the actors of the group of
-   pd act (presence matrix) and the alternatives of an actor are the other actors of its group (plugin protocol 141), so the
-   other blocks are carried unchanged and cancel from the deviation of every statistic. The effects are shared by all
-   periods (statistics summed over all periods of all groups, as in RSiena), each period has its own rate, so the rates are
-   group-specific. The switch from the last wave of a group to the first wave of the next one is not a period.
+   Group h has nW_h waves (any number >= 2, picked from the waves() list: row h of the matrix wl), so nW_h - 1 periods. The groups are
+   glued one after the other: the estimator sees ONE chain of sum(nW_h - 1) + 1 "virtual waves" whose periods are the periods of group 1, then
+   of group 2, ... At virtual wave k the block of group h holds its wave c_h(k) = min(max(k - s_h, 1), nW_h), s_h = sum of the periods of the groups
+   before h: groups that have not started are at their first wave, finished groups stay at their last wave. In period pd only the actors of the
+   group of pd act (presence matrix) and the alternatives of an actor are the other actors of its group (plugin), so the other blocks are
+   carried unchanged and cancel from the deviation of every statistic. The effects are shared by all periods (statistics summed over all periods
+   of all groups, as in RSiena), each period has its own rate, so the rates are group-specific. The switch from the last wave of a group to the
+   first wave of the next one is not a period. Constants that RSiena keeps per group (similarity mean of a covariate, balance mean, the mean
+   of the behavior ...) are registered per term (SaomGroupsRegister()) and take the value of the group of the period (SaomGroupsSync() for
+   the targets in Mata, a per-period parameter table for the plugin).
    =================================================================== */
 real scalar SaomGroupsMode() {
 	pointer(real scalar) scalar p
@@ -9033,9 +9042,15 @@ real scalar SaomGroupsMode() {
 void SaomGroupsReset() {
 	rmexternal("__nwsaom_groupmode")
 	rmexternal("__nwsaom_groupid")
+	rmexternal("__nwsaom_groupw")
+	rmexternal("__nwsaom_groupbal")
+	rmexternal("__nwsaom_grouppres")
+	rmexternal("__nwsaom_gcreg")
+	rmexternal("__nwsaom_gcval")
+	rmexternal("__nwsaom_gbehmean")
 }
 
-/* the group codes of the actors (n x 1, the values 1..G in the order of the sorted group variable) or the externals' removal */
+/* the group codes of the actors (n x 1, the values 1..G in the order of the sorted group variable) or 0 x 1 */
 real colvector SaomGroupsId() {
 	pointer(real colvector) scalar p
 	p = findexternal("__nwsaom_groupid")
@@ -9043,14 +9058,176 @@ real colvector SaomGroupsId() {
 	return(*p)
 }
 
-/* checks the groups against the wave networks (no tie between two groups, every group has at least two actors), stores the group
-   codes and the mode flag; returns G. Errors with a message. */
-real scalar SaomGroupsSet(pointer(class SaomGraph scalar) rowvector Gw, real colvector grp) {
-	real colvector lv, code
+/* G x Wmax matrix: the waves (indices into waves()) of each group, 0-padded */
+real matrix SaomGroupsWL() {
+	pointer(real matrix) scalar p
+	p = findexternal("__nwsaom_groupw")
+	if (p == NULL) return(J(0, 0, 0))
+	return(*p)
+}
+
+/* waves of each group (G x 1) */
+real colvector SaomGroupsNW() {
+	real matrix wl
+	wl = SaomGroupsWL()
+	if (rows(wl) == 0) return(J(0, 1, 0))
+	return(rowsum(wl :> 0))
+}
+
+/* 1 x (total periods): group of each virtual period, and its period number within the group */
+real rowvector SaomGroupsPeriodGroup() {
+	real colvector nw
+	real rowvector out
+	real scalar h
+	nw = SaomGroupsNW()
+	out = J(1, 0, 0)
+	for (h=1; h<=rows(nw); h++) out = out, J(1, nw[h] - 1, h)
+	return(out)
+}
+real rowvector SaomGroupsPeriodIdx() {
+	real colvector nw
+	real rowvector out
+	real scalar h
+	nw = SaomGroupsNW()
+	out = J(1, 0, 0)
+	for (h=1; h<=rows(nw); h++) out = out, (1::(nw[h] - 1))'
+	return(out)
+}
+
+/* RSiena's period number of each virtual period (the switching steps are skipped): periods before + waves of the earlier groups */
+real rowvector SaomGroupsRSienaPeriod() {
+	real colvector nw
+	real rowvector out
+	real scalar h, off
+	nw = SaomGroupsNW()
+	out = J(1, 0, 0)
+	off = 0
+	for (h=1; h<=rows(nw); h++) {
+		out = out, (off :+ (1::(nw[h] - 1))')
+		off = off + nw[h]
+	}
+	return(out)
+}
+
+real rowvector SaomGroupsSizes() {
+	real colvector code
+	real scalar h
+	real rowvector out
+	code = SaomGroupsId()
+	out = J(1, max(code), 0)
+	for (h=1; h<=cols(out); h++) out[h] = sum(code :== h)
+	return(out)
+}
+
+/* number of actors of the group of each actor (n x 1); 0 x 1 without groups */
+real colvector SaomGroupsNact() {
+	real colvector code, out
+	real rowvector sz
+	if (!SaomGroupsMode()) return(J(0, 1, 0))
+	code = SaomGroupsId()
+	sz = SaomGroupsSizes()
+	out = sz[code]'
+	return(out)
+}
+
+/* 1 when the user gave present() (composition change): conditional estimation is then off, as in RSiena */
+real scalar SaomGroupsHasPres() {
+	pointer(real scalar) scalar p
+	p = findexternal("__nwsaom_grouppres")
+	if (p == NULL) return(0)
+	return(*p != 0)
+}
+
+/* RSiena's balanceMean of group 1 (the default value of the term before the per-period table takes over) */
+real scalar SaomGroupsBalMean() {
+	pointer(real rowvector) scalar p
+	p = findexternal("__nwsaom_groupbal")
+	if (p == NULL) return(0)
+	return((*p)[1])
+}
+
+/* gwaves("1: 1 2 3 | 2: 1 2"): the waves (indices into waves()) of the groups named by the value of the group variable; groups not named
+   have all waves. Returns the G x W matrix (rows in the order of the sorted group values), 0-padded. */
+real matrix SaomGroupsParseWaves(string scalar spec, real colvector grp, real scalar W) {
+	real colvector lv
+	real matrix wl
+	string rowvector parts, kv, ws
+	real scalar G, h, i, j, v, w
+	lv = uniqrows(grp)
+	G = rows(lv)
+	wl = J(G, W, 0)
+	for (h=1; h<=G; h++) wl[h, .] = 1..W
+	spec = strtrim(spec)
+	if (spec == "") return(wl)
+	parts = tokens(spec, "|")
+	for (i=1; i<=cols(parts); i++) {
+		if (parts[i] == "|") continue
+		kv = tokens(parts[i], ":")
+		if (cols(kv) != 3 | kv[2] != ":") {
+			errprintf("nwsaom: gwaves(): each group is given as value: wave numbers, e.g. gwaves(1: 1 2 3 | 2: 1 2).\n")
+			exit(198)
+		}
+		v = strtoreal(strtrim(kv[1]))
+		h = selectindex(lv :== v)
+		if (rows(h) == 0) {
+			errprintf("nwsaom: gwaves(): %s is not a value of the group variable.\n", strtrim(kv[1]))
+			exit(198)
+		}
+		ws = tokens(strtrim(kv[3]))
+		wl[h, .] = J(1, W, 0)
+		for (j=1; j<=cols(ws); j++) {
+			w = strtoreal(ws[j])
+			if (w >= . | w < 1 | w > W | w != trunc(w)) {
+				errprintf("nwsaom: gwaves(): wave numbers must be integers between 1 and %g.\n", W)
+				exit(198)
+			}
+			wl[h, j] = w
+		}
+	}
+	return(wl)
+}
+
+/* tvcov("a1 a2 a3 | s1 s2 s3") for the glued chain: every virtual period takes the variable of the START wave of its period in its group */
+string scalar SaomGroupsTvExpand(string scalar tv) {
+	string rowvector parts, vars
+	string scalar out, one
+	real matrix wl
+	real rowvector pg, pi
+	real scalar i, pd, P
+	wl = SaomGroupsWL()
+	pg = SaomGroupsPeriodGroup()
+	pi = SaomGroupsPeriodIdx()
+	P = cols(pg)
+	parts = tokens(tv, "|")
+	out = ""
+	for (i=1; i<=cols(parts); i++) {
+		if (parts[i] == "|") continue
+		vars = tokens(parts[i])
+		one = ""
+		for (pd=1; pd<=P; pd++) {
+			if (wl[pg[pd], pi[pd]] > cols(vars)) {
+				errprintf("nwsaom: tvcov() has too few variables for the waves of the groups.\n")
+				exit(198)
+			}
+			one = one + (pd > 1 ? " " : "") + vars[wl[pg[pd], pi[pd]]]
+		}
+		out = out + (out == "" ? "" : " | ") + one
+	}
+	return(out)
+}
+
+/* checks the groups against the wave networks (no tie between two groups in the waves a group uses, every group has at least 3 actors and
+   2 waves), stores group codes, waves per group, the balance mean of each group and the mode flag; returns G. wl: G rows (sorted group
+   value), the waves of the group (0-padded). Errors with a message. */
+real scalar SaomGroupsSet(pointer(class SaomGraph scalar) rowvector Gw, real colvector grp, real matrix wl, real scalar haspres) {
+	real colvector lv, code, nn
 	real matrix t
-	pointer(real scalar) scalar pm
+	pointer(real scalar) scalar pm, pp
 	pointer(real colvector) scalar pg
-	real scalar G, h, w, bad, n
+	pointer(real matrix) scalar pw
+	pointer(real rowvector) scalar pb
+	real rowvector bal
+	real scalar G, h, c, bad, n, tempra, temprb, ng, hh, w, nwh
 
 	n = rows(grp)
 	if (n != (*Gw[1]).n) {
@@ -9067,6 +9244,10 @@ real scalar SaomGroupsSet(pointer(class SaomGraph scalar) rowvector Gw, real col
 		errprintf("nwsaom: groups(): the group variable takes only one value; fit a single group without groups().\n")
 		exit(198)
 	}
+	if (rows(wl) != G) {
+		errprintf("nwsaom: groups(): internal error, wave table has %g rows for %g groups.\n", rows(wl), G)
+		exit(198)
+	}
 	code = J(n, 1, .)
 	for (h=1; h<=G; h++) code[selectindex(grp :== lv[h])] = J(sum(grp :== lv[h]), 1, h)
 	for (h=1; h<=G; h++) {
@@ -9074,67 +9255,222 @@ real scalar SaomGroupsSet(pointer(class SaomGraph scalar) rowvector Gw, real col
 			errprintf("nwsaom: groups(): group %g (value %g) has fewer than 3 actors.\n", h, lv[h])
 			exit(198)
 		}
-	}
-	for (w=1; w<=cols(Gw); w++) {
-		t = (*Gw[w]).all_ties()
-		if (rows(t) == 0) continue
-		bad = sum(code[t[., 1]] :!= code[t[., 2]])
-		if (bad > 0) {
-			errprintf("nwsaom: groups(): wave %g has %g tie(s) between actors of different groups; the networks of the waves must have no ties between groups (the groups are separate actor sets).\n", w, bad)
+		nwh = sum(wl[h, .] :> 0)
+		if (nwh < 2) {
+			errprintf("nwsaom: groups(): group %g (value %g) has fewer than 2 waves.\n", h, lv[h])
 			exit(198)
 		}
+		for (c=1; c<=nwh; c++) {
+			if (wl[h, c] < 1 | wl[h, c] > cols(Gw)) {
+				errprintf("nwsaom: groups(): wave %g of group %g is not in waves().\n", wl[h, c], h)
+				exit(198)
+			}
+			if (c > 1) if (wl[h, c] <= wl[h, c-1]) {
+				errprintf("nwsaom: gwaves(): the waves of group %g must be in increasing order.\n", h)
+				exit(198)
+			}
+			t = (*Gw[wl[h, c]]).all_ties()
+			if (rows(t) == 0) continue
+			bad = sum((code[t[., 1]] :== h) :& (code[t[., 2]] :!= h))
+			if (bad > 0) {
+				errprintf("nwsaom: groups(): wave %g has %g tie(s) from actors of group %g to actors of other groups; the networks of the waves must have no ties between groups (the groups are separate actor sets).\n", wl[h, c], bad, h)
+				exit(198)
+			}
+		}
 	}
-	rmexternal("__nwsaom_groupmode")
-	rmexternal("__nwsaom_groupid")
+	// RSiena's balanceMean, group by group (every group keeps its own, calcBalmean(): base waves of the group, the group's own n)
+	bal = J(1, G, 0)
+	nn = J(n, 1, 0)
+	for (h=1; h<=G; h++) {
+		ng = sum(code :== h)
+		tempra = 0
+		temprb = 0
+		nwh = sum(wl[h, .] :> 0)
+		for (c=1; c<nwh; c++) {
+			w = wl[h, c]
+			for (hh=1; hh<=n; hh++) {
+				if (code[hh] != h) continue
+				tempra = tempra + 2 * (*Gw[w]).degree_in(hh) * ((ng - 1) - (*Gw[w]).degree_in(hh))
+			}
+			temprb = temprb + ng * (ng - 1) * (ng - 2)
+		}
+		bal[h] = tempra / temprb
+	}
+	SaomGroupsReset()
 	pm = crexternal("__nwsaom_groupmode")
 	*pm = 1
 	pg = crexternal("__nwsaom_groupid")
 	*pg = code
+	pw = crexternal("__nwsaom_groupw")
+	*pw = wl
+	pb = crexternal("__nwsaom_groupbal")
+	*pb = bal
+	pp = crexternal("__nwsaom_grouppres")
+	*pp = haspres
 	return(G)
 }
 
-real rowvector SaomGroupsSizes() {
-	real colvector code
-	real scalar h
-	real rowvector out
-	code = SaomGroupsId()
-	out = J(1, max(code), 0)
-	for (h=1; h<=cols(out); h++) out[h] = sum(code :== h)
-	return(out)
-}
-
-/* virtual wave k (1..G*(W-1)+1) of the glued chain, see above */
+/* virtual wave k of the glued chain, see above: fills V (a fresh SaomGraph) */
 void SaomGroupsWave(pointer(class SaomGraph scalar) rowvector Gw, real scalar k, class SaomGraph scalar V) {
-	real colvector code
-	real matrix t
-	real scalar W, G, h, c, n, i
+	real colvector code, nw
+	real matrix t, wl
+	real scalar G, h, c, n, i, s
 	code = SaomGroupsId()
-	W = cols(Gw)
-	G = max(code)
+	wl = SaomGroupsWL()
+	nw = SaomGroupsNW()
+	G = rows(nw)
 	n = (*Gw[1]).n
 	V.init(n, (*Gw[1]).directed)
+	s = 0
 	for (h=1; h<=G; h++) {
-		c = min((max((k - (h-1)*(W-1), 1)), W))
-		t = (*Gw[c]).all_ties()
+		c = min((max((k - s, 1)), nw[h]))
+		s = s + nw[h] - 1
+		t = (*Gw[wl[h, c]]).all_ties()
 		if (rows(t) == 0) continue
 		t = select(t, code[t[., 1]] :== h)
 		for (i=1; i<=rows(t); i++) V.toggle(t[i, 1], t[i, 2])
 	}
 }
 
-/* n x (G*(W-1)+1) presence matrix of the virtual waves: group h is present at the waves of its own periods (the product of two
-   adjacent columns is the activity of a period) */
-real matrix SaomGroupsPresent(real scalar W) {
-	real colvector code
-	real matrix pm
-	real scalar G, h, Wv
+/* n x Wv presence matrix of the virtual waves: group h is present at the waves of its own periods (the product of two adjacent columns is
+   the activity of a period); pmo (n x W, presence at the original waves, 0 x 0 = everybody present) gives composition change inside a group */
+real matrix SaomGroupsPresent(real matrix pmo) {
+	real colvector code, nw
+	real matrix pm, wl
+	real scalar G, h, Wv, c, s, k
 	code = SaomGroupsId()
-	G = max(code)
-	Wv = G*(W-1) + 1
+	nw = SaomGroupsNW()
+	wl = SaomGroupsWL()
+	G = rows(nw)
+	Wv = sum(nw :- 1) + 1
 	pm = J(rows(code), Wv, 0)
-	for (h=1; h<=G; h++) pm[selectindex(code :== h), ((h-1)*(W-1)+1)..(h*(W-1)+1)] = J(sum(code :== h), W, 1)
+	s = 0
+	for (h=1; h<=G; h++) {
+		for (k=s+1; k<=s+nw[h]; k++) {
+			c = k - s
+			if (rows(pmo) == 0) pm[selectindex(code :== h), k] = J(sum(code :== h), 1, 1)
+			else pm[selectindex(code :== h), k] = pmo[selectindex(code :== h), wl[h, c]]
+		}
+		s = s + nw[h] - 1
+	}
 	return(pm)
 }
+
+/* the same carry rule for any N x N (or N x 1) per-wave matrix list (missing-data masks, behavior values): virtual wave k of the blocks of group h
+   is wave c_h(k); returns the virtual wave k as a matrix built from src[1..W] (pointers to matrices of equal size; rows are actors, for
+   N x N matrices the columns too) */
+real matrix SaomGroupsCarry(pointer(real matrix) rowvector src, real scalar k) {
+	real colvector code, nw
+	real matrix wl, out, m
+	real scalar G, h, c, s, ncol
+	code = SaomGroupsId()
+	wl = SaomGroupsWL()
+	nw = SaomGroupsNW()
+	G = rows(nw)
+	out = *src[1]
+	ncol = cols(out)
+	s = 0
+	for (h=1; h<=G; h++) {
+		c = min((max((k - s, 1)), nw[h]))
+		s = s + nw[h] - 1
+		m = *src[wl[h, c]]
+		if (ncol == rows(m) & ncol > 1) out[selectindex(code :== h), selectindex(code :== h)] = m[selectindex(code :== h), selectindex(code :== h)]
+		else out[selectindex(code :== h), .] = m[selectindex(code :== h), .]
+	}
+	return(out)
+}
+
+/* RSiena's rangeAndSimilarity() of the group: the mean over the ordered pairs i != j of the group of 1 - |x_i - x_j| / range, the range being the
+   group's OWN range (the covariates keep the simMean of their own data object); 0 for a constant covariate. One value per group. */
+real rowvector SaomGroupsSimMeansOwn(real colvector x) {
+	real colvector code, idx, xs
+	real rowvector out
+	real scalar h, r, i, tot
+	code = SaomGroupsId()
+	out = J(1, max(code), 0)
+	for (h=1; h<=cols(out); h++) {
+		idx = selectindex(code :== h)
+		xs = x[idx]
+		r = max(xs) - min(xs)
+		if (r == 0 | rows(xs) < 2) continue
+		tot = 0
+		for (i=1; i<=rows(xs); i++) tot = tot + sum(1 :- abs(xs[i] :- xs) :/ r) - 1
+		out[h] = tot / (rows(xs) * (rows(xs) - 1))
+	}
+	return(out)
+}
+
+/* registers the group-specific constants of the terms of M: simcov -> td.center (the similarity mean), balance -> td.decay (the balance mean) */
+void SaomGroupsRegister(class SaomModel scalar M) {
+	pointer(real matrix) scalar preg, pval
+	real matrix reg, val
+	real scalar t, G
+	pointer(class SaomTermData scalar) scalar tdp
+	pointer(real rowvector) scalar pbal
+	string scalar nm
+	if (!SaomGroupsMode()) return
+	G = max(SaomGroupsId())
+	reg = J(0, 2, 0)
+	val = J(0, G, 0)
+	for (t=1; t<=M.nterms; t++) {
+		nm = M.names[t]
+		tdp = M.td[t]
+		if (strpos(nm, "simcov") == 1) {
+			reg = reg \ (t, 1)
+			val = val \ SaomGroupsSimMeansOwn((*tdp).attr)
+		}
+		else if (strpos(nm, "balance") == 1) {
+			reg = reg \ (t, 2)
+			pbal = findexternal("__nwsaom_groupbal")
+			val = val \ *pbal
+		}
+	}
+	rmexternal("__nwsaom_gcreg")
+	rmexternal("__nwsaom_gcval")
+	preg = crexternal("__nwsaom_gcreg")
+	*preg = reg
+	pval = crexternal("__nwsaom_gcval")
+	*pval = val
+}
+
+/* sets the registered constants of M to the values of the group of period pd (for the targets and for the Mata statistics) */
+void SaomGroupsSync(class SaomModel scalar M, real scalar pd) {
+	pointer(real matrix) scalar preg, pval
+	pointer(class SaomTermData scalar) scalar tdp
+	real rowvector pg
+	real scalar r, g
+	if (!SaomGroupsMode()) return
+	preg = findexternal("__nwsaom_gcreg")
+	if (preg == NULL) return
+	pval = findexternal("__nwsaom_gcval")
+	pg = SaomGroupsPeriodGroup()
+	g = pg[pd]
+	for (r=1; r<=rows(*preg); r++) {
+		tdp = M.td[(*preg)[r, 1]]
+		if ((*preg)[r, 2] == 1) (*tdp).center = (*pval)[r, g]
+		else (*tdp).decay = (*pval)[r, g]
+	}
+}
+
+/* BATCHSETUP trailer: the per-period values of the registered constants: " n" then per constant " slot v_1 ... v_P" (slot 0-based) */
+string scalar SaomGroupsTrailer(real scalar P) {
+	pointer(real matrix) scalar preg, pval
+	real rowvector pg
+	string scalar s
+	real scalar r, pd
+	if (!SaomGroupsMode()) return("")
+	preg = findexternal("__nwsaom_gcreg")
+	if (preg == NULL) return(" 0")
+	pval = findexternal("__nwsaom_gcval")
+	pg = SaomGroupsPeriodGroup()
+	s = " " + strofreal(rows(*preg))
+	for (r=1; r<=rows(*preg); r++) {
+		s = s + " " + strofreal((*preg)[r, 1] - 1)
+		for (pd=1; pd<=P; pd++) s = s + " " + strofreal((*pval)[r, pg[pd]], "%25.17g")
+	}
+	return(s)
+}
+
 
 /* closed-form starting rate (RSiena's effects.r): n_active*(0.2 +
    2*distance)/(n_active*(n_active-1) + 1) */
@@ -15215,7 +15551,7 @@ void SaomBatchSetup(pointer(class SaomGraph scalar) rowvector Gwaves, real scala
 	argstr = argstr + SaomBehCovTrailer(n)
 	argstr = argstr + SaomBehDyTrailer(n)
 	argstr = argstr + SaomSRTrailer() + SaomBehVarTrailer() + SaomRCTVTrailer() + SaomBRTrailer()
-	if (grpcol > 0) argstr = argstr + " " + strofreal(grpcol)
+	if (grpcol > 0) argstr = argstr + " " + strofreal(grpcol) + SaomGroupsTrailer(P)
 
 	stata("capture program saomnativesim, plugin using(" + char(34) + SaomNativePluginPath() + char(34) + ")")
 	if (strtoreal(st_global("NWSAOM_TRACE")) == 4) printf("TRACE BATCHSETUP argument string: %f characters\n", strlen(argstr))

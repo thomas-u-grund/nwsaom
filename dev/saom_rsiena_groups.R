@@ -1,10 +1,11 @@
 # Multi-group reference: RSiena sienaGroupCreate() + siena07() on three groups cut out of the s50 data.
 # Writes the stacked data (wave matrices block-diagonal, group, alc) for nwsaom and the RSiena estimates.
-# Usage: Rscript dev/saom_rsiena_groups.R <outdir> [cond 0/1] [seeds]
+# Usage: Rscript dev/saom_rsiena_groups.R <outdir> [cond 0/1] [seeds] [feature: base|balsim]
 library(RSiena)
 args <- commandArgs(TRUE)
 out <- args[1]; cond <- if (length(args) >= 2) as.logical(as.integer(args[2])) else TRUE
 nseed <- if (length(args) >= 3) as.integer(args[3]) else 5
+feat <- if (length(args) >= 4) args[4] else 'base'
 dir.create(out, showWarnings = FALSE, recursive = TRUE)
 grp <- c(rep(1, 15), rep(2, 20), rep(3, 15))
 waves <- list(s501, s502, s503)
@@ -21,9 +22,14 @@ mk <- function(g) {
 }
 gd <- sienaGroupCreate(list(mk(1), mk(2), mk(3)))
 eff <- getEffects(gd)
-eff <- includeEffects(eff, transTrip, cycle3)
-eff <- includeEffects(eff, egoX, altX, interaction1 = "alc")
-eff <- includeEffects(eff, sameX, interaction1 = "alc", include = FALSE)
+if (feat == 'base') {
+  eff <- includeEffects(eff, transTrip, cycle3)
+  eff <- includeEffects(eff, egoX, altX, interaction1 = "alc")
+}
+if (feat == 'balsim') {
+  eff <- includeEffects(eff, balance)
+  eff <- includeEffects(eff, egoX, simX, interaction1 = "alc")
+}
 res <- NULL
 for (s in 1:nseed) {
   alg <- sienaAlgorithmCreate(projname = NULL, cond = cond, seed = s, n3 = 2000, nsub = 4)
@@ -37,5 +43,5 @@ for (s in 1:nseed) {
   }
   res <- rbind(res, th)
 }
-write.csv(res, file.path(out, paste0("rsiena_cond", as.integer(cond), ".csv")), row.names = FALSE)
+write.csv(res, file.path(out, paste0("rsiena_", feat, "_cond", as.integer(cond), ".csv")), row.names = FALSE)
 print(aggregate(cbind(theta, se) ~ name, res, mean))

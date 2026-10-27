@@ -13,64 +13,88 @@ capture program drop _nwsaom_groups
 program define _nwsaom_groups, rclass
 	gettoken sub 0 : 0, parse(" ,")
 	if "`sub'" == "build" {
-		syntax , GROUPS(string) NODES(integer) NWAVES(integer) MULTI(integer) TM(integer) COEV(integer) [BAD(string)]
+		syntax , GROUPS(string) NODES(integer) NWAVES(integer) MULTI(integer) TM(integer) COEV(integer) HASPRES(integer) HASMISSNET(integer) [GWAVES(string) BAD(string) TVCOV(string)]
 		if "`bad'" != "" {
-			di "{err}groups() is not yet combinable with: {bf:`bad'}. Version 1 of the multi-group estimation covers the network-only method of moments with actor covariates."
+			di "{err}groups() is not yet combinable with: {bf:`bad'}."
 			error 198
 		}
-		if !`multi' | `tm' | `coev' {
-			di "{err}groups() needs {bf:waves()} and a one-mode network without a behavior."
+		if !`multi' | `tm' {
+			di "{err}groups() needs {bf:waves()} and a one-mode network."
 			error 198
 		}
 		confirm numeric variable `groups'
-		mata: st_numscalar("__ns_g_G", SaomGroupsSet(__nwsaom_last_Gwaves, st_data(1::`nodes', "`groups'")))
+		mata: __ns_ggrp = st_data(1::`nodes', "`groups'")
+		mata: __ns_gwl = SaomGroupsParseWaves(`"`gwaves'"', __ns_ggrp, `nwaves')
+		mata: st_numscalar("__ns_g_G", SaomGroupsSet(__nwsaom_last_Gwaves, __ns_ggrp, __ns_gwl, `haspres'))
 		local G = scalar(__ns_g_G)
 		scalar drop __ns_g_G
 		local W = `nwaves'
-		local Wv = `G' * (`W' - 1) + 1
+		mata: st_numscalar("__ns_g_Wv", sum(SaomGroupsNW() :- 1) + 1)
+		local Wv = scalar(__ns_g_Wv)
+		scalar drop __ns_g_Wv
 		forvalues k = 1/`Wv' {
 			mata: __ns_gv`k' = SaomGraph()
-		mata: SaomGroupsWave(__nwsaom_last_Gwaves, `k', __ns_gv`k')
+			mata: SaomGroupsWave(__nwsaom_last_Gwaves, `k', __ns_gv`k')
 		}
-		mata: __ns_gpres = SaomGroupsPresent(`W')
+		if `haspres' mata: __ns_gpres = SaomGroupsPresent(__nwsaom_presentmat)
+		else mata: __ns_gpres = SaomGroupsPresent(J(0, 0, 0))
+		if `hasmissnet' {
+			local ptrs ""
+			forvalues k = 1/`W' {
+				local ptrs `ptrs'`=cond(`k' > 1, ", ", "")'&__ns_missnet_w`k'
+			}
+			mata: __ns_gmp = (`ptrs')
+			forvalues k = 1/`Wv' {
+				mata: __ns_gm`k' = SaomGroupsCarry(__ns_gmp, `k')
+			}
+		}
 		capture mata: mata drop __nwsaom_last_Gwaves
 		forvalues k = 1/`W' {
 			capture mata: mata drop __nwsaom_last_G`k'
+			if `hasmissnet' capture mata: mata drop __ns_missnet_w`k'
 		}
 		local ptrs ""
 		forvalues k = 1/`Wv' {
 			mata: __nwsaom_last_G`k' = SaomGraph()
-		mata: SaomCopyGraph(__ns_gv`k', __nwsaom_last_G`k')
+			mata: SaomCopyGraph(__ns_gv`k', __nwsaom_last_G`k')
 			capture mata: mata drop __ns_gv`k'
+			if `hasmissnet' {
+				mata: __ns_missnet_w`k' = __ns_gm`k'
+				capture mata: mata drop __ns_gm`k'
+			}
 			local ptrs `ptrs'`=cond(`k' > 1, ", ", "")'&__nwsaom_last_G`k'
 		}
 		mata: __nwsaom_last_Gwaves = (`ptrs')
 		capture mata: mata drop __nwsaom_presentmat __ns_present1
 		mata: __nwsaom_presentmat = __ns_gpres
-		mata: mata drop __ns_gpres
-		* group sizes and period names (RSiena numbers the periods of the glued series with the switching steps skipped)
-		tempname gn
-		mata: st_matrix("`gn'", SaomGroupsSizes())
-		matrix __ns_gnmat = `gn'
-		local pn ""
-		forvalues g = 1/`G' {
-			forvalues m = 1/`=`W'-1' {
-				local pn "`pn' period`=(`g'-1)*`W'+`m''"
-			}
+		capture mata: mata drop __ns_gpres __ns_gwl __ns_ggrp __ns_gmp
+		* group sizes, waves per group and period names (RSiena numbers the periods of the glued series with the switching steps skipped)
+		mata: st_matrix("__ns_gnmat", SaomGroupsSizes())
+		mata: st_matrix("__ns_gwmat", SaomGroupsNW()')
+		mata: st_local("pn", invtokens("period" :+ strofreal(SaomGroupsRSienaPeriod())))
+		local tvnew ""
+		if `"`tvcov'"' != "" {
+			mata: st_local("tvnew", SaomGroupsTvExpand(`"`tvcov'"'))
 		}
 		return scalar nwaves = `Wv'
 		return scalar ngroups = `G'
 		return local pnames "`pn'"
+		return local tvcov `"`tvnew'"'
 	}
 	else if "`sub'" == "show" {
 		syntax , GROUPS(string) W(integer)
-		tempname gn
+		tempname gn gw
 		matrix `gn' = __ns_gnmat
 		local G = colsof(`gn')
 		local sz ""
 		forvalues g = 1/`G' {
 			local sz "`sz'`=cond(`g'>1, ", ", "")'`=`gn'[1,`g']'"
 		}
-		di as text "Groups: " as result `G' as text " (variable " as result "`groups'" as text "), actors per group: " as result "`sz'" as text "; periods per group: " as result `=`w'-1'
+		matrix `gw' = __ns_gwmat
+		local wz ""
+		forvalues g = 1/`G' {
+			local wz "`wz'`=cond(`g'>1, ", ", "")'`=`gw'[1,`g']'"
+		}
+		di as text "Groups: " as result `G' as text " (variable " as result "`groups'" as text "), actors per group: " as result "`sz'" as text "; waves per group: " as result "`wz'"
 	}
 end
