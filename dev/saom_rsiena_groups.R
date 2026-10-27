@@ -1,6 +1,8 @@
-# Multi-group reference: RSiena sienaGroupCreate() + siena07() on three groups cut out of the s50 data.
-# Writes the stacked data (wave matrices block-diagonal, group, alc) for nwsaom and the RSiena estimates.
-# Usage: Rscript dev/saom_rsiena_groups.R <outdir> [cond 0/1] [seeds] [feature: base|balsim]
+# Multi-group reference: RSiena sienaGroupCreate() + siena07() on three groups cut out of the s50 data (actors 1-15, 16-35, 36-50).
+# Writes the stacked data (wave matrices block-diagonal, actors.csv) for nwsaom and the RSiena estimates.
+# Usage: Rscript dev/saom_rsiena_groups.R <outdir> [cond 0/1] [seeds] [feature]
+# feature: base | balsim | unequal (group 2 has waves 1,2 and group 3 waves 2,3) | tvcov | comp (composition change) | miss (missing ties)
+#          | ratecov | inter (interaction) | dyad (dyadic covariate)
 library(RSiena)
 args <- commandArgs(TRUE)
 out <- args[1]; cond <- if (length(args) >= 2) as.logical(as.integer(args[2])) else TRUE
@@ -11,33 +13,71 @@ grp <- c(rep(1, 15), rep(2, 20), rep(3, 15))
 waves <- list(s501, s502, s503)
 blk <- function(m) { m[outer(grp, grp, "!=")] <- 0; m }
 waves <- lapply(waves, blk)
-for (w in 1:3) write.table(waves[[w]], file.path(out, paste0("w", w, ".csv")), row.names = FALSE, col.names = FALSE, sep = ",")
-write.csv(data.frame(group = grp, alc = s50a[, 1]), file.path(out, "actors.csv"), row.names = FALSE)
-mk <- function(g) {
-  i <- which(grp == g)
-  arr <- array(c(waves[[1]][i, i], waves[[2]][i, i], waves[[3]][i, i]), dim = c(length(i), length(i), 3))
-  net <- sienaDependent(arr)
-  alc <- coCovar(s50a[i, 1])
+# RSiena 1.6.14 stops (INTEGER() ... not a 'list' in initializeFRAN) for a group object whose groups have different numbers of waves, so the
+# reference for 'unequal' is the equivalent object with two-wave groups only: group 1 (waves 1,2,3) = two groups (1,2) and (2,3) of the same
+# actors, group 2 has waves 1,2, group 3 waves 2,3. With uncentred covariates and without effects that use group constants (balance, simX)
+# the model is the same, period by period.
+gsets <- list(1, 1, 2, 3); gw <- list(1:3, 1:3, 1:3)
+if (feat == 'unequal') { gsets <- list(1, 1, 2, 3); gw <- list(1:2, 2:3, 1:2, 2:3) } else { gsets <- list(1, 2, 3) }
+present <- matrix(1, 50, 3)
+if (feat == 'comp') {                                     # actors 3 and 8 (group 1), 22 (group 2) and 40 (group 3) join at wave 2 (a leaver exactly at an observation is treated differently by present() and sienaCompositionChange)
+  present[3, 1] <- 0; present[8, 1] <- 0; present[40, 1] <- 0; present[22, 1] <- 0
+  # the ties of an absent actor at a wave where it is absent are those of the nearest wave where it is present (RSiena and nwsaom both
+  # count the ties of absent actors as they are in the data)
+  orig <- waves
+  for (a in 1:50) for (w in 1:3) if (present[a, w] == 0) {
+    pw <- which(present[a, ] == 1); wn <- pw[which.min(abs(pw - w))]
+    waves[[w]][a, ] <- orig[[wn]][a, ]; waves[[w]][, a] <- orig[[wn]][, a]
+  }
+}
+miss <- list(NULL, NULL, NULL)
+if (feat == 'miss') {                                     # all out-ties of actor 20 (group 2) at wave 2 and of actor 45 (group 3) at wave 3 are missing
+  mm <- lapply(1:3, function(w) matrix(0, 50, 50))
+  mm[[2]][20, ] <- 1; mm[[3]][45, ] <- 1
+  for (w in 1:3) diag(mm[[w]]) <- 0
+  miss <- mm
+}
+for (w in 1:3) {
+  write.table(waves[[w]], file.path(out, paste0("w", w, ".csv")), row.names = FALSE, col.names = FALSE, sep = ",")
+  write.table(if (is.null(miss[[w]])) matrix(0, 50, 50) else miss[[w]], file.path(out, paste0("m", w, ".csv")), row.names = FALSE, col.names = FALSE, sep = ",")
+}
+# a dyadic covariate: same sex-like similarity of the alcohol wave-1 values (block-diagonal)
+D0 <- outer(s50a[, 1], s50a[, 1], function(a, b) as.numeric(abs(a - b) <= 1)); diag(D0) <- 0
+D0 <- D0 * outer(grp, grp, "==")
+write.table(D0, file.path(out, "dyad.csv"), row.names = FALSE, col.names = FALSE, sep = ",")
+actors <- data.frame(group = grp, alc = s50a[, 1], alc1 = s50a[, 1], alc2 = s50a[, 2], alc3 = s50a[, 3], p1 = present[, 1], p2 = present[, 2], p3 = present[, 3])
+write.csv(actors, file.path(out, "actors.csv"), row.names = FALSE)
+mk <- function(gi) {
+  g <- gsets[[gi]]; i <- which(grp == g); ws <- gw[[gi]]
+  arr <- array(unlist(lapply(ws, function(w) waves[[w]][i, i])), dim = c(length(i), length(i), length(ws)))
+  if (feat == 'miss') for (k in seq_along(ws)) { m <- miss[[ws[k]]][i, i]; a <- arr[, , k]; a[m == 1] <- NA; arr[, , k] <- a }
+  net <- sienaDependent(arr, allowOnly = FALSE)
+  if (feat == 'tvcov') alc <- varCovar(as.matrix(s50a[i, ws]))
+  else alc <- coCovar(s50a[i, 1], centered = (feat != 'unequal'))
+  if (feat == 'dyad') { D <- coDyadCovar(D0[i, i]); return(sienaDataCreate(net, alc, D)) }
+  if (feat == 'comp') {
+    ch <- lapply(i, function(a) { p <- present[a, ws]; w1 <- which(p == 1); c(min(w1), max(w1)) })
+    cc <- sienaCompositionChange(ch)
+    return(sienaDataCreate(net, alc, cc))
+  }
   sienaDataCreate(net, alc)
 }
-gd <- sienaGroupCreate(list(mk(1), mk(2), mk(3)))
+gd <- sienaGroupCreate(lapply(seq_along(gsets), mk))
 eff <- getEffects(gd)
-if (feat == 'base') {
-  eff <- includeEffects(eff, transTrip, cycle3)
-  eff <- includeEffects(eff, egoX, altX, interaction1 = "alc")
-}
-if (feat == 'balsim') {
-  eff <- includeEffects(eff, balance)
-  eff <- includeEffects(eff, egoX, simX, interaction1 = "alc")
-}
+if (feat == 'base') { eff <- includeEffects(eff, transTrip, cycle3); eff <- includeEffects(eff, egoX, altX, interaction1 = "alc") }
+if (feat == 'balsim') { eff <- includeEffects(eff, balance); eff <- includeEffects(eff, egoX, simX, interaction1 = "alc") }
+if (feat %in% c('unequal', 'comp', 'miss')) { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, altX, interaction1 = "alc") }
+if (feat == 'tvcov') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, altX, simX, interaction1 = "alc") }
+if (feat == 'ratecov') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, interaction1 = "alc"); eff <- includeEffects(eff, RateX, interaction1 = "alc", type = "rate") }
+if (feat == 'inter') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, altX, interaction1 = "alc"); eff <- includeInteraction(eff, egoX, recip, interaction1 = c("alc", "")) }
+if (feat == 'dyad') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, X, interaction1 = "D"); }
 res <- NULL
 for (s in 1:nseed) {
   alg <- sienaAlgorithmCreate(projname = NULL, cond = cond, seed = s, n3 = 2000, nsub = 4)
   a <- siena07(alg, data = gd, effects = eff, batch = TRUE, verbose = FALSE, silent = TRUE, returnDeps = FALSE)
   ef <- a$effects[a$effects$include, ]
-  sel <- ef$type != "rate" | TRUE
   th <- data.frame(seed = s, name = ef$effectName, theta = a$theta, se = sqrt(diag(a$covtheta)))
-  if (cond) {
+  if (a$cconditional) {
     rr <- data.frame(seed = s, name = paste("rate", seq_along(a$rate)), theta = a$rate, se = sqrt(a$vrate))
     th <- rbind(rr, th)
   }

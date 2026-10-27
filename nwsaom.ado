@@ -1134,7 +1134,7 @@ program nwsaom, eclass
 	// (Mata's optional-argument ordering rule - an earlier optional
 	// cannot be skipped to reach a later one) - a missing-data-only
 	// model (no present()) still needs an all-present placeholder here.
-	else if `__ns_hasmiss' {
+	else if `__ns_hasmiss' & !`__ns_isgrp' {
 		capture mata: mata drop __nwsaom_presentmat __ns_present1
 		mata: __nwsaom_presentmat = J(`nodes', `__nwsaom_nwaves', 1)
 		mata: __ns_present1 = J(`nodes', 1, 1)

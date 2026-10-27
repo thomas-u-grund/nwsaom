@@ -9400,6 +9400,33 @@ real rowvector SaomGroupsSimMeansOwn(real colvector x) {
 	return(out)
 }
 
+/* the same for a changing covariate (one column per virtual period, the values at the start of the period): RSiena pools the pairs of all periods
+   of the group, with the range of all its values */
+real rowvector SaomGroupsSimMeansOwnTV(real matrix xpd) {
+	real colvector code, idx
+	real rowvector out, pg, cols_
+	real matrix xs
+	real scalar h, r, i, j, tot, cnt
+	code = SaomGroupsId()
+	pg = SaomGroupsPeriodGroup()
+	out = J(1, max(code), 0)
+	for (h=1; h<=cols(out); h++) {
+		idx = selectindex(code :== h)
+		cols_ = selectindex(pg :== h)
+		xs = xpd[idx, cols_]
+		r = max(xs) - min(xs)
+		if (r == 0 | rows(xs) < 2) continue
+		tot = 0
+		cnt = 0
+		for (j=1; j<=cols(xs); j++) {
+			for (i=1; i<=rows(xs); i++) tot = tot + sum(1 :- abs(xs[i, j] :- xs[., j]) :/ r) - 1
+			cnt = cnt + rows(xs) * (rows(xs) - 1)
+		}
+		out[h] = tot / cnt
+	}
+	return(out)
+}
+
 /* registers the group-specific constants of the terms of M: simcov -> td.center (the similarity mean), balance -> td.decay (the balance mean) */
 void SaomGroupsRegister(class SaomModel scalar M) {
 	pointer(real matrix) scalar preg, pval
@@ -9417,7 +9444,7 @@ void SaomGroupsRegister(class SaomModel scalar M) {
 		tdp = M.td[t]
 		if (strpos(nm, "simcov") == 1) {
 			reg = reg \ (t, 1)
-			val = val \ SaomGroupsSimMeansOwn((*tdp).attr)
+			val = val \ (rows((*tdp).attrpd) > 0 ? SaomGroupsSimMeansOwnTV((*tdp).attrpd) : SaomGroupsSimMeansOwn((*tdp).attr))
 		}
 		else if (strpos(nm, "balance") == 1) {
 			reg = reg \ (t, 2)
