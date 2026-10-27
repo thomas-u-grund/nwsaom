@@ -4443,6 +4443,7 @@ typedef struct model_s {
 	int ntv;				// protocol 21: attributes that vary by period (BATCHSETUP only)
 	int tvcol[MAXATTR];			// their 1-based attribute columns
 	long *struct_off, *struct_j;
+	long *fr_off, *fr_j;			// free alternatives of every ego with structural dyads, CSR by ego (ascending, without the ego): built with the structural list
 	/* protocol 19: several co-evolving behaviors. Behavior 0 is the legacy block above (nbehterms, behtermcodes,
 	   behminval..., behfntype); behaviors 1..nbeh-1 are views (bm[b]): a model_t of its own holding only that
 	   behavior's terms and constants, so the single-behavior code runs unchanged on any behavior. nbehterms of the
@@ -4558,15 +4559,42 @@ static void graph_free(graph_t *g) {
 static __thread double *saom_c4buf = NULL;
 static __thread long saom_c4cap = 0;
 
-static double eval_network_alternatives(const model_t *M, const simparams_t *P, graph_t *g,
-	double **attrs, long actor, const double *presentArr, double *tt_arr, double *c3_arr,
+/* The alternatives of an ego in ascending order: every node but the ego, minus the nodes with present[j] == 0 (present may be NULL).
+   A structural (two-mode) ego uses the precomputed list of the model (fr_off/fr_j: the free alternatives only).  The list is
+   built into a thread-local buffer when it is not the model's own. */
+static __thread long *saom_altbuf = NULL;
+static __thread long saom_altcap = 0;
+static const long *saom_alt_list(const model_t *M, long n, long actor, const double *present, long *nalt) {
+	long j, c = 0;
+	if (!present && M->fr_off && M->nstruct > 0 && M->struct_off[actor + 1] > M->struct_off[actor]) {
+		*nalt = M->fr_off[actor + 1] - M->fr_off[actor];
+		return M->fr_j + M->fr_off[actor];
+	}
+	if (saom_altcap < n + 1) { free(saom_altbuf); saom_altbuf = (long *)malloc((size_t)(n + 1) * sizeof(long)); saom_altcap = n + 1; }
+	for (j = 1; j <= n; j++) {
+		if (j == actor) continue;
+		if (present && present[j] == 0.0) continue;
+		saom_altbuf[c++] = j;
+	}
+	*nalt = c;
+	return saom_altbuf;
+}
+
+/* Term-major evaluation of every alternative j of `actor' (the list fl[0..nfl-1], ascending; NULL = saom_alt_list() of
+   `presentArr'): chg[k*(n+1)+j] receives term k's change statistic, u[j] the utility (sum over k of theta[k]*chg,
+   accumulated in term order), and the maximum utility (including "stay" = 0) is returned.  Entries of chg and u for nodes
+   outside the list are not touched (callers never read them). */
+static double eval_network_alternatives_l(const model_t *M, const simparams_t *P, graph_t *g,
+	double **attrs, long actor, const double *presentArr, const long *fl, long nfl, double *tt_arr, double *c3_arr,
 	double *chg, double *u, unsigned char *ijx) {
 
-	long n = M->n, j, k, stride = n + 1;
+	long n = M->n, j, k, q, stride = n + 1;
 	const unsigned char *row = g->adjm ? g->adjm + actor * stride : NULL;
 	double maxu = 0.0;
 
-	for (j = 1; j <= n; j++) ijx[j] = row ? row[j] : (unsigned char)has_edge(g, actor, j);
+	/* fl == NULL: all nodes 1..n in order (the actor's own entry is computed by the simple terms and skipped by the others) */
+	if (!fl) { if (presentArr) fl = saom_alt_list(M, n, actor, presentArr, &nfl); else nfl = n; }
+	for (q = 0; q < nfl; q++) { j = fl ? fl[q] : q + 1; ijx[j] = row ? row[j] : (unsigned char)has_edge(g, actor, j); }
 
 	for (k = 0; k < M->nterms; k++) {
 		double *c = chg + k * stride;
@@ -4578,56 +4606,81 @@ static double eval_network_alternatives(const model_t *M, const simparams_t *P, 
 		double p1 = M->p1[k];
 		switch (tc) {
 			case TERMCODE_OUTDEGREE:
-				for (j = 1; j <= n; j++) c[j] = ijx[j] ? -1.0 : 1.0;
+				for (q = 0; q < nfl; q++) { j = fl ? fl[q] : q + 1; c[j] = ijx[j] ? -1.0 : 1.0; }
 				break;
 			case TERMCODE_RECIPROCITY:
 				if (g->adjm) {
 					const unsigned char *col = g->adjm + actor;
-					for (j = 1; j <= n; j++) c[j] = col[j * stride] ? (ijx[j] ? -1.0 : 1.0) : 0.0;
+					for (q = 0; q < nfl; q++) { j = fl ? fl[q] : q + 1; c[j] = col[j * stride] ? (ijx[j] ? -1.0 : 1.0) : 0.0; }
 				}
-				else for (j = 1; j <= n; j++) c[j] = has_edge(g, j, actor) ? (ijx[j] ? -1.0 : 1.0) : 0.0;
+				else for (q = 0; q < nfl; q++) { j = fl ? fl[q] : q + 1; c[j] = has_edge(g, j, actor) ? (ijx[j] ? -1.0 : 1.0) : 0.0; }
 				break;
 			case TERMCODE_NODEMATCH:
-				for (j = 1; j <= n; j++) c[j] = (a[actor] != a[j]) ? 0.0 : (ijx[j] ? -1.0 : 1.0);
+				for (q = 0; q < nfl; q++) { j = fl ? fl[q] : q + 1; c[j] = (a[actor] != a[j]) ? 0.0 : (ijx[j] ? -1.0 : 1.0); }
 				break;
 			case TERMCODE_NODECOV:
-				for (j = 1; j <= n; j++) { double v = a[actor] + a[j]; c[j] = ijx[j] ? -v : v; }
+				for (q = 0; q < nfl; q++) { j = fl ? fl[q] : q + 1; double v = a[actor] + a[j]; c[j] = ijx[j] ? -v : v; }
 				break;
 			case TERMCODE_NODEICOV:
-				for (j = 1; j <= n; j++) c[j] = ijx[j] ? -a[j] : a[j];
+				for (q = 0; q < nfl; q++) { j = fl ? fl[q] : q + 1; c[j] = ijx[j] ? -a[j] : a[j]; }
 				break;
 			case TERMCODE_NODEOCOV:
-				for (j = 1; j <= n; j++) c[j] = ijx[j] ? -a[actor] : a[actor];
+				for (q = 0; q < nfl; q++) { j = fl ? fl[q] : q + 1; c[j] = ijx[j] ? -a[actor] : a[actor]; }
 				break;
 			case TERMCODE_TRANSTRIP:
-				for (j = 1; j <= n; j++) c[j] = ijx[j] ? -tt_arr[j] : tt_arr[j];
+				for (q = 0; q < nfl; q++) { j = fl ? fl[q] : q + 1; c[j] = ijx[j] ? -tt_arr[j] : tt_arr[j]; }
 				break;
 			case TERMCODE_CYCLE3:
-				for (j = 1; j <= n; j++) c[j] = ijx[j] ? -c3_arr[j] : c3_arr[j];
+				for (q = 0; q < nfl; q++) { j = fl ? fl[q] : q + 1; c[j] = ijx[j] ? -c3_arr[j] : c3_arr[j]; }
 				break;
 			case TERMCODE_CYCLE4:
 				if (g->outadj && g->inadj) {
 					if (saom_c4cap < n + 1) { free(saom_c4buf); saom_c4buf = (double *)malloc((size_t)(n + 1) * sizeof(double)); saom_c4cap = n + 1; }
 					memset(saom_c4buf, 0, (size_t)(n + 1) * sizeof(double));
 					batch_cycle4(g, actor, saom_c4buf);
-					for (j = 1; j <= n; j++) c[j] = ijx[j] ? -saom_c4buf[j] : saom_c4buf[j];
+					for (q = 0; q < nfl; q++) { j = fl ? fl[q] : q + 1; c[j] = ijx[j] ? -saom_c4buf[j] : saom_c4buf[j]; }
 				}
-				else for (j = 1; j <= n; j++) {
-					if (j == actor) continue;
-					if (presentArr && presentArr[j] == 0.0) continue;
+				else for (q = 0; q < nfl; q++) {
+					j = fl ? fl[q] : q + 1;
+					if (!fl && j == actor) continue;
 					c[j] = saom_eval_change((int)k, (int *)M->termcodes, (int *)M->attridx, (double *)M->p1, attrs, g, actor, j, ijx[j], tt_arr, c3_arr);
 				}
 				break;
 			case TERMCODE_SIMCOV:
-				for (j = 1; j <= n; j++) { double d = 1.0 - fabs(a[actor] - a[j]) - p1; c[j] = ijx[j] ? -d : d; }
+				for (q = 0; q < nfl; q++) { j = fl ? fl[q] : q + 1; double d = 1.0 - fabs(a[actor] - a[j]) - p1; c[j] = ijx[j] ? -d : d; }
 				break;
 			case TERMCODE_BEHSIM:
-				for (j = 1; j <= n; j++) { double d = 1.0 - fabs(a[actor] - a[j]) / saom_behsim_range - p1; c[j] = ijx[j] ? -d : d; }
+				for (q = 0; q < nfl; q++) { j = fl ? fl[q] : q + 1; double d = 1.0 - fabs(a[actor] - a[j]) / saom_behsim_range - p1; c[j] = ijx[j] ? -d : d; }
+				break;
+			/* the degree terms, with the expressions of saom_change_term() (same arithmetic, no dispatch) */
+			case TERMCODE_INDEGPOP:
+				for (q = 0; q < nfl; q++) { j = fl ? fl[q] : q + 1; double d = (double)g->din[j]; c[j] = ijx[j] ? -sqrt(d) : sqrt(d + 1.0); }
+				break;
+			case TERMCODE_OUTACTIVITY: {
+				double d = (double)g->dout[actor], v1 = -(2.0 * d - 1.0), v0 = (2.0 * d + 1.0);
+				for (q = 0; q < nfl; q++) { j = fl ? fl[q] : q + 1; c[j] = ijx[j] ? v1 : v0; }
+				break;
+			}
+			case TERMCODE_OUTISO: {
+				double cur_isolate = (g->dout[actor] == 0) ? 1.0 : 0.0;
+				double new_isolate = (((g->dout[actor] - 1) == 0) ? 1.0 : 0.0);
+				double v1 = new_isolate - cur_isolate, v0 = 0.0 - cur_isolate;
+				for (q = 0; q < nfl; q++) { j = fl ? fl[q] : q + 1; c[j] = ijx[j] ? v1 : v0; }
+				break;
+			}
+			case TERMCODE_ANTIINISO2:
+				for (q = 0; q < nfl; q++) { j = fl ? fl[q] : q + 1; long d = g->din[j]; int cond = ijx[j] ? (d == 2) : (d == 1); c[j] = cond ? (ijx[j] ? -1.0 : 1.0) : 0.0; }
+				break;
+			case TERMCODE_ANTIINISO:
+				for (q = 0; q < nfl; q++) { j = fl ? fl[q] : q + 1; long d = g->din[j]; int cond = ijx[j] ? (d <= 1) : (d == 0); c[j] = cond ? (ijx[j] ? -1.0 : 1.0) : 0.0; }
+				break;
+			case TERMCODE_IN3PLUS:
+				for (q = 0; q < nfl; q++) { j = fl ? fl[q] : q + 1; long d = g->din[j]; int cond = ijx[j] ? (d == 3) : (d == 2); c[j] = cond ? (ijx[j] ? -1.0 : 1.0) : 0.0; }
 				break;
 			default:
-				for (j = 1; j <= n; j++) {
-					if (j == actor) continue;
-					if (presentArr && presentArr[j] == 0.0) continue;
+				for (q = 0; q < nfl; q++) {
+					j = fl ? fl[q] : q + 1;
+					if (!fl && j == actor) continue;
 					c[j] = saom_eval_change((int)k, (int *)M->termcodes, (int *)M->attridx, (double *)M->p1, attrs, g, actor, j, ijx[j], tt_arr, c3_arr);
 				}
 				break;
@@ -4636,23 +4689,29 @@ static double eval_network_alternatives(const model_t *M, const simparams_t *P, 
 		   an endowment term counts only for withdrawals, a creation term
 		   only for new ties */
 		if (M->hasfntype && M->fntype[k] != 0) {
-			if (M->fntype[k] == 1) { for (j = 1; j <= n; j++) if (!ijx[j]) c[j] = 0.0; }
-			else { for (j = 1; j <= n; j++) if (ijx[j]) c[j] = 0.0; }
+			if (M->fntype[k] == 1) { for (q = 0; q < nfl; q++) { j = fl ? fl[q] : q + 1; if (!ijx[j]) c[j] = 0.0; } }
+			else { for (q = 0; q < nfl; q++) { j = fl ? fl[q] : q + 1; if (ijx[j]) c[j] = 0.0; } }
 		}
 #ifdef SAOM_PROFILE
 		prof_term_t[k] += prof_now() - pt0;
 		prof_term_n[k] += 1.0;
 #endif
 	}
-	for (j = 1; j <= n; j++) {
+	for (q = 0; q < nfl; q++) {
 		double uj = 0.0;
-		if (j == actor) continue;
-		if (presentArr && presentArr[j] == 0.0) continue;
+		j = fl ? fl[q] : q + 1;
+		if (!fl && j == actor) continue;
 		for (k = 0; k < M->nterms; k++) uj += P->theta[k] * chg[k * stride + j];
 		u[j] = uj;
 		if (uj > maxu) maxu = uj;
 	}
 	return maxu;
+}
+
+static double eval_network_alternatives(const model_t *M, const simparams_t *P, graph_t *g,
+	double **attrs, long actor, const double *presentArr, double *tt_arr, double *c3_arr,
+	double *chg, double *u, unsigned char *ijx) {
+	return eval_network_alternatives_l(M, P, g, attrs, actor, presentArr, NULL, 0, tt_arr, c3_arr, chg, u, ijx);
 }
 
 /* Lagged/end behavior statistics on graph `gs' (edge list read directly),
@@ -4978,7 +5037,6 @@ static int simulate_period(const model_t *M, const period_t *PD, const simparams
 	{
 		double *u = (double *)malloc((size_t)(n + 1) * sizeof(double));
 		double *ev = (double *)malloc((size_t)(n + 1) * sizeof(double));
-		double *availbuf = (M->nstruct > 0) ? (double *)malloc((size_t)(n + 1) * sizeof(double)) : NULL;
 		double *tt_arr = M->need_transtrip ? (double *)calloc((size_t)(n + 1), sizeof(double)) : NULL;
 		double *c3_arr = M->need_cycle3 ? (double *)calloc((size_t)(n + 1), sizeof(double)) : NULL;
 		double *chg = (double *)malloc((size_t)(n + 1) * (size_t)(M->nterms > 0 ? M->nterms : 1) * sizeof(double));
@@ -5289,7 +5347,8 @@ static int simulate_period(const model_t *M, const period_t *PD, const simparams
 				}
 				else if (actNet) {
 					long actor, j, choice;
-					const double *avail;
+					const long *alt;
+					long nalt, qa;
 					double maxu, stayterm, denom, draw, cum;
 					PROF_START(pt_a);
 					if (P->hasratecov) {
@@ -5318,22 +5377,22 @@ static int simulate_period(const model_t *M, const period_t *PD, const simparams
 					PROF_START(pt_e);
 					/* protocol 11, structural(): fixed dyads of the actor are
 					   not among its alternatives (as absent actors) */
-					avail = NULL;	/* RSiena: an inactive actor stays among the alters of an active ego (NetworkVariable::calculatePermissibleChanges()) */
-					if (M->nstruct > 0 && M->struct_off[actor + 1] > M->struct_off[actor]) {
-						long q;
-						for (j = 1; j <= n; j++) availbuf[j] = 1.0;
-						for (q = M->struct_off[actor]; q < M->struct_off[actor + 1]; q++) availbuf[M->struct_j[q]] = 0.0;
-						avail = availbuf;
+					/* RSiena: an inactive actor stays among the alters of an active ego (NetworkVariable::calculatePermissibleChanges()) */
+					alt = NULL;
+					nalt = n;
+					if (M->fr_off && M->nstruct > 0 && M->struct_off[actor + 1] > M->struct_off[actor]) {	/* a two-mode ego: the free alternatives (the other mode) only */
+						alt = M->fr_j + M->fr_off[actor];
+						nalt = M->fr_off[actor + 1] - M->fr_off[actor];
 					}
-					maxu = eval_network_alternatives(M, P, &g, attrs, actor, avail, tt_arr, c3_arr, chg, u, ijx);
+					maxu = eval_network_alternatives_l(M, P, &g, attrs, actor, NULL, alt, nalt, tt_arr, c3_arr, chg, u, ijx);
 					PROF_ADD(PR_EVAL, pt_e);
 					PROF_START(pt_s);
 
 					stayterm = exp(0.0 - maxu);
 					denom = stayterm;
-					for (j = 1; j <= n; j++) {
-						if (j == actor) continue;
-						if (avail && avail[j] == 0.0) continue;
+					for (qa = 0; qa < nalt; qa++) {
+						j = alt ? alt[qa] : qa + 1;
+						if (!alt && j == actor) continue;
 						ev[j] = exp(u[j] - maxu);
 						denom += ev[j];
 					}
@@ -5342,9 +5401,9 @@ static int simulate_period(const model_t *M, const period_t *PD, const simparams
 					cum = stayterm;
 					choice = 0;
 					if (draw > cum) {
-						for (j = 1; j <= n; j++) {
-							if (j == actor) continue;
-							if (avail && avail[j] == 0.0) continue;
+						for (qa = 0; qa < nalt; qa++) {
+							j = alt ? alt[qa] : qa + 1;
+							if (!alt && j == actor) continue;
 							cum += ev[j];
 							choice = j;
 							if (draw <= cum) break;
@@ -5354,9 +5413,9 @@ static int simulate_period(const model_t *M, const period_t *PD, const simparams
 						for (k = 0; k < M->nterms; k++) {
 							double ebar_k = 0.0, chosen_k;
 							const double *c = chg + k * stride;
-							for (j = 1; j <= n; j++) {
-								if (j == actor) continue;
-								if (avail && avail[j] == 0.0) continue;
+							for (qa = 0; qa < nalt; qa++) {
+								j = alt ? alt[qa] : qa + 1;
+								if (!alt && j == actor) continue;
 								ebar_k += (ev[j] / denom) * c[j];
 							}
 							chosen_k = (choice != 0) ? c[choice] : 0.0;
@@ -5545,7 +5604,7 @@ static int simulate_period(const model_t *M, const period_t *PD, const simparams
 			}
 			ht_free(&hstart);
 		}
-		free(u); free(ev); free(tt_arr); free(c3_arr); free(chg); free(ijx); free(availbuf);
+		free(u); free(ev); free(tt_arr); free(c3_arr); free(chg); free(ijx);
 	}
 	if (presloc) free(presloc);
 	if (wbase_rc) free(wbase_rc);
@@ -5886,7 +5945,7 @@ static void batch_free(void) {
 	free(batch_cur->per);
 	for (k = 0; k < batch_cur->M.nattr; k++) free(batch_cur->attrmem[k]);
 	free(batch_cur->attrmem);
-	free(batch_cur->M.struct_off); free(batch_cur->M.struct_j);
+	free(batch_cur->M.struct_off); free(batch_cur->M.struct_j); free(batch_cur->M.fr_off); free(batch_cur->M.fr_j);
 	free(batch_cur->rcattr);
 	if (batch_cur->rcper) { long q; for (q = 0; q < batch_cur->P; q++) free(batch_cur->rcper[q]); free(batch_cur->rcper); }
 	{ long q; for (q = 0; q < batch_cur->nrctv; q++) free(batch_cur->rctv[q]); batch_cur->nrctv = 0; }
@@ -5988,6 +6047,30 @@ static void build_struct_csr(model_t *M, long nst, const long *si, const long *s
 		}
 		free(fill);
 	}
+	/* the free alternatives of every ego with structural dyads (a two-mode network: the other mode), ascending */
+	{
+		long *mark = (long *)calloc((size_t)(M->n + 1), sizeof(long)), tot = 0, e, q;
+		M->fr_off = (long *)calloc((size_t)(M->n + 2), sizeof(long));
+		for (e = 1; e <= M->n; e++) {
+			long cnt = 0;
+			if (M->struct_off[e + 1] > M->struct_off[e]) {
+				for (q = M->struct_off[e]; q < M->struct_off[e + 1]; q++) mark[M->struct_j[q]] = e;
+				for (i = 1; i <= M->n; i++) if (i != e && mark[i] != e) cnt++;
+			}
+			M->fr_off[e + 1] = M->fr_off[e] + cnt;
+		}
+		tot = M->fr_off[M->n + 1];
+		M->fr_j = (long *)malloc((size_t)(tot > 0 ? tot : 1) * sizeof(long));
+		memset(mark, 0, (size_t)(M->n + 1) * sizeof(long));
+		for (e = 1; e <= M->n; e++) {
+			long c = M->fr_off[e];
+			if (M->struct_off[e + 1] > M->struct_off[e]) {
+				for (q = M->struct_off[e]; q < M->struct_off[e + 1]; q++) mark[M->struct_j[q]] = e;
+				for (i = 1; i <= M->n; i++) if (i != e && mark[i] != e) M->fr_j[c++] = i;
+			}
+		}
+		free(mark);
+	}
 }
 
 static void parse_model_trailer11(model_t *M) {
@@ -6002,6 +6085,8 @@ static void parse_model_trailer11(model_t *M) {
 	M->nstruct_pending = 0;
 	M->struct_off = NULL;
 	M->struct_j = NULL;
+	M->fr_off = NULL;
+	M->fr_j = NULL;
 	if (nst < 0) {
 		/* protocol 20: -N = N structural dyads in the last two frame columns (read at the end of BATCHSETUP) */
 		M->nstruct = 0;
@@ -6388,7 +6473,7 @@ static ST_retcode batch_setup(char *arg) {
      condmode=1: W = P, the conditional-simulation time per period;
      condmode=2: conditional simulation, the mode-0 columns with a 7th
        per-period column (after nchangesBeh), the simulated time. */
-static ST_retcode batch_run(char *arg) {
+static ST_retcode batch_run_i(char *arg) {
 	model_t *M = &batch_cur->M;
 	long K, nthreads, pd, k, u, P, pNet, pBeh, W, c;
 	unsigned long long seed;
@@ -6572,6 +6657,22 @@ static ST_retcode batch_run(char *arg) {
 	free(prm);
 	return 0;
 }
+
+#ifdef SAOM_PROFILE
+static double prof_last_exit = 0.0;
+static ST_retcode batch_run(char *arg) {
+	double t0 = prof_now(), t1;
+	ST_retcode rc;
+	if (prof_last_exit > 0.0) { prof_t[PR_WAIT] += t0 - prof_last_exit; prof_n[PR_WAIT] += 1.0; }
+	rc = batch_run_i(arg);
+	t1 = prof_now();
+	prof_t[8] += t1 - t0; prof_n[8] += 1.0;
+	prof_last_exit = t1;
+	return rc;
+}
+#else
+#define batch_run batch_run_i
+#endif
 
 /* ===================================================================
    protocol 52: several co-evolving dependent networks (up to MAXNETS, all one-mode directed, same actor set). BATCHSETUP<k>| fills the slot of network k
@@ -7339,7 +7440,7 @@ static ST_retcode legacy_call(char *arg0) {
 	free(PD.ti); free(PD.tj); free(PD.beh0); free(PD.mi); free(PD.mj); free(PD.missbeh); free(PD.present);
 	free(P.ratecovattr);
 	free(P.ratecoef);
-	free(M.struct_off); free(M.struct_j);
+	free(M.struct_off); free(M.struct_j); free(M.fr_off); free(M.fr_j);
 	return(0);
 }
 
@@ -7639,6 +7740,27 @@ STDLL stata_call(int argc, char *argv[]) {
 		free(buf);
 		return rc;
 	}
+#ifdef SAOM_PROFILE
+	if (strncmp(argv[0], "BATCHCLEAN|", 11) == 0) {
+		const char *po = getenv("SAOM_PROF_OUT");
+		if (po) {
+			FILE *pf = fopen(po, "a");
+			const char *nm[8] = {"setup", "actor", "eval", "softmax", "apply", "beh", "end", "glue"};
+			int q;
+			if (pf) {
+				for (q = 0; q < 8; q++) fprintf(pf, "PROF %s %.6f %.0f\n", nm[q], prof_t[q], prof_n[q]);
+				fprintf(pf, "PROF batchrun %.6f %.0f\n", prof_t[8], prof_n[8]);
+				for (q = 0; q < 12; q++) fprintf(pf, "PROFTERM %d %.6f %.0f\n", q + 1, prof_term_t[q], prof_term_n[q]);
+				fprintf(pf, "PROFCALLS %.0f\n", prof_calls);
+				fclose(pf);
+			}
+		}
+		memset(prof_t, 0, sizeof(prof_t)); memset(prof_n, 0, sizeof(prof_n));
+		memset(prof_term_t, 0, sizeof(prof_term_t)); memset(prof_term_n, 0, sizeof(prof_term_n));
+		prof_calls = 0.0;
+		prof_last_exit = 0.0;
+	}
+#endif
 	if (strncmp(argv[0], "BATCHCLEAN|", 11) == 0) { int sl; for (sl = MAXNETS - 1; sl >= 0; sl--) { batch_cur = &batch_states[sl]; batch_free(); } batch_cur = &batch_states[0]; while (saom_ngyard > 0) free(saom_gyard[--saom_ngyard]); return 0; }
 	if (strncmp(argv[0], "RCSTART|", 8) == 0) return rcstart_cmd();
 	if (strncmp(argv[0], "BEHSTAT|", 8) == 0) {
