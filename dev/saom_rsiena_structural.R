@@ -83,7 +83,9 @@ if (variant %in% c('v5', 'm0')) {
 for (k in 1:3) { m <- waves[[k]]; m[is.na(m)] <- 0; write.table(m, file.path(out, sprintf("w%d.csv", k)), row.names = FALSE, col.names = FALSE, sep = ",") }
 if (task == 'data') quit()
 arr <- function(ws) array(unlist(ws), dim = c(nrow(ws[[1]]), ncol(ws[[1]]), length(ws)))
+cvv <- (1:50 %% 4) + 0.5
 mkdata <- function(ws) {
+  if (Sys.getenv("MODEL", "std") == 'ratecov') { cvc <- coCovar(cvv, centered = TRUE); return(sienaDataCreate(sienaDependent(arr(ws)), cvc)) }
   if (!bip && !is.null(cchg)) return(sienaDataCreate(sienaDependent(arr(ws)), sienaCompositionChange(cchg)))
   if (!bip) return(sienaDataCreate(sienaDependent(arr(ws))))
   A <- sienaNodeSet(40, nodeSetName = "A"); B <- sienaNodeSet(20, nodeSetName = "B")
@@ -96,6 +98,9 @@ mkeff <- function(d, theta = NULL) {
   if (MODEL == 'endow') {   # reciprocity split into endowment and creation, outdegree and transitive triplets plain
     e <- includeEffects(e, recip, type = 'endow'); e <- includeEffects(e, recip, type = 'creation'); e <- includeEffects(e, recip, type = 'eval', include = FALSE)
     e <- includeEffects(e, transTrip)
+  } else if (MODEL == 'ratecov') {
+    e <- includeEffects(e, recip, transTrip, cycle3, inPopSqrt, outAct)
+    e <- includeEffects(e, RateX, interaction1 = 'cvc', type = 'rate')
   } else if (bip) e <- includeEffects(e, cycle4, inPopSqrt, outAct)
   else e <- includeEffects(e, recip, transTrip, cycle3, inPopSqrt, outAct)
   e
@@ -135,6 +140,7 @@ if (task == 'sim') {
   e$initialValue[e$shortName == 'transTrip'] <- th['transtrip']; e$initialValue[e$shortName == 'cycle3'] <- th['cycle3']
   }
   e$initialValue[e$shortName == 'Rate'] <- 4
+  if (MODEL == 'ratecov') e$initialValue[e$shortName == 'RateX'] <- as.numeric(Sys.getenv('RCC', '0.3'))
   e$fix[e$include] <- TRUE
   res <- NULL
   for (s in 1:nseed) {
