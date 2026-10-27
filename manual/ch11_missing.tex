@@ -37,29 +37,32 @@ Missing data are handled in the native engine, when the model is otherwise nativ
 
 \paragraph{Missing covariate values.} Covariates of \opt{nodematch()}, \opt{nodecov()}, \opt{nodeicov()}, \opt{nodeocov()}, \opt{simcov()} and their aliases follow RSiena. A missing value is imputed with the covariate mean when actors decide their ministeps, but the \emph{statistic} (target and every simulated statistic) skips a tie whose relevant actor is missing: the alter for \opt{altx()}, the ego for \opt{egox()}, either for \opt{samex()} and \opt{simx()}. With the default centring a missing \opt{altx()}, \opt{egox()} or \opt{nodecov()} value becomes 0 and skipping changes nothing; under \opt{nocenter} and for \opt{samex()}/\opt{simx()} it does, and the range and similarity mean of \opt{simx()} use the observed values only. On RSiena's \texttt{s501}/\texttt{s502} with 8 of 50 covariate values missing, density, reciprocity, altX, egoX and simX agree with RSiena 1.6.6 within sampling noise (simX $0.79$ against $0.78$). An \opt{interact()} naming a \opt{samex()} or \opt{simx()} effect whose variable has missing values is rejected.
 
-\section{Structural zeros and ones: \opt{structural()}}\label{sec:structural}
-A structural dyad is one whose tie value is known and cannot change, for example a legally mandated reporting tie, a physically impossible tie, or a dyad that you wish to hold fixed for a counterfactual. It is a simpler idea than missing data: the value is not unknown. RSiena marks such dyads by embedding the sentinel values 10 (structural zero) and 11 (structural one) in the network array. \nwsaom{} uses a \emph{separate} 0/1 mask matrix instead, in the manner of \opt{missnet()}.
-\begin{itemize}
-\item \opt{structural(matname)} takes \emph{one} 0/1 $n\times n$ matrix with a zero diagonal; a 1 freezes that dyad for the whole period.
-\item The observed value of a marked dyad must be \emph{identical} at both waves. A dyad that genuinely changed cannot be structural, and \nwsaom{} rejects it with an error (rc 198) rather than ignore it.
-\item Mechanically the dyad is excluded from every actor's candidate set in each ministep, so it can never toggle; the effect statistics and their changes are reused unchanged.
-\end{itemize}
-The following example marks dyads that are zero in both waves among the first five actors:
-\begin{lstlisting}
-nwtomata glasgow1, mat(A1)
-nwtomata glasgow2, mat(A2)
-mata:
-S = J(50,50,0)
-S[|1,1\5,50|] = (A1[|1,1\5,50|]:==0):*(A2[|1,1\5,50|]:==0)
-S = S - diag(diagonal(S))
-st_matrix("S", S)
-end
-nwsaom, wave1(glasgow1) wave2(glasgow2) outdegree reciprocity transtrip ///
-    structural(S) seed(1)
-\end{lstlisting}
-(Also run with the development build; the fit converged with an overall ratio of 0.110.) The structural mask also underlies the two-mode implementation, where only actor--event dyads are free.
+\section{Structural zeros and ones}\label{sec:structural}
+A structural dyad is one whose tie value is known and cannot change, for example a legally mandated reporting tie, a physically impossible tie, or a dyad that you wish to hold fixed for a counterfactual. It is a simpler idea than missing data: the value is not unknown. \nwsaom{} follows RSiena: the values are part of the wave networks. In a wave network a tie with the value 10 is a structural zero and a tie with the value 11 a structural one (a 1 is an ordinary tie, a 0 no tie). \nwsaom{} detects the codes; there is no option. With \texttt{nwset, mat()} the codes are the cell values of the matrix, with \texttt{nwfromedge} give the value variable the values 10 and 11. Codes on the diagonal are ignored; every other tie value than 1, 10 and 11 stops the command.
 
-\paragraph{Scope.} \opt{structural()} is implemented for the two-wave path \opt{wave1()}/\opt{wave2()}, for network-only models, and it is not combinable with \opt{symmetric}, \opt{ratecov()} or the network endowment/creation split; each of these combinations is rejected outright. For users the option is limited to the two-wave path; it is used with \opt{waves()} only internally, for two-mode networks. It runs in the native plugin.
+The rules are RSiena's, checked against RSiena 1.6.14 on the data of the examples:
+\begin{itemize}
+\item The codes belong to a wave; the structural dyads may differ from wave to wave. A dyad that is structural at the \emph{start} of a period keeps its start value during the whole period (the value of its code: 11 is a tie, 10 no tie) and is not among the alternatives of the actors. A dyad that is structural at the \emph{end} of a period only is free during the period and gets its end value before the statistics are computed.
+\item The observed statistics of a period are those of the end network with the dyads that were structural at the start of the period set to their start value. The observed distance between two waves, which is the target of the rate and of the conditional estimation, leaves out the dyads that are structural at either end of the period and the dyads that are missing at either end. The conditional estimation stops, as RSiena's, when the number of changes of the dyads that are not missing reaches that distance, so with structural dyads that change from wave to wave the unconditional estimation (option \opt{unconditional}) is usually the better choice.
+\item An actor with no free alternative among the active actors has the rate 0; the other actors cannot choose a structural dyad.
+\item A dyad that is missing at a wave (\opt{missnet()}) takes the code of the previous wave. Composition change (\opt{present()}, \opt{joinat()}, \opt{leaveat()}), covariates, interactions, rate covariates and the structural rate effects (computed over the actors who can act), network endowment and creation (RSiena advises against them when the structural dyads change from wave to wave) and two-mode networks (the codes are cells of the actors-by-events matrix) work as without codes.
+\end{itemize}
+The following example makes the ties from pupil 1 to the pupils 11 to 20 structural zeros in both waves:
+\begin{lstlisting}
+nwtomata glasgow1, mat(G1)
+nwtomata glasgow2, mat(G2)
+forvalues j = 11/20 {
+    mata: G1[1,`j'] = 10; G2[1,`j'] = 10
+}
+mata: st_matrix("g1m", G1); st_matrix("g2m", G2)
+nwset, mat(g1m) directed name(g1)
+nwset, mat(g2m) directed name(g2)
+nwsaom, wave1(g1) wave2(g2) outdegree reciprocity transtrip seed(1)
+\end{lstlisting}
+
+\paragraph{Scope.} One directed one-mode network or one two-mode network, any number of waves, the method of moments. Not yet with a co-evolving behavior, \opt{groups()}, \opt{symmetric}, \texttt{nwsaom multinet}, \opt{ml} and \texttt{nwsaom bayes}; \texttt{estat gof}, \texttt{mems}, \texttt{simulate}, \texttt{importance}, \texttt{score}, \texttt{timetest} and \texttt{nwsaom describe} stop with a message after or for such data. The code runs in the native plugin only (there is no Mata implementation).
+
+\paragraph{The older option \opt{structural(matname)}.} It takes one 0/1 matrix of dyads that are fixed in both periods and need the same observed value at both waves; two waves, network only. It is kept for compatibility, is replaced by the codes, and cannot be combined with them.
 
 \section{What RSiena has that \nwsaom{} does not (yet)}\label{sec:notimpl}
 RSiena's effects table, as returned by \texttt{getEffects()} for twelve data configurations of RSiena 1.6.6, has \nTotal{} rows (a row is one RSiena short name for one variable type and interaction context). The effects that RSiena 1.6.7 to 1.6.14 added or changed (for example \texttt{WXZX} and the two-mode \texttt{toU}) are implemented and compared with RSiena 1.6.14 but are not part of these counts; the counts change with RSiena releases. Every row was compared with \nwsaom{} by reading the code and the documentation, and by running models against \texttt{siena07} where they were implemented. Of these rows:

@@ -363,11 +363,8 @@ to {opt leaveat()}; a missing value means from the first wave / to the last wave
 {synopt:{opth missbeh(varlist)}}Missing behavior data: one 0/1 variable per wave, same "one variable per wave" convention as {opt present()}, marking
 which actors' behavior value is missing at that wave. Requires {opt behavior()}. Optional - omitting it means every actor's value is fully observed.
 See {help nwsaom_remarks##missingdata:Missing data} in nwsaom_remarks{p_end}
-{synopt:{opt structural(matname)}}Structural zeros/ones: ONE 0/1 n x n MATRIX (zero diagonal) marking dyads whose tie value is fixed by design rather than actor choice (e.g. a
-legally mandated reporting tie, or a dyad known a priori to never form) - a marked dyad is excluded from every actor's own ministep candidate set, so it can never toggle during
-simulation. The marked dyad's OBSERVED value must be identical at both waves (a "frozen" dyad that genuinely changed between waves is rejected outright, matching RSiena's own
-structural-value convention that a fixed dyad's data must actually be constant). v1 scope: exactly two waves ({opt wave1()}/{opt wave2()}, not {opt waves()}), network-only (no
-{opt behavior()}); not yet combinable with {opt symmetric}, {opt ratecov()}, or the network endowment/creation split. See {help nwsaom_remarks##structural:Structural zeros/ones} in
+{synopt:{opt structural(matname)}}Older way to mark structural zeros/ones: ONE 0/1 n x n MATRIX (zero diagonal) of dyads whose tie value is fixed in both periods; two waves, network-only. Replaced by the codes
+10 (structural zero) and 11 (structural one) in the wave networks, which {cmd:nwsaom} detects without any option and which may change from wave to wave. See {help nwsaom_remarks##structural:Structural zeros/ones} in
 nwsaom_remarks{p_end}
 
 {marker ratecov_options}{...}
@@ -853,13 +850,17 @@ missing tie values ({opt missnet()}: one 0/1 matrix per wave){p_end}
 		{cmd:. matrix miss2 = J(50, 50, 0)}
 		{cmd:. nwsaom, wave1(glasgow1) wave2(glasgow2) outdegree reciprocity missnet(miss1 miss2) seed(1)}
 
-{pstd}{bf:Structural zeros}: dyads that cannot change (a 0/1 matrix; here, ties from pupil 1 to
-pupils 11-20, which are absent at both waves){p_end}
-		{cmd:. matrix zeros = J(50, 50, 0)}
+{pstd}{bf:Structural zeros}: dyads that cannot change are coded 10 (structural zero) or 11 (structural one) in the wave networks, as in RSiena; here, ties from pupil 1 to
+pupils 11-20 are structural zeros at both waves{p_end}
+		{cmd:. nwtomata glasgow1, mat(G1)}
+		{cmd:. nwtomata glasgow2, mat(G2)}
 		{cmd:. forvalues j = 11/20 {c -(}}
-		{cmd:.     matrix zeros[1,`j'] = 1}
+		{cmd:.     mata: G1[1,`j'] = 10; G2[1,`j'] = 10}
 		{cmd:. {c )-}}
-		{cmd:. nwsaom, wave1(glasgow1) wave2(glasgow2) outdegree reciprocity structural(zeros) seed(1)}
+		{cmd:. mata: st_matrix("g1m", G1); st_matrix("g2m", G2)}
+		{cmd:. nwset, mat(g1m) directed name(g1)}
+		{cmd:. nwset, mat(g2m) directed name(g2)}
+		{cmd:. nwsaom, wave1(g1) wave2(g2) outdegree reciprocity seed(1)}
 
 {pstd}{bf:Threads}: the same results on one thread (the default uses all physical cores){p_end}
 		{cmd:. nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity gwesp(.69) cores(1) seed(1)}

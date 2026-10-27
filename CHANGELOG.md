@@ -3,6 +3,19 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+Structural zeros and ones: RSiena's codes 10 and 11 in the wave networks. Needs the compiled plugin of this release (an older plugin gives a clear message; there is no Mata implementation of the new part). Fits that use neither the codes nor `structural()` are unchanged.
+
+### Added
+- **The values 10 and 11 in a wave network are structural zeros and ones, as in RSiena (1.6.14).** `nwsaom` detects them (no option). They are accepted in the networks of `wave1()`/`wave2()`/`waves()` of a directed one-mode network or a two-mode network, for any number of waves, in the method of moments (conditional and unconditional). The codes may differ from wave to wave. Rules, all checked against RSiena 1.6.14: a dyad that is structural at the start of a period keeps its start value (11 is a tie) and is not among the alternatives of the actors; a dyad that is structural at the end of a period only is free during the period and takes its end value before the statistics; the targets are those of the end network with the dyads that were structural at the start set to their start value; the observed distance (rate target, conditional estimation) leaves out the dyads that are structural or missing at either end while the conditional simulation counts every change of a dyad that is not missing (RSiena's behavior); an actor with no free alternative among the active actors has rate 0; a dyad that is missing at a wave takes the code of the previous wave. They combine with covariates, interactions, missing network data (`missnet()`), composition change (`present()`, `joinat()`/`leaveat()`), network endowment/creation, covariate rate effects and the structural rate effects.
+- Validation: the observed statistics and distances agree with `siena07` exactly on five coded data sets (constant and changing sets, frozen actors, missing data, composition change, endowment/creation, a two-mode network), simulation at fixed parameters agrees with `siena07` within Monte Carlo error (unconditional and conditional), and 8-seed estimates agree. Test `test_nwsaom_structural_codes.do`.
+- Not yet with the codes (each refused with a message): a co-evolving behavior, `groups()`, `symmetric`, `nwsaom multinet`/`multiplex`, `ml`, `nwsaom bayes`, `estat gof`/`mems`/`simulate`/`importance`/`score`/`timetest` after such a fit, and `nwsaom describe` of such networks.
+
+### Changed
+- `structural(matname)` (a 0/1 matrix, two waves) is the older way to mark structural dyads and is kept; the codes 10 and 11 replace it and cannot be combined with it.
+- The check of the tie values (`_nwsaom_chkbin`) accepts 1, 10 and 11 and names the offending value and dyad otherwise. The 1.0.10 text above that the program "does not accept 10 and 11 yet" described its state then; the comment in `_nwsaom_chkbin.ado` that quoted RSiena's message as if both were accepted is corrected.
+
 ## [1.2.0] - 2026-10-27
 
 Minor release: joint estimation of several groups. Works with nwcommands 3.6.0 and later. The Mata libraries `lnwsaom1.mlib` and `lnwsaom2.mlib` are rebuilt (Stata 17) against the unchanged core library; the compiled plugin of this release is needed for groups (an older plugin gives a clear message), and everything else works with an older plugin, only slower where the new code paths apply.
