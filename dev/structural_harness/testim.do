@@ -37,10 +37,13 @@ if "`mdl'" == "ratecov" {
 	local rcs "ratecov(cv)"
 	local nb 7
 }
+local th0e : env TH0
+local th0opt ""
+if "`th0e'" != "" local th0opt "theta0(`th0e')"
 tempname fh
 file open `fh' using "`dir'/nws_est_`cond'.csv", write replace
 forvalues s = 1/`nseeds' {
-	nwsaom, `mopt' waves(w1 w2 w3) outdegree reciprocity transtrip cycle3 indegpopularity outactivity `rcs' k0(`kk0') k3(`kk3') seed(`s') `=cond("`cond'"=="uncond","unconditional","")'
+	nwsaom, `mopt' waves(w1 w2 w3) outdegree reciprocity transtrip cycle3 indegpopularity outactivity `rcs' `th0opt' k0(`kk0') k3(`kk3') seed(`s') `=cond("`cond'"=="uncond","unconditional","")'
 	matrix b = e(b)
 	local line ""
 	forvalues j = 1/`nb' {

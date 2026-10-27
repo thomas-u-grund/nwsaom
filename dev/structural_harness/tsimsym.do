@@ -25,8 +25,8 @@ if `hascc' {
 }
 local mdl : env MODEL
 local spec "symmetric symtype(joint) outdegree transties indegpopularity"
-local th0 "-1.2 0.3 0.1"
-local par "-1.2, 0.3, 0.1, 49, 49"
+local th0 "-1.2 0.1 0.3"
+local par "-1.2, 0.1, 0.3, 49, 49"
 local rcs ""
 if "`mdl'" == "ratecov" {
 	clear
@@ -67,7 +67,7 @@ void tsim_run(real scalar cond, real scalar K, string scalar dir, real rowvector
 	pres = J(0,0,0)
 	fnt = *findexternal("__nwsaom_last_fntype")
 	if (fileexists(dir + "/cc.csv")) pres = *findexternal("__nwsaom_compstart")
-	SaomNetCtxInit(C, Gw, __nwsaom_last_M, pres, MM, fnt, (st_numscalar("RCON") == 1 ? st_matrix("RC") : J(0,0,0)), 0, J(0,0,0))
+	SaomNetCtxInit(C, Gw, __nwsaom_last_M, pres, MM, fnt, (st_numscalar("RCON") == 1 ? st_matrix("RC") : J(0,0,0)), 1, J(0,0,0))
 	SaomNetSimMany(C, __nwsaom_last_M, par, K, 0, Z, S)
 	SaomBatchCleanup()
 	mm = mean(Z)

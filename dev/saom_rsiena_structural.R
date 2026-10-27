@@ -181,6 +181,8 @@ if (task == 'est') {
   d3 <- mkdata(waves)
   e <- mkeff(d3)
   res <- NULL
+  st <- as.numeric(strsplit(Sys.getenv("START", ""), ",")[[1]])
+  if (length(st) == 6) { sn <- c('density','recip','transTrip','cycle3','inPopSqrt','outAct'); for (q in 1:6) e$initialValue[e$shortName == sn[q]] <- st[q] }
   for (s in 1:nseed) {
     ans <- siena07(ALG(projname = NULL, seed = 200 + s, n3 = n3, nsub = 4, cond = cnd), data = d3, effects = e, batch = TRUE, silent = TRUE)
     ans <- siena07(ALG(projname = NULL, seed = 300 + s, n3 = n3, nsub = 1, cond = cnd), data = d3, effects = e, prevAns = ans, batch = TRUE, silent = TRUE)

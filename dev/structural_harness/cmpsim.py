@@ -28,7 +28,7 @@ if os.environ.get('MODEL','')=='endow':
         names=['outdegree','recipEndow','recipCreation','transTrip']
 if os.path.basename(d).startswith('sy'):
     # R: [rate1, rate2, density, transTies, inPopSqrt]; nwsaom: [outdegree, transties, inpop, rate1, rate2]
-    idx=[3,4,0,1,2]
+    idx=[3,4,0,2,1]
     names=['rate1','rate2','outdegree','transTies','inPopSqrt']
 if os.path.basename(d).startswith('tm'):
     # R: [rate1, rate2, outdegree, cycle4, inPopSqrt, outAct]; nwsaom: [outdegree, inpop, outact, cycle4, rate1, rate2]
