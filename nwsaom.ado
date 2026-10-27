@@ -1021,14 +1021,18 @@ program nwsaom, eclass
 	}
 	// groups(): joint estimation of several groups (RSiena's sienaGroupCreate()); the groups are glued into one chain of virtual waves, see _nwsaom_groups.ado
 	local __ns_isgrp = ("`groups'" != "")
+	if "`gwaves'" != "" & !`__ns_isgrp' {
+		di "{err}{bf:gwaves()} belongs to {bf:groups()}: give {bf:groups(varname)} as well."
+		error 198
+	}
 	local __ns_gW = 0
 	if `__ns_isgrp' {
 		local __ns_gbad ""
 		if `__ns_mb' local __ns_gbad "behavior(several)"
-		foreach __o in joinat leaveat structural behrate symmetric symtype tvdyadcov tvdyadcovrecip tvdyadx dyadx netx netbeh ml {
+		foreach __o in structural behrate symmetric symtype tvdyadcov tvdyadcovrecip tvdyadx dyadx netx netbeh ml {
 			if `"``__o''"' != "" local __ns_gbad "`__ns_gbad' `__o'"
 		}
-		_nwsaom_groups build, groups(`groups') nodes(`nodes') nwaves(`__nwsaom_nwaves') multi(`__ns_multi') tm(`__nwsaom_tm') coev(`__nwsaom_coev') haspres(`__ns_haspresent') hasmissnet(`__ns_hasmissnet') gwaves(`gwaves') bad(`__ns_gbad') tvcov(`"`tvcov'"')
+		_nwsaom_groups build, groups(`groups') nodes(`nodes') nwaves(`__nwsaom_nwaves') multi(`__ns_multi') tm(`__nwsaom_tm') coev(`__nwsaom_coev') haspres(`__ns_haspresent') hasmissnet(`__ns_hasmissnet') gwaves(`gwaves') bad(`__ns_gbad') tvcov(`"`tvcov'"') joinat(`joinat') leaveat(`leaveat')
 		local __ns_gW = `__nwsaom_nwaves'
 		local __nwsaom_nwaves = r(nwaves)
 		local __ns_gpn "`r(pnames)'"
@@ -1051,7 +1055,8 @@ program nwsaom, eclass
 		}
 	}
 	capture mata: mata drop __nwsaom_compstart __nwsaom_compev
-	if `__ns_hastimed' {
+	if `__ns_hastimed' & `__ns_isgrp' mata: SaomGroupsTimedApply()
+	else if `__ns_hastimed' {
 		capture mata: mata drop __nwsaom_presentmat __ns_present1
 		mata: SaomTimedFromVars(`nodes', `__nwsaom_nwaves', "`joinat'", "`leaveat'")
 		mata: __ns_present1 = __nwsaom_compstart[.,1]

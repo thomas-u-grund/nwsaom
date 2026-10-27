@@ -28,6 +28,16 @@ if (feat == 'compl') {                                    # leavers: actors 3, 2
     waves[[w]][a, ] <- orig[[wn]][a, ]; waves[[w]][, a] <- orig[[wn]][, a]
   }
 }
+jt <- rep(1, 50); lt <- rep(3, 50)                          # joinat() / leaveat() on the time scale of the waves of the actor's group (feature 'timed')
+if (feat == 'timed') {
+  jt[3] <- 1.4; lt[8] <- 2.6; lt[22] <- 1.7; jt[30] <- 2.35; jt[41] <- 1.2; lt[41] <- 2.5; lt[47] <- 2.8
+  for (a in 1:50) for (w in 1:3) present[a, w] <- as.numeric(ceiling(jt[a]) <= w && w <= trunc(lt[a]))
+  orig <- waves
+  for (a in 1:50) for (w in 1:3) if (present[a, w] == 0) {
+    pw <- which(present[a, ] == 1); wn <- pw[which.min(abs(pw - w))]
+    waves[[w]][a, ] <- orig[[wn]][a, ]; waves[[w]][, a] <- orig[[wn]][, a]
+  }
+}
 if (feat %in% c('comp', 'coevcomp')) {                                     # actors 3 and 8 (group 1), 22 (group 2) and 40 (group 3) join at wave 2 (a leaver exactly at an observation is treated differently by present() and sienaCompositionChange)
   present[3, 1] <- 0; present[8, 1] <- 0; present[40, 1] <- 0; present[22, 1] <- 0
   # the ties of an absent actor at a wave where it is absent are those of the nearest wave where it is present (RSiena and nwsaom both
@@ -39,7 +49,7 @@ if (feat %in% c('comp', 'coevcomp')) {                                     # act
   }
 }
 s50b <- as.matrix(s50a[, 1:3])                             # behavior / changing covariate values; absent actors take the nearest present wave
-if (feat %in% c('comp', 'coevcomp', 'compl')) for (a in 1:50) for (w in 1:3) if (present[a, w] == 0) { pw <- which(present[a, ] == 1); s50b[a, w] <- s50b[a, pw[which.min(abs(pw - w))]] }
+if (feat %in% c('comp', 'coevcomp', 'compl', 'timed')) for (a in 1:50) for (w in 1:3) if (present[a, w] == 0) { pw <- which(present[a, ] == 1); s50b[a, w] <- s50b[a, pw[which.min(abs(pw - w))]] }
 bmiss <- matrix(0, 50, 3)
 if (feat %in% c('coevmiss', 'coevmiss0')) { bmiss[5, 2] <- 1; bmiss[25, 1] <- 1; bmiss[45, 3] <- 1; bmiss[30, 2] <- 1 }
 miss <- list(NULL, NULL, NULL)
@@ -69,6 +79,7 @@ mk <- function(gi) {
   else if (feat == 'tvcov') alc <- varCovar(as.matrix(s50a[i, ws]))
   else alc <- coCovar(s50a[i, 1], centered = (feat != 'unequal'))
   if (feat == 'dyad') { D <- coDyadCovar(D0[i, i]); return(sienaDataCreate(net, alc, D)) }
+  if (feat == 'timed') return(sienaDataCreate(net, alc, sienaCompositionChange(lapply(i, function(a) c(jt[a], lt[a])))))
   if (feat %in% c('comp', 'compl')) {
     ch <- lapply(i, function(a) { p <- present[a, ws]; w1 <- which(p == 1); c(min(w1), max(w1)) })
     cc <- sienaCompositionChange(ch)
@@ -95,6 +106,7 @@ if (feat == 'coevsim') { eff <- includeEffects(eff, transTrip); eff <- includeEf
 if (feat == 'coevrate') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, avAlt, name = 'alc', interaction1 = 'net'); eff <- includeEffects(eff, RateX, name = 'alc', interaction1 = 'ccv', type = 'rate') }
 if (feat %in% c('coev', 'coevcomp', 'coevmiss')) { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, altX, interaction1 = 'alc'); eff <- includeEffects(eff, avAlt, name = 'alc', interaction1 = 'net') }
 if (feat == 'dyad') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, X, interaction1 = "D"); }
+if (feat == 'timed') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, altX, interaction1 = "alc") }
 if (feat == 'degc') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, inPop.c, outAct.c) }            # centred degree effects: the average degree is a property of the group
 if (feat == 'sequiv') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, inStructEq) }                    # structural equivalence: structmean of the group
 if (feat == 'ownass') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, outInAss); eff <- setEffect(eff, outInAss, parameter = 2) }

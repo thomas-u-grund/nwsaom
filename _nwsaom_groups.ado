@@ -13,7 +13,7 @@ capture program drop _nwsaom_groups
 program define _nwsaom_groups, rclass
 	gettoken sub 0 : 0, parse(" ,")
 	if "`sub'" == "build" {
-		syntax , GROUPS(string) NODES(integer) NWAVES(integer) MULTI(integer) TM(integer) COEV(integer) HASPRES(integer) HASMISSNET(integer) [GWAVES(string) BAD(string) TVCOV(string)]
+		syntax , GROUPS(string) NODES(integer) NWAVES(integer) MULTI(integer) TM(integer) COEV(integer) HASPRES(integer) HASMISSNET(integer) [GWAVES(string) BAD(string) TVCOV(string) JOINAT(string) LEAVEAT(string)]
 		if "`bad'" != "" {
 			di "{err}groups() is not yet combinable with: {bf:`bad'}."
 			error 198
@@ -35,6 +35,10 @@ program define _nwsaom_groups, rclass
 		forvalues k = 1/`Wv' {
 			mata: __ns_gv`k' = SaomGraph()
 			mata: SaomGroupsWave(__nwsaom_last_Gwaves, `k', __ns_gv`k')
+		}
+		if "`joinat'`leaveat'" != "" {
+			* composition change at fractional times: the times are on the time scale of the waves of the actor's own group (RSiena: every group is its own data object)
+			mata: SaomGroupsTimed(`nwaves', "`joinat'", "`leaveat'")
 		}
 		if `haspres' mata: __ns_gpres = SaomGroupsPresent(__nwsaom_presentmat)
 		else mata: __ns_gpres = SaomGroupsPresent(J(0, 0, 0))

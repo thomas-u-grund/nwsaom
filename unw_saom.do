@@ -18871,4 +18871,71 @@ real scalar SaomGroupsIsDg(pointer(class SaomTermData scalar) scalar tdp, string
 	if (rows((*tdp).attr) < 4) return(0)
 	return(all((*tdp).attr[4::rows((*tdp).attr)] :== 0) & (*tdp).levels[1] >= 260 & (*tdp).levels[2] == 0)
 }
+/* joinat()/leaveat() in groups: the times are on the time scale of the waves of the actor's own group (wave c of the group = time c). Sets the presence
+   at the original waves (__nwsaom_presentmat, n x W; entries of waves a group does not use stay 1) and stores the events of the virtual periods in
+   __ns_gtev (virtual period, time in the period, actor, 1 join / 2 leave); SaomGroupsTimedApply() turns them into the externals the estimators read. */
+void SaomGroupsTimed(real scalar W, string scalar jv, string scalar lv) {
+	real colvector code, nw, join, leave, idx
+	real matrix wl, pmo, ev
+	pointer(real matrix) scalar pp, pe
+	real scalar n, G, h, s, i, c, j, l, per, tm, Wh
+	code = SaomGroupsId()
+	nw = SaomGroupsNW()
+	wl = SaomGroupsWL()
+	n = rows(code)
+	G = rows(nw)
+	join = (jv != "" ? st_data(1::n, jv) : J(n, 1, .))
+	leave = (lv != "" ? st_data(1::n, lv) : J(n, 1, .))
+	pmo = J(n, W, 1)
+	ev = J(0, 4, 0)
+	s = 0
+	for (h=1; h<=G; h++) {
+		Wh = nw[h]
+		idx = selectindex(code :== h)
+		for (c=1; c<=rows(idx); c++) {
+			i = idx[c]
+			j = (join[i] >= . ? 1 : join[i])
+			l = (leave[i] >= . ? Wh : leave[i])
+			if (j < 1 | l > Wh | j > l) {
+				errprintf("joinat()/leaveat(): actor %g has the times %g and %g; they must satisfy 1 <= joinat <= leaveat <= %g (the number of waves of its group)\n", i, j, l, Wh)
+				exit(198)
+			}
+			if (ceil(j) > trunc(l)) {
+				errprintf("joinat()/leaveat(): actor %g (times %g and %g) is not active at any observation of its group; RSiena requires every interval to contain a wave\n", i, j, l)
+				exit(198)
+			}
+			for (per=1; per<=Wh; per++) pmo[i, wl[h, per]] = (ceil(j) <= per & per <= trunc(l))
+			if (j > 1) {
+				per = trunc(j)
+				tm = j - per
+				if (tm > 1e-10) ev = ev \ (s + per, tm, i, 1)
+			}
+			if (l < Wh) {
+				per = trunc(l)
+				tm = l - per
+				if (tm > 1e-10) ev = ev \ (s + per, tm, i, 2)
+			}
+		}
+		s = s + Wh - 1
+	}
+	if (rows(ev) > 0) ev = sort(ev, (1, 2))
+	rmexternal("__nwsaom_presentmat")
+	pp = crexternal("__nwsaom_presentmat")
+	*pp = pmo
+	rmexternal("__ns_gtev")
+	pe = crexternal("__ns_gtev")
+	*pe = ev
+}
+void SaomGroupsTimedApply() {
+	pointer(real matrix) scalar pp, pc, pe, pg
+	pp = findexternal("__nwsaom_presentmat")
+	pg = findexternal("__ns_gtev")
+	rmexternal("__nwsaom_compstart")
+	rmexternal("__nwsaom_compev")
+	pc = crexternal("__nwsaom_compstart")
+	*pc = (*pp)[., 1..(cols(*pp) - 1)]
+	pe = crexternal("__nwsaom_compev")
+	*pe = (pg == NULL ? J(0, 4, 0) : *pg)
+	rmexternal("__ns_gtev")
+}
 end

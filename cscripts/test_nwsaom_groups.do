@@ -677,6 +677,65 @@ assert r(df) == 2
 assert r(chi2) < 1.5
 display "PASS: estat timetest and estat score after a fit with groups"
 
+* ---- timed: joiners and leavers at fractional times (joinat(), leaveat(); the times are on the scale of the waves of the actor's group)
+mata:
+mata set matastrict off
+void gt_data() {
+	jt = J(50, 1, 1)
+	lt = J(50, 1, 3)
+	jt[3] = 1.4; lt[8] = 2.6; lt[22] = 1.7; jt[30] = 2.35; jt[41] = 1.2; lt[41] = 2.5; lt[47] = 2.8
+	pres = J(50, 3, 0)
+	for (a=1; a<=50; a++) for (w=1; w<=3; w++) pres[a, w] = (ceil(jt[a]) <= w) & (w <= trunc(lt[a]))
+	orig = st_matrix("Gbase1"), st_matrix("Gbase2"), st_matrix("Gbase3")
+	for (w=1; w<=3; w++) {
+		M = st_matrix("Gbase" + strofreal(w))
+		for (a=1; a<=50; a++) {
+			if (pres[a, w]) continue
+			pw = selectindex(pres[a, .])
+			d = abs(pw :- w)
+			wn = pw[selectindex(d :== min(d))[1]]
+			O = orig[., (wn-1)*50+1..wn*50]
+			M[a, .] = O[a, .]
+			M[., a] = O[., a]
+		}
+		st_matrix("Gtimed" + strofreal(w), M)
+	}
+	st_numscalar("__gt_dummy", 0)
+	st_matrix("__jt", jt)
+	st_matrix("__lt", lt)
+}
+end
+mata: gt_data()
+nwclear
+use "__groups_base.dta", clear
+generate double jt = .
+generate double lt = .
+mata: st_store(., "jt", st_matrix("__jt"))
+mata: st_store(., "lt", st_matrix("__lt"))
+forvalues w = 1/3 {
+	nwset, mat(Gtimed`w') name(g`w') nooutput
+}
+frame create ref
+frame ref: import delimited "dev/saom_rsiena_groups_timed_cond0.csv", clear
+__gfit, opts(outdegree reciprocity transtrip egox(alc) altx(alc) joinat(jt) leaveat(lt)) uncond
+__gchk outdegree "outdegree (density)" 0.12 0
+__gchk reciprocity "reciprocity" 0.12 0
+__gchk transtrip "transitive triplets" 0.12 0
+__gchk altx_alc "alc alter" 0.12 0
+__gchk egox_alc "alc ego" 0.12 0
+__gchk period1 "constant net rate (period 1)" 0.1 0.08
+__gchk period2 "constant net rate (period 2)" 0.1 0.08
+__gchk period4 "constant net rate (period 4)" 0.1 0.08
+__gchk period5 "constant net rate (period 5)" 0.1 0.08
+__gchk period7 "constant net rate (period 7)" 0.1 0.08
+__gchk period8 "constant net rate (period 8)" 0.1 0.08
+frame drop ref
+display "PASS: timed (uncond) agrees with RSiena"
+* gwaves() belongs to groups()
+capture nwsaom, waves(g1 g2 g3) outdegree gwaves(1: 1 2 3) k3(20)
+assert _rc == 198
+display "PASS: gwaves() without groups() stops"
+
 * ---- constants that RSiena keeps per group: the average degree (centred degree effects), the structmean (structural equivalence), the average degrees of ownx() effects
 foreach f in degc sequiv ownass {
 	nwclear
@@ -720,7 +779,7 @@ foreach x in 1 2 3 {
 display "PASS: per-group data constants equal RSiena's"
 
 * what stops with a message
-foreach o in "structural(Md)" "symmetric" "joinat(p1) leaveat(p2)" "ml" {
+foreach o in "structural(Md)" "symmetric" "ml" {
 	capture nwsaom, waves(g1 g2 g3) groups(group) outdegree `o' k3(20)
 	assert _rc != 0
 }
