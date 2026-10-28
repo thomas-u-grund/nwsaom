@@ -1980,7 +1980,7 @@ BEGIN
 				}
 				put ")"
 			}
-			if (rates.cb_interact_1a.isneq("") & rates.cb_interact_1b.isneq("")) | (rates.cb_interact_2a.isneq("") & rates.cb_interact_2b.isneq("")) | (rates.cb_interact_3a.isneq("") & rates.cb_interact_3b.isneq("")) | (rates.cb_interact_4a.isneq("") & rates.cb_interact_4b.isneq("")) | (rates.cb_interact_5a.isneq("") & rates.cb_interact_5b.isneq("")) | (rates.cb_interact_6a.isneq("") & rates.cb_interact_6b.isneq("")) | rates.ed_interact.isneq("") {
+			if rates.cb_interact_1a.isneq("") & rates.cb_interact_1b.isneq("") | rates.cb_interact_2a.isneq("") & rates.cb_interact_2b.isneq("") | rates.cb_interact_3a.isneq("") & rates.cb_interact_3b.isneq("") | rates.cb_interact_4a.isneq("") & rates.cb_interact_4b.isneq("") | rates.cb_interact_5a.isneq("") & rates.cb_interact_5b.isneq("") | rates.cb_interact_6a.isneq("") & rates.cb_interact_6b.isneq("") | rates.ed_interact.isneq("") {
 				put " interact("
 				if rates.cb_interact_1a.isneq("") & rates.cb_interact_1b.isneq("") {
 					put rates.cb_interact_1a "#" rates.cb_interact_1b " "

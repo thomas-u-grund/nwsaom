@@ -5,6 +5,14 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.3] - 2026-10-28
+
+Hotfix for the dialog boxes. The Mata libraries and the plugin are unchanged.
+
+### Fixed
+- The OK button of the main nwsaom dialog did nothing (no command, no message) since the dialogs were introduced: the interact() part of the command program used parentheses in a condition, which the dialog engine cannot evaluate, so it silently stopped building the command. The condition is rewritten without parentheses.
+- New test `dlg/cmd_assembly_test.py` runs the command program of every dialog in Stata and compares the command it builds.
+
 ## [1.3.2] - 2026-10-28
 
 Patch release. The Mata libraries and the plugin are unchanged.

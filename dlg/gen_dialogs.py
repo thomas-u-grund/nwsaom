@@ -451,7 +451,7 @@ def render_ops(d, lay):
             emit('}', ind)
         elif kind == 'pairs':
             _, opt, prs, more = op
-            anyc = ' | '.join(['(%s.isneq("") & %s.isneq(""))' % (q(lay, a), q(lay, b)) for a, b in prs] + ['%s.isneq("")' % q(lay, more)])
+            anyc = ' | '.join(['%s.isneq("") & %s.isneq("")' % (q(lay, a), q(lay, b)) for a, b in prs] + ['%s.isneq("")' % q(lay, more)])
             emit('if %s {' % anyc, ind)
             emit('put " %s("' % opt, ind + 1)
             for a, b in prs:

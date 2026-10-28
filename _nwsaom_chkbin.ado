@@ -1,4 +1,4 @@
-*! version 1.3.2  28oct2026 _nwsaom_chkbin - the wave networks of nwsaom must hold the tie values 1, 10 and 11 (as RSiena: "entries in networks must be 0, 1, 10, 11, or NA")
+*! version 1.3.3  28oct2026 _nwsaom_chkbin - the wave networks of nwsaom must hold the tie values 1, 10 and 11 (as RSiena: "entries in networks must be 0, 1, 10, 11, or NA")
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General

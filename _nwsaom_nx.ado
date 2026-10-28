@@ -1,4 +1,4 @@
-*! version 1.3.2  28oct2026 _nwsaom_nx - the native-only network options of nwsaom (netx ownx dyadx tvdyadcov tvdyadcovrecip tvdyadx), split out of nwsaom.ado because Stata caps one ado program at about 141 KB of code
+*! version 1.3.3  28oct2026 _nwsaom_nx - the native-only network options of nwsaom (netx ownx dyadx tvdyadcov tvdyadcovrecip tvdyadx), split out of nwsaom.ado because Stata caps one ado program at about 141 KB of code
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General

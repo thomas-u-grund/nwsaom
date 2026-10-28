@@ -27,6 +27,7 @@ Without that, a fresh install fails with r(3021) "class compiled at different ti
 ## Tests
 
 `NWCORE=/path/to/nwcommands cscripts/run_tests.sh quick|full [plugin_dir] [jobs]` (first step: `tools/check_version.py`; each test runs in its own `-e` Stata process; set `STATA` to the Stata 17 binary, then repeat with 18).
+Dialogs (any release that touches a .dlg): `python3 dlg/check_dialogs.py`, `NWCORE=... dlg/db_load_check.sh` and `python3 dlg/cmd_assembly_test.py --nwcore $NWCORE` (runs every dialog's command program in the real engine; the first two cannot see a program that aborts silently so that OK does nothing).
 Most tests print no PASS marker: failure is an `r()` error and a missing log is NOT RUN (master C0).
 `quick` (about a minute with jobs; run after every change) covers the newer features and the ado checks; `full` adds the RSiena regression tests (35 minutes serial, 10-15 in parallel); run `full` before a MINOR or lockstep release.
 `plugin_dir` puts a freshly built `saom_sim_macos.plugin` ahead of any installed copy on the adopath (a repo copy with its own `lib/plugins/` shadows it: copy the plugin there too).
