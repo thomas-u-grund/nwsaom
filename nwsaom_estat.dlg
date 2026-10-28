@@ -35,8 +35,10 @@ BEGIN
   EDIT ed_estat_gof_maxdist 450 190 470 ., nomem
   TEXT tx_estat_gof_name 10 211 215 ., label("name() - graph name stub")
   EDIT ed_estat_gof_name 230 211 225 ., nomem
-  CHECKBOX cx_estat_gof_twotailed 10 232 301 ., label("twotailed - two-tailed test")
-  CHECKBOX cx_estat_joinoff 316 232 301 ., label("join(off) - separate test per wave-period")
+  TEXT tx_estat_gof_grp 10 232 430 ., label("grp() - one group of a groups() fit (0 = all)")
+  EDIT ed_estat_gof_grp 450 232 470 ., nomem
+  CHECKBOX cx_estat_gof_twotailed 10 253 301 ., label("twotailed - two-tailed test")
+  CHECKBOX cx_estat_joinoff 316 253 301 ., label("join(off) - separate test per wave-period")
 END
 
 DIALOG mems_sim, tabtitle("Mems, sim")
@@ -77,7 +79,7 @@ BEGIN
   TEXT tx_estat_tt_effects 10 79 430 ., label("effects() - effects to test (default all)")
   EDIT ed_estat_tt_effects 450 79 470 ., nomem
   CHECKBOX cx_estat_tt_fixrates 10 100 301 ., label("fixrates - keep the rates fixed")
-  TEXT tx_h7_3 10 127 900 ., label("-- estat importance has no options --")
+  TEXT tx_h7_3 10 127 900 ., label("-- estat importance has only the option grp() (first tab) --")
 END
 
 PROGRAM command
@@ -132,6 +134,11 @@ BEGIN
 			if statistic.rb_estat_gof {
 				if statistic.ed_estat_gof_name.isneq("") {
 					put " name(" statistic.ed_estat_gof_name ")"
+				}
+			}
+			if statistic.rb_estat_gof | statistic.rb_estat_simulate | statistic.rb_estat_importance {
+				if statistic.ed_estat_gof_grp.isneq("") {
+					put " grp(" statistic.ed_estat_gof_grp ")"
 				}
 			}
 			if statistic.rb_estat_gof {
@@ -204,15 +211,15 @@ BEGIN
 					put " generate(" mems_sim.ed_estat_sim_generate ")"
 				}
 			}
+END
+
+PROGRAM opt_part2
+BEGIN
 			if statistic.rb_estat_score {
 				if score_tt.ed_estat_score_tested.isneq("") {
 					put " tested(" score_tt.ed_estat_score_tested ")"
 				}
 			}
-END
-
-PROGRAM opt_part2
-BEGIN
 			if statistic.rb_estat_timetest {
 				if score_tt.ed_estat_tt_effects.isneq("") {
 					put " effects(" score_tt.ed_estat_tt_effects ")"

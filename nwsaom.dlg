@@ -567,13 +567,18 @@ BEGIN
   EDIT ed_sim_nsim 450 52 610 ., nomem
   TEXT tx_sim_generate 10 73 430 ., label("generate() - stub of the networks created")
   EDIT ed_sim_generate 450 73 610 ., nomem
-  GROUPBOX gb_related 10 108 1040 82, label("Related dialogs")
-  BUTTON bt_bayes 22 130 333 22, label("Bayesian estimation...") onpush(program open_nwsaom_bayes)
-  BUTTON bt_multinet 363 130 333 22, label("Several networks (multinet)...") onpush(program open_nwsaom_multinet)
-  BUTTON bt_multiplex 704 130 333 22, label("Multiplex...") onpush(program open_nwsaom_multiplex)
-  BUTTON bt_estat 22 158 333 22, label("Postestimation...") onpush(program open_nwsaom_estat)
-  BUTTON bt_describe 363 158 333 22, label("Describe data...") onpush(program open_nwsaom_describe)
-  BUTTON bt_meta 704 158 333 22, label("Meta-analysis...") onpush(program open_nwsaom_meta)
+  TEXT tx_h8_9 10 100 1040 ., label("-- Several groups estimated jointly (RSiena sienaGroupCreate): a group variable, one network series per group --")
+  TEXT tx_groups 10 121 430 ., label("groups() - variable that identifies the group of each node")
+  VARLIST vl_groups 450 121 610 ., nomem
+  TEXT tx_gwaves 10 142 430 ., label("gwaves() - number of waves of each group")
+  EDIT ed_gwaves 450 142 610 ., nomem
+  GROUPBOX gb_related 10 177 1040 82, label("Related dialogs")
+  BUTTON bt_bayes 22 199 333 22, label("Bayesian estimation...") onpush(program open_nwsaom_bayes)
+  BUTTON bt_multinet 363 199 333 22, label("Several networks (multinet)...") onpush(program open_nwsaom_multinet)
+  BUTTON bt_multiplex 704 199 333 22, label("Multiplex...") onpush(program open_nwsaom_multiplex)
+  BUTTON bt_estat 22 227 333 22, label("Postestimation...") onpush(program open_nwsaom_estat)
+  BUTTON bt_describe 363 227 333 22, label("Describe data...") onpush(program open_nwsaom_describe)
+  BUTTON bt_meta 704 227 333 22, label("Meta-analysis...") onpush(program open_nwsaom_meta)
 END
 
 LIST netlist
@@ -2507,6 +2512,16 @@ BEGIN
 			if waves.rb_nwsaom_sim {
 				if estimate_2.ed_sim_generate.isneq("") {
 					put " generate(" estimate_2.ed_sim_generate ")"
+				}
+			}
+			if waves.rb_nwsaom_est {
+				if estimate_2.vl_groups.isneq("") {
+					put " groups(" estimate_2.vl_groups ")"
+				}
+			}
+			if waves.rb_nwsaom_est {
+				if estimate_2.ed_gwaves.isneq("") {
+					put " gwaves(" estimate_2.ed_gwaves ")"
 				}
 			}
 			if waves.rb_nwsaom_est {

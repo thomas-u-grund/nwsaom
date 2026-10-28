@@ -11,6 +11,7 @@ Patch release. The Mata libraries and the plugin are unchanged.
 
 ### Changed
 - **Dialog box.** The main dialog (`db nwsaom`) has a group "Related dialogs" on its last tab (Estimate 2) with buttons that open the dialogs for Bayesian estimation, several networks (multinet), multiplex networks, postestimation, describing the data and meta-analysis. The commands the dialogs build are unchanged.
+- The main dialog has fields for `groups()` and `gwaves()` (several groups estimated together) on the last tab (Estimate 2). The postestimation dialog has a `grp()` field for `estat gof`, `estat simulate` and `estat importance` after a fit with groups.
 - The dialog for `nwsaom describe` now has the `actormode()` field that the command already had.
 
 ## [1.3.1] - 2026-10-28

@@ -527,6 +527,9 @@ field(M, T, 'sim_rates', 'rates', 'rates() - rate of every period', modes=['sim'
 field(M, T, 'sim_ratesbeh', 'ratesbeh', 'ratesbeh() - behavior rates', modes=['sim'], companion='behavior(b1 b2 b3) linear', ctx='beh')
 field(M, T, 'sim_nsim', 'nsim', 'nsim() - number of simulations (default 100)', modes=['sim'])
 field(M, T, 'sim_generate', 'generate', 'generate() - stub of the networks created', modes=['sim'])
+hdr(M, T, 'Several groups estimated jointly (RSiena sienaGroupCreate): a group variable, one network series per group')
+field(M, T, 'groups', 'groups', 'groups() - variable that identifies the group of each node', 'varlist', modes=EST, companion='gwaves(1 2 3)')
+field(M, T, 'gwaves', 'gwaves', 'gwaves() - number of waves of each group', modes=EST, companion='groups(grp)')
 
 # options that exist in the syntax line but are not offered as a separate control
 EXCLUDED_MAIN = {}
@@ -799,6 +802,7 @@ E('wr_stats', 'estat', 'wrapper', 'stats', 'stats() - auxiliary statistics', T, 
 for o, lab, ctl in (('nsim', 'nsim() - replicates (default 50)', 'edit'), ('seed', 'seed()', 'edit'), ('maxdeg', 'maxdeg() - degree cap (default 15)', 'edit'),
                     ('maxdist', 'maxdist() - geodesic cap (default 6)', 'edit'), ('name', 'name() - graph name stub', 'edit')):
     field(ES, T, 'gof_' + o, o, lab, ctl, modes=['gof'], help='nwsaom_estat', ctx='est')
+field(ES, T, 'gof_grp', 'grp', 'grp() - one group of a groups() fit (0 = all)', modes=['gof', 'simulate', 'importance'], help='nwsaom_estat', ctx='est')
 flag(ES, T, 'gof_twotailed', 'twotailed', 'twotailed - two-tailed test', modes=['gof'], help='nwsaom_estat', ctx='est')
 e = E('cx_estat_joinoff', 'estat', 'flag', 'join', 'join(off) - separate test per wave-period', T, cmd=' join(off)', modes=['gof'], help='nwsaom_estat', ctx='est')
 ES.tab(T).append(dict(t='flag', e=e['id']))
@@ -818,8 +822,8 @@ field(ES, T, 'score_tested', 'tested', 'tested() - effects of the full model to 
 hdr(ES, T, 'estat timetest')
 field(ES, T, 'tt_effects', 'effects', 'effects() - effects to test (default all)', modes=['timetest'], help='nwsaom_estat', ctx='est')
 flag(ES, T, 'tt_fixrates', 'fixrates', 'fixrates - keep the rates fixed', modes=['timetest'], help='nwsaom_estat', ctx='est')
-hdr(ES, T, 'estat importance has no options')
-E('rb_estat_importance_note', 'estat', 'note', 'importance', 'importance - no options', None, cmd='', modes=['importance'], help='nwsaom_estat', ctx='est')
+hdr(ES, T, 'estat importance has only the option grp() (first tab)')
+E('rb_estat_importance_note', 'estat', 'note', 'importance', 'importance - option grp() on the first tab only', None, cmd='', modes=['importance'], help='nwsaom_estat', ctx='est')
 
 
 # ================================================================================================= smoke-test fixtures
