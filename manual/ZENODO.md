@@ -1,20 +1,20 @@
-> Note (2026-10-27): for the 1.2 series the manual is relabelled "Manual for version 1.2" (new chapter 'Several groups: joint estimation'; version field 1.2.0 at the 1.2.0 release). The text below is the 1.1 record; change title, version and description accordingly when the 1.2 version is uploaded. Nothing has been uploaded.
+> Note (2026-10-28): owner decision: the title and the citation of the manual carry NO version number. The text below was written for the 1.1 record; for any later series use the same title and set only the Zenodo version field and the description to the series. Nothing has been uploaded.
 
-# Zenodo record for the nwsaom manual, Manual for version 1.1
+# Zenodo record for the nwsaom manual
 
 Metadata for ONE new version of the existing Zenodo record. Nothing has been uploaded.
 
 **Record.** All-versions ("Cite all versions") DOI `10.5281/zenodo.23623807`; the last published version is record 23626696 (version field "1.0.2", file labelled "Manual for version 1.0.3", published 2026-10-24). On zenodo.org open the record 10.5281/zenodo.23623807, choose **New version**, replace the file, and change the fields below. The all-versions DOI does not change; the DOI printed on the title page of the PDF (`\manualdoi` in `nwsaom_manual.tex`) and in all citation texts is this all-versions DOI.
 
-**Labelling (master RELEASING.md B.10).** The manual is labelled by the minor series ("Manual for version 1.1", valid for all 1.1.x, `\manualseries`). The exact package version of the listings (1.1.0) is on the title page (`\pkgversion`) and in the Zenodo version field. This is the one new Zenodo version of the 1.1 series: for patch releases (1.1.1, ...) nothing is uploaded; only `\pkgversion`/`\pkgdate` change (`tools/set_version.py`) and the PDF is committed. A new version again only for 1.2 or 2.0 with changed documented behaviour (then change `\manualseries`).
+**Labelling (master RELEASING.md B.10).** The title and the citation of the manual contain no version number. The Zenodo version label is the series "X.Y" (for example "1.3"; internal to Zenodo, not part of the citation), and the description says that the manual describes nwsaom X.Y.x. The PDF title page has one line saying which series it describes (`\manualseries`); the exact package version of the listings is `\pkgversion`. The software version is cited separately, as printed by `nwsaom version`. This is the one new Zenodo version of the 1.1 series: for patch releases (1.1.1, ...) nothing is uploaded; only `\pkgversion`/`\pkgdate` change (`tools/set_version.py`) and the PDF is committed. A new version again only for 1.2 or 2.0 with changed documented behaviour (then change `\manualseries`).
 
 ## Metadata (mirrored from record 23626696, read-only on zenodo.org, 2026-10-26)
 
 **Resource type.** Publication, sub-type Software documentation (as the existing record).
 
-**Title.** nwsaom: Stochastic actor-oriented models in Stata. Manual for version 1.1
+**Title.** nwsaom: Stochastic actor-oriented models in Stata. Manual
 
-**Version.** 1.1.0
+**Version.** the series "X.Y" (for example "1.3")
 
 **Publication date.** 2026-10-26 (or the day of the upload)
 
@@ -51,4 +51,4 @@ Check the first row only after the GitHub release v1.1.0 exists; drop the last r
 
 1. On zenodo.org open 10.5281/zenodo.23623807, **New version**; delete the old file, upload `manual/nwsaom_manual.pdf` (also kept as `nwsaom_manual_1.1.pdf` in the SJ folder); fill the fields above; publish.
 2. Check that the all-versions DOI on the record page is still 10.5281/zenodo.23623807 (the new version gets its own version DOI, not used in any citation text).
-3. Nothing else changes: the PDF, `CITATION.cff`, `NOTICE.md`, `README.md` and the website already carry the all-versions DOI and the label "Manual for version 1.1".
+3. Nothing else changes: the PDF, `CITATION.cff`, `NOTICE.md`, `README.md` and the website already carry the all-versions DOI and the title "Manual" without a version number.
