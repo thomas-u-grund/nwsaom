@@ -4,7 +4,7 @@ d Thomas U. Grund, University College Dublin, www.grund.co.uk
 d email: thomas.u.grund@gmail.com
 d GPL-3. Requires the core package nwcommands.
 d Requires nwcommands (core), version 3.6.0 or later
-d Version: 1.3.0
+d Version: 1.3.1
 d Distribution-Date: 28oct2026
 f _nwsaom_chkbin.ado
 f _nwsaom_getrates.ado

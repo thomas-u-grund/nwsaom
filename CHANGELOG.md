@@ -5,6 +5,13 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-10-28
+
+Patch release. Works with nwcommands 3.6.0 and later; the Mata libraries and the plugin are unchanged.
+
+### Fixed
+- With structural zeros and ones (the codes 10 and 11 in the wave networks) `nwsaom` printed one stray line with the number of fixed dyads per wave (for example 1250) before the results header. Nothing is printed now.
+
 ## [1.3.0] - 2026-10-28
 
 Minor release: more of the joint estimation of several groups, and structural zeros and ones. Works with nwcommands 3.6.0 and later. The Mata libraries `lnwsaom1.mlib` and `lnwsaom2.mlib` are rebuilt (Stata 17); the compiled plugin of this release (protocol 151) is needed for groups and for the codes (an older plugin gives a clear message). Structural zeros and ones: RSiena's codes 10 and 11 in the wave networks. Needs the compiled plugin of this release (an older plugin gives a clear message; there is no Mata implementation of the new part). Fits that use neither the codes nor `structural()` are unchanged.
