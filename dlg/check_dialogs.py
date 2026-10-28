@@ -154,11 +154,19 @@ def check_dialog(name, res):
     # all controls of the layout appear and every non-label control id is used in the program or is a helper
     used = set(c for _, c in refs)
     for id_, c in d['ctrls'].items():
-        if c['kind'] not in ('TEXT', 'BUTTON', 'GROUPBOX') and id_ not in used:
+        if c['kind'] not in ('TEXT', 'BUTTON', 'GROUPBOX') and id_ not in used and id_ not in ('cb_nettype', 'cb_fitflag'):   # cb_nettype only greys controls
             err('%s: control %s is never used by the command program' % (base, id_))
+    # optionarg needs the option() attribute on its control, otherwise the command program aborts silently
+    for fn_ in os.listdir(S.ROOT):
+        if fn_.endswith('.dlg'):
+            txt_ = open(os.path.join(S.ROOT, fn_), encoding='utf-8').read()
+            defs_ = {m_.group(2): m_.group(0) for m_ in re.finditer(r'^\s+(COMBOBOX|EDIT|VARLIST|VARNAME)\s+(\w+) .*$', txt_, re.M)}
+            for c_ in set(re.findall(r'optionarg /asis \w+\.(\w+)', txt_)):
+                if 'option(' not in defs_.get(c_, ''):
+                    err('%s: optionarg on %s whose control has no option() attribute' % (fn_, c_))
     # lists non-empty
     for ln_, items in d['lists'].items():
-        if ln_ != 'netlist' and not items:
+        if ln_ not in ('netlist', 'netlist_a', 'fitlist') and not items:
             err('%s: LIST %s is empty' % (base, ln_))
     # every control id is a legal Stata name of at most 32 characters
     for id_ in d['ctrls']:
@@ -222,7 +230,7 @@ def check_spec():
             err('spec does not cover mloptions option ' + o)
     # sim-mode options of nwsaom simulate
     for o in ('theta', 'behtheta', 'rates', 'ratesbeh', 'nsim', 'generate'):
-        if not any(e['dialog'] == 'nwsaom' and e['opt'] == o and e['modes'] == ['sim'] for e in S.ENTRIES.values()):
+        if not any(e['dialog'] == 'simulate' and e['opt'] == o and 'spec' in (e['modes'] or []) for e in S.ENTRIES.values()):
             err('spec does not cover nwsaom simulate option ' + o)
     return nopts
 

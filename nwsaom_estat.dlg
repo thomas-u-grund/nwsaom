@@ -17,7 +17,7 @@ BEGIN
   RADIO rb_estat_score 610 10 290 ., label("score - score-type test") middle
   RADIO rb_estat_timetest 10 31 290 ., label("timetest - time heterogeneity") middle
   RADIO rb_estat_importance 310 31 290 ., label("importance - effect importance") middle
-  RADIO rb_estat_simulate 610 31 290 ., label("simulate - simulate at given coefficients") last
+  RADIO rb_estat_simulate 610 31 290 ., label("simulate - the last fit") last
   TEXT tx_n6_1 10 58 910 ., label("Operates on the nwsaom fit currently in memory - no network is selected here. Choose the statistic on the first tab.")
   TEXT tx_h7_1 10 85 900 ., label("-- Auxiliary statistics (stats(); default outdegree indegree geodesic) --")
   CHECKBOX cx_estat_stat_outdegree 10 106 301 ., label("outdegree - out-degree distribution") tooltip("RSiena: density")
@@ -26,17 +26,17 @@ BEGIN
   CHECKBOX cx_estat_stat_triad 10 127 301 ., label("triad - 16-category triad census")
   CHECKBOX cx_estat_stat_behavior 316 127 301 ., label("behavior - co-evolution fits only")
   TEXT tx_estat_gof_nsim 10 148 215 ., label("nsim() - replicates (default 50)")
-  EDIT ed_estat_gof_nsim 230 148 225 ., nomem
+  EDIT ed_estat_gof_nsim 230 148 225 ., nomem option(nsim)
   TEXT tx_estat_gof_seed 470 148 215 ., label("seed()")
-  EDIT ed_estat_gof_seed 690 148 225 ., nomem
+  EDIT ed_estat_gof_seed 690 148 225 ., nomem option(seed)
   TEXT tx_estat_gof_maxdeg 10 169 430 ., label("maxdeg() - degree cap (default 15)")
-  EDIT ed_estat_gof_maxdeg 450 169 470 ., nomem
+  EDIT ed_estat_gof_maxdeg 450 169 470 ., nomem option(maxdeg)
   TEXT tx_estat_gof_maxdist 10 190 430 ., label("maxdist() - geodesic cap (default 6)")
-  EDIT ed_estat_gof_maxdist 450 190 470 ., nomem
+  EDIT ed_estat_gof_maxdist 450 190 470 ., nomem option(maxdist)
   TEXT tx_estat_gof_name 10 211 215 ., label("name() - graph name stub")
-  EDIT ed_estat_gof_name 230 211 225 ., nomem
+  EDIT ed_estat_gof_name 230 211 225 ., nomem option(name)
   TEXT tx_estat_gof_grp 10 232 430 ., label("grp() - one group of a groups() fit (0 = all)")
-  EDIT ed_estat_gof_grp 450 232 470 ., nomem
+  EDIT ed_estat_gof_grp 450 232 470 ., nomem option(grp)
   CHECKBOX cx_estat_gof_twotailed 10 253 301 ., label("twotailed - two-tailed test")
   CHECKBOX cx_estat_joinoff 316 253 301 ., label("join(off) - separate test per wave-period")
 END
@@ -45,39 +45,39 @@ DIALOG mems_sim, tabtitle("Mems, sim")
 BEGIN
   TEXT tx_h0_2 10 10 900 ., label("-- estat mems: effect() and macro() are required --")
   TEXT tx_estat_mems_effect 10 31 215 ., label("effect() - coefficient name")
-  EDIT ed_estat_mems_effect 230 31 225 ., nomem
+  EDIT ed_estat_mems_effect 230 31 225 ., nomem option(effect)
   TEXT tx_estat_mems_macro 10 52 430 ., label("macro() - name of the macro receiving the result")
-  EDIT ed_estat_mems_macro 450 52 470 ., nomem
+  EDIT ed_estat_mems_macro 450 52 470 ., nomem option(macro)
   TEXT tx_estat_mems_nsim 10 73 215 ., label("nsim() - replicates (default 500)")
-  EDIT ed_estat_mems_nsim 230 73 225 ., nomem
+  EDIT ed_estat_mems_nsim 230 73 225 ., nomem option(nsim)
   TEXT tx_estat_mems_seed 470 73 215 ., label("seed()")
-  EDIT ed_estat_mems_seed 690 73 225 ., nomem
+  EDIT ed_estat_mems_seed 690 73 225 ., nomem option(seed)
   TEXT tx_estat_mems_interval 10 94 215 ., label("interval() - numlist")
-  EDIT ed_estat_mems_interval 230 94 225 ., nomem
+  EDIT ed_estat_mems_interval 230 94 225 ., nomem option(interval)
   CHECKBOX cx_estat_mems_nodots 10 115 301 ., label("nodots - suppress progress dots")
-  TEXT tx_h12_2 10 142 900 ., label("-- estat simulate (at the coefficients of a stored matrix theta(); rates() required for a plain network model) --")
+  TEXT tx_h12_2 10 142 900 ., label("-- estat simulate: the model of the last nwsaom fit; theta() and rates() (optional) simulate at other coefficients instead --")
   TEXT tx_estat_sim_nsim 10 163 215 ., label("nsim() - replicates (default 100)")
-  EDIT ed_estat_sim_nsim 230 163 225 ., nomem
+  EDIT ed_estat_sim_nsim 230 163 225 ., nomem option(nsim)
   TEXT tx_estat_sim_seed 470 163 215 ., label("seed()")
-  EDIT ed_estat_sim_seed 690 163 225 ., nomem
+  EDIT ed_estat_sim_seed 690 163 225 ., nomem option(seed)
   TEXT tx_estat_sim_theta 10 184 215 ., label("theta() - matrix of coefficients")
-  EDIT ed_estat_sim_theta 230 184 225 ., nomem
+  EDIT ed_estat_sim_theta 230 184 225 ., nomem option(theta)
   TEXT tx_estat_sim_rates 470 184 215 ., label("rates() - rate of each period")
-  EDIT ed_estat_sim_rates 690 184 225 ., nomem
+  EDIT ed_estat_sim_rates 690 184 225 ., nomem option(rates)
   TEXT tx_estat_sim_ratesbeh 10 205 215 ., label("ratesbeh() - behavior rates")
-  EDIT ed_estat_sim_ratesbeh 230 205 225 ., nomem
+  EDIT ed_estat_sim_ratesbeh 230 205 225 ., nomem option(ratesbeh)
   TEXT tx_estat_sim_generate 470 205 215 ., label("generate() - stub of new networks")
-  EDIT ed_estat_sim_generate 690 205 225 ., nomem
+  EDIT ed_estat_sim_generate 690 205 225 ., nomem option(generate)
 END
 
 DIALOG score_tt, tabtitle("Score, tt")
 BEGIN
   TEXT tx_h0_3 10 10 900 ., label("-- estat score --")
   TEXT tx_estat_score_tested 10 31 430 ., label("tested() - effects of the full model to test")
-  EDIT ed_estat_score_tested 450 31 470 ., nomem
+  EDIT ed_estat_score_tested 450 31 470 ., nomem option(tested)
   TEXT tx_h3_3 10 58 900 ., label("-- estat timetest --")
   TEXT tx_estat_tt_effects 10 79 430 ., label("effects() - effects to test (default all)")
-  EDIT ed_estat_tt_effects 450 79 470 ., nomem
+  EDIT ed_estat_tt_effects 450 79 470 ., nomem option(effects)
   CHECKBOX cx_estat_tt_fixrates 10 100 301 ., label("fixrates - keep the rates fixed")
   TEXT tx_h7_3 10 127 900 ., label("-- estat importance has only the option grp() (first tab) --")
 END
@@ -104,7 +104,9 @@ BEGIN
 	}
 	beginoptions
 		put /program opt_part1
+		put " "
 		put /program opt_part2
+		put " "
 	endoptions
 	stata
 END
@@ -113,32 +115,32 @@ PROGRAM opt_part1
 BEGIN
 			if statistic.rb_estat_gof {
 				if statistic.ed_estat_gof_nsim.isneq("") {
-					put " nsim(" statistic.ed_estat_gof_nsim ")"
+					optionarg /asis statistic.ed_estat_gof_nsim
 				}
 			}
 			if statistic.rb_estat_gof {
 				if statistic.ed_estat_gof_seed.isneq("") {
-					put " seed(" statistic.ed_estat_gof_seed ")"
+					optionarg /asis statistic.ed_estat_gof_seed
 				}
 			}
 			if statistic.rb_estat_gof {
 				if statistic.ed_estat_gof_maxdeg.isneq("") {
-					put " maxdeg(" statistic.ed_estat_gof_maxdeg ")"
+					optionarg /asis statistic.ed_estat_gof_maxdeg
 				}
 			}
 			if statistic.rb_estat_gof {
 				if statistic.ed_estat_gof_maxdist.isneq("") {
-					put " maxdist(" statistic.ed_estat_gof_maxdist ")"
+					optionarg /asis statistic.ed_estat_gof_maxdist
 				}
 			}
 			if statistic.rb_estat_gof {
 				if statistic.ed_estat_gof_name.isneq("") {
-					put " name(" statistic.ed_estat_gof_name ")"
+					optionarg /asis statistic.ed_estat_gof_name
 				}
 			}
 			if statistic.rb_estat_gof | statistic.rb_estat_simulate | statistic.rb_estat_importance {
 				if statistic.ed_estat_gof_grp.isneq("") {
-					put " grp(" statistic.ed_estat_gof_grp ")"
+					optionarg /asis statistic.ed_estat_gof_grp
 				}
 			}
 			if statistic.rb_estat_gof {
@@ -153,27 +155,27 @@ BEGIN
 			}
 			if statistic.rb_estat_mems {
 				if mems_sim.ed_estat_mems_effect.isneq("") {
-					put " effect(" mems_sim.ed_estat_mems_effect ")"
+					optionarg /asis mems_sim.ed_estat_mems_effect
 				}
 			}
 			if statistic.rb_estat_mems {
 				if mems_sim.ed_estat_mems_macro.isneq("") {
-					put " macro(" mems_sim.ed_estat_mems_macro ")"
+					optionarg /asis mems_sim.ed_estat_mems_macro
 				}
 			}
 			if statistic.rb_estat_mems {
 				if mems_sim.ed_estat_mems_nsim.isneq("") {
-					put " nsim(" mems_sim.ed_estat_mems_nsim ")"
+					optionarg /asis mems_sim.ed_estat_mems_nsim
 				}
 			}
 			if statistic.rb_estat_mems {
 				if mems_sim.ed_estat_mems_seed.isneq("") {
-					put " seed(" mems_sim.ed_estat_mems_seed ")"
+					optionarg /asis mems_sim.ed_estat_mems_seed
 				}
 			}
 			if statistic.rb_estat_mems {
 				if mems_sim.ed_estat_mems_interval.isneq("") {
-					put " interval(" mems_sim.ed_estat_mems_interval ")"
+					optionarg /asis mems_sim.ed_estat_mems_interval
 				}
 			}
 			if statistic.rb_estat_mems {
@@ -183,32 +185,32 @@ BEGIN
 			}
 			if statistic.rb_estat_simulate {
 				if mems_sim.ed_estat_sim_nsim.isneq("") {
-					put " nsim(" mems_sim.ed_estat_sim_nsim ")"
+					optionarg /asis mems_sim.ed_estat_sim_nsim
 				}
 			}
 			if statistic.rb_estat_simulate {
 				if mems_sim.ed_estat_sim_seed.isneq("") {
-					put " seed(" mems_sim.ed_estat_sim_seed ")"
+					optionarg /asis mems_sim.ed_estat_sim_seed
 				}
 			}
 			if statistic.rb_estat_simulate {
 				if mems_sim.ed_estat_sim_theta.isneq("") {
-					put " theta(" mems_sim.ed_estat_sim_theta ")"
+					optionarg /asis mems_sim.ed_estat_sim_theta
 				}
 			}
 			if statistic.rb_estat_simulate {
 				if mems_sim.ed_estat_sim_rates.isneq("") {
-					put " rates(" mems_sim.ed_estat_sim_rates ")"
+					optionarg /asis mems_sim.ed_estat_sim_rates
 				}
 			}
 			if statistic.rb_estat_simulate {
 				if mems_sim.ed_estat_sim_ratesbeh.isneq("") {
-					put " ratesbeh(" mems_sim.ed_estat_sim_ratesbeh ")"
+					optionarg /asis mems_sim.ed_estat_sim_ratesbeh
 				}
 			}
 			if statistic.rb_estat_simulate {
 				if mems_sim.ed_estat_sim_generate.isneq("") {
-					put " generate(" mems_sim.ed_estat_sim_generate ")"
+					optionarg /asis mems_sim.ed_estat_sim_generate
 				}
 			}
 END
@@ -217,12 +219,12 @@ PROGRAM opt_part2
 BEGIN
 			if statistic.rb_estat_score {
 				if score_tt.ed_estat_score_tested.isneq("") {
-					put " tested(" score_tt.ed_estat_score_tested ")"
+					optionarg /asis score_tt.ed_estat_score_tested
 				}
 			}
 			if statistic.rb_estat_timetest {
 				if score_tt.ed_estat_tt_effects.isneq("") {
-					put " effects(" score_tt.ed_estat_tt_effects ")"
+					optionarg /asis score_tt.ed_estat_tt_effects
 				}
 			}
 			if statistic.rb_estat_timetest {

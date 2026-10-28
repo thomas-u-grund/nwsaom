@@ -4,9 +4,10 @@ d Thomas U. Grund, University College Dublin, www.grund.co.uk
 d email: thomas.u.grund@gmail.com
 d GPL-3. Requires the core package nwcommands.
 d Requires nwcommands (core), version 3.6.0 or later
-d Version: 1.3.3
+d Version: 1.3.4
 d Distribution-Date: 28oct2026
 f _nwsaom_chkbin.ado
+f _nwsaom_dlgprep.ado
 f _nwsaom_getrates.ado
 f _nwsaom_libcheck.ado
 f _nwsaom_mnbeh.ado
@@ -45,6 +46,7 @@ f nwsaom.dlg
 f nwsaom_multinet.dlg
 f nwsaom_bayes.dlg
 f nwsaom_meta.dlg
+f nwsaom_simulate.dlg
 f nwsaom_describe.dlg
 f nwsaom_multiplex.dlg
 f nwsaom_estat.dlg

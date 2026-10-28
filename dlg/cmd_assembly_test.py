@@ -30,9 +30,17 @@ CASES = {
          "nwsaom, waves(w1 w2 w3) outdegree"),
         ("interact pair", ['call rates.cb_interact_1a.setvalue "outdegree"', 'call rates.cb_interact_1b.setvalue "reciprocity"'],
          "nwsaom, interact(outdegree#reciprocity )"),
-        ("simulate only", ["call waves.rb_nwsaom_sim.seton"], "nwsaom simulate"),
     ],
-    "nwsaom_multinet": [("default", [], "nwsaom multinet, eff1(outdegree reciprocity )eff2(outdegree reciprocity )")],
+    "nwsaom_simulate": [
+        ("last fit", ["call simulate.rb_simulate_last.seton", 'call simulate.ed_simulate_nsim.setvalue "5"', 'call simulate.ed_simulate_seed.setvalue "3"'],
+         "estat simulate, nsim(5) seed(3)"),
+        ("specify the model", ["call simulate.rb_simulate_spec.seton", 'call simulate.cb_simulate_waves.setvalue "w1 w2 w3"',
+                               'call simulate.ed_simulate_effects.setvalue "outdegree reciprocity"',
+                               'call simulate.ed_simulate_theta.setvalue "-1 0.5"', 'call simulate.ed_simulate_rates.setvalue "5 5"',
+                               'call simulate.ed_simulate_other.setvalue "behavior(b1 b2 b3) linear"'],
+         "nwsaom simulate, waves(w1 w2 w3) outdegree reciprocity theta(-1 0.5) rates(5 5) behavior(b1 b2 b3) linear"),
+    ],
+    "nwsaom_multinet": [("default", [], "nwsaom multinet, eff1(outdegree reciprocity ) eff2(outdegree reciprocity )")],
     "nwsaom_describe": [("default", [], "nwsaom describe")],
     "nwsaom_bayes": [("default", [], "nwsaom bayes")],
     "nwsaom_meta": [("names", ['call meta.ed_meta_names.setvalue "a b"'], "nwsaom meta a b")],
@@ -47,8 +55,8 @@ def build(dlgname, setup, outdir):
     i = s.index("PROGRAM command\nBEGIN\n")
     j = s.index("\nEND", i)
     body = s[i + len("PROGRAM command\nBEGIN\n"):j].rstrip("\n")
-    body = re.sub(r"\n\tstata\s*$", "\n\tstata hidden immediate", body)
-    assert body.endswith("stata hidden immediate"), dlgname + ": PROGRAM command does not end with stata"
+    body = re.sub(r"(?m)^(\s*)stata\s*$", r"\1stata hidden immediate", body)
+    assert "stata hidden immediate" in body, dlgname + ": PROGRAM command has no stata statement"
     run = "PROGRAM zzrun\nBEGIN\n" + "".join("\t%s\n" % x for x in setup) + '\tput "nwdlgcap "\n' + body + "\nEND\n\n"
     if "SCRIPT POSTINIT\nBEGIN\n" in s:
         s = s.replace("SCRIPT POSTINIT\nBEGIN\n", "SCRIPT POSTINIT\nBEGIN\n\tprogram zzrun\n", 1)

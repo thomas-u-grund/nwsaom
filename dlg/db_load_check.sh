@@ -11,7 +11,7 @@ sysdir set PLUS "$tmp/plus"
 adopath ++ "$NWCORE"
 adopath ++ "$root"
 discard
-foreach d in nwsaom nwsaom_multinet nwsaom_bayes nwsaom_meta nwsaom_describe nwsaom_multiplex nwsaom_estat {
+foreach d in nwsaom nwsaom_multinet nwsaom_bayes nwsaom_meta nwsaom_describe nwsaom_multiplex nwsaom_simulate nwsaom_estat {
 	capture db \`d'
 	display "DBRC|\`d'|" _rc
 }

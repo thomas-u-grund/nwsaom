@@ -1,0 +1,202 @@
+VERSION 10
+
+
+SYNCHRONOUS_ONLY
+INCLUDE _std_mlarge
+DEFINE _dlgwd 940
+DEFINE _dlght 443
+INCLUDE header
+
+HELP hlp1, view("help nwsaom")
+RESET res1
+
+SCRIPT PREINIT
+BEGIN
+	program initialize
+END
+
+SCRIPT POSTINIT
+BEGIN
+	program postinit_sim
+END
+
+DIALOG simulate, tabtitle("Simulate")
+BEGIN
+  RADIO rb_simulate_last 10 10 450 ., label("Use the model of the last nwsaom fit (estat simulate)") first default(1) onclickon(script sim_dis)
+  RADIO rb_simulate_spec 470 10 450 ., label("Specify the model (nwsaom simulate)") last onclickon(script sim_en)
+  COMBOBOX cb_fitflag 10 31 60 ., dropdownlist contents(fitlist) values(fitlist) nomem
+  TEXT tx_n3_1 10 58 910 ., label("The first choice simulates the model of the last nwsaom fit in memory. The second needs the waves, the effects and theta() (no estimation).")
+  TEXT tx_h4_1 10 85 900 ., label("-- Specify the model (only with the second choice) --")
+  TEXT tx_simulate_waves 10 106 215 ., label("waves() - networks in time order")
+  COMBOBOX cb_simulate_waves 230 106 225 ., dropdown contents(netlist) append nomem option(waves)
+  TEXT tx_simulate_effects 10 127 430 ., label("Effects, in command syntax (as in nwsaom)")
+  EDIT ed_simulate_effects 450 127 470 ., nomem tooltip("for example: outdegree reciprocity transtrip") option(_text)
+  TEXT tx_simulate_theta 10 148 430 ., label("theta() - one value per network effect (table order)")
+  EDIT ed_simulate_theta 450 148 470 ., nomem tooltip("RSiena: simOnly") option(theta)
+  TEXT tx_simulate_behtheta 10 169 430 ., label("behtheta() - one value per behavior effect")
+  EDIT ed_simulate_behtheta 450 169 470 ., nomem option(behtheta)
+  TEXT tx_simulate_rates 10 190 215 ., label("rates() - rate of every period")
+  EDIT ed_simulate_rates 230 190 225 ., nomem option(rates)
+  TEXT tx_simulate_ratesbeh 470 190 215 ., label("ratesbeh() - behavior rates")
+  EDIT ed_simulate_ratesbeh 690 190 225 ., nomem option(ratesbeh)
+  TEXT tx_simulate_other 10 211 430 ., label("Other model options, in command syntax")
+  EDIT ed_simulate_other 450 211 470 ., nomem tooltip("for example: behavior(b1 b2 b3) linear tvcov(a1 a2 a3)") option(_text)
+  TEXT tx_h19_1 10 238 900 ., label("-- Simulation --")
+  TEXT tx_simulate_nsim 10 259 430 ., label("nsim() - number of simulations (default 100)")
+  EDIT ed_simulate_nsim 450 259 470 ., nomem option(nsim)
+  TEXT tx_simulate_seed 10 280 215 ., label("seed() - random-number seed")
+  EDIT ed_simulate_seed 230 280 225 ., nomem option(seed)
+  TEXT tx_simulate_generate 10 301 430 ., label("generate() - stub of the networks created")
+  EDIT ed_simulate_generate 450 301 470 ., nomem option(generate)
+  TEXT tx_simulate_grp 10 322 430 ., label("grp() - one group of a groups() fit (0 = all)")
+  EDIT ed_simulate_grp 450 322 470 ., nomem option(grp)
+END
+
+LIST netlist
+BEGIN
+	// populated at runtime by _nwdialog.ado
+END
+
+SCRIPT sim_dis_0
+BEGIN
+	simulate.tx_simulate_waves.disable
+	simulate.cb_simulate_waves.disable
+	simulate.tx_simulate_effects.disable
+	simulate.ed_simulate_effects.disable
+	simulate.tx_simulate_theta.disable
+	simulate.ed_simulate_theta.disable
+	simulate.tx_simulate_behtheta.disable
+	simulate.ed_simulate_behtheta.disable
+	simulate.tx_simulate_rates.disable
+	simulate.ed_simulate_rates.disable
+	simulate.tx_simulate_ratesbeh.disable
+	simulate.ed_simulate_ratesbeh.disable
+	simulate.tx_simulate_other.disable
+	simulate.ed_simulate_other.disable
+END
+
+SCRIPT sim_dis
+BEGIN
+	script sim_dis_0
+END
+
+SCRIPT sim_en_0
+BEGIN
+	simulate.tx_simulate_waves.enable
+	simulate.cb_simulate_waves.enable
+	simulate.tx_simulate_effects.enable
+	simulate.ed_simulate_effects.enable
+	simulate.tx_simulate_theta.enable
+	simulate.ed_simulate_theta.enable
+	simulate.tx_simulate_behtheta.enable
+	simulate.ed_simulate_behtheta.enable
+	simulate.tx_simulate_rates.enable
+	simulate.ed_simulate_rates.enable
+	simulate.tx_simulate_ratesbeh.enable
+	simulate.ed_simulate_ratesbeh.enable
+	simulate.tx_simulate_other.enable
+	simulate.ed_simulate_other.enable
+END
+
+SCRIPT sim_en
+BEGIN
+	script sim_en_0
+END
+
+PROGRAM postinit_sim
+BEGIN
+	if simulate.cb_fitflag.iseq("fit") {
+		call simulate.rb_simulate_last.seton
+		call script sim_dis
+	}
+	if !simulate.cb_fitflag.iseq("fit") {
+		call simulate.rb_simulate_spec.seton
+		call script sim_en
+	}
+	call simulate.cb_fitflag.hide
+END
+
+LIST fitlist
+BEGIN
+	// filled in when the dialog opens (_nwsaom_dlgprep.ado)
+END
+
+PROGRAM initialize
+BEGIN
+	put "_nwsaom_dlgprep nwsaom_simulate"
+	stata hidden immediate
+END
+
+PROGRAM command
+BEGIN
+	if simulate.rb_simulate_last {
+		put "estat simulate"
+	}
+	if simulate.rb_simulate_spec {
+		put "nwsaom simulate"
+	}
+	beginoptions
+		put /program opt_part1
+		put " "
+	endoptions
+	stata
+END
+
+PROGRAM opt_part1
+BEGIN
+			if simulate.rb_simulate_spec {
+				if simulate.cb_simulate_waves.isneq("") {
+					optionarg /asis simulate.cb_simulate_waves
+				}
+			}
+			if simulate.rb_simulate_spec {
+				if simulate.ed_simulate_effects.isneq("") {
+					put " " simulate.ed_simulate_effects
+				}
+			}
+			if simulate.rb_simulate_spec {
+				if simulate.ed_simulate_theta.isneq("") {
+					optionarg /asis simulate.ed_simulate_theta
+				}
+			}
+			if simulate.rb_simulate_spec {
+				if simulate.ed_simulate_behtheta.isneq("") {
+					optionarg /asis simulate.ed_simulate_behtheta
+				}
+			}
+			if simulate.rb_simulate_spec {
+				if simulate.ed_simulate_rates.isneq("") {
+					optionarg /asis simulate.ed_simulate_rates
+				}
+			}
+			if simulate.rb_simulate_spec {
+				if simulate.ed_simulate_ratesbeh.isneq("") {
+					optionarg /asis simulate.ed_simulate_ratesbeh
+				}
+			}
+			if simulate.rb_simulate_spec {
+				if simulate.ed_simulate_other.isneq("") {
+					put " " simulate.ed_simulate_other
+				}
+			}
+			if simulate.rb_simulate_last | simulate.rb_simulate_spec {
+				if simulate.ed_simulate_nsim.isneq("") {
+					optionarg /asis simulate.ed_simulate_nsim
+				}
+			}
+			if simulate.rb_simulate_last | simulate.rb_simulate_spec {
+				if simulate.ed_simulate_seed.isneq("") {
+					optionarg /asis simulate.ed_simulate_seed
+				}
+			}
+			if simulate.rb_simulate_last | simulate.rb_simulate_spec {
+				if simulate.ed_simulate_generate.isneq("") {
+					optionarg /asis simulate.ed_simulate_generate
+				}
+			}
+			if simulate.rb_simulate_last {
+				if simulate.ed_simulate_grp.isneq("") {
+					optionarg /asis simulate.ed_simulate_grp
+				}
+			}
+END

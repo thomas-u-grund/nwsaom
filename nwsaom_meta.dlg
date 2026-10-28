@@ -14,13 +14,13 @@ DIALOG meta, tabtitle("Meta")
 BEGIN
   TEXT tx_h0_1 10 10 900 ., label("-- Combine the stored estimates (estimates store) of the same model fitted to several groups --")
   TEXT tx_meta_names 10 31 430 ., label("Stored estimates (2 or more, same model)")
-  EDIT ed_meta_names 450 31 470 ., nomem
+  EDIT ed_meta_names 450 31 470 ., nomem option(_namelist)
   TEXT tx_meta_bound 10 52 430 ., label("bound() - exclude groups with se >= bound (default 10)")
-  EDIT ed_meta_bound 450 52 470 ., nomem
+  EDIT ed_meta_bound 450 52 470 ., nomem option(bound)
   TEXT tx_meta_alpha 10 73 430 ., label("alpha() - level of the profile intervals (default 0.05)")
-  EDIT ed_meta_alpha 450 73 470 ., nomem
+  EDIT ed_meta_alpha 450 73 470 ., nomem option(alpha)
   TEXT tx_meta_maxit 10 94 430 ., label("maxit() - maximum IWLS iterations (default 20)")
-  EDIT ed_meta_maxit 450 94 470 ., nomem
+  EDIT ed_meta_maxit 450 94 470 ., nomem option(maxit)
   CHECKBOX cx_meta_rates 10 115 301 ., label("rates - also combine the rate parameters")
   CHECKBOX cx_meta_notable 316 115 301 ., label("notable - suppress the output")
 END
@@ -32,6 +32,7 @@ BEGIN
 	put " " meta.ed_meta_names
 	beginoptions
 		put /program opt_part1
+		put " "
 	endoptions
 	stata
 END
@@ -39,13 +40,13 @@ END
 PROGRAM opt_part1
 BEGIN
 			if meta.ed_meta_bound.isneq("") {
-				put " bound(" meta.ed_meta_bound ")"
+				optionarg /asis meta.ed_meta_bound
 			}
 			if meta.ed_meta_alpha.isneq("") {
-				put " alpha(" meta.ed_meta_alpha ")"
+				optionarg /asis meta.ed_meta_alpha
 			}
 			if meta.ed_meta_maxit.isneq("") {
-				put " maxit(" meta.ed_meta_maxit ")"
+				optionarg /asis meta.ed_meta_maxit
 			}
 			if meta.cx_meta_rates {
 				put " rates"

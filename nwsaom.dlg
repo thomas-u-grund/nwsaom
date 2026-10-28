@@ -17,20 +17,21 @@ END
 
 DIALOG waves, tabtitle("Waves")
 BEGIN
-  RADIO rb_nwsaom_est 10 10 520 ., label("Estimate (nwsaom)") first default(1)
-  RADIO rb_nwsaom_sim 540 10 520 ., label("Simulate only (nwsaom simulate)") last
-  TEXT tx_h2_1 10 43 1040 ., label("-- Observed waves (a dependent network per wave; wave1()/wave2() OR waves()) --")
+  TEXT tx_nettype 10 10 120 ., label("Network type:")
+  COMBOBOX cb_nettype 140 10 160 ., dropdownlist contents(l_nettype) values(l_nettype_v) onselchange(program type_apply) nomem
+  TEXT tx_nettype_h 320 10 730 ., label("set from wave1; greys out (never hides) the options that do not apply to the type; auto switches all on")
+  TEXT tx_h3_1 10 43 1040 ., label("-- Observed waves (a dependent network per wave; wave1()/wave2() OR waves()) --")
   TEXT tx_wave1 10 64 185 ., label("wave1()")
-  COMBOBOX cb_wave1 200 64 150 ., dropdown contents(netlist) nomem
+  COMBOBOX cb_wave1 200 64 150 ., dropdownlist contents(netlist) values(netlist) onselchangelist(netlist_a) nomem option(wave1)
   TEXT tx_wave2 363 64 185 ., label("wave2()")
-  COMBOBOX cb_wave2 553 64 150 ., dropdown contents(netlist) nomem
+  COMBOBOX cb_wave2 553 64 150 ., dropdown contents(netlist) nomem option(wave2)
   TEXT tx_waves 10 85 430 ., label("waves() - 2+ networks in time order")
-  COMBOBOX cb_waves 450 85 610 ., dropdown contents(netlist) append nomem
+  COMBOBOX cb_waves 450 85 610 ., dropdown contents(netlist) append nomem option(waves)
   TEXT tx_tvcov 10 106 430 ., label("tvcov() - changing covariates a1 a2 a3 | s1 s2 s3")
-  EDIT ed_tvcov 450 106 610 ., nomem
+  EDIT ed_tvcov 450 106 610 ., nomem option(tvcov)
   TEXT tx_actormode 10 127 430 ., label("actormode() - two-mode actor mode (1|2)")
-  EDIT ed_actormode 450 127 610 ., nomem tooltip("for: twomode")
-  TEXT tx_h13_1 10 154 1040 ., label("-- Baseline: outdegree is required unless split into endowment + creation (reciprocity is optional) --")
+  EDIT ed_actormode 450 127 610 ., nomem tooltip("for: twomode") option(actormode)
+  TEXT tx_h14_1 10 154 1040 ., label("-- Baseline: outdegree is required unless split into endowment + creation (reciprocity is optional) --")
   CHECKBOX cx_outdegree 10 175 260 ., label("outdegree (density)") tooltip("RSiena: density")
   CHECKBOX cx_reciprocity 275 175 260 ., label("reciprocity (recip)") tooltip("RSiena: recip")
   CHECKBOX cx_outdegreeendow 540 175 260 ., label("outdegreeendow")
@@ -40,14 +41,14 @@ BEGIN
   CHECKBOX cx_transtiesendow 540 196 260 ., label("transtiesendow")
   CHECKBOX cx_transtiescreation 805 196 260 ., label("transtiescreation")
   TEXT tx_endow 10 217 430 ., label("endow() - effects split into endowment")
-  COMBOBOX cb_endow 450 217 610 ., dropdown contents(endow_list) append nomem tooltip("Name the same effect in endow() and creation(); covariate effects as altx:var")
+  COMBOBOX cb_endow 450 217 610 ., dropdown contents(endow_list) append nomem tooltip("Name the same effect in endow() and creation(); covariate effects as altx:var") option(endow)
   TEXT tx_creation 10 238 430 ., label("creation() - the same effects, creation role")
-  COMBOBOX cb_creation 450 238 610 ., dropdown contents(endow_list) append nomem
-  TEXT tx_h26_1 10 265 1040 ., label("-- Undirected networks --")
+  COMBOBOX cb_creation 450 238 610 ., dropdown contents(endow_list) append nomem option(creation)
+  TEXT tx_h27_1 10 265 1040 ., label("-- Undirected networks --")
   CHECKBOX cx_symmetric 10 286 260 ., label("symmetric (non-directed network)")
   TEXT tx_symtype 10 307 430 ., label("symtype() - model type for undirected ties")
-  COMBOBOX cb_symtype 450 307 610 ., dropdown contents(symtype_list) nomem tooltip("for: symmetric")
-  TEXT tx_h30_1 10 334 1040 ., label("-- Degree-based effects (flags) --")
+  COMBOBOX cb_symtype 450 307 610 ., dropdown contents(symtype_list) nomem tooltip("for: symmetric") option(symtype)
+  TEXT tx_h31_1 10 334 1040 ., label("-- Degree-based effects (flags) --")
   CHECKBOX cx_indegpopularity 10 355 260 ., label("indegpopularity (inPopSqrt)") tooltip("RSiena: inPopSqrt")
   CHECKBOX cx_outpopularity 275 355 260 ., label("outpopularity (outPopSqrt)") tooltip("RSiena: outPopSqrt")
   CHECKBOX cx_outactivity 540 355 260 ., label("outactivity (outAct)") tooltip("RSiena: outAct")
@@ -67,23 +68,23 @@ BEGIN
   CHECKBOX cx_reciact 10 439 260 ., label("reciact")
   CHECKBOX cx_reciactsqrt 275 439 260 ., label("reciactsqrt")
   CHECKBOX cx_between 540 439 260 ., label("between") tooltip("RSiena: between")
-  TEXT tx_h50_1 10 466 1040 ., label("-- Degree effects with a parameter (number or numlist) --")
+  TEXT tx_h51_1 10 466 1040 ., label("-- Degree effects with a parameter (number or numlist) --")
   TEXT tx_outtrunc 10 487 185 ., label("outtrunc()")
-  EDIT ed_outtrunc 200 487 150 ., nomem tooltip("RSiena: outTrunc")
+  EDIT ed_outtrunc 200 487 150 ., nomem tooltip("RSiena: outTrunc") option(outtrunc)
   TEXT tx_outmore 363 487 185 ., label("outmore()")
-  EDIT ed_outmore 553 487 150 ., nomem tooltip("RSiena: outMore")
+  EDIT ed_outmore 553 487 150 ., nomem tooltip("RSiena: outMore") option(outmore)
   TEXT tx_outthreshold 716 487 185 ., label("outthreshold()")
-  EDIT ed_outthreshold 906 487 150 ., nomem tooltip("RSiena: outThreshold")
+  EDIT ed_outthreshold 906 487 150 ., nomem tooltip("RSiena: outThreshold") option(outthreshold)
 END
 
 DIALOG structure, tabtitle("Structure")
 BEGIN
   TEXT tx_outinv 10 10 185 ., label("outinv()")
-  EDIT ed_outinv 200 10 150 ., nomem tooltip("RSiena: outInv")
+  EDIT ed_outinv 200 10 150 ., nomem tooltip("RSiena: outInv") option(outinv)
   TEXT tx_outsqinv 363 10 185 ., label("outsqinv()")
-  EDIT ed_outsqinv 553 10 150 ., nomem tooltip("RSiena: outSqInv")
+  EDIT ed_outsqinv 553 10 150 ., nomem tooltip("RSiena: outSqInv") option(outsqinv)
   TEXT tx_avdeg 716 10 185 ., label("avdeg()")
-  EDIT ed_avdeg 906 10 150 ., nomem tooltip("RSiena: avDeg. native plugin only")
+  EDIT ed_avdeg 906 10 150 ., nomem tooltip("RSiena: avDeg. native plugin only") option(avdeg)
   TEXT tx_h6_2 10 37 1040 ., label("-- Triadic closure, cycles, balance (flags) --")
   CHECKBOX cx_transtrip 10 58 260 ., label("transtrip") tooltip("RSiena: transTrip")
   CHECKBOX cx_transmedtrip 275 58 260 ., label("transmedtrip") tooltip("RSiena: transMedTrip")
@@ -98,19 +99,19 @@ BEGIN
   CHECKBOX cx_transtriads 540 100 260 ., label("transtriads") tooltip("RSiena: transTriads. native plugin only")
   TEXT tx_h18_2 10 127 1040 ., label("-- Geometrically weighted effects: give the decay parameter --")
   TEXT tx_gwesp 10 148 185 ., label("gwesp()")
-  EDIT ed_gwesp 200 148 150 ., nomem tooltip("RSiena: gwesp")
+  EDIT ed_gwesp 200 148 150 ., nomem tooltip("RSiena: gwesp") option(gwesp)
   TEXT tx_gwespfb 363 148 185 ., label("gwespfb()")
-  EDIT ed_gwespfb 553 148 150 ., nomem tooltip("RSiena: gwespFB")
+  EDIT ed_gwespfb 553 148 150 ., nomem tooltip("RSiena: gwespFB") option(gwespfb)
   TEXT tx_gwespbf 716 148 185 ., label("gwespbf()")
-  EDIT ed_gwespbf 906 148 150 ., nomem tooltip("RSiena: gwespBF")
+  EDIT ed_gwespbf 906 148 150 ., nomem tooltip("RSiena: gwespBF") option(gwespbf)
   TEXT tx_gwespbb 10 169 185 ., label("gwespbb()")
-  EDIT ed_gwespbb 200 169 150 ., nomem tooltip("RSiena: gwespBB")
+  EDIT ed_gwespbb 200 169 150 ., nomem tooltip("RSiena: gwespBB") option(gwespbb)
   TEXT tx_gwesprr 363 169 185 ., label("gwesprr()")
-  EDIT ed_gwesprr 553 169 150 ., nomem tooltip("RSiena: gwespRR")
+  EDIT ed_gwesprr 553 169 150 ., nomem tooltip("RSiena: gwespRR") option(gwesprr)
   TEXT tx_gwdspff 716 169 185 ., label("gwdspff()")
-  EDIT ed_gwdspff 906 169 150 ., nomem tooltip("RSiena: gwdspFF")
+  EDIT ed_gwdspff 906 169 150 ., nomem tooltip("RSiena: gwdspFF") option(gwdspff)
   TEXT tx_gwdspfb 10 190 185 ., label("gwdspfb()")
-  EDIT ed_gwdspfb 200 190 150 ., nomem tooltip("RSiena: gwdspFB")
+  EDIT ed_gwdspfb 200 190 150 ., nomem tooltip("RSiena: gwdspFB") option(gwdspfb)
   TEXT tx_h33_2 10 217 1040 ., label("-- Isolates and assortativity --")
   CHECKBOX cx_isolatenet 10 238 260 ., label("isolatenet") tooltip("RSiena: isolateNet")
   CHECKBOX cx_outiso 275 238 260 ., label("outiso") tooltip("RSiena: outIso")
@@ -125,39 +126,39 @@ BEGIN
   CHECKBOX cx_inoutass 540 280 260 ., label("inoutass")
   TEXT tx_h45_2 10 307 1040 ., label("-- Node covariate effects: one effect per variable (Statnet name = RSiena alias) --")
   TEXT tx_nodematch 10 328 185 ., label("nodematch() (sameX)")
-  VARLIST vl_nodematch 200 328 150 ., nomem tooltip("RSiena: sameX")
+  VARLIST vl_nodematch 200 328 150 ., nomem tooltip("RSiena: sameX") option(nodematch)
   TEXT tx_samex 363 328 185 ., label("samex()")
-  VARLIST vl_samex 553 328 150 ., nomem tooltip("RSiena: sameX")
+  VARLIST vl_samex 553 328 150 ., nomem tooltip("RSiena: sameX") option(samex)
   TEXT tx_nodecov 716 328 185 ., label("nodecov() (altX+egoX)")
-  VARLIST vl_nodecov 906 328 150 ., nomem tooltip("RSiena: altX+egoX")
+  VARLIST vl_nodecov 906 328 150 ., nomem tooltip("RSiena: altX+egoX") option(nodecov)
   TEXT tx_nodeicov 10 349 185 ., label("nodeicov() (altX)")
-  VARLIST vl_nodeicov 200 349 150 ., nomem tooltip("RSiena: altX")
+  VARLIST vl_nodeicov 200 349 150 ., nomem tooltip("RSiena: altX") option(nodeicov)
   TEXT tx_altx 363 349 185 ., label("altx()")
-  VARLIST vl_altx 553 349 150 ., nomem tooltip("RSiena: altX")
+  VARLIST vl_altx 553 349 150 ., nomem tooltip("RSiena: altX") option(altx)
   TEXT tx_nodeocov 716 349 185 ., label("nodeocov() (egoX)")
-  VARLIST vl_nodeocov 906 349 150 ., nomem tooltip("RSiena: egoX")
+  VARLIST vl_nodeocov 906 349 150 ., nomem tooltip("RSiena: egoX") option(nodeocov)
   TEXT tx_egox 10 370 185 ., label("egox()")
-  VARLIST vl_egox 200 370 150 ., nomem tooltip("RSiena: egoX")
+  VARLIST vl_egox 200 370 150 ., nomem tooltip("RSiena: egoX") option(egox)
   TEXT tx_simcov 363 370 185 ., label("simcov() (simX)")
-  VARLIST vl_simcov 553 370 150 ., nomem tooltip("RSiena: simX")
+  VARLIST vl_simcov 553 370 150 ., nomem tooltip("RSiena: simX") option(simcov)
   TEXT tx_simx 716 370 185 ., label("simx()")
-  VARLIST vl_simx 906 370 150 ., nomem tooltip("RSiena: simX")
+  VARLIST vl_simx 906 370 150 ., nomem tooltip("RSiena: simX") option(simx)
   TEXT tx_absdiffx 10 391 185 ., label("absdiffx()")
-  VARLIST vl_absdiffx 200 391 150 ., nomem tooltip("RSiena: absDiffX")
+  VARLIST vl_absdiffx 200 391 150 ., nomem tooltip("RSiena: absDiffX") option(absdiffx)
   TEXT tx_egoxaltx 363 391 185 ., label("egoxaltx()")
-  VARLIST vl_egoxaltx 553 391 150 ., nomem tooltip("RSiena: egoXaltX")
+  VARLIST vl_egoxaltx 553 391 150 ., nomem tooltip("RSiena: egoXaltX") option(egoxaltx)
   TEXT tx_diffx 716 391 185 ., label("diffx()")
-  VARLIST vl_diffx 906 391 150 ., nomem tooltip("RSiena: diffX")
+  VARLIST vl_diffx 906 391 150 ., nomem tooltip("RSiena: diffX") option(diffx)
   TEXT tx_higher 10 412 185 ., label("higher()")
-  VARLIST vl_higher 200 412 150 ., nomem tooltip("RSiena: higher")
+  VARLIST vl_higher 200 412 150 ., nomem tooltip("RSiena: higher") option(higher)
   TEXT tx_egosqx 363 412 185 ., label("egosqx()")
-  VARLIST vl_egosqx 553 412 150 ., nomem tooltip("RSiena: egoSqX")
+  VARLIST vl_egosqx 553 412 150 ., nomem tooltip("RSiena: egoSqX") option(egosqx)
   TEXT tx_altsqx 716 412 185 ., label("altsqx()")
-  VARLIST vl_altsqx 906 412 150 ., nomem tooltip("RSiena: altSqX")
+  VARLIST vl_altsqx 906 412 150 ., nomem tooltip("RSiena: altSqX") option(altsqx)
   TEXT tx_samexrecip 10 433 185 ., label("samexrecip()")
-  VARLIST vl_samexrecip 200 433 150 ., nomem tooltip("RSiena: sameXRecip")
+  VARLIST vl_samexrecip 200 433 150 ., nomem tooltip("RSiena: sameXRecip") option(samexrecip)
   TEXT tx_simrecipx 363 433 185 ., label("simrecipx()")
-  VARLIST vl_simrecipx 553 433 150 ., nomem tooltip("RSiena: simRecipX")
+  VARLIST vl_simrecipx 553 433 150 ., nomem tooltip("RSiena: simRecipX") option(simrecipx)
   CHECKBOX cx_nocenter 10 454 260 ., label("nocenter - raw covariate values")
   TEXT tx_h81_2 10 481 1040 ., label("-- Contrast and threshold covariate effects --")
 END
@@ -165,75 +166,75 @@ END
 DIALOG covariates, tabtitle("Covariates")
 BEGIN
   TEXT tx_egoplusaltsqx 10 10 185 ., label("egoplusaltsqx()")
-  VARLIST vl_egoplusaltsqx 200 10 150 ., nomem tooltip("RSiena: egoPlusAltSqX. native plugin only")
+  VARLIST vl_egoplusaltsqx 200 10 150 ., nomem tooltip("RSiena: egoPlusAltSqX. native plugin only") option(egoplusaltsqx)
   TEXT tx_diffsqx 363 10 185 ., label("diffsqx()")
-  VARLIST vl_diffsqx 553 10 150 ., nomem tooltip("RSiena: diffSqX. native plugin only")
+  VARLIST vl_diffsqx 553 10 150 ., nomem tooltip("RSiena: diffSqX. native plugin only") option(diffsqx)
   TEXT tx_egodiffx 716 10 185 ., label("egodiffx()")
-  VARLIST vl_egodiffx 906 10 150 ., nomem tooltip("RSiena: egoDiffX. native plugin only")
+  VARLIST vl_egodiffx 906 10 150 ., nomem tooltip("RSiena: egoDiffX. native plugin only") option(egodiffx)
   TEXT tx_althigheregox 10 31 185 ., label("althigheregox()")
-  VARLIST vl_althigheregox 200 31 150 ., nomem tooltip("RSiena: altHigherEgoX. native plugin only")
+  VARLIST vl_althigheregox 200 31 150 ., nomem tooltip("RSiena: altHigherEgoX. native plugin only") option(althigheregox)
   TEXT tx_unequalx 363 31 185 ., label("unequalx()")
-  VARLIST vl_unequalx 553 31 150 ., nomem tooltip("RSiena: unequalX. native plugin only")
+  VARLIST vl_unequalx 553 31 150 ., nomem tooltip("RSiena: unequalX. native plugin only") option(unequalx)
   TEXT tx_egolthresholdx 716 31 185 ., label("egolthresholdx()")
-  VARLIST vl_egolthresholdx 906 31 150 ., nomem tooltip("RSiena: egoLThresholdX. native plugin only")
+  VARLIST vl_egolthresholdx 906 31 150 ., nomem tooltip("RSiena: egoLThresholdX. native plugin only") option(egolthresholdx)
   TEXT tx_egorthresholdx 10 52 185 ., label("egorthresholdx()")
-  VARLIST vl_egorthresholdx 200 52 150 ., nomem tooltip("RSiena: egoRThresholdX. native plugin only")
+  VARLIST vl_egorthresholdx 200 52 150 ., nomem tooltip("RSiena: egoRThresholdX. native plugin only") option(egorthresholdx)
   TEXT tx_altlthresholdx 363 52 185 ., label("altlthresholdx()")
-  VARLIST vl_altlthresholdx 553 52 150 ., nomem tooltip("RSiena: altLThresholdX. native plugin only")
+  VARLIST vl_altlthresholdx 553 52 150 ., nomem tooltip("RSiena: altLThresholdX. native plugin only") option(altlthresholdx)
   TEXT tx_altrthresholdx 716 52 185 ., label("altrthresholdx()")
-  VARLIST vl_altrthresholdx 906 52 150 ., nomem tooltip("RSiena: altRThresholdX. native plugin only")
+  VARLIST vl_altrthresholdx 906 52 150 ., nomem tooltip("RSiena: altRThresholdX. native plugin only") option(altrthresholdx)
   TEXT tx_degabsdiffx 10 73 185 ., label("degabsdiffx()")
-  VARLIST vl_degabsdiffx 200 73 150 ., nomem tooltip("RSiena: degAbsDiffX. native plugin only")
+  VARLIST vl_degabsdiffx 200 73 150 ., nomem tooltip("RSiena: degAbsDiffX. native plugin only") option(degabsdiffx)
   TEXT tx_degposdiffx 363 73 185 ., label("degposdiffx()")
-  VARLIST vl_degposdiffx 553 73 150 ., nomem tooltip("RSiena: degPosDiffX. native plugin only")
+  VARLIST vl_degposdiffx 553 73 150 ., nomem tooltip("RSiena: degPosDiffX. native plugin only") option(degposdiffx)
   TEXT tx_degnegdiffx 716 73 185 ., label("degnegdiffx()")
-  VARLIST vl_degnegdiffx 906 73 150 ., nomem tooltip("RSiena: degNegDiffX. native plugin only")
+  VARLIST vl_degnegdiffx 906 73 150 ., nomem tooltip("RSiena: degNegDiffX. native plugin only") option(degnegdiffx)
   TEXT tx_covthreshold 10 94 430 ., label("covthreshold() - threshold of the 4 threshold effects (default 0)")
-  EDIT ed_covthreshold 450 94 610 ., nomem tooltip("native plugin only")
+  EDIT ed_covthreshold 450 94 610 ., nomem tooltip("native plugin only") option(covthreshold)
   TEXT tx_xparam 10 115 430 ., label("xparam() - parameter of netx() effects (default 1)")
-  EDIT ed_xparam 450 115 610 ., nomem tooltip("native plugin only")
+  EDIT ed_xparam 450 115 610 ., nomem tooltip("native plugin only") option(xparam)
   TEXT tx_h28_3 10 142 1040 ., label("-- Covariate x triad / popularity / activity effects (directed one-mode networks) --")
   TEXT tx_samextranstrip 10 163 185 ., label("samextranstrip()")
-  VARLIST vl_samextranstrip 200 163 150 ., nomem tooltip("RSiena: sameXTransTrip. native plugin only")
+  VARLIST vl_samextranstrip 200 163 150 ., nomem tooltip("RSiena: sameXTransTrip. native plugin only") option(samextranstrip)
   TEXT tx_diffxtranstrip 363 163 185 ., label("diffxtranstrip()")
-  VARLIST vl_diffxtranstrip 553 163 150 ., nomem tooltip("RSiena: diffXTransTrip. native plugin only")
+  VARLIST vl_diffxtranstrip 553 163 150 ., nomem tooltip("RSiena: diffXTransTrip. native plugin only") option(diffxtranstrip)
   TEXT tx_simxtranstrip 716 163 185 ., label("simxtranstrip()")
-  VARLIST vl_simxtranstrip 906 163 150 ., nomem tooltip("RSiena: simXTransTrip. native plugin only")
+  VARLIST vl_simxtranstrip 906 163 150 ., nomem tooltip("RSiena: simXTransTrip. native plugin only") option(simxtranstrip)
   TEXT tx_homxtranstrip 10 184 185 ., label("homxtranstrip()")
-  VARLIST vl_homxtranstrip 200 184 150 ., nomem tooltip("RSiena: homXTransTrip. native plugin only")
+  VARLIST vl_homxtranstrip 200 184 150 ., nomem tooltip("RSiena: homXTransTrip. native plugin only") option(homxtranstrip)
   TEXT tx_samexoutact 363 184 185 ., label("samexoutact()")
-  VARLIST vl_samexoutact 553 184 150 ., nomem tooltip("RSiena: sameXOutAct. native plugin only")
+  VARLIST vl_samexoutact 553 184 150 ., nomem tooltip("RSiena: sameXOutAct. native plugin only") option(samexoutact)
   TEXT tx_diffxoutact 716 184 185 ., label("diffxoutact()")
-  VARLIST vl_diffxoutact 906 184 150 ., nomem tooltip("RSiena: diffXOutAct. native plugin only")
+  VARLIST vl_diffxoutact 906 184 150 ., nomem tooltip("RSiena: diffXOutAct. native plugin only") option(diffxoutact)
   TEXT tx_samexreciact 10 205 185 ., label("samexreciact()")
-  VARLIST vl_samexreciact 200 205 150 ., nomem tooltip("RSiena: sameXReciAct. native plugin only")
+  VARLIST vl_samexreciact 200 205 150 ., nomem tooltip("RSiena: sameXReciAct. native plugin only") option(samexreciact)
   TEXT tx_diffxreciact 363 205 185 ., label("diffxreciact()")
-  VARLIST vl_diffxreciact 553 205 150 ., nomem tooltip("RSiena: diffXReciAct. native plugin only")
+  VARLIST vl_diffxreciact 553 205 150 ., nomem tooltip("RSiena: diffXReciAct. native plugin only") option(diffxreciact)
   TEXT tx_homxoutact 716 205 185 ., label("homxoutact()")
-  VARLIST vl_homxoutact 906 205 150 ., nomem tooltip("RSiena: homXOutAct. native plugin only")
+  VARLIST vl_homxoutact 906 205 150 ., nomem tooltip("RSiena: homXOutAct. native plugin only") option(homxoutact)
   TEXT tx_altxoutact 10 226 185 ., label("altxoutact()")
-  VARLIST vl_altxoutact 200 226 150 ., nomem tooltip("RSiena: altXOutAct. native plugin only")
+  VARLIST vl_altxoutact 200 226 150 ., nomem tooltip("RSiena: altXOutAct. native plugin only") option(altxoutact)
   TEXT tx_inpopx 363 226 185 ., label("inpopx()")
-  VARLIST vl_inpopx 553 226 150 ., nomem tooltip("RSiena: inPopX. native plugin only")
+  VARLIST vl_inpopx 553 226 150 ., nomem tooltip("RSiena: inPopX. native plugin only") option(inpopx)
   TEXT tx_outpopx 716 226 185 ., label("outpopx()")
-  VARLIST vl_outpopx 906 226 150 ., nomem tooltip("RSiena: outPopX. native plugin only")
+  VARLIST vl_outpopx 906 226 150 ., nomem tooltip("RSiena: outPopX. native plugin only") option(outpopx)
   TEXT tx_inactx 10 247 185 ., label("inactx()")
-  VARLIST vl_inactx 200 247 150 ., nomem tooltip("RSiena: inActX. native plugin only")
+  VARLIST vl_inactx 200 247 150 ., nomem tooltip("RSiena: inActX. native plugin only") option(inactx)
   TEXT tx_outactx 363 247 185 ., label("outactx()")
-  VARLIST vl_outactx 553 247 150 ., nomem tooltip("RSiena: outActX. native plugin only")
+  VARLIST vl_outactx 553 247 150 ., nomem tooltip("RSiena: outActX. native plugin only") option(outactx)
   TEXT tx_samexinpop 716 247 185 ., label("samexinpop()")
-  VARLIST vl_samexinpop 906 247 150 ., nomem tooltip("RSiena: sameXInPop. native plugin only")
+  VARLIST vl_samexinpop 906 247 150 ., nomem tooltip("RSiena: sameXInPop. native plugin only") option(samexinpop)
   TEXT tx_diffxinpop 10 268 185 ., label("diffxinpop()")
-  VARLIST vl_diffxinpop 200 268 150 ., nomem tooltip("RSiena: diffXInPop. native plugin only")
+  VARLIST vl_diffxinpop 200 268 150 ., nomem tooltip("RSiena: diffXInPop. native plugin only") option(diffxinpop)
   TEXT tx_h61_3 10 295 1040 ., label("-- Dyadic covariates: names of Stata n x n matrices (tv...: the stem of matrices stem1 stem2 ...) --")
   TEXT tx_dyadcov 10 316 185 ., label("dyadcov() (X)")
-  EDIT ed_dyadcov 200 316 150 ., nomem tooltip("RSiena: X")
+  EDIT ed_dyadcov 200 316 150 ., nomem tooltip("RSiena: X") option(dyadcov)
   TEXT tx_dyadcovrecip 363 316 185 ., label("dyadcovrecip() (XRecip)")
-  EDIT ed_dyadcovrecip 553 316 150 ., nomem tooltip("RSiena: XRecip")
+  EDIT ed_dyadcovrecip 553 316 150 ., nomem tooltip("RSiena: XRecip") option(dyadcovrecip)
   TEXT tx_tvdyadcov 716 316 185 ., label("tvdyadcov() (X (changing))")
-  EDIT ed_tvdyadcov 906 316 150 ., nomem tooltip("RSiena: X (changing)")
+  EDIT ed_tvdyadcov 906 316 150 ., nomem tooltip("RSiena: X (changing)") option(tvdyadcov)
   TEXT tx_tvdyadcovrecip 10 337 430 ., label("tvdyadcovrecip() (XRecip (changing))")
-  EDIT ed_tvdyadcovrecip 450 337 610 ., nomem tooltip("RSiena: XRecip (changing)")
+  EDIT ed_tvdyadcovrecip 450 337 610 ., nomem tooltip("RSiena: XRecip (changing)") option(tvdyadcovrecip)
   TEXT tx_dyadx_t 10 358 1050 ., label("-- dyadx() - effects of a constant dyadic covariate: effect:matrix -- box next to the effect: matrix name")
   COMBOBOX cb_dyadx_1 10 379 215 ., dropdown contents(lst_dyadx) values(lst_dyadx_v) nomem
   EDIT ed_dyadx_1a 230 379 115 ., nomem
@@ -347,13 +348,13 @@ BEGIN
   CHECKBOX cx_recipratelog 10 184 260 ., label("recipratelog") tooltip("RSiena: recipRateLog. native plugin only")
   TEXT tx_h31_5 10 211 1040 ., label("-- Covariates of the rate --")
   TEXT tx_ratecov 10 232 185 ., label("ratecov() (RateX)")
-  VARLIST vl_ratecov 200 232 150 ., nomem tooltip("RSiena: RateX")
+  VARLIST vl_ratecov 200 232 150 ., nomem tooltip("RSiena: RateX") option(ratecov)
   TEXT tx_ratecovcoef 363 232 185 ., label("ratecovcoef() - start values")
-  EDIT ed_ratecovcoef 553 232 150 ., nomem
+  EDIT ed_ratecovcoef 553 232 150 ., nomem option(ratecovcoef)
   TEXT tx_behratecov 10 253 430 ., label("behratecov() - covariates of the behavior rate")
-  VARLIST vl_behratecov 450 253 610 ., nomem
+  VARLIST vl_behratecov 450 253 610 ., nomem option(behratecov)
   TEXT tx_behratecoef 10 274 430 ., label("behratecoef() - start values (behavior rate)")
-  EDIT ed_behratecoef 450 274 610 ., nomem
+  EDIT ed_behratecoef 450 274 610 ., nomem option(behratecoef)
   TEXT tx_behrate_t 10 295 1050 ., label("-- behrate() - network-dependent rate effects of the behavior -- box: argument of the *covar effects only")
   COMBOBOX cb_behrate_1 10 316 215 ., dropdown contents(lst_behrate) values(lst_behrate_v) nomem
   EDIT ed_behrate_1a 230 316 115 ., nomem
@@ -367,25 +368,25 @@ BEGIN
   EDIT ed_behrate_more 230 358 830 ., nomem
   TEXT tx_h51_5 10 391 1040 ., label("-- Composition change: joiners and leavers --")
   TEXT tx_present 10 412 430 ., label("present() - 0/1 variable per wave")
-  VARLIST vl_present 450 412 610 ., nomem
+  VARLIST vl_present 450 412 610 ., nomem option(present)
   TEXT tx_joinat 10 433 185 ., label("joinat() - time of joining")
-  VARLIST vl_joinat 200 433 150 ., nomem
+  VARLIST vl_joinat 200 433 150 ., nomem option(joinat)
   TEXT tx_leaveat 363 433 185 ., label("leaveat() - time of leaving")
-  VARLIST vl_leaveat 553 433 150 ., nomem
+  VARLIST vl_leaveat 553 433 150 ., nomem option(leaveat)
   TEXT tx_h58_5 10 460 1040 ., label("-- Missing data and structural zeros/ones --")
   TEXT tx_missnet 10 481 430 ., label("missnet() - one 0/1 matrix per wave")
-  EDIT ed_missnet 450 481 610 ., nomem
+  EDIT ed_missnet 450 481 610 ., nomem option(missnet)
 END
 
 DIALOG rates_2, tabtitle("Rates 2")
 BEGIN
   TEXT tx_missbeh 10 10 430 ., label("missbeh() - 0/1 variable per wave")
-  VARLIST vl_missbeh 450 10 610 ., nomem
+  VARLIST vl_missbeh 450 10 610 ., nomem option(missbeh)
   TEXT tx_structural 10 31 430 ., label("structural() - 0/1 matrix of fixed dyads")
-  EDIT ed_structural 450 31 610 ., nomem
+  EDIT ed_structural 450 31 610 ., nomem option(structural)
   TEXT tx_h4_6 10 58 1040 ., label("-- Co-evolving behavior (one variable per wave, same order as the waves; at least linear) --")
   TEXT tx_behavior 10 79 430 ., label("behavior() - variable per wave")
-  VARLIST vl_behavior 450 79 610 ., nomem
+  VARLIST vl_behavior 450 79 610 ., nomem option(behavior)
   CHECKBOX cx_linear 10 100 260 ., label("linear") tooltip("RSiena: linear")
   CHECKBOX cx_linearendow 275 100 260 ., label("linearendow")
   CHECKBOX cx_linearcreation 540 100 260 ., label("linearcreation")
@@ -404,17 +405,17 @@ BEGIN
   CHECKBOX cx_behaltx 540 190 260 ., label("behaltx (altX (beh))") tooltip("RSiena: altX (beh)")
   CHECKBOX cx_behegoplusalt 805 190 260 ., label("behegoplusalt (egoPlusAltX (beh))") tooltip("RSiena: egoPlusAltX (beh)")
   TEXT tx_behtheta0 10 211 430 ., label("behtheta0() - start values of behavior effects")
-  EDIT ed_behtheta0 450 211 610 ., nomem
+  EDIT ed_behtheta0 450 211 610 ., nomem option(behtheta0)
   TEXT tx_behfrom 10 232 430 ., label("behfrom() - covariate main effects")
-  VARLIST vl_behfrom 450 232 610 ., nomem tooltip("RSiena: effFrom")
+  VARLIST vl_behfrom 450 232 610 ., nomem tooltip("RSiena: effFrom") option(behfrom)
   TEXT tx_behavxalt 10 253 185 ., label("behavxalt() (avXAlt)")
-  VARLIST vl_behavxalt 200 253 150 ., nomem tooltip("RSiena: avXAlt")
+  VARLIST vl_behavxalt 200 253 150 ., nomem tooltip("RSiena: avXAlt") option(behavxalt)
   TEXT tx_behavsamexalt 363 253 185 ., label("behavsamexalt() (avSameXAlt)")
-  VARLIST vl_behavsamexalt 553 253 150 ., nomem tooltip("RSiena: avSameXAlt")
+  VARLIST vl_behavsamexalt 553 253 150 ., nomem tooltip("RSiena: avSameXAlt") option(behavsamexalt)
   TEXT tx_behtotxalt 716 253 185 ., label("behtotxalt() (totXAlt)")
-  VARLIST vl_behtotxalt 906 253 150 ., nomem tooltip("RSiena: totXAlt")
+  VARLIST vl_behtotxalt 906 253 150 ., nomem tooltip("RSiena: totXAlt") option(behtotxalt)
   TEXT tx_behtotsamexalt 10 274 430 ., label("behtotsamexalt() (totSameXAlt)")
-  VARLIST vl_behtotsamexalt 450 274 610 ., nomem tooltip("RSiena: totSameXAlt")
+  VARLIST vl_behtotsamexalt 450 274 610 ., nomem tooltip("RSiena: totSameXAlt") option(behtotsamexalt)
   TEXT tx_beheff_t 10 295 1050 ., label("-- beheff() - behavior effects of network position, alters and similarity -- box next to the effect is not used")
   COMBOBOX cb_beheff_1 10 316 215 ., dropdown contents(lst_beheff) values(lst_beheff_v) nomem
   EDIT ed_beheff_1a 230 316 115 ., nomem
@@ -462,7 +463,7 @@ BEGIN
   EDIT ed_behnet2_more 230 73 830 ., nomem
   TEXT tx_h15_7 10 106 1040 ., label("-- Behavior effects of the network x a covariate or a dyadic covariate --")
   TEXT tx_behwparam 10 127 430 ., label("behwparam() - parameter of avAltW/avInAltW/avSimW (1|2)")
-  EDIT ed_behwparam 450 127 610 ., nomem
+  EDIT ed_behwparam 450 127 610 ., nomem option(behwparam)
   TEXT tx_behx_t 10 148 1050 ., label("-- behx() - behavior effects of network x covariate: effect:variable -- box next to the effect: variable or tvcov stem")
   COMBOBOX cb_behx_1 10 169 215 ., dropdown contents(lst_behx) values(lst_behx_v) nomem
   EDIT ed_behx_1a 230 169 115 ., nomem
@@ -502,83 +503,71 @@ BEGIN
   EDIT ed_tvbehw_more 230 391 830 ., nomem
   TEXT tx_h55_7 10 424 1040 ., label("-- Method of moments: replicates, start values, fixed effects --")
   TEXT tx_k0 10 445 430 ., label("k0() - Phase 1 replicates (default 50)")
-  EDIT ed_k0 450 445 610 ., nomem
+  EDIT ed_k0 450 445 610 ., nomem option(k0)
   TEXT tx_k3 10 466 430 ., label("k3() - Phase 3 replicates (default 1000)")
-  EDIT ed_k3 450 466 610 ., nomem
+  EDIT ed_k3 450 466 610 ., nomem option(k3)
   TEXT tx_firstg 10 487 430 ., label("firstg() - initial gain (default 0.2)")
-  EDIT ed_firstg 450 487 610 ., nomem
+  EDIT ed_firstg 450 487 610 ., nomem option(firstg)
 END
 
 DIALOG estimate, tabtitle("Estimate")
 BEGIN
   TEXT tx_seed 10 10 185 ., label("seed()")
-  EDIT ed_seed 200 10 150 ., nomem
+  EDIT ed_seed 200 10 150 ., nomem option(seed)
   TEXT tx_cores 10 31 430 ., label("cores() - threads of the plugin (default all)")
-  EDIT ed_cores 450 31 610 ., nomem
+  EDIT ed_cores 450 31 610 ., nomem option(cores)
   TEXT tx_theta0 10 52 185 ., label("theta0() - start values")
-  EDIT ed_theta0 200 52 150 ., nomem
+  EDIT ed_theta0 200 52 150 ., nomem option(theta0)
   TEXT tx_rate0 363 52 185 ., label("rate0() - start rates")
-  EDIT ed_rate0 553 52 150 ., nomem
+  EDIT ed_rate0 553 52 150 ., nomem option(rate0)
   TEXT tx_fix 10 73 430 ., label("fix() - fixed effects (names or _all)")
-  EDIT ed_fix 450 73 610 ., nomem
+  EDIT ed_fix 450 73 610 ., nomem option(fix)
   CHECKBOX cx_unconditional 10 94 260 ., label("unconditional estimation")
   TEXT tx_h11_8 10 121 1040 ., label("-- Maximum likelihood instead of the method of moments (ml; options go to mloptions()) --")
   CHECKBOX cx_ml 10 142 260 ., label("ml - maximum likelihood estimation")
   TEXT tx_ml_n1 10 163 430 ., label("n1() - phase 1 steps (default 50)")
-  EDIT ed_ml_n1 450 163 610 ., nomem
+  EDIT ed_ml_n1 450 163 610 ., nomem option(n1)
   TEXT tx_ml_nsub 10 184 430 ., label("nsub() - phase 2 subphases (default 4)")
-  EDIT ed_ml_nsub 450 184 610 ., nomem
+  EDIT ed_ml_nsub 450 184 610 ., nomem option(nsub)
   TEXT tx_ml_nstart2 10 205 430 ., label("nstart2() - phase 2 first steps (default 100)")
-  EDIT ed_ml_nstart2 450 205 610 ., nomem
+  EDIT ed_ml_nstart2 450 205 610 ., nomem option(nstart2)
   TEXT tx_ml_n3 10 226 430 ., label("n3() - phase 3 steps (default 1000)")
-  EDIT ed_ml_n3 450 226 610 ., nomem
+  EDIT ed_ml_n3 450 226 610 ., nomem option(n3)
   TEXT tx_ml_mult 10 247 430 ., label("mult() - multiplier (default 5)")
-  EDIT ed_ml_mult 450 247 610 ., nomem
+  EDIT ed_ml_mult 450 247 610 ., nomem option(mult)
   TEXT tx_ml_nmh 10 268 430 ., label("nmh() - MH steps per ministep (default 0)")
-  EDIT ed_ml_nmh 450 268 610 ., nomem
+  EDIT ed_ml_nmh 450 268 610 ., nomem option(nmh)
   TEXT tx_ml_gain 10 289 185 ., label("gain() - gain (default 0.2)")
-  EDIT ed_ml_gain 200 289 150 ., nomem
+  EDIT ed_ml_gain 200 289 150 ., nomem option(gain)
   TEXT tx_ml_mhgeom 10 310 430 ., label("mhgeom() - geometric MH (default 0)")
-  EDIT ed_ml_mhgeom 450 310 610 ., nomem
+  EDIT ed_ml_mhgeom 450 310 610 ., nomem option(mhgeom)
   TEXT tx_ml_seed 10 331 185 ., label("seed() - ML seed")
-  EDIT ed_ml_seed 200 331 150 ., nomem
+  EDIT ed_ml_seed 200 331 150 ., nomem option(seed)
   TEXT tx_ml_theta0 363 331 185 ., label("theta0() - ML start values")
-  EDIT ed_ml_theta0 553 331 150 ., nomem
+  EDIT ed_ml_theta0 553 331 150 ., nomem option(theta0)
   TEXT tx_ml_rate0 716 331 185 ., label("rate0() - ML start rates")
-  EDIT ed_ml_rate0 906 331 150 ., nomem
+  EDIT ed_ml_rate0 906 331 150 ., nomem option(rate0)
   CHECKBOX cx_ml_notable 10 352 260 ., label("notable - suppress the ML table")
   TEXT tx_h36_8 10 379 1040 ., label("-- Output --")
   CHECKBOX cx_detail 10 400 260 ., label("detail - RSiena names, means")
-  TEXT tx_n38_8 10 421 1050 ., label("Choose 'Simulate only' with the radio buttons on the first tab: nwsaom simulate runs the model specified on the other tabs at the")
-  TEXT tx_n39_8 10 442 1050 ., label("coefficients below without estimating (RSiena siena07 with simOnly). Not used when estimating.")
-  TEXT tx_sim_theta 10 463 430 ., label("theta() - one value per network effect")
-  EDIT ed_sim_theta 450 463 610 ., nomem tooltip("RSiena: simOnly")
-  TEXT tx_sim_behtheta 10 484 430 ., label("behtheta() - one value per behavior effect")
-  EDIT ed_sim_behtheta 450 484 610 ., nomem
+  TEXT tx_n38_8 10 421 1050 ., label("To simulate without estimating, press 'Simulate...' on the Related tab (nwsaom simulate / estat simulate).")
+  TEXT tx_h39_8 10 448 1040 ., label("-- Several groups estimated jointly (RSiena sienaGroupCreate): a group variable, one network series per group --")
+  TEXT tx_groups 10 469 430 ., label("groups() - variable that identifies the group of each node")
+  VARLIST vl_groups 450 469 610 ., nomem option(groups)
+  TEXT tx_gwaves 10 490 430 ., label("gwaves() - number of waves of each group")
+  EDIT ed_gwaves 450 490 610 ., nomem option(gwaves)
 END
 
-DIALOG estimate_2, tabtitle("Estimate 2")
+DIALOG related, tabtitle("Related")
 BEGIN
-  TEXT tx_sim_rates 10 10 430 ., label("rates() - rate of every period")
-  EDIT ed_sim_rates 450 10 610 ., nomem
-  TEXT tx_sim_ratesbeh 10 31 185 ., label("ratesbeh() - behavior rates")
-  EDIT ed_sim_ratesbeh 200 31 150 ., nomem
-  TEXT tx_sim_nsim 10 52 430 ., label("nsim() - number of simulations (default 100)")
-  EDIT ed_sim_nsim 450 52 610 ., nomem
-  TEXT tx_sim_generate 10 73 430 ., label("generate() - stub of the networks created")
-  EDIT ed_sim_generate 450 73 610 ., nomem
-  TEXT tx_h8_9 10 100 1040 ., label("-- Several groups estimated jointly (RSiena sienaGroupCreate): a group variable, one network series per group --")
-  TEXT tx_groups 10 121 430 ., label("groups() - variable that identifies the group of each node")
-  VARLIST vl_groups 450 121 610 ., nomem
-  TEXT tx_gwaves 10 142 430 ., label("gwaves() - number of waves of each group")
-  EDIT ed_gwaves 450 142 610 ., nomem
-  GROUPBOX gb_related 10 177 1040 82, label("Related dialogs")
-  BUTTON bt_bayes 22 199 333 22, label("Bayesian estimation...") onpush(program open_nwsaom_bayes)
-  BUTTON bt_multinet 363 199 333 22, label("Several networks (multinet)...") onpush(program open_nwsaom_multinet)
-  BUTTON bt_multiplex 704 199 333 22, label("Multiplex...") onpush(program open_nwsaom_multiplex)
-  BUTTON bt_estat 22 227 333 22, label("Postestimation...") onpush(program open_nwsaom_estat)
-  BUTTON bt_describe 363 227 333 22, label("Describe data...") onpush(program open_nwsaom_describe)
-  BUTTON bt_meta 704 227 333 22, label("Meta-analysis...") onpush(program open_nwsaom_meta)
+  GROUPBOX gb_related 10 10 1040 86, label("Related dialogs")
+  BUTTON bt_bayes 22 32 247 22, label("Bayesian estimation...") onpush(program open_nwsaom_bayes)
+  BUTTON bt_multinet 277 32 247 22, label("Several networks (multinet)...") onpush(program open_nwsaom_multinet)
+  BUTTON bt_multiplex 532 32 247 22, label("Multiplex...") onpush(program open_nwsaom_multiplex)
+  BUTTON bt_estat 787 32 247 22, label("Postestimation...") onpush(program open_nwsaom_estat)
+  BUTTON bt_describe 22 60 247 22, label("Describe data...") onpush(program open_nwsaom_describe)
+  BUTTON bt_meta 277 60 247 22, label("Meta-analysis...") onpush(program open_nwsaom_meta)
+  BUTTON bt_simulate 532 60 247 22, label("Simulate...") onpush(program open_nwsaom_simulate)
 END
 
 LIST netlist
@@ -1286,70 +1275,1527 @@ BEGIN
 	totwinalt
 END
 
+LIST l_nettype
+BEGIN
+	auto
+	directed
+	undirected
+	two-mode
+END
+
+LIST l_nettype_v
+BEGIN
+	auto
+	directed
+	undirected
+	two-mode
+END
+
+SCRIPT ty_auto_0
+BEGIN
+	waves.tx_wave1.enable
+	waves.cb_wave1.enable
+	waves.tx_wave2.enable
+	waves.cb_wave2.enable
+	waves.tx_waves.enable
+	waves.cb_waves.enable
+	waves.tx_tvcov.enable
+	waves.ed_tvcov.enable
+	waves.tx_actormode.enable
+	waves.ed_actormode.enable
+	waves.cx_outdegree.enable
+	waves.cx_reciprocity.enable
+	waves.cx_outdegreeendow.enable
+	waves.cx_outdegreecreation.enable
+	waves.cx_reciprocityendow.enable
+	waves.cx_reciprocitycreation.enable
+	waves.cx_transtiesendow.enable
+	waves.cx_transtiescreation.enable
+	waves.tx_endow.enable
+	waves.cb_endow.enable
+	waves.tx_creation.enable
+	waves.cb_creation.enable
+	waves.cx_symmetric.enable
+	waves.tx_symtype.enable
+	waves.cb_symtype.enable
+	waves.cx_indegpopularity.enable
+	waves.cx_outpopularity.enable
+	waves.cx_outactivity.enable
+	waves.cx_inactivity.enable
+	waves.cx_inpop.enable
+	waves.cx_outpop.enable
+	waves.cx_inact.enable
+	waves.cx_outactsqrt.enable
+	waves.cx_inpopc.enable
+	waves.cx_outpopc.enable
+	waves.cx_outactc.enable
+	waves.cx_inactc.enable
+	waves.cx_degplus.enable
+	waves.cx_degplusc.enable
+	waves.cx_recipop.enable
+END
+
+SCRIPT ty_auto_1
+BEGIN
+	waves.cx_recipopsqrt.enable
+	waves.cx_reciact.enable
+	waves.cx_reciactsqrt.enable
+	waves.cx_between.enable
+	waves.tx_outtrunc.enable
+	waves.ed_outtrunc.enable
+	waves.tx_outmore.enable
+	waves.ed_outmore.enable
+	waves.tx_outthreshold.enable
+	waves.ed_outthreshold.enable
+	structure.tx_outinv.enable
+	structure.ed_outinv.enable
+	structure.tx_outsqinv.enable
+	structure.ed_outsqinv.enable
+	structure.tx_avdeg.enable
+	structure.ed_avdeg.enable
+	structure.cx_transtrip.enable
+	structure.cx_transmedtrip.enable
+	structure.cx_transrectrip.enable
+	structure.cx_cycle3.enable
+	structure.cx_cycle4.enable
+	structure.cx_sqrtcycle4.enable
+	structure.cx_dblnbrdist2.enable
+	structure.cx_nbrdist2.enable
+	structure.cx_transties.enable
+	structure.cx_balance.enable
+	structure.cx_transtriads.enable
+	structure.tx_gwesp.enable
+	structure.ed_gwesp.enable
+	structure.tx_gwespfb.enable
+	structure.ed_gwespfb.enable
+	structure.tx_gwespbf.enable
+	structure.ed_gwespbf.enable
+	structure.tx_gwespbb.enable
+	structure.ed_gwespbb.enable
+	structure.tx_gwesprr.enable
+	structure.ed_gwesprr.enable
+	structure.tx_gwdspff.enable
+	structure.ed_gwdspff.enable
+	structure.tx_gwdspfb.enable
+END
+
+SCRIPT ty_auto_2
+BEGIN
+	structure.ed_gwdspfb.enable
+	structure.cx_isolatenet.enable
+	structure.cx_outiso.enable
+	structure.cx_antiiso.enable
+	structure.cx_antiiniso.enable
+	structure.cx_antiiniso2.enable
+	structure.cx_inplus3.enable
+	structure.cx_isolatepop.enable
+	structure.cx_outoutass.enable
+	structure.cx_ininass.enable
+	structure.cx_outinass.enable
+	structure.cx_inoutass.enable
+	structure.tx_nodematch.enable
+	structure.vl_nodematch.enable
+	structure.tx_samex.enable
+	structure.vl_samex.enable
+	structure.tx_nodecov.enable
+	structure.vl_nodecov.enable
+	structure.tx_nodeicov.enable
+	structure.vl_nodeicov.enable
+	structure.tx_altx.enable
+	structure.vl_altx.enable
+	structure.tx_nodeocov.enable
+	structure.vl_nodeocov.enable
+	structure.tx_egox.enable
+	structure.vl_egox.enable
+	structure.tx_simcov.enable
+	structure.vl_simcov.enable
+	structure.tx_simx.enable
+	structure.vl_simx.enable
+	structure.tx_absdiffx.enable
+	structure.vl_absdiffx.enable
+	structure.tx_egoxaltx.enable
+	structure.vl_egoxaltx.enable
+	structure.tx_diffx.enable
+	structure.vl_diffx.enable
+	structure.tx_higher.enable
+	structure.vl_higher.enable
+	structure.tx_egosqx.enable
+	structure.vl_egosqx.enable
+END
+
+SCRIPT ty_auto_3
+BEGIN
+	structure.tx_altsqx.enable
+	structure.vl_altsqx.enable
+	structure.tx_samexrecip.enable
+	structure.vl_samexrecip.enable
+	structure.tx_simrecipx.enable
+	structure.vl_simrecipx.enable
+	structure.cx_nocenter.enable
+	covariates.tx_egoplusaltsqx.enable
+	covariates.vl_egoplusaltsqx.enable
+	covariates.tx_diffsqx.enable
+	covariates.vl_diffsqx.enable
+	covariates.tx_egodiffx.enable
+	covariates.vl_egodiffx.enable
+	covariates.tx_althigheregox.enable
+	covariates.vl_althigheregox.enable
+	covariates.tx_unequalx.enable
+	covariates.vl_unequalx.enable
+	covariates.tx_egolthresholdx.enable
+	covariates.vl_egolthresholdx.enable
+	covariates.tx_egorthresholdx.enable
+	covariates.vl_egorthresholdx.enable
+	covariates.tx_altlthresholdx.enable
+	covariates.vl_altlthresholdx.enable
+	covariates.tx_altrthresholdx.enable
+	covariates.vl_altrthresholdx.enable
+	covariates.tx_degabsdiffx.enable
+	covariates.vl_degabsdiffx.enable
+	covariates.tx_degposdiffx.enable
+	covariates.vl_degposdiffx.enable
+	covariates.tx_degnegdiffx.enable
+	covariates.vl_degnegdiffx.enable
+	covariates.tx_covthreshold.enable
+	covariates.ed_covthreshold.enable
+	covariates.tx_xparam.enable
+	covariates.ed_xparam.enable
+	covariates.tx_samextranstrip.enable
+	covariates.vl_samextranstrip.enable
+	covariates.tx_diffxtranstrip.enable
+	covariates.vl_diffxtranstrip.enable
+	covariates.tx_simxtranstrip.enable
+END
+
+SCRIPT ty_auto_4
+BEGIN
+	covariates.vl_simxtranstrip.enable
+	covariates.tx_homxtranstrip.enable
+	covariates.vl_homxtranstrip.enable
+	covariates.tx_samexoutact.enable
+	covariates.vl_samexoutact.enable
+	covariates.tx_diffxoutact.enable
+	covariates.vl_diffxoutact.enable
+	covariates.tx_samexreciact.enable
+	covariates.vl_samexreciact.enable
+	covariates.tx_diffxreciact.enable
+	covariates.vl_diffxreciact.enable
+	covariates.tx_homxoutact.enable
+	covariates.vl_homxoutact.enable
+	covariates.tx_altxoutact.enable
+	covariates.vl_altxoutact.enable
+	covariates.tx_inpopx.enable
+	covariates.vl_inpopx.enable
+	covariates.tx_outpopx.enable
+	covariates.vl_outpopx.enable
+	covariates.tx_inactx.enable
+	covariates.vl_inactx.enable
+	covariates.tx_outactx.enable
+	covariates.vl_outactx.enable
+	covariates.tx_samexinpop.enable
+	covariates.vl_samexinpop.enable
+	covariates.tx_diffxinpop.enable
+	covariates.vl_diffxinpop.enable
+	covariates.tx_dyadcov.enable
+	covariates.ed_dyadcov.enable
+	covariates.tx_dyadcovrecip.enable
+	covariates.ed_dyadcovrecip.enable
+	covariates.tx_tvdyadcov.enable
+	covariates.ed_tvdyadcov.enable
+	covariates.tx_tvdyadcovrecip.enable
+	covariates.ed_tvdyadcovrecip.enable
+	rates.cx_outrate.enable
+	rates.cx_inrate.enable
+	rates.cx_reciprate.enable
+	rates.cx_outrateinv.enable
+	rates.cx_inrateinv.enable
+END
+
+SCRIPT ty_auto_5
+BEGIN
+	rates.cx_reciprateinv.enable
+	rates.cx_outratelog.enable
+	rates.cx_inratelog.enable
+	rates.cx_recipratelog.enable
+	rates.tx_ratecov.enable
+	rates.vl_ratecov.enable
+	rates.tx_ratecovcoef.enable
+	rates.ed_ratecovcoef.enable
+	rates.tx_behratecov.enable
+	rates.vl_behratecov.enable
+	rates.tx_behratecoef.enable
+	rates.ed_behratecoef.enable
+	rates.tx_present.enable
+	rates.vl_present.enable
+	rates.tx_joinat.enable
+	rates.vl_joinat.enable
+	rates.tx_leaveat.enable
+	rates.vl_leaveat.enable
+	rates.tx_missnet.enable
+	rates.ed_missnet.enable
+	rates_2.tx_missbeh.enable
+	rates_2.vl_missbeh.enable
+	rates_2.tx_structural.enable
+	rates_2.ed_structural.enable
+	rates_2.tx_behavior.enable
+	rates_2.vl_behavior.enable
+	rates_2.cx_linear.enable
+	rates_2.cx_linearendow.enable
+	rates_2.cx_linearcreation.enable
+	rates_2.cx_quadratic.enable
+	rates_2.cx_quadraticendow.enable
+	rates_2.cx_quadraticcreation.enable
+	rates_2.cx_avalt.enable
+	rates_2.cx_avaltendow.enable
+	rates_2.cx_avaltcreation.enable
+	rates_2.cx_avsim.enable
+	rates_2.cx_avsimendow.enable
+	rates_2.cx_avsimcreation.enable
+	rates_2.cx_behsim.enable
+	rates_2.cx_behegox.enable
+END
+
+SCRIPT ty_auto_6
+BEGIN
+	rates_2.cx_behaltx.enable
+	rates_2.cx_behegoplusalt.enable
+	rates_2.tx_behtheta0.enable
+	rates_2.ed_behtheta0.enable
+	rates_2.tx_behfrom.enable
+	rates_2.vl_behfrom.enable
+	rates_2.tx_behavxalt.enable
+	rates_2.vl_behavxalt.enable
+	rates_2.tx_behavsamexalt.enable
+	rates_2.vl_behavsamexalt.enable
+	rates_2.tx_behtotxalt.enable
+	rates_2.vl_behtotxalt.enable
+	rates_2.tx_behtotsamexalt.enable
+	rates_2.vl_behtotsamexalt.enable
+	behavior.tx_behwparam.enable
+	behavior.ed_behwparam.enable
+	behavior.tx_k0.enable
+	behavior.ed_k0.enable
+	behavior.tx_k3.enable
+	behavior.ed_k3.enable
+	behavior.tx_firstg.enable
+	behavior.ed_firstg.enable
+	estimate.tx_seed.enable
+	estimate.ed_seed.enable
+	estimate.tx_cores.enable
+	estimate.ed_cores.enable
+	estimate.tx_theta0.enable
+	estimate.ed_theta0.enable
+	estimate.tx_rate0.enable
+	estimate.ed_rate0.enable
+	estimate.tx_fix.enable
+	estimate.ed_fix.enable
+	estimate.cx_unconditional.enable
+	estimate.cx_ml.enable
+	estimate.tx_ml_n1.enable
+	estimate.ed_ml_n1.enable
+	estimate.tx_ml_nsub.enable
+	estimate.ed_ml_nsub.enable
+	estimate.tx_ml_nstart2.enable
+	estimate.ed_ml_nstart2.enable
+END
+
+SCRIPT ty_auto_7
+BEGIN
+	estimate.tx_ml_n3.enable
+	estimate.ed_ml_n3.enable
+	estimate.tx_ml_mult.enable
+	estimate.ed_ml_mult.enable
+	estimate.tx_ml_nmh.enable
+	estimate.ed_ml_nmh.enable
+	estimate.tx_ml_gain.enable
+	estimate.ed_ml_gain.enable
+	estimate.tx_ml_mhgeom.enable
+	estimate.ed_ml_mhgeom.enable
+	estimate.tx_ml_seed.enable
+	estimate.ed_ml_seed.enable
+	estimate.tx_ml_theta0.enable
+	estimate.ed_ml_theta0.enable
+	estimate.tx_ml_rate0.enable
+	estimate.ed_ml_rate0.enable
+	estimate.cx_ml_notable.enable
+	estimate.cx_detail.enable
+	estimate.tx_groups.enable
+	estimate.vl_groups.enable
+	estimate.tx_gwaves.enable
+	estimate.ed_gwaves.enable
+END
+
+SCRIPT ty_auto
+BEGIN
+	script ty_auto_0
+	script ty_auto_1
+	script ty_auto_2
+	script ty_auto_3
+	script ty_auto_4
+	script ty_auto_5
+	script ty_auto_6
+	script ty_auto_7
+END
+
+SCRIPT ty_d_0
+BEGIN
+	waves.tx_wave1.enable
+	waves.cb_wave1.enable
+	waves.tx_wave2.enable
+	waves.cb_wave2.enable
+	waves.tx_waves.enable
+	waves.cb_waves.enable
+	waves.tx_tvcov.enable
+	waves.ed_tvcov.enable
+	waves.tx_actormode.disable
+	waves.ed_actormode.disable
+	waves.cx_outdegree.enable
+	waves.cx_reciprocity.enable
+	waves.cx_outdegreeendow.enable
+	waves.cx_outdegreecreation.enable
+	waves.cx_reciprocityendow.enable
+	waves.cx_reciprocitycreation.enable
+	waves.cx_transtiesendow.enable
+	waves.cx_transtiescreation.enable
+	waves.tx_endow.enable
+	waves.cb_endow.enable
+	waves.tx_creation.enable
+	waves.cb_creation.enable
+	waves.cx_symmetric.disable
+	waves.tx_symtype.disable
+	waves.cb_symtype.disable
+	waves.cx_indegpopularity.enable
+	waves.cx_outpopularity.enable
+	waves.cx_outactivity.enable
+	waves.cx_inactivity.enable
+	waves.cx_inpop.enable
+	waves.cx_outpop.enable
+	waves.cx_inact.enable
+	waves.cx_outactsqrt.enable
+	waves.cx_inpopc.enable
+	waves.cx_outpopc.enable
+	waves.cx_outactc.enable
+	waves.cx_inactc.enable
+	waves.cx_degplus.disable
+	waves.cx_degplusc.disable
+	waves.cx_recipop.enable
+END
+
+SCRIPT ty_d_1
+BEGIN
+	waves.cx_recipopsqrt.enable
+	waves.cx_reciact.enable
+	waves.cx_reciactsqrt.enable
+	waves.cx_between.enable
+	waves.tx_outtrunc.enable
+	waves.ed_outtrunc.enable
+	waves.tx_outmore.enable
+	waves.ed_outmore.enable
+	waves.tx_outthreshold.enable
+	waves.ed_outthreshold.enable
+	structure.tx_outinv.enable
+	structure.ed_outinv.enable
+	structure.tx_outsqinv.enable
+	structure.ed_outsqinv.enable
+	structure.tx_avdeg.enable
+	structure.ed_avdeg.enable
+	structure.cx_transtrip.enable
+	structure.cx_transmedtrip.enable
+	structure.cx_transrectrip.enable
+	structure.cx_cycle3.enable
+	structure.cx_cycle4.enable
+	structure.cx_sqrtcycle4.enable
+	structure.cx_dblnbrdist2.enable
+	structure.cx_nbrdist2.enable
+	structure.cx_transties.enable
+	structure.cx_balance.enable
+	structure.cx_transtriads.disable
+	structure.tx_gwesp.enable
+	structure.ed_gwesp.enable
+	structure.tx_gwespfb.enable
+	structure.ed_gwespfb.enable
+	structure.tx_gwespbf.enable
+	structure.ed_gwespbf.enable
+	structure.tx_gwespbb.enable
+	structure.ed_gwespbb.enable
+	structure.tx_gwesprr.enable
+	structure.ed_gwesprr.enable
+	structure.tx_gwdspff.enable
+	structure.ed_gwdspff.enable
+	structure.tx_gwdspfb.enable
+END
+
+SCRIPT ty_d_2
+BEGIN
+	structure.ed_gwdspfb.enable
+	structure.cx_isolatenet.enable
+	structure.cx_outiso.enable
+	structure.cx_antiiso.enable
+	structure.cx_antiiniso.enable
+	structure.cx_antiiniso2.enable
+	structure.cx_inplus3.enable
+	structure.cx_isolatepop.enable
+	structure.cx_outoutass.enable
+	structure.cx_ininass.enable
+	structure.cx_outinass.enable
+	structure.cx_inoutass.enable
+	structure.tx_nodematch.enable
+	structure.vl_nodematch.enable
+	structure.tx_samex.enable
+	structure.vl_samex.enable
+	structure.tx_nodecov.enable
+	structure.vl_nodecov.enable
+	structure.tx_nodeicov.disable
+	structure.vl_nodeicov.disable
+	structure.tx_altx.enable
+	structure.vl_altx.enable
+	structure.tx_nodeocov.disable
+	structure.vl_nodeocov.disable
+	structure.tx_egox.enable
+	structure.vl_egox.enable
+	structure.tx_simcov.enable
+	structure.vl_simcov.enable
+	structure.tx_simx.enable
+	structure.vl_simx.enable
+	structure.tx_absdiffx.enable
+	structure.vl_absdiffx.enable
+	structure.tx_egoxaltx.enable
+	structure.vl_egoxaltx.enable
+	structure.tx_diffx.enable
+	structure.vl_diffx.enable
+	structure.tx_higher.enable
+	structure.vl_higher.enable
+	structure.tx_egosqx.enable
+	structure.vl_egosqx.enable
+END
+
+SCRIPT ty_d_3
+BEGIN
+	structure.tx_altsqx.enable
+	structure.vl_altsqx.enable
+	structure.tx_samexrecip.enable
+	structure.vl_samexrecip.enable
+	structure.tx_simrecipx.enable
+	structure.vl_simrecipx.enable
+	structure.cx_nocenter.enable
+	covariates.tx_egoplusaltsqx.enable
+	covariates.vl_egoplusaltsqx.enable
+	covariates.tx_diffsqx.enable
+	covariates.vl_diffsqx.enable
+	covariates.tx_egodiffx.enable
+	covariates.vl_egodiffx.enable
+	covariates.tx_althigheregox.enable
+	covariates.vl_althigheregox.enable
+	covariates.tx_unequalx.enable
+	covariates.vl_unequalx.enable
+	covariates.tx_egolthresholdx.enable
+	covariates.vl_egolthresholdx.enable
+	covariates.tx_egorthresholdx.enable
+	covariates.vl_egorthresholdx.enable
+	covariates.tx_altlthresholdx.enable
+	covariates.vl_altlthresholdx.enable
+	covariates.tx_altrthresholdx.enable
+	covariates.vl_altrthresholdx.enable
+	covariates.tx_degabsdiffx.enable
+	covariates.vl_degabsdiffx.enable
+	covariates.tx_degposdiffx.enable
+	covariates.vl_degposdiffx.enable
+	covariates.tx_degnegdiffx.enable
+	covariates.vl_degnegdiffx.enable
+	covariates.tx_covthreshold.enable
+	covariates.ed_covthreshold.enable
+	covariates.tx_xparam.enable
+	covariates.ed_xparam.enable
+	covariates.tx_samextranstrip.enable
+	covariates.vl_samextranstrip.enable
+	covariates.tx_diffxtranstrip.enable
+	covariates.vl_diffxtranstrip.enable
+	covariates.tx_simxtranstrip.enable
+END
+
+SCRIPT ty_d_4
+BEGIN
+	covariates.vl_simxtranstrip.enable
+	covariates.tx_homxtranstrip.enable
+	covariates.vl_homxtranstrip.enable
+	covariates.tx_samexoutact.enable
+	covariates.vl_samexoutact.enable
+	covariates.tx_diffxoutact.enable
+	covariates.vl_diffxoutact.enable
+	covariates.tx_samexreciact.enable
+	covariates.vl_samexreciact.enable
+	covariates.tx_diffxreciact.enable
+	covariates.vl_diffxreciact.enable
+	covariates.tx_homxoutact.enable
+	covariates.vl_homxoutact.enable
+	covariates.tx_altxoutact.enable
+	covariates.vl_altxoutact.enable
+	covariates.tx_inpopx.enable
+	covariates.vl_inpopx.enable
+	covariates.tx_outpopx.enable
+	covariates.vl_outpopx.enable
+	covariates.tx_inactx.enable
+	covariates.vl_inactx.enable
+	covariates.tx_outactx.enable
+	covariates.vl_outactx.enable
+	covariates.tx_samexinpop.enable
+	covariates.vl_samexinpop.enable
+	covariates.tx_diffxinpop.enable
+	covariates.vl_diffxinpop.enable
+	covariates.tx_dyadcov.enable
+	covariates.ed_dyadcov.enable
+	covariates.tx_dyadcovrecip.enable
+	covariates.ed_dyadcovrecip.enable
+	covariates.tx_tvdyadcov.enable
+	covariates.ed_tvdyadcov.enable
+	covariates.tx_tvdyadcovrecip.enable
+	covariates.ed_tvdyadcovrecip.enable
+	rates.cx_outrate.enable
+	rates.cx_inrate.enable
+	rates.cx_reciprate.enable
+	rates.cx_outrateinv.enable
+	rates.cx_inrateinv.enable
+END
+
+SCRIPT ty_d_5
+BEGIN
+	rates.cx_reciprateinv.enable
+	rates.cx_outratelog.enable
+	rates.cx_inratelog.enable
+	rates.cx_recipratelog.enable
+	rates.tx_ratecov.enable
+	rates.vl_ratecov.enable
+	rates.tx_ratecovcoef.enable
+	rates.ed_ratecovcoef.enable
+	rates.tx_behratecov.enable
+	rates.vl_behratecov.enable
+	rates.tx_behratecoef.enable
+	rates.ed_behratecoef.enable
+	rates.tx_present.enable
+	rates.vl_present.enable
+	rates.tx_joinat.enable
+	rates.vl_joinat.enable
+	rates.tx_leaveat.enable
+	rates.vl_leaveat.enable
+	rates.tx_missnet.enable
+	rates.ed_missnet.enable
+	rates_2.tx_missbeh.enable
+	rates_2.vl_missbeh.enable
+	rates_2.tx_structural.enable
+	rates_2.ed_structural.enable
+	rates_2.tx_behavior.disable
+	rates_2.vl_behavior.disable
+	rates_2.cx_linear.enable
+	rates_2.cx_linearendow.enable
+	rates_2.cx_linearcreation.enable
+	rates_2.cx_quadratic.enable
+	rates_2.cx_quadraticendow.enable
+	rates_2.cx_quadraticcreation.enable
+	rates_2.cx_avalt.enable
+	rates_2.cx_avaltendow.enable
+	rates_2.cx_avaltcreation.enable
+	rates_2.cx_avsim.enable
+	rates_2.cx_avsimendow.enable
+	rates_2.cx_avsimcreation.enable
+	rates_2.cx_behsim.enable
+	rates_2.cx_behegox.enable
+END
+
+SCRIPT ty_d_6
+BEGIN
+	rates_2.cx_behaltx.enable
+	rates_2.cx_behegoplusalt.enable
+	rates_2.tx_behtheta0.enable
+	rates_2.ed_behtheta0.enable
+	rates_2.tx_behfrom.enable
+	rates_2.vl_behfrom.enable
+	rates_2.tx_behavxalt.enable
+	rates_2.vl_behavxalt.enable
+	rates_2.tx_behavsamexalt.enable
+	rates_2.vl_behavsamexalt.enable
+	rates_2.tx_behtotxalt.enable
+	rates_2.vl_behtotxalt.enable
+	rates_2.tx_behtotsamexalt.enable
+	rates_2.vl_behtotsamexalt.enable
+	behavior.tx_behwparam.enable
+	behavior.ed_behwparam.enable
+	behavior.tx_k0.enable
+	behavior.ed_k0.enable
+	behavior.tx_k3.enable
+	behavior.ed_k3.enable
+	behavior.tx_firstg.enable
+	behavior.ed_firstg.enable
+	estimate.tx_seed.enable
+	estimate.ed_seed.enable
+	estimate.tx_cores.enable
+	estimate.ed_cores.enable
+	estimate.tx_theta0.enable
+	estimate.ed_theta0.enable
+	estimate.tx_rate0.enable
+	estimate.ed_rate0.enable
+	estimate.tx_fix.enable
+	estimate.ed_fix.enable
+	estimate.cx_unconditional.enable
+	estimate.cx_ml.enable
+	estimate.tx_ml_n1.enable
+	estimate.ed_ml_n1.enable
+	estimate.tx_ml_nsub.enable
+	estimate.ed_ml_nsub.enable
+	estimate.tx_ml_nstart2.enable
+	estimate.ed_ml_nstart2.enable
+END
+
+SCRIPT ty_d_7
+BEGIN
+	estimate.tx_ml_n3.enable
+	estimate.ed_ml_n3.enable
+	estimate.tx_ml_mult.enable
+	estimate.ed_ml_mult.enable
+	estimate.tx_ml_nmh.enable
+	estimate.ed_ml_nmh.enable
+	estimate.tx_ml_gain.enable
+	estimate.ed_ml_gain.enable
+	estimate.tx_ml_mhgeom.enable
+	estimate.ed_ml_mhgeom.enable
+	estimate.tx_ml_seed.enable
+	estimate.ed_ml_seed.enable
+	estimate.tx_ml_theta0.enable
+	estimate.ed_ml_theta0.enable
+	estimate.tx_ml_rate0.enable
+	estimate.ed_ml_rate0.enable
+	estimate.cx_ml_notable.enable
+	estimate.cx_detail.enable
+	estimate.tx_groups.enable
+	estimate.vl_groups.enable
+	estimate.tx_gwaves.enable
+	estimate.ed_gwaves.enable
+END
+
+SCRIPT ty_d
+BEGIN
+	script ty_d_0
+	script ty_d_1
+	script ty_d_2
+	script ty_d_3
+	script ty_d_4
+	script ty_d_5
+	script ty_d_6
+	script ty_d_7
+END
+
+SCRIPT ty_u_0
+BEGIN
+	waves.tx_wave1.enable
+	waves.cb_wave1.enable
+	waves.tx_wave2.enable
+	waves.cb_wave2.enable
+	waves.tx_waves.enable
+	waves.cb_waves.enable
+	waves.tx_tvcov.enable
+	waves.ed_tvcov.enable
+	waves.tx_actormode.disable
+	waves.ed_actormode.disable
+	waves.cx_outdegree.enable
+	waves.cx_reciprocity.disable
+	waves.cx_outdegreeendow.enable
+	waves.cx_outdegreecreation.enable
+	waves.cx_reciprocityendow.enable
+	waves.cx_reciprocitycreation.enable
+	waves.cx_transtiesendow.enable
+	waves.cx_transtiescreation.enable
+	waves.tx_endow.enable
+	waves.cb_endow.enable
+	waves.tx_creation.enable
+	waves.cb_creation.enable
+	waves.cx_symmetric.enable
+	waves.tx_symtype.enable
+	waves.cb_symtype.enable
+	waves.cx_indegpopularity.enable
+	waves.cx_outpopularity.disable
+	waves.cx_outactivity.enable
+	waves.cx_inactivity.disable
+	waves.cx_inpop.enable
+	waves.cx_outpop.disable
+	waves.cx_inact.disable
+	waves.cx_outactsqrt.enable
+	waves.cx_inpopc.enable
+	waves.cx_outpopc.disable
+	waves.cx_outactc.enable
+	waves.cx_inactc.disable
+	waves.cx_degplus.enable
+	waves.cx_degplusc.enable
+	waves.cx_recipop.disable
+END
+
+SCRIPT ty_u_1
+BEGIN
+	waves.cx_recipopsqrt.disable
+	waves.cx_reciact.disable
+	waves.cx_reciactsqrt.disable
+	waves.cx_between.enable
+	waves.tx_outtrunc.enable
+	waves.ed_outtrunc.enable
+	waves.tx_outmore.enable
+	waves.ed_outmore.enable
+	waves.tx_outthreshold.enable
+	waves.ed_outthreshold.enable
+	structure.tx_outinv.enable
+	structure.ed_outinv.enable
+	structure.tx_outsqinv.enable
+	structure.ed_outsqinv.enable
+	structure.tx_avdeg.enable
+	structure.ed_avdeg.enable
+	structure.cx_transtrip.disable
+	structure.cx_transmedtrip.disable
+	structure.cx_transrectrip.disable
+	structure.cx_cycle3.disable
+	structure.cx_cycle4.enable
+	structure.cx_sqrtcycle4.disable
+	structure.cx_dblnbrdist2.enable
+	structure.cx_nbrdist2.enable
+	structure.cx_transties.enable
+	structure.cx_balance.enable
+	structure.cx_transtriads.enable
+	structure.tx_gwesp.enable
+	structure.ed_gwesp.enable
+	structure.tx_gwespfb.disable
+	structure.ed_gwespfb.disable
+	structure.tx_gwespbf.disable
+	structure.ed_gwespbf.disable
+	structure.tx_gwespbb.disable
+	structure.ed_gwespbb.disable
+	structure.tx_gwesprr.disable
+	structure.ed_gwesprr.disable
+	structure.tx_gwdspff.disable
+	structure.ed_gwdspff.disable
+	structure.tx_gwdspfb.disable
+END
+
+SCRIPT ty_u_2
+BEGIN
+	structure.ed_gwdspfb.disable
+	structure.cx_isolatenet.enable
+	structure.cx_outiso.enable
+	structure.cx_antiiso.disable
+	structure.cx_antiiniso.enable
+	structure.cx_antiiniso2.enable
+	structure.cx_inplus3.disable
+	structure.cx_isolatepop.disable
+	structure.cx_outoutass.enable
+	structure.cx_ininass.enable
+	structure.cx_outinass.enable
+	structure.cx_inoutass.enable
+	structure.tx_nodematch.enable
+	structure.vl_nodematch.enable
+	structure.tx_samex.enable
+	structure.vl_samex.enable
+	structure.tx_nodecov.enable
+	structure.vl_nodecov.enable
+	structure.tx_nodeicov.disable
+	structure.vl_nodeicov.disable
+	structure.tx_altx.enable
+	structure.vl_altx.enable
+	structure.tx_nodeocov.disable
+	structure.vl_nodeocov.disable
+	structure.tx_egox.enable
+	structure.vl_egox.enable
+	structure.tx_simcov.enable
+	structure.vl_simcov.enable
+	structure.tx_simx.enable
+	structure.vl_simx.enable
+	structure.tx_absdiffx.enable
+	structure.vl_absdiffx.enable
+	structure.tx_egoxaltx.enable
+	structure.vl_egoxaltx.enable
+	structure.tx_diffx.enable
+	structure.vl_diffx.enable
+	structure.tx_higher.enable
+	structure.vl_higher.enable
+	structure.tx_egosqx.enable
+	structure.vl_egosqx.enable
+END
+
+SCRIPT ty_u_3
+BEGIN
+	structure.tx_altsqx.enable
+	structure.vl_altsqx.enable
+	structure.tx_samexrecip.disable
+	structure.vl_samexrecip.disable
+	structure.tx_simrecipx.disable
+	structure.vl_simrecipx.disable
+	structure.cx_nocenter.enable
+	covariates.tx_egoplusaltsqx.enable
+	covariates.vl_egoplusaltsqx.enable
+	covariates.tx_diffsqx.enable
+	covariates.vl_diffsqx.enable
+	covariates.tx_egodiffx.enable
+	covariates.vl_egodiffx.enable
+	covariates.tx_althigheregox.enable
+	covariates.vl_althigheregox.enable
+	covariates.tx_unequalx.enable
+	covariates.vl_unequalx.enable
+	covariates.tx_egolthresholdx.enable
+	covariates.vl_egolthresholdx.enable
+	covariates.tx_egorthresholdx.enable
+	covariates.vl_egorthresholdx.enable
+	covariates.tx_altlthresholdx.enable
+	covariates.vl_altlthresholdx.enable
+	covariates.tx_altrthresholdx.enable
+	covariates.vl_altrthresholdx.enable
+	covariates.tx_degabsdiffx.enable
+	covariates.vl_degabsdiffx.enable
+	covariates.tx_degposdiffx.enable
+	covariates.vl_degposdiffx.enable
+	covariates.tx_degnegdiffx.enable
+	covariates.vl_degnegdiffx.enable
+	covariates.tx_covthreshold.enable
+	covariates.ed_covthreshold.enable
+	covariates.tx_xparam.enable
+	covariates.ed_xparam.enable
+	covariates.tx_samextranstrip.enable
+	covariates.vl_samextranstrip.enable
+	covariates.tx_diffxtranstrip.enable
+	covariates.vl_diffxtranstrip.enable
+	covariates.tx_simxtranstrip.disable
+END
+
+SCRIPT ty_u_4
+BEGIN
+	covariates.vl_simxtranstrip.disable
+	covariates.tx_homxtranstrip.enable
+	covariates.vl_homxtranstrip.enable
+	covariates.tx_samexoutact.enable
+	covariates.vl_samexoutact.enable
+	covariates.tx_diffxoutact.enable
+	covariates.vl_diffxoutact.enable
+	covariates.tx_samexreciact.disable
+	covariates.vl_samexreciact.disable
+	covariates.tx_diffxreciact.disable
+	covariates.vl_diffxreciact.disable
+	covariates.tx_homxoutact.enable
+	covariates.vl_homxoutact.enable
+	covariates.tx_altxoutact.enable
+	covariates.vl_altxoutact.enable
+	covariates.tx_inpopx.enable
+	covariates.vl_inpopx.enable
+	covariates.tx_outpopx.enable
+	covariates.vl_outpopx.enable
+	covariates.tx_inactx.enable
+	covariates.vl_inactx.enable
+	covariates.tx_outactx.enable
+	covariates.vl_outactx.enable
+	covariates.tx_samexinpop.enable
+	covariates.vl_samexinpop.enable
+	covariates.tx_diffxinpop.enable
+	covariates.vl_diffxinpop.enable
+	covariates.tx_dyadcov.enable
+	covariates.ed_dyadcov.enable
+	covariates.tx_dyadcovrecip.enable
+	covariates.ed_dyadcovrecip.enable
+	covariates.tx_tvdyadcov.enable
+	covariates.ed_tvdyadcov.enable
+	covariates.tx_tvdyadcovrecip.disable
+	covariates.ed_tvdyadcovrecip.disable
+	rates.cx_outrate.disable
+	rates.cx_inrate.disable
+	rates.cx_reciprate.disable
+	rates.cx_outrateinv.enable
+	rates.cx_inrateinv.disable
+END
+
+SCRIPT ty_u_5
+BEGIN
+	rates.cx_reciprateinv.disable
+	rates.cx_outratelog.enable
+	rates.cx_inratelog.disable
+	rates.cx_recipratelog.disable
+	rates.tx_ratecov.enable
+	rates.vl_ratecov.enable
+	rates.tx_ratecovcoef.enable
+	rates.ed_ratecovcoef.enable
+	rates.tx_behratecov.enable
+	rates.vl_behratecov.enable
+	rates.tx_behratecoef.enable
+	rates.ed_behratecoef.enable
+	rates.tx_present.enable
+	rates.vl_present.enable
+	rates.tx_joinat.enable
+	rates.vl_joinat.enable
+	rates.tx_leaveat.enable
+	rates.vl_leaveat.enable
+	rates.tx_missnet.enable
+	rates.ed_missnet.enable
+	rates_2.tx_missbeh.enable
+	rates_2.vl_missbeh.enable
+	rates_2.tx_structural.enable
+	rates_2.ed_structural.enable
+	rates_2.tx_behavior.disable
+	rates_2.vl_behavior.disable
+	rates_2.cx_linear.enable
+	rates_2.cx_linearendow.enable
+	rates_2.cx_linearcreation.enable
+	rates_2.cx_quadratic.enable
+	rates_2.cx_quadraticendow.enable
+	rates_2.cx_quadraticcreation.enable
+	rates_2.cx_avalt.enable
+	rates_2.cx_avaltendow.enable
+	rates_2.cx_avaltcreation.enable
+	rates_2.cx_avsim.enable
+	rates_2.cx_avsimendow.enable
+	rates_2.cx_avsimcreation.enable
+	rates_2.cx_behsim.enable
+	rates_2.cx_behegox.enable
+END
+
+SCRIPT ty_u_6
+BEGIN
+	rates_2.cx_behaltx.enable
+	rates_2.cx_behegoplusalt.enable
+	rates_2.tx_behtheta0.enable
+	rates_2.ed_behtheta0.enable
+	rates_2.tx_behfrom.enable
+	rates_2.vl_behfrom.enable
+	rates_2.tx_behavxalt.enable
+	rates_2.vl_behavxalt.enable
+	rates_2.tx_behavsamexalt.enable
+	rates_2.vl_behavsamexalt.enable
+	rates_2.tx_behtotxalt.enable
+	rates_2.vl_behtotxalt.enable
+	rates_2.tx_behtotsamexalt.enable
+	rates_2.vl_behtotsamexalt.enable
+	behavior.tx_behwparam.enable
+	behavior.ed_behwparam.enable
+	behavior.tx_k0.enable
+	behavior.ed_k0.enable
+	behavior.tx_k3.enable
+	behavior.ed_k3.enable
+	behavior.tx_firstg.enable
+	behavior.ed_firstg.enable
+	estimate.tx_seed.enable
+	estimate.ed_seed.enable
+	estimate.tx_cores.enable
+	estimate.ed_cores.enable
+	estimate.tx_theta0.enable
+	estimate.ed_theta0.enable
+	estimate.tx_rate0.enable
+	estimate.ed_rate0.enable
+	estimate.tx_fix.enable
+	estimate.ed_fix.enable
+	estimate.cx_unconditional.enable
+	estimate.cx_ml.enable
+	estimate.tx_ml_n1.enable
+	estimate.ed_ml_n1.enable
+	estimate.tx_ml_nsub.enable
+	estimate.ed_ml_nsub.enable
+	estimate.tx_ml_nstart2.enable
+	estimate.ed_ml_nstart2.enable
+END
+
+SCRIPT ty_u_7
+BEGIN
+	estimate.tx_ml_n3.enable
+	estimate.ed_ml_n3.enable
+	estimate.tx_ml_mult.enable
+	estimate.ed_ml_mult.enable
+	estimate.tx_ml_nmh.enable
+	estimate.ed_ml_nmh.enable
+	estimate.tx_ml_gain.enable
+	estimate.ed_ml_gain.enable
+	estimate.tx_ml_mhgeom.enable
+	estimate.ed_ml_mhgeom.enable
+	estimate.tx_ml_seed.enable
+	estimate.ed_ml_seed.enable
+	estimate.tx_ml_theta0.enable
+	estimate.ed_ml_theta0.enable
+	estimate.tx_ml_rate0.enable
+	estimate.ed_ml_rate0.enable
+	estimate.cx_ml_notable.enable
+	estimate.cx_detail.enable
+	estimate.tx_groups.enable
+	estimate.vl_groups.enable
+	estimate.tx_gwaves.enable
+	estimate.ed_gwaves.enable
+END
+
+SCRIPT ty_u
+BEGIN
+	script ty_u_0
+	script ty_u_1
+	script ty_u_2
+	script ty_u_3
+	script ty_u_4
+	script ty_u_5
+	script ty_u_6
+	script ty_u_7
+END
+
+SCRIPT ty_b_0
+BEGIN
+	waves.tx_wave1.enable
+	waves.cb_wave1.enable
+	waves.tx_wave2.enable
+	waves.cb_wave2.enable
+	waves.tx_waves.enable
+	waves.cb_waves.enable
+	waves.tx_tvcov.enable
+	waves.ed_tvcov.enable
+	waves.tx_actormode.enable
+	waves.ed_actormode.enable
+	waves.cx_outdegree.enable
+	waves.cx_reciprocity.disable
+	waves.cx_outdegreeendow.enable
+	waves.cx_outdegreecreation.enable
+	waves.cx_reciprocityendow.enable
+	waves.cx_reciprocitycreation.enable
+	waves.cx_transtiesendow.enable
+	waves.cx_transtiescreation.enable
+	waves.tx_endow.enable
+	waves.cb_endow.enable
+	waves.tx_creation.enable
+	waves.cb_creation.enable
+	waves.cx_symmetric.disable
+	waves.tx_symtype.disable
+	waves.cb_symtype.disable
+	waves.cx_indegpopularity.enable
+	waves.cx_outpopularity.disable
+	waves.cx_outactivity.enable
+	waves.cx_inactivity.disable
+	waves.cx_inpop.enable
+	waves.cx_outpop.disable
+	waves.cx_inact.disable
+	waves.cx_outactsqrt.enable
+	waves.cx_inpopc.enable
+	waves.cx_outpopc.disable
+	waves.cx_outactc.enable
+	waves.cx_inactc.disable
+	waves.cx_degplus.disable
+	waves.cx_degplusc.disable
+	waves.cx_recipop.disable
+END
+
+SCRIPT ty_b_1
+BEGIN
+	waves.cx_recipopsqrt.disable
+	waves.cx_reciact.disable
+	waves.cx_reciactsqrt.disable
+	waves.cx_between.disable
+	waves.tx_outtrunc.enable
+	waves.ed_outtrunc.enable
+	waves.tx_outmore.enable
+	waves.ed_outmore.enable
+	waves.tx_outthreshold.enable
+	waves.ed_outthreshold.enable
+	structure.tx_outinv.enable
+	structure.ed_outinv.enable
+	structure.tx_outsqinv.enable
+	structure.ed_outsqinv.enable
+	structure.tx_avdeg.enable
+	structure.ed_avdeg.enable
+	structure.cx_transtrip.disable
+	structure.cx_transmedtrip.disable
+	structure.cx_transrectrip.disable
+	structure.cx_cycle3.disable
+	structure.cx_cycle4.enable
+	structure.cx_sqrtcycle4.disable
+	structure.cx_dblnbrdist2.disable
+	structure.cx_nbrdist2.disable
+	structure.cx_transties.disable
+	structure.cx_balance.disable
+	structure.cx_transtriads.disable
+	structure.tx_gwesp.disable
+	structure.ed_gwesp.disable
+	structure.tx_gwespfb.disable
+	structure.ed_gwespfb.disable
+	structure.tx_gwespbf.disable
+	structure.ed_gwespbf.disable
+	structure.tx_gwespbb.disable
+	structure.ed_gwespbb.disable
+	structure.tx_gwesprr.disable
+	structure.ed_gwesprr.disable
+	structure.tx_gwdspff.disable
+	structure.ed_gwdspff.disable
+	structure.tx_gwdspfb.enable
+END
+
+SCRIPT ty_b_2
+BEGIN
+	structure.ed_gwdspfb.enable
+	structure.cx_isolatenet.disable
+	structure.cx_outiso.enable
+	structure.cx_antiiso.disable
+	structure.cx_antiiniso.enable
+	structure.cx_antiiniso2.enable
+	structure.cx_inplus3.enable
+	structure.cx_isolatepop.disable
+	structure.cx_outoutass.enable
+	structure.cx_ininass.enable
+	structure.cx_outinass.enable
+	structure.cx_inoutass.enable
+	structure.tx_nodematch.enable
+	structure.vl_nodematch.enable
+	structure.tx_samex.disable
+	structure.vl_samex.disable
+	structure.tx_nodecov.disable
+	structure.vl_nodecov.disable
+	structure.tx_nodeicov.enable
+	structure.vl_nodeicov.enable
+	structure.tx_altx.disable
+	structure.vl_altx.disable
+	structure.tx_nodeocov.enable
+	structure.vl_nodeocov.enable
+	structure.tx_egox.disable
+	structure.vl_egox.disable
+	structure.tx_simcov.enable
+	structure.vl_simcov.enable
+	structure.tx_simx.disable
+	structure.vl_simx.disable
+	structure.tx_absdiffx.disable
+	structure.vl_absdiffx.disable
+	structure.tx_egoxaltx.disable
+	structure.vl_egoxaltx.disable
+	structure.tx_diffx.disable
+	structure.vl_diffx.disable
+	structure.tx_higher.disable
+	structure.vl_higher.disable
+	structure.tx_egosqx.enable
+	structure.vl_egosqx.enable
+END
+
+SCRIPT ty_b_3
+BEGIN
+	structure.tx_altsqx.enable
+	structure.vl_altsqx.enable
+	structure.tx_samexrecip.disable
+	structure.vl_samexrecip.disable
+	structure.tx_simrecipx.disable
+	structure.vl_simrecipx.disable
+	structure.cx_nocenter.enable
+	covariates.tx_egoplusaltsqx.disable
+	covariates.vl_egoplusaltsqx.disable
+	covariates.tx_diffsqx.disable
+	covariates.vl_diffsqx.disable
+	covariates.tx_egodiffx.disable
+	covariates.vl_egodiffx.disable
+	covariates.tx_althigheregox.disable
+	covariates.vl_althigheregox.disable
+	covariates.tx_unequalx.disable
+	covariates.vl_unequalx.disable
+	covariates.tx_egolthresholdx.enable
+	covariates.vl_egolthresholdx.enable
+	covariates.tx_egorthresholdx.enable
+	covariates.vl_egorthresholdx.enable
+	covariates.tx_altlthresholdx.enable
+	covariates.vl_altlthresholdx.enable
+	covariates.tx_altrthresholdx.enable
+	covariates.vl_altrthresholdx.enable
+	covariates.tx_degabsdiffx.enable
+	covariates.vl_degabsdiffx.enable
+	covariates.tx_degposdiffx.enable
+	covariates.vl_degposdiffx.enable
+	covariates.tx_degnegdiffx.enable
+	covariates.vl_degnegdiffx.enable
+	covariates.tx_covthreshold.enable
+	covariates.ed_covthreshold.enable
+	covariates.tx_xparam.enable
+	covariates.ed_xparam.enable
+	covariates.tx_samextranstrip.disable
+	covariates.vl_samextranstrip.disable
+	covariates.tx_diffxtranstrip.disable
+	covariates.vl_diffxtranstrip.disable
+	covariates.tx_simxtranstrip.disable
+END
+
+SCRIPT ty_b_4
+BEGIN
+	covariates.vl_simxtranstrip.disable
+	covariates.tx_homxtranstrip.disable
+	covariates.vl_homxtranstrip.disable
+	covariates.tx_samexoutact.disable
+	covariates.vl_samexoutact.disable
+	covariates.tx_diffxoutact.disable
+	covariates.vl_diffxoutact.disable
+	covariates.tx_samexreciact.disable
+	covariates.vl_samexreciact.disable
+	covariates.tx_diffxreciact.disable
+	covariates.vl_diffxreciact.disable
+	covariates.tx_homxoutact.enable
+	covariates.vl_homxoutact.enable
+	covariates.tx_altxoutact.enable
+	covariates.vl_altxoutact.enable
+	covariates.tx_inpopx.enable
+	covariates.vl_inpopx.enable
+	covariates.tx_outpopx.disable
+	covariates.vl_outpopx.disable
+	covariates.tx_inactx.disable
+	covariates.vl_inactx.disable
+	covariates.tx_outactx.enable
+	covariates.vl_outactx.enable
+	covariates.tx_samexinpop.enable
+	covariates.vl_samexinpop.enable
+	covariates.tx_diffxinpop.enable
+	covariates.vl_diffxinpop.enable
+	covariates.tx_dyadcov.disable
+	covariates.ed_dyadcov.disable
+	covariates.tx_dyadcovrecip.disable
+	covariates.ed_dyadcovrecip.disable
+	covariates.tx_tvdyadcov.disable
+	covariates.ed_tvdyadcov.disable
+	covariates.tx_tvdyadcovrecip.disable
+	covariates.ed_tvdyadcovrecip.disable
+	rates.cx_outrate.enable
+	rates.cx_inrate.disable
+	rates.cx_reciprate.disable
+	rates.cx_outrateinv.enable
+	rates.cx_inrateinv.disable
+END
+
+SCRIPT ty_b_5
+BEGIN
+	rates.cx_reciprateinv.disable
+	rates.cx_outratelog.enable
+	rates.cx_inratelog.disable
+	rates.cx_recipratelog.disable
+	rates.tx_ratecov.disable
+	rates.vl_ratecov.disable
+	rates.tx_ratecovcoef.enable
+	rates.ed_ratecovcoef.enable
+	rates.tx_behratecov.enable
+	rates.vl_behratecov.enable
+	rates.tx_behratecoef.enable
+	rates.ed_behratecoef.enable
+	rates.tx_present.enable
+	rates.vl_present.enable
+	rates.tx_joinat.enable
+	rates.vl_joinat.enable
+	rates.tx_leaveat.enable
+	rates.vl_leaveat.enable
+	rates.tx_missnet.enable
+	rates.ed_missnet.enable
+	rates_2.tx_missbeh.enable
+	rates_2.vl_missbeh.enable
+	rates_2.tx_structural.enable
+	rates_2.ed_structural.enable
+	rates_2.tx_behavior.enable
+	rates_2.vl_behavior.enable
+	rates_2.cx_linear.enable
+	rates_2.cx_linearendow.enable
+	rates_2.cx_linearcreation.enable
+	rates_2.cx_quadratic.enable
+	rates_2.cx_quadraticendow.enable
+	rates_2.cx_quadraticcreation.enable
+	rates_2.cx_avalt.enable
+	rates_2.cx_avaltendow.enable
+	rates_2.cx_avaltcreation.enable
+	rates_2.cx_avsim.enable
+	rates_2.cx_avsimendow.enable
+	rates_2.cx_avsimcreation.enable
+	rates_2.cx_behsim.disable
+	rates_2.cx_behegox.disable
+END
+
+SCRIPT ty_b_6
+BEGIN
+	rates_2.cx_behaltx.disable
+	rates_2.cx_behegoplusalt.disable
+	rates_2.tx_behtheta0.enable
+	rates_2.ed_behtheta0.enable
+	rates_2.tx_behfrom.enable
+	rates_2.vl_behfrom.enable
+	rates_2.tx_behavxalt.enable
+	rates_2.vl_behavxalt.enable
+	rates_2.tx_behavsamexalt.enable
+	rates_2.vl_behavsamexalt.enable
+	rates_2.tx_behtotxalt.enable
+	rates_2.vl_behtotxalt.enable
+	rates_2.tx_behtotsamexalt.enable
+	rates_2.vl_behtotsamexalt.enable
+	behavior.tx_behwparam.enable
+	behavior.ed_behwparam.enable
+	behavior.tx_k0.enable
+	behavior.ed_k0.enable
+	behavior.tx_k3.enable
+	behavior.ed_k3.enable
+	behavior.tx_firstg.enable
+	behavior.ed_firstg.enable
+	estimate.tx_seed.enable
+	estimate.ed_seed.enable
+	estimate.tx_cores.enable
+	estimate.ed_cores.enable
+	estimate.tx_theta0.enable
+	estimate.ed_theta0.enable
+	estimate.tx_rate0.enable
+	estimate.ed_rate0.enable
+	estimate.tx_fix.enable
+	estimate.ed_fix.enable
+	estimate.cx_unconditional.enable
+	estimate.cx_ml.enable
+	estimate.tx_ml_n1.enable
+	estimate.ed_ml_n1.enable
+	estimate.tx_ml_nsub.enable
+	estimate.ed_ml_nsub.enable
+	estimate.tx_ml_nstart2.enable
+	estimate.ed_ml_nstart2.enable
+END
+
+SCRIPT ty_b_7
+BEGIN
+	estimate.tx_ml_n3.enable
+	estimate.ed_ml_n3.enable
+	estimate.tx_ml_mult.enable
+	estimate.ed_ml_mult.enable
+	estimate.tx_ml_nmh.enable
+	estimate.ed_ml_nmh.enable
+	estimate.tx_ml_gain.enable
+	estimate.ed_ml_gain.enable
+	estimate.tx_ml_mhgeom.enable
+	estimate.ed_ml_mhgeom.enable
+	estimate.tx_ml_seed.enable
+	estimate.ed_ml_seed.enable
+	estimate.tx_ml_theta0.enable
+	estimate.ed_ml_theta0.enable
+	estimate.tx_ml_rate0.enable
+	estimate.ed_ml_rate0.enable
+	estimate.cx_ml_notable.enable
+	estimate.cx_detail.enable
+	estimate.tx_groups.enable
+	estimate.vl_groups.enable
+	estimate.tx_gwaves.enable
+	estimate.ed_gwaves.enable
+END
+
+SCRIPT ty_b
+BEGIN
+	script ty_b_0
+	script ty_b_1
+	script ty_b_2
+	script ty_b_3
+	script ty_b_4
+	script ty_b_5
+	script ty_b_6
+	script ty_b_7
+END
+
+SCRIPT nettype_auto
+BEGIN
+	waves.cb_nettype.setvalue "auto"
+	program type_apply
+END
+
+SCRIPT nettype_d
+BEGIN
+	waves.cb_nettype.setvalue "directed"
+	program type_apply
+END
+
+SCRIPT nettype_u
+BEGIN
+	waves.cb_nettype.setvalue "undirected"
+	program type_apply
+END
+
+SCRIPT nettype_b
+BEGIN
+	waves.cb_nettype.setvalue "two-mode"
+	program type_apply
+END
+
+PROGRAM type_apply
+BEGIN
+	call script ty_auto
+	if waves.cb_nettype.iseq("directed") {
+		call script ty_d
+	}
+	if waves.cb_nettype.iseq("undirected") {
+		call script ty_u
+	}
+	if waves.cb_nettype.iseq("two-mode") {
+		call script ty_b
+	}
+END
+
+LIST netlist_a
+BEGIN
+	// filled in when the dialog opens (_nwsaom_dlgprep.ado)
+END
+
 PROGRAM initialize
 BEGIN
-	put "_nwdialog nwsaom"
+	put "_nwsaom_dlgprep nwsaom"
 	stata hidden immediate
 END
 
 PROGRAM open_nwsaom_bayes
 BEGIN
 	put "db nwsaom_bayes"
-	stata hidden
+	stata hidden queue
 END
 
 PROGRAM open_nwsaom_multinet
 BEGIN
 	put "db nwsaom_multinet"
-	stata hidden
+	stata hidden queue
 END
 
 PROGRAM open_nwsaom_multiplex
 BEGIN
 	put "db nwsaom_multiplex"
-	stata hidden
+	stata hidden queue
 END
 
 PROGRAM open_nwsaom_estat
 BEGIN
 	put "db nwsaom_estat"
-	stata hidden
+	stata hidden queue
 END
 
 PROGRAM open_nwsaom_describe
 BEGIN
 	put "db nwsaom_describe"
-	stata hidden
+	stata hidden queue
 END
 
 PROGRAM open_nwsaom_meta
 BEGIN
 	put "db nwsaom_meta"
-	stata hidden
+	stata hidden queue
+END
+
+PROGRAM open_nwsaom_simulate
+BEGIN
+	put "db nwsaom_simulate"
+	stata hidden queue
 END
 
 PROGRAM command
 BEGIN
-	if waves.rb_nwsaom_est {
-		put "nwsaom"
-	}
-	if waves.rb_nwsaom_sim {
-		put "nwsaom simulate"
-	}
+	put "nwsaom"
 	beginoptions
 		put /program opt_part1
+		put " "
 		put /program opt_part2
+		put " "
 		put /program opt_part3
+		put " "
 		put /program opt_part4
+		put " "
 		put /program opt_part5
+		put " "
 		put /program opt_part6
+		put " "
 		put /program opt_part7
+		put " "
 		put /program opt_part8
+		put " "
 		put /program opt_part9
+		put " "
 		put /program opt_part10
+		put " "
 		put /program opt_part11
+		put " "
 		put /program opt_part12
+		put " "
 		put /program opt_part13
+		put " "
 	endoptions
 	stata
 END
@@ -1357,19 +2803,19 @@ END
 PROGRAM opt_part1
 BEGIN
 			if waves.cb_wave1.isneq("") {
-				put " wave1(" waves.cb_wave1 ")"
+				optionarg /asis waves.cb_wave1
 			}
 			if waves.cb_wave2.isneq("") {
-				put " wave2(" waves.cb_wave2 ")"
+				optionarg /asis waves.cb_wave2
 			}
 			if waves.cb_waves.isneq("") {
-				put " waves(" waves.cb_waves ")"
+				optionarg /asis waves.cb_waves
 			}
 			if waves.ed_tvcov.isneq("") {
-				put " tvcov(" waves.ed_tvcov ")"
+				optionarg /asis waves.ed_tvcov
 			}
 			if waves.ed_actormode.isneq("") {
-				put " actormode(" waves.ed_actormode ")"
+				optionarg /asis waves.ed_actormode
 			}
 			if waves.cx_outdegree {
 				put " outdegree"
@@ -1396,16 +2842,16 @@ BEGIN
 				put " transtiescreation"
 			}
 			if waves.cb_endow.isneq("") {
-				put " endow(" waves.cb_endow ")"
+				optionarg /asis waves.cb_endow
 			}
 			if waves.cb_creation.isneq("") {
-				put " creation(" waves.cb_creation ")"
+				optionarg /asis waves.cb_creation
 			}
 			if waves.cx_symmetric {
 				put " symmetric"
 			}
 			if waves.cb_symtype.isneq("") {
-				put " symtype(" waves.cb_symtype ")"
+				optionarg /asis waves.cb_symtype
 			}
 			if waves.cx_indegpopularity {
 				put " indegpopularity"
@@ -1469,22 +2915,22 @@ BEGIN
 				put " between"
 			}
 			if waves.ed_outtrunc.isneq("") {
-				put " outtrunc(" waves.ed_outtrunc ")"
+				optionarg /asis waves.ed_outtrunc
 			}
 			if waves.ed_outmore.isneq("") {
-				put " outmore(" waves.ed_outmore ")"
+				optionarg /asis waves.ed_outmore
 			}
 			if waves.ed_outthreshold.isneq("") {
-				put " outthreshold(" waves.ed_outthreshold ")"
+				optionarg /asis waves.ed_outthreshold
 			}
 			if structure.ed_outinv.isneq("") {
-				put " outinv(" structure.ed_outinv ")"
+				optionarg /asis structure.ed_outinv
 			}
 			if structure.ed_outsqinv.isneq("") {
-				put " outsqinv(" structure.ed_outsqinv ")"
+				optionarg /asis structure.ed_outsqinv
 			}
 			if structure.ed_avdeg.isneq("") {
-				put " avdeg(" structure.ed_avdeg ")"
+				optionarg /asis structure.ed_avdeg
 			}
 			if structure.cx_transtrip {
 				put " transtrip"
@@ -1520,25 +2966,25 @@ BEGIN
 				put " transtriads"
 			}
 			if structure.ed_gwesp.isneq("") {
-				put " gwesp(" structure.ed_gwesp ")"
+				optionarg /asis structure.ed_gwesp
 			}
 			if structure.ed_gwespfb.isneq("") {
-				put " gwespfb(" structure.ed_gwespfb ")"
+				optionarg /asis structure.ed_gwespfb
 			}
 			if structure.ed_gwespbf.isneq("") {
-				put " gwespbf(" structure.ed_gwespbf ")"
+				optionarg /asis structure.ed_gwespbf
 			}
 			if structure.ed_gwespbb.isneq("") {
-				put " gwespbb(" structure.ed_gwespbb ")"
+				optionarg /asis structure.ed_gwespbb
 			}
 			if structure.ed_gwesprr.isneq("") {
-				put " gwesprr(" structure.ed_gwesprr ")"
+				optionarg /asis structure.ed_gwesprr
 			}
 			if structure.ed_gwdspff.isneq("") {
-				put " gwdspff(" structure.ed_gwdspff ")"
+				optionarg /asis structure.ed_gwdspff
 			}
 			if structure.ed_gwdspfb.isneq("") {
-				put " gwdspfb(" structure.ed_gwdspfb ")"
+				optionarg /asis structure.ed_gwdspfb
 			}
 			if structure.cx_isolatenet {
 				put " isolatenet"
@@ -1578,164 +3024,164 @@ BEGIN
 				put " inoutass"
 			}
 			if structure.vl_nodematch.isneq("") {
-				put " nodematch(" structure.vl_nodematch ")"
+				optionarg /asis structure.vl_nodematch
 			}
 			if structure.vl_samex.isneq("") {
-				put " samex(" structure.vl_samex ")"
+				optionarg /asis structure.vl_samex
 			}
 			if structure.vl_nodecov.isneq("") {
-				put " nodecov(" structure.vl_nodecov ")"
+				optionarg /asis structure.vl_nodecov
 			}
 			if structure.vl_nodeicov.isneq("") {
-				put " nodeicov(" structure.vl_nodeicov ")"
+				optionarg /asis structure.vl_nodeicov
 			}
 			if structure.vl_altx.isneq("") {
-				put " altx(" structure.vl_altx ")"
+				optionarg /asis structure.vl_altx
 			}
 			if structure.vl_nodeocov.isneq("") {
-				put " nodeocov(" structure.vl_nodeocov ")"
+				optionarg /asis structure.vl_nodeocov
 			}
 			if structure.vl_egox.isneq("") {
-				put " egox(" structure.vl_egox ")"
+				optionarg /asis structure.vl_egox
 			}
 			if structure.vl_simcov.isneq("") {
-				put " simcov(" structure.vl_simcov ")"
+				optionarg /asis structure.vl_simcov
 			}
 			if structure.vl_simx.isneq("") {
-				put " simx(" structure.vl_simx ")"
+				optionarg /asis structure.vl_simx
 			}
 			if structure.vl_absdiffx.isneq("") {
-				put " absdiffx(" structure.vl_absdiffx ")"
+				optionarg /asis structure.vl_absdiffx
 			}
 			if structure.vl_egoxaltx.isneq("") {
-				put " egoxaltx(" structure.vl_egoxaltx ")"
+				optionarg /asis structure.vl_egoxaltx
 			}
 			if structure.vl_diffx.isneq("") {
-				put " diffx(" structure.vl_diffx ")"
+				optionarg /asis structure.vl_diffx
 			}
 			if structure.vl_higher.isneq("") {
-				put " higher(" structure.vl_higher ")"
+				optionarg /asis structure.vl_higher
 			}
 			if structure.vl_egosqx.isneq("") {
-				put " egosqx(" structure.vl_egosqx ")"
+				optionarg /asis structure.vl_egosqx
 			}
 			if structure.vl_altsqx.isneq("") {
-				put " altsqx(" structure.vl_altsqx ")"
+				optionarg /asis structure.vl_altsqx
 			}
 			if structure.vl_samexrecip.isneq("") {
-				put " samexrecip(" structure.vl_samexrecip ")"
+				optionarg /asis structure.vl_samexrecip
 			}
 			if structure.vl_simrecipx.isneq("") {
-				put " simrecipx(" structure.vl_simrecipx ")"
+				optionarg /asis structure.vl_simrecipx
 			}
 			if structure.cx_nocenter {
 				put " nocenter"
 			}
 			if covariates.vl_egoplusaltsqx.isneq("") {
-				put " egoplusaltsqx(" covariates.vl_egoplusaltsqx ")"
+				optionarg /asis covariates.vl_egoplusaltsqx
 			}
 			if covariates.vl_diffsqx.isneq("") {
-				put " diffsqx(" covariates.vl_diffsqx ")"
+				optionarg /asis covariates.vl_diffsqx
 			}
 			if covariates.vl_egodiffx.isneq("") {
-				put " egodiffx(" covariates.vl_egodiffx ")"
+				optionarg /asis covariates.vl_egodiffx
 			}
 			if covariates.vl_althigheregox.isneq("") {
-				put " althigheregox(" covariates.vl_althigheregox ")"
+				optionarg /asis covariates.vl_althigheregox
 			}
 			if covariates.vl_unequalx.isneq("") {
-				put " unequalx(" covariates.vl_unequalx ")"
+				optionarg /asis covariates.vl_unequalx
 			}
 			if covariates.vl_egolthresholdx.isneq("") {
-				put " egolthresholdx(" covariates.vl_egolthresholdx ")"
+				optionarg /asis covariates.vl_egolthresholdx
 			}
 			if covariates.vl_egorthresholdx.isneq("") {
-				put " egorthresholdx(" covariates.vl_egorthresholdx ")"
+				optionarg /asis covariates.vl_egorthresholdx
 			}
 			if covariates.vl_altlthresholdx.isneq("") {
-				put " altlthresholdx(" covariates.vl_altlthresholdx ")"
+				optionarg /asis covariates.vl_altlthresholdx
 			}
 			if covariates.vl_altrthresholdx.isneq("") {
-				put " altrthresholdx(" covariates.vl_altrthresholdx ")"
+				optionarg /asis covariates.vl_altrthresholdx
 			}
 			if covariates.vl_degabsdiffx.isneq("") {
-				put " degabsdiffx(" covariates.vl_degabsdiffx ")"
+				optionarg /asis covariates.vl_degabsdiffx
 			}
 END
 
 PROGRAM opt_part4
 BEGIN
 			if covariates.vl_degposdiffx.isneq("") {
-				put " degposdiffx(" covariates.vl_degposdiffx ")"
+				optionarg /asis covariates.vl_degposdiffx
 			}
 			if covariates.vl_degnegdiffx.isneq("") {
-				put " degnegdiffx(" covariates.vl_degnegdiffx ")"
+				optionarg /asis covariates.vl_degnegdiffx
 			}
 			if covariates.ed_covthreshold.isneq("") {
-				put " covthreshold(" covariates.ed_covthreshold ")"
+				optionarg /asis covariates.ed_covthreshold
 			}
 			if covariates.ed_xparam.isneq("") {
-				put " xparam(" covariates.ed_xparam ")"
+				optionarg /asis covariates.ed_xparam
 			}
 			if covariates.vl_samextranstrip.isneq("") {
-				put " samextranstrip(" covariates.vl_samextranstrip ")"
+				optionarg /asis covariates.vl_samextranstrip
 			}
 			if covariates.vl_diffxtranstrip.isneq("") {
-				put " diffxtranstrip(" covariates.vl_diffxtranstrip ")"
+				optionarg /asis covariates.vl_diffxtranstrip
 			}
 			if covariates.vl_simxtranstrip.isneq("") {
-				put " simxtranstrip(" covariates.vl_simxtranstrip ")"
+				optionarg /asis covariates.vl_simxtranstrip
 			}
 			if covariates.vl_homxtranstrip.isneq("") {
-				put " homxtranstrip(" covariates.vl_homxtranstrip ")"
+				optionarg /asis covariates.vl_homxtranstrip
 			}
 			if covariates.vl_samexoutact.isneq("") {
-				put " samexoutact(" covariates.vl_samexoutact ")"
+				optionarg /asis covariates.vl_samexoutact
 			}
 			if covariates.vl_diffxoutact.isneq("") {
-				put " diffxoutact(" covariates.vl_diffxoutact ")"
+				optionarg /asis covariates.vl_diffxoutact
 			}
 			if covariates.vl_samexreciact.isneq("") {
-				put " samexreciact(" covariates.vl_samexreciact ")"
+				optionarg /asis covariates.vl_samexreciact
 			}
 			if covariates.vl_diffxreciact.isneq("") {
-				put " diffxreciact(" covariates.vl_diffxreciact ")"
+				optionarg /asis covariates.vl_diffxreciact
 			}
 			if covariates.vl_homxoutact.isneq("") {
-				put " homxoutact(" covariates.vl_homxoutact ")"
+				optionarg /asis covariates.vl_homxoutact
 			}
 			if covariates.vl_altxoutact.isneq("") {
-				put " altxoutact(" covariates.vl_altxoutact ")"
+				optionarg /asis covariates.vl_altxoutact
 			}
 			if covariates.vl_inpopx.isneq("") {
-				put " inpopx(" covariates.vl_inpopx ")"
+				optionarg /asis covariates.vl_inpopx
 			}
 			if covariates.vl_outpopx.isneq("") {
-				put " outpopx(" covariates.vl_outpopx ")"
+				optionarg /asis covariates.vl_outpopx
 			}
 			if covariates.vl_inactx.isneq("") {
-				put " inactx(" covariates.vl_inactx ")"
+				optionarg /asis covariates.vl_inactx
 			}
 			if covariates.vl_outactx.isneq("") {
-				put " outactx(" covariates.vl_outactx ")"
+				optionarg /asis covariates.vl_outactx
 			}
 			if covariates.vl_samexinpop.isneq("") {
-				put " samexinpop(" covariates.vl_samexinpop ")"
+				optionarg /asis covariates.vl_samexinpop
 			}
 			if covariates.vl_diffxinpop.isneq("") {
-				put " diffxinpop(" covariates.vl_diffxinpop ")"
+				optionarg /asis covariates.vl_diffxinpop
 			}
 			if covariates.ed_dyadcov.isneq("") {
-				put " dyadcov(" covariates.ed_dyadcov ")"
+				optionarg /asis covariates.ed_dyadcov
 			}
 			if covariates.ed_dyadcovrecip.isneq("") {
-				put " dyadcovrecip(" covariates.ed_dyadcovrecip ")"
+				optionarg /asis covariates.ed_dyadcovrecip
 			}
 			if covariates.ed_tvdyadcov.isneq("") {
-				put " tvdyadcov(" covariates.ed_tvdyadcov ")"
+				optionarg /asis covariates.ed_tvdyadcov
 			}
 			if covariates.ed_tvdyadcovrecip.isneq("") {
-				put " tvdyadcovrecip(" covariates.ed_tvdyadcovrecip ")"
+				optionarg /asis covariates.ed_tvdyadcovrecip
 			}
 END
 
@@ -2037,16 +3483,16 @@ BEGIN
 				put " recipratelog"
 			}
 			if rates.vl_ratecov.isneq("") {
-				put " ratecov(" rates.vl_ratecov ")"
+				optionarg /asis rates.vl_ratecov
 			}
 			if rates.ed_ratecovcoef.isneq("") {
-				put " ratecovcoef(" rates.ed_ratecovcoef ")"
+				optionarg /asis rates.ed_ratecovcoef
 			}
 			if rates.vl_behratecov.isneq("") {
-				put " behratecov(" rates.vl_behratecov ")"
+				optionarg /asis rates.vl_behratecov
 			}
 			if rates.ed_behratecoef.isneq("") {
-				put " behratecoef(" rates.ed_behratecoef ")"
+				optionarg /asis rates.ed_behratecoef
 			}
 			if rates.cb_behrate_1 | rates.cb_behrate_2 | rates.cb_behrate_3 | rates.cb_behrate_4 | rates.ed_behrate_more {
 				put " behrate("
@@ -2084,25 +3530,25 @@ BEGIN
 				put ")"
 			}
 			if rates.vl_present.isneq("") {
-				put " present(" rates.vl_present ")"
+				optionarg /asis rates.vl_present
 			}
 			if rates.vl_joinat.isneq("") {
-				put " joinat(" rates.vl_joinat ")"
+				optionarg /asis rates.vl_joinat
 			}
 			if rates.vl_leaveat.isneq("") {
-				put " leaveat(" rates.vl_leaveat ")"
+				optionarg /asis rates.vl_leaveat
 			}
 			if rates.ed_missnet.isneq("") {
-				put " missnet(" rates.ed_missnet ")"
+				optionarg /asis rates.ed_missnet
 			}
 			if rates_2.vl_missbeh.isneq("") {
-				put " missbeh(" rates_2.vl_missbeh ")"
+				optionarg /asis rates_2.vl_missbeh
 			}
 			if rates_2.ed_structural.isneq("") {
-				put " structural(" rates_2.ed_structural ")"
+				optionarg /asis rates_2.ed_structural
 			}
 			if rates_2.vl_behavior.isneq("") {
-				put " behavior(" rates_2.vl_behavior ")"
+				optionarg /asis rates_2.vl_behavior
 			}
 			if rates_2.cx_linear {
 				put " linear"
@@ -2157,22 +3603,22 @@ BEGIN
 				put " behegoplusalt"
 			}
 			if rates_2.ed_behtheta0.isneq("") {
-				put " behtheta0(" rates_2.ed_behtheta0 ")"
+				optionarg /asis rates_2.ed_behtheta0
 			}
 			if rates_2.vl_behfrom.isneq("") {
-				put " behfrom(" rates_2.vl_behfrom ")"
+				optionarg /asis rates_2.vl_behfrom
 			}
 			if rates_2.vl_behavxalt.isneq("") {
-				put " behavxalt(" rates_2.vl_behavxalt ")"
+				optionarg /asis rates_2.vl_behavxalt
 			}
 			if rates_2.vl_behavsamexalt.isneq("") {
-				put " behavsamexalt(" rates_2.vl_behavsamexalt ")"
+				optionarg /asis rates_2.vl_behavsamexalt
 			}
 			if rates_2.vl_behtotxalt.isneq("") {
-				put " behtotxalt(" rates_2.vl_behtotxalt ")"
+				optionarg /asis rates_2.vl_behtotxalt
 			}
 			if rates_2.vl_behtotsamexalt.isneq("") {
-				put " behtotsamexalt(" rates_2.vl_behtotsamexalt ")"
+				optionarg /asis rates_2.vl_behtotsamexalt
 			}
 			if rates_2.cb_beheff_1 | rates_2.cb_beheff_2 | rates_2.cb_beheff_3 | rates_2.cb_beheff_4 | rates_2.cb_beheff_5 | rates_2.cb_beheff_6 | rates_2.ed_beheff_more {
 				put " beheff("
@@ -2312,7 +3758,7 @@ BEGIN
 				put ")"
 			}
 			if behavior.ed_behwparam.isneq("") {
-				put " behwparam(" behavior.ed_behwparam ")"
+				optionarg /asis behavior.ed_behwparam
 			}
 END
 
@@ -2442,128 +3888,86 @@ BEGIN
 				put ")"
 			}
 			if behavior.ed_k0.isneq("") {
-				put " k0(" behavior.ed_k0 ")"
+				optionarg /asis behavior.ed_k0
 			}
 			if behavior.ed_k3.isneq("") {
-				put " k3(" behavior.ed_k3 ")"
+				optionarg /asis behavior.ed_k3
 			}
 			if behavior.ed_firstg.isneq("") {
-				put " firstg(" behavior.ed_firstg ")"
+				optionarg /asis behavior.ed_firstg
 			}
 			if estimate.ed_seed.isneq("") {
-				put " seed(" estimate.ed_seed ")"
+				optionarg /asis estimate.ed_seed
 			}
 			if estimate.ed_cores.isneq("") {
-				put " cores(" estimate.ed_cores ")"
+				optionarg /asis estimate.ed_cores
 			}
-			if waves.rb_nwsaom_est {
-				if estimate.ed_theta0.isneq("") {
-					put " theta0(" estimate.ed_theta0 ")"
-				}
+			if estimate.ed_theta0.isneq("") {
+				optionarg /asis estimate.ed_theta0
 			}
 			if estimate.ed_rate0.isneq("") {
-				put " rate0(" estimate.ed_rate0 ")"
+				optionarg /asis estimate.ed_rate0
 			}
-			if waves.rb_nwsaom_est {
-				if estimate.ed_fix.isneq("") {
-					put " fix(" estimate.ed_fix ")"
-				}
+			if estimate.ed_fix.isneq("") {
+				optionarg /asis estimate.ed_fix
 			}
 			if estimate.cx_unconditional {
 				put " unconditional"
 			}
-			if waves.rb_nwsaom_est {
-				if estimate.cx_ml {
-					put " ml"
-				}
+			if estimate.cx_ml {
+				put " ml"
 			}
 			if estimate.cx_detail {
 				put " detail"
 			}
-			if waves.rb_nwsaom_sim {
-				if estimate.ed_sim_theta.isneq("") {
-					put " theta(" estimate.ed_sim_theta ")"
-				}
+			if estimate.vl_groups.isneq("") {
+				optionarg /asis estimate.vl_groups
 			}
-			if waves.rb_nwsaom_sim {
-				if estimate.ed_sim_behtheta.isneq("") {
-					put " behtheta(" estimate.ed_sim_behtheta ")"
-				}
-			}
-			if waves.rb_nwsaom_sim {
-				if estimate_2.ed_sim_rates.isneq("") {
-					put " rates(" estimate_2.ed_sim_rates ")"
-				}
-			}
-			if waves.rb_nwsaom_sim {
-				if estimate_2.ed_sim_ratesbeh.isneq("") {
-					put " ratesbeh(" estimate_2.ed_sim_ratesbeh ")"
-				}
-			}
-			if waves.rb_nwsaom_sim {
-				if estimate_2.ed_sim_nsim.isneq("") {
-					put " nsim(" estimate_2.ed_sim_nsim ")"
-				}
+			if estimate.ed_gwaves.isneq("") {
+				optionarg /asis estimate.ed_gwaves
 			}
 END
 
 PROGRAM opt_part13
 BEGIN
-			if waves.rb_nwsaom_sim {
-				if estimate_2.ed_sim_generate.isneq("") {
-					put " generate(" estimate_2.ed_sim_generate ")"
+			if estimate.ed_ml_n1 | estimate.ed_ml_nsub | estimate.ed_ml_nstart2 | estimate.ed_ml_n3 | estimate.ed_ml_mult | estimate.ed_ml_nmh | estimate.ed_ml_gain | estimate.ed_ml_mhgeom | estimate.ed_ml_seed | estimate.ed_ml_theta0 | estimate.ed_ml_rate0 | estimate.cx_ml_notable {
+				put " mloptions("
+				if estimate.ed_ml_n1.isneq("") {
+					put "n1(" estimate.ed_ml_n1 ") "
 				}
-			}
-			if waves.rb_nwsaom_est {
-				if estimate_2.vl_groups.isneq("") {
-					put " groups(" estimate_2.vl_groups ")"
+				if estimate.ed_ml_nsub.isneq("") {
+					put "nsub(" estimate.ed_ml_nsub ") "
 				}
-			}
-			if waves.rb_nwsaom_est {
-				if estimate_2.ed_gwaves.isneq("") {
-					put " gwaves(" estimate_2.ed_gwaves ")"
+				if estimate.ed_ml_nstart2.isneq("") {
+					put "nstart2(" estimate.ed_ml_nstart2 ") "
 				}
-			}
-			if waves.rb_nwsaom_est {
-				if estimate.ed_ml_n1 | estimate.ed_ml_nsub | estimate.ed_ml_nstart2 | estimate.ed_ml_n3 | estimate.ed_ml_mult | estimate.ed_ml_nmh | estimate.ed_ml_gain | estimate.ed_ml_mhgeom | estimate.ed_ml_seed | estimate.ed_ml_theta0 | estimate.ed_ml_rate0 | estimate.cx_ml_notable {
-					put " mloptions("
-					if estimate.ed_ml_n1.isneq("") {
-						put "n1(" estimate.ed_ml_n1 ") "
-					}
-					if estimate.ed_ml_nsub.isneq("") {
-						put "nsub(" estimate.ed_ml_nsub ") "
-					}
-					if estimate.ed_ml_nstart2.isneq("") {
-						put "nstart2(" estimate.ed_ml_nstart2 ") "
-					}
-					if estimate.ed_ml_n3.isneq("") {
-						put "n3(" estimate.ed_ml_n3 ") "
-					}
-					if estimate.ed_ml_mult.isneq("") {
-						put "mult(" estimate.ed_ml_mult ") "
-					}
-					if estimate.ed_ml_nmh.isneq("") {
-						put "nmh(" estimate.ed_ml_nmh ") "
-					}
-					if estimate.ed_ml_gain.isneq("") {
-						put "gain(" estimate.ed_ml_gain ") "
-					}
-					if estimate.ed_ml_mhgeom.isneq("") {
-						put "mhgeom(" estimate.ed_ml_mhgeom ") "
-					}
-					if estimate.ed_ml_seed.isneq("") {
-						put "seed(" estimate.ed_ml_seed ") "
-					}
-					if estimate.ed_ml_theta0.isneq("") {
-						put "theta0(" estimate.ed_ml_theta0 ") "
-					}
-					if estimate.ed_ml_rate0.isneq("") {
-						put "rate0(" estimate.ed_ml_rate0 ") "
-					}
-					if estimate.cx_ml_notable {
-						put "notable "
-					}
-					put ")"
+				if estimate.ed_ml_n3.isneq("") {
+					put "n3(" estimate.ed_ml_n3 ") "
 				}
+				if estimate.ed_ml_mult.isneq("") {
+					put "mult(" estimate.ed_ml_mult ") "
+				}
+				if estimate.ed_ml_nmh.isneq("") {
+					put "nmh(" estimate.ed_ml_nmh ") "
+				}
+				if estimate.ed_ml_gain.isneq("") {
+					put "gain(" estimate.ed_ml_gain ") "
+				}
+				if estimate.ed_ml_mhgeom.isneq("") {
+					put "mhgeom(" estimate.ed_ml_mhgeom ") "
+				}
+				if estimate.ed_ml_seed.isneq("") {
+					put "seed(" estimate.ed_ml_seed ") "
+				}
+				if estimate.ed_ml_theta0.isneq("") {
+					put "theta0(" estimate.ed_ml_theta0 ") "
+				}
+				if estimate.ed_ml_rate0.isneq("") {
+					put "rate0(" estimate.ed_ml_rate0 ") "
+				}
+				if estimate.cx_ml_notable {
+					put "notable "
+				}
+				put ")"
 			}
 END

@@ -5,6 +5,20 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.4] - 2026-10-28
+
+Patch release (dialogs only). The Mata libraries and the plugin are unchanged.
+
+### Added
+- **Dialog box.** New dialog `db nwsaom_simulate`, opened by the button "Simulate..." under Related dialogs (new last tab "Related" of the main dialog). Its first choice is "Use the model of the last nwsaom fit" (`estat simulate`; chosen at opening when the last estimation was nwsaom, otherwise the second choice is). The second choice, "Specify the model" (`nwsaom simulate`), has fields for waves(), the effects in command syntax, theta(), behtheta(), rates(), ratesbeh() and a free field for other model options; nsim(), seed() and generate() serve both. The fields of the second choice are greyed out while the first is chosen.
+- **Dialog box.** The main dialog has a drop-down "Network type" (auto / directed / undirected / two-mode), set from the wave1 network, that greys out (never hides) the options that do not apply to the type, for example reciprocity-type effects on undirected networks, symtype() on directed ones, actormode() on one-mode ones. Which options apply is taken from the effects inventory; "auto" switches everything on again. A helper `_nwsaom_dlgprep.ado` supplies the network types when a dialog opens (works with core 3.12.1).
+
+### Changed
+- **Dialog box.** The main dialog no longer has a simulate-only mode (it could not take theta()); use the new simulate dialog.
+- **Dialog box.** The buttons that open the related dialogs gave a Stata error message ("Wait until Stata has completed the current command..."). They now queue the command, so the related dialog opens.
+- **Dialog box.** The command built by the dialogs no longer has a blank before a closing bracket, and options that come from different parts of a dialog are always separated by a blank.
+- **Dialog box.** The "append" drop-down fields (waves(), endow(), creation()) carry the option name like all other fields.
+
 ## [1.3.3] - 2026-10-28
 
 Hotfix for the dialog boxes. The Mata libraries and the plugin are unchanged.

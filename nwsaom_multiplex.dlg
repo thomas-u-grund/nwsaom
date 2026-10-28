@@ -18,13 +18,13 @@ END
 DIALOG networks, tabtitle("Networks")
 BEGIN
   TEXT tx_multiplex_netawave1 10 10 215 ., label("netawave1()")
-  COMBOBOX cb_multiplex_netawave1 230 10 225 ., dropdown contents(netlist) nomem
+  COMBOBOX cb_multiplex_netawave1 230 10 225 ., dropdown contents(netlist) nomem option(netawave1)
   TEXT tx_multiplex_netawave2 470 10 215 ., label("netawave2()")
-  COMBOBOX cb_multiplex_netawave2 690 10 225 ., dropdown contents(netlist) nomem
+  COMBOBOX cb_multiplex_netawave2 690 10 225 ., dropdown contents(netlist) nomem option(netawave2)
   TEXT tx_multiplex_netbwave1 10 31 215 ., label("netbwave1()")
-  COMBOBOX cb_multiplex_netbwave1 230 31 225 ., dropdown contents(netlist) nomem
+  COMBOBOX cb_multiplex_netbwave1 230 31 225 ., dropdown contents(netlist) nomem option(netbwave1)
   TEXT tx_multiplex_netbwave2 470 31 215 ., label("netbwave2()")
-  COMBOBOX cb_multiplex_netbwave2 690 31 225 ., dropdown contents(netlist) nomem
+  COMBOBOX cb_multiplex_netbwave2 690 31 225 ., dropdown contents(netlist) nomem option(netbwave2)
   CHECKBOX cx_multiplex_crprod 10 52 301 ., label("crprod")
   CHECKBOX cx_multiplex_crprodb 316 52 301 ., label("crprodb")
 END
@@ -32,17 +32,17 @@ END
 DIALOG estimate, tabtitle("Estimate")
 BEGIN
   TEXT tx_multiplex_theta01 10 10 215 ., label("theta01()")
-  EDIT ed_multiplex_theta01 230 10 225 ., nomem
+  EDIT ed_multiplex_theta01 230 10 225 ., nomem option(theta01)
   TEXT tx_multiplex_theta02 470 10 215 ., label("theta02()")
-  EDIT ed_multiplex_theta02 690 10 225 ., nomem
+  EDIT ed_multiplex_theta02 690 10 225 ., nomem option(theta02)
   TEXT tx_multiplex_k0 10 31 215 ., label("k0() (default 30)")
-  EDIT ed_multiplex_k0 230 31 225 ., nomem
+  EDIT ed_multiplex_k0 230 31 225 ., nomem option(k0)
   TEXT tx_multiplex_k3 470 31 215 ., label("k3() (default 200)")
-  EDIT ed_multiplex_k3 690 31 225 ., nomem
+  EDIT ed_multiplex_k3 690 31 225 ., nomem option(k3)
   TEXT tx_multiplex_firstg 10 52 215 ., label("firstg() (default 0.2)")
-  EDIT ed_multiplex_firstg 230 52 225 ., nomem
+  EDIT ed_multiplex_firstg 230 52 225 ., nomem option(firstg)
   TEXT tx_multiplex_seed 470 52 215 ., label("seed() (default -1)")
-  EDIT ed_multiplex_seed 690 52 225 ., nomem
+  EDIT ed_multiplex_seed 690 52 225 ., nomem option(seed)
   CHECKBOX cx_multiplex_detail 10 73 301 ., label("detail")
 END
 
@@ -62,6 +62,7 @@ BEGIN
 	put "nwsaom multiplex"
 	beginoptions
 		put /program opt_part1
+		put " "
 	endoptions
 	stata
 END
@@ -69,16 +70,16 @@ END
 PROGRAM opt_part1
 BEGIN
 			if networks.cb_multiplex_netawave1.isneq("") {
-				put " netawave1(" networks.cb_multiplex_netawave1 ")"
+				optionarg /asis networks.cb_multiplex_netawave1
 			}
 			if networks.cb_multiplex_netawave2.isneq("") {
-				put " netawave2(" networks.cb_multiplex_netawave2 ")"
+				optionarg /asis networks.cb_multiplex_netawave2
 			}
 			if networks.cb_multiplex_netbwave1.isneq("") {
-				put " netbwave1(" networks.cb_multiplex_netbwave1 ")"
+				optionarg /asis networks.cb_multiplex_netbwave1
 			}
 			if networks.cb_multiplex_netbwave2.isneq("") {
-				put " netbwave2(" networks.cb_multiplex_netbwave2 ")"
+				optionarg /asis networks.cb_multiplex_netbwave2
 			}
 			if networks.cx_multiplex_crprod {
 				put " crprod"
@@ -87,22 +88,22 @@ BEGIN
 				put " crprodb"
 			}
 			if estimate.ed_multiplex_theta01.isneq("") {
-				put " theta01(" estimate.ed_multiplex_theta01 ")"
+				optionarg /asis estimate.ed_multiplex_theta01
 			}
 			if estimate.ed_multiplex_theta02.isneq("") {
-				put " theta02(" estimate.ed_multiplex_theta02 ")"
+				optionarg /asis estimate.ed_multiplex_theta02
 			}
 			if estimate.ed_multiplex_k0.isneq("") {
-				put " k0(" estimate.ed_multiplex_k0 ")"
+				optionarg /asis estimate.ed_multiplex_k0
 			}
 			if estimate.ed_multiplex_k3.isneq("") {
-				put " k3(" estimate.ed_multiplex_k3 ")"
+				optionarg /asis estimate.ed_multiplex_k3
 			}
 			if estimate.ed_multiplex_firstg.isneq("") {
-				put " firstg(" estimate.ed_multiplex_firstg ")"
+				optionarg /asis estimate.ed_multiplex_firstg
 			}
 			if estimate.ed_multiplex_seed.isneq("") {
-				put " seed(" estimate.ed_multiplex_seed ")"
+				optionarg /asis estimate.ed_multiplex_seed
 			}
 			if estimate.cx_multiplex_detail {
 				put " detail"

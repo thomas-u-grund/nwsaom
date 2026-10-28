@@ -182,6 +182,41 @@ RS.update({'outdegree': 'density', 'reciprocity': 'recip', 'nodematch': 'sameX',
            'reciprate': 'recipRate', 'ratecov': 'RateX'})
 
 
+# network types an option applies to (D directed, U undirected, B two-mode), derived from the effects inventory: RSiena lists
+# effects per variable type ("one-mode network" = directed, "non-directed network", "two-mode network"); behavior, rate-of-behavior
+# and gmm rows apply to every network type. An option with no row of its own (setup options) applies to all types.
+TYPE_LETTER = {'one-mode network': 'D', 'non-directed network': 'U', 'two-mode network': 'B',
+               'rate (one-mode network)': 'D', 'rate (non-directed network)': 'U', 'rate (two-mode network)': 'B',
+               'gmm (one-mode network)': 'D', 'gmm (non-directed network)': 'U', 'gmm (two-mode network)': 'B',
+               'behavior (non-directed network)': 'U', 'rate (behavior (non-directed network))': 'U'}
+
+
+def option_nets():
+    """option head -> set of letters; options that also occur in a row of a type-free variable (behavior ...) get UDB."""
+    out = {}
+    for r in INV_IMPL:
+        letter = TYPE_LETTER.get(r['variable_type'], 'UDB')
+        for part in r['nwsaom_option'].split(','):
+            m = re.match(r'^\s*([a-z][a-z0-9]*)\s*(\(.*\))?\s*(\(.*\))?$', part)
+            if m and not r['nwsaom_option'].startswith('nwsaom multinet'):
+                out.setdefault(m.group(1), set()).update(letter)
+    return out
+
+
+OPTION_NETS = option_nets()
+COND_NETS = {'twomode': 'B', 'symmetric': 'U', 'directed': 'D'}
+
+
+def nets_of(opt, cond, dialog):
+    if dialog != 'nwsaom':
+        return 'UDB'
+    if cond in COND_NETS:
+        return COND_NETS[cond]
+    if opt in FAMILY_DEF or opt not in OPTION_NETS:
+        return 'UDB'
+    return ''.join(c for c in 'UDB' if c in OPTION_NETS[opt])
+
+
 def rs(opt):
     return RS.get(opt, '')
 
@@ -264,6 +299,7 @@ def E(id, dialog, kind, opt, label, tab=None, **kw):
              companion=kw.pop('companion', ''), ctx=kw.pop('ctx', 'dir'), help=kw.pop('help', 'nwsaom'),
              modes=kw.pop('modes', None), parent=kw.pop('parent', None), value=kw.pop('value', None),
              family=kw.pop('family', None), arg=kw.pop('arg', None), tip=kw.pop('tip', ''))
+    e['nets'] = kw.pop('nets', None) or nets_of(opt, e['cond'], dialog)
     e.update(kw)
     ENTRIES[id] = e
     return e
@@ -320,8 +356,6 @@ def note(d, tab, text, lines=1):
 
 # ------------------------------------------------------------------------------------ the main dialog
 M = Dlg('nwsaom', 'nwsaom - stochastic actor-oriented model (SAOM) estimation', 'nwsaom', 'nwsaom', 1080, 600)
-M.modes = [('est', 'Estimate (nwsaom)'), ('sim', 'Simulate only (nwsaom simulate)')]
-M.sub_prefix = {'est': 'nwsaom', 'sim': 'nwsaom simulate'}
 EST = ['est']
 MN = M.name
 T = 'Waves'
@@ -519,14 +553,7 @@ hdr(M, T, 'Output')
 flag(M, T, 'detail', 'detail', 'detail - RSiena names, means')
 
 T = 'Estimate'
-note(M, T, 'Choose "Simulate only" with the radio buttons on the first tab: nwsaom simulate runs the model specified on the other tabs at the', 1)
-note(M, T, 'coefficients below without estimating (RSiena siena07 with simOnly). Not used when estimating.', 1)
-field(M, T, 'sim_theta', 'theta', 'theta() - one value per network effect', modes=['sim'], help='nwsaom', rsiena='simOnly')
-field(M, T, 'sim_behtheta', 'behtheta', 'behtheta() - one value per behavior effect', modes=['sim'], companion='behavior(b1 b2 b3) linear', ctx='beh')
-field(M, T, 'sim_rates', 'rates', 'rates() - rate of every period', modes=['sim'])
-field(M, T, 'sim_ratesbeh', 'ratesbeh', 'ratesbeh() - behavior rates', modes=['sim'], companion='behavior(b1 b2 b3) linear', ctx='beh')
-field(M, T, 'sim_nsim', 'nsim', 'nsim() - number of simulations (default 100)', modes=['sim'])
-field(M, T, 'sim_generate', 'generate', 'generate() - stub of the networks created', modes=['sim'])
+note(M, T, 'To simulate without estimating, press "Simulate..." on the Related tab (nwsaom simulate / estat simulate).', 1)
 hdr(M, T, 'Several groups estimated jointly (RSiena sienaGroupCreate): a group variable, one network series per group')
 field(M, T, 'groups', 'groups', 'groups() - variable that identifies the group of each node', 'varlist', modes=EST, companion='gwaves(1 2 3)')
 field(M, T, 'gwaves', 'gwaves', 'gwaves() - number of waves of each group', modes=EST, companion='groups(grp)')
@@ -783,11 +810,37 @@ auto_dialog(MX, MX_OPTS, OrderedDict([('Networks', ['netawave1', 'netawave2', 'n
                                       ('Estimate', ['theta01', 'theta02', 'k0', 'k3', 'firstg', 'seed', 'detail'])]),
             {}, ctx='mx', ctlmap={'netawave1': 'combo', 'netawave2': 'combo', 'netbwave1': 'combo', 'netbwave2': 'combo'})
 
+# --- simulate (nwsaom simulate / estat simulate)
+SM = Dlg('simulate', 'nwsaom simulate - simulate a SAOM (the last fit, or a model you specify)', 'nwsaom', 'nwsaom simulate')
+SM.modes = [('last', 'Use the model of the last nwsaom fit (estat simulate)'), ('spec', 'Specify the model (nwsaom simulate)')]
+SM.sub_prefix = {'last': 'estat simulate', 'spec': 'nwsaom simulate'}
+T = 'Simulate'
+SPEC = ['spec']
+BOTH = ['last', 'spec']
+note(SM, T, 'The first choice simulates the model of the last nwsaom fit in memory. The second needs the waves, the effects and theta() (no estimation).', 1)
+hdr(SM, T, 'Specify the model (only with the second choice)')
+field(SM, T, 'waves', 'waves', 'waves() - networks in time order', 'append', 'netlist', modes=SPEC, ctx='dir')
+e = E('ed_simulate_effects', 'simulate', 'edit', '_text', 'Effects, in command syntax (as in nwsaom)', T, cmd=' {v}', modes=SPEC, help='nwsaom', ctx='dir', arg='text',
+      tip='for example: outdegree reciprocity transtrip')
+SM.tab(T).append(dict(t='field', e=e['id'], ctl='edit', lst=None))
+field(SM, T, 'theta', 'theta', 'theta() - one value per network effect (table order)', modes=SPEC, help='nwsaom', rsiena='simOnly')
+field(SM, T, 'behtheta', 'behtheta', 'behtheta() - one value per behavior effect', modes=SPEC, companion='behavior(b1 b2 b3) linear', ctx='beh')
+field(SM, T, 'rates', 'rates', 'rates() - rate of every period', modes=SPEC)
+field(SM, T, 'ratesbeh', 'ratesbeh', 'ratesbeh() - behavior rates', modes=SPEC, companion='behavior(b1 b2 b3) linear', ctx='beh')
+e = E('ed_simulate_other', 'simulate', 'edit', '_text', 'Other model options, in command syntax', T, cmd=' {v}', modes=SPEC, help='nwsaom', ctx='dir', arg='text',
+      tip='for example: behavior(b1 b2 b3) linear tvcov(a1 a2 a3)')
+SM.tab(T).append(dict(t='field', e=e['id'], ctl='edit', lst=None))
+hdr(SM, T, 'Simulation')
+field(SM, T, 'nsim', 'nsim', 'nsim() - number of simulations (default 100)', modes=BOTH)
+field(SM, T, 'seed', 'seed', 'seed() - random-number seed', modes=BOTH)
+field(SM, T, 'generate', 'generate', 'generate() - stub of the networks created', modes=BOTH)
+field(SM, T, 'grp', 'grp', 'grp() - one group of a groups() fit (0 = all)', modes=['last'], ctx='est')
+
 # --- estat
 ES = Dlg('estat', 'nwsaom postestimation - estat', 'nwsaom_estat', 'estat')
 ES.modes = [('gof', 'gof - goodness of fit'), ('mems', 'mems - Mahalanobis/moment contributions'), ('score', 'score - score-type test'),
             ('timetest', 'timetest - time heterogeneity'), ('importance', 'importance - effect importance'),
-            ('simulate', 'simulate - simulate at given coefficients')]
+            ('simulate', 'simulate - the last fit')]
 ES.sub_prefix = {m: 'estat ' + m for m, _ in ES.modes}
 T = 'Statistic'
 note(ES, T, 'Operates on the nwsaom fit currently in memory - no network is selected here. Choose the statistic on the first tab.', 1)
@@ -812,7 +865,7 @@ for o, lab in (('effect', 'effect() - coefficient name'), ('macro', 'macro() - n
                ('nsim', 'nsim() - replicates (default 500)'), ('seed', 'seed()'), ('interval', 'interval() - numlist'), ):
     field(ES, T, 'mems_' + o, o, lab, modes=['mems'], help='nwsaom_estat', ctx='est', companion='effect(outdegree) macro(mm)' if o not in ('effect', 'macro') else '')
 flag(ES, T, 'mems_nodots', 'nodots', 'nodots - suppress progress dots', modes=['mems'], help='nwsaom_estat', ctx='est', companion='effect(outdegree) macro(mm)')
-hdr(ES, T, 'estat simulate (at the coefficients of a stored matrix theta(); rates() required for a plain network model)')
+hdr(ES, T, 'estat simulate: the model of the last nwsaom fit; theta() and rates() (optional) simulate at other coefficients instead')
 for o, lab in (('nsim', 'nsim() - replicates (default 100)'), ('seed', 'seed()'), ('theta', 'theta() - matrix of coefficients'),
                ('rates', 'rates() - rate of each period'), ('ratesbeh', 'ratesbeh() - behavior rates'), ('generate', 'generate() - stub of new networks')):
     field(ES, T, 'sim_' + o, o, lab, modes=['simulate'], help='nwsaom_estat', ctx='est')

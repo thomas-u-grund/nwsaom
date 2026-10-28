@@ -19,15 +19,15 @@ DIALOG networks, tabtitle("Networks")
 BEGIN
   TEXT tx_h0_1 10 10 1040 ., label("-- Two networks that change together on the same actors (the waves of each, same number, at least two) --")
   TEXT tx_multinet_net1 10 31 185 ., label("net1() - waves of network 1")
-  COMBOBOX cb_multinet_net1 200 31 150 ., dropdown contents(netlist) append nomem
+  COMBOBOX cb_multinet_net1 200 31 150 ., dropdown contents(netlist) append nomem option(net1)
   TEXT tx_multinet_net2 363 31 185 ., label("net2() - waves of network 2")
-  COMBOBOX cb_multinet_net2 553 31 150 ., dropdown contents(netlist) append nomem
+  COMBOBOX cb_multinet_net2 553 31 150 ., dropdown contents(netlist) append nomem option(net2)
   CHECKBOX cx_multinet_sym1 10 52 260 ., label("sym1 - network 1 is non-directed")
   CHECKBOX cx_multinet_sym2 275 52 260 ., label("sym2 - network 2 is non-directed")
   TEXT tx_multinet_actormode 10 73 430 ., label("actormode() - two-mode network: actor mode (1|2)")
-  EDIT ed_multinet_actormode 450 73 610 ., nomem
+  EDIT ed_multinet_actormode 450 73 610 ., nomem option(actormode)
   TEXT tx_multinet_tvcov 10 94 430 ., label("tvcov() - changing covariates a1 a2 a3")
-  EDIT ed_multinet_tvcov 450 94 610 ., nomem
+  EDIT ed_multinet_tvcov 450 94 610 ., nomem option(tvcov)
   TEXT tx_multinet_eff1_t 10 115 1050 ., label("-- eff1() - effects within network 1 (default outdegree reciprocity) -- box next to the effect: variable / matrix / parameter after the colon")
   CHECKBOX cx_multinet_eff1_outdegree 10 136 260 ., label("outdegree (density)") default(1)
   CHECKBOX cx_multinet_eff1_reciprocity 275 136 260 ., label("reciprocity (recip)") default(1)
@@ -122,11 +122,11 @@ BEGIN
   EDIT ed_multinet_cross2_more 230 289 830 ., nomem
   TEXT tx_h48_2 10 322 1040 ., label("-- A behavior that co-evolves with both networks (one variable per wave) --")
   TEXT tx_multinet_behavior 10 343 430 ., label("behavior() - variable per wave")
-  VARLIST vl_multinet_behavior 450 343 610 ., nomem
+  VARLIST vl_multinet_behavior 450 343 610 ., nomem option(behavior)
   TEXT tx_multinet_missbeh 10 364 430 ., label("missbeh() - 0/1 variable per wave")
-  VARLIST vl_multinet_missbeh 450 364 610 ., nomem
+  VARLIST vl_multinet_missbeh 450 364 610 ., nomem option(missbeh)
   TEXT tx_multinet_behint 10 385 430 ., label("behint() - interactions a#b of behavior effects")
-  EDIT ed_multinet_behint 450 385 610 ., nomem
+  EDIT ed_multinet_behint 450 385 610 ., nomem option(behint)
 END
 
 DIALOG behavior, tabtitle("Behavior")
@@ -208,21 +208,21 @@ BEGIN
   TEXT tx_multinet_beheff21_more 10 427 215 ., label("more tokens (typed)")
   EDIT ed_multinet_beheff21_more 230 427 830 ., nomem
   TEXT tx_multinet_theta0 10 454 430 ., label("theta0() - start values of all effects (net1_*, net2_*, behavior)")
-  EDIT ed_multinet_theta0 450 454 610 ., nomem
+  EDIT ed_multinet_theta0 450 454 610 ., nomem option(theta0)
   TEXT tx_multinet_fix 10 475 430 ., label("fix() - fixed effects (coefficient names or _all)")
-  EDIT ed_multinet_fix 450 475 610 ., nomem
+  EDIT ed_multinet_fix 450 475 610 ., nomem option(fix)
   TEXT tx_multinet_k0 10 496 430 ., label("k0() - Phase 1 replicates (default 30)")
-  EDIT ed_multinet_k0 450 496 610 ., nomem
+  EDIT ed_multinet_k0 450 496 610 ., nomem option(k0)
 END
 
 DIALOG estimate, tabtitle("Estimate")
 BEGIN
   TEXT tx_multinet_k3 10 10 430 ., label("k3() - Phase 3 replicates (default 200)")
-  EDIT ed_multinet_k3 450 10 610 ., nomem
+  EDIT ed_multinet_k3 450 10 610 ., nomem option(k3)
   TEXT tx_multinet_firstg 10 31 430 ., label("firstg() - initial gain (default 0.2)")
-  EDIT ed_multinet_firstg 450 31 610 ., nomem
+  EDIT ed_multinet_firstg 450 31 610 ., nomem option(firstg)
   TEXT tx_multinet_seed 10 52 185 ., label("seed()")
-  EDIT ed_multinet_seed 200 52 150 ., nomem
+  EDIT ed_multinet_seed 200 52 150 ., nomem option(seed)
 END
 
 LIST netlist
@@ -1157,13 +1157,21 @@ BEGIN
 	put "nwsaom multinet"
 	beginoptions
 		put /program opt_part1
+		put " "
 		put /program opt_part2
+		put " "
 		put /program opt_part3
+		put " "
 		put /program opt_part4
+		put " "
 		put /program opt_part5
+		put " "
 		put /program opt_part6
+		put " "
 		put /program opt_part7
+		put " "
 		put /program opt_part8
+		put " "
 	endoptions
 	stata
 END
@@ -1171,10 +1179,10 @@ END
 PROGRAM opt_part1
 BEGIN
 			if networks.cb_multinet_net1.isneq("") {
-				put " net1(" networks.cb_multinet_net1 ")"
+				optionarg /asis networks.cb_multinet_net1
 			}
 			if networks.cb_multinet_net2.isneq("") {
-				put " net2(" networks.cb_multinet_net2 ")"
+				optionarg /asis networks.cb_multinet_net2
 			}
 			if networks.cx_multinet_sym1 {
 				put " sym1"
@@ -1183,10 +1191,10 @@ BEGIN
 				put " sym2"
 			}
 			if networks.ed_multinet_actormode.isneq("") {
-				put " actormode(" networks.ed_multinet_actormode ")"
+				optionarg /asis networks.ed_multinet_actormode
 			}
 			if networks.ed_multinet_tvcov.isneq("") {
-				put " tvcov(" networks.ed_multinet_tvcov ")"
+				optionarg /asis networks.ed_multinet_tvcov
 			}
 			if networks.cx_multinet_eff1_outdegree | networks.cx_multinet_eff1_reciprocity | networks.cx_multinet_eff1_transtrip | networks.cx_multinet_eff1_cycle3 | networks.cx_multinet_eff1_transmedtrip | networks.cx_multinet_eff1_cycle4 | networks.cx_multinet_eff1_indegpop | networks.cx_multinet_eff1_outact | networks.cb_multinet_eff1_1 | networks.cb_multinet_eff1_2 | networks.cb_multinet_eff1_3 | networks.cb_multinet_eff1_4 | networks.ed_multinet_eff1_more {
 				put " eff1("
@@ -1473,13 +1481,13 @@ BEGIN
 				put ")"
 			}
 			if cross_net.vl_multinet_behavior.isneq("") {
-				put " behavior(" cross_net.vl_multinet_behavior ")"
+				optionarg /asis cross_net.vl_multinet_behavior
 			}
 			if cross_net.vl_multinet_missbeh.isneq("") {
-				put " missbeh(" cross_net.vl_multinet_missbeh ")"
+				optionarg /asis cross_net.vl_multinet_missbeh
 			}
 			if cross_net.ed_multinet_behint.isneq("") {
-				put " behint(" cross_net.ed_multinet_behint ")"
+				optionarg /asis cross_net.ed_multinet_behint
 			}
 END
 
@@ -1746,21 +1754,21 @@ END
 PROGRAM opt_part8
 BEGIN
 			if behavior.ed_multinet_theta0.isneq("") {
-				put " theta0(" behavior.ed_multinet_theta0 ")"
+				optionarg /asis behavior.ed_multinet_theta0
 			}
 			if behavior.ed_multinet_fix.isneq("") {
-				put " fix(" behavior.ed_multinet_fix ")"
+				optionarg /asis behavior.ed_multinet_fix
 			}
 			if behavior.ed_multinet_k0.isneq("") {
-				put " k0(" behavior.ed_multinet_k0 ")"
+				optionarg /asis behavior.ed_multinet_k0
 			}
 			if estimate.ed_multinet_k3.isneq("") {
-				put " k3(" estimate.ed_multinet_k3 ")"
+				optionarg /asis estimate.ed_multinet_k3
 			}
 			if estimate.ed_multinet_firstg.isneq("") {
-				put " firstg(" estimate.ed_multinet_firstg ")"
+				optionarg /asis estimate.ed_multinet_firstg
 			}
 			if estimate.ed_multinet_seed.isneq("") {
-				put " seed(" estimate.ed_multinet_seed ")"
+				optionarg /asis estimate.ed_multinet_seed
 			}
 END

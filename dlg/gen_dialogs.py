@@ -19,11 +19,13 @@ ROOT = S.ROOT
 TOP, PITCH, YMAX = 10, 21, 376       # first row, row pitch, last row start
 RELATED = [('bt_bayes', 'Bayesian estimation...', 'nwsaom_bayes'), ('bt_multinet', 'Several networks (multinet)...', 'nwsaom_multinet'),
            ('bt_multiplex', 'Multiplex...', 'nwsaom_multiplex'), ('bt_estat', 'Postestimation...', 'nwsaom_estat'),
-           ('bt_describe', 'Describe data...', 'nwsaom_describe'), ('bt_meta', 'Meta-analysis...', 'nwsaom_meta')]
+           ('bt_describe', 'Describe data...', 'nwsaom_describe'), ('bt_meta', 'Meta-analysis...', 'nwsaom_meta'),
+           ('bt_simulate', 'Simulate...', 'nwsaom_simulate')]
 CHW = 6.4                           # estimated pixels per character
 OUT_NAME = {'nwsaom': 'nwsaom', 'multinet': 'nwsaom_multinet', 'bayes': 'nwsaom_bayes', 'meta': 'nwsaom_meta',
-            'describe': 'nwsaom_describe', 'multiplex': 'nwsaom_multiplex', 'estat': 'nwsaom_estat'}
-HAS_NETLIST = {'nwsaom', 'multinet', 'multiplex', 'describe'}
+            'describe': 'nwsaom_describe', 'multiplex': 'nwsaom_multiplex', 'estat': 'nwsaom_estat', 'simulate': 'nwsaom_simulate'}
+HAS_NETLIST = {'nwsaom', 'multinet', 'multiplex', 'describe', 'simulate'}
+PREP_HELPER = {'nwsaom', 'simulate'}      # dialogs opened with _nwsaom_dlgprep.ado instead of _nwdialog
 
 
 def san(s):
@@ -102,15 +104,18 @@ class Layout:
 
     def put_flag(self, e):
         tip = tooltip(e)
+        n0 = len(self.page.ctrls)
         c = self.add('CHECKBOX', e['id'], self.cx, self.fw - 5, label=san(e['label']), opts=['tooltip("%s")' % tip] if tip else [])
         if len(e['label']) * CHW > self.fw - 15:
             self.warn.append('flag label too long: ' + e['label'])
+        self.tag(n0, e)
         return c
 
     def put_field(self, e, item, x0, half, full_width=None):
         ctl = item['ctl']
         id_ = e['id']
         lab = san(e['label'])
+        n0 = len(self.page.ctrls)
         if half:
             if self.nf == 3:
                 lw, cx, cw = 185, x0 + 190, 150
@@ -121,6 +126,8 @@ class Layout:
         self.text('tx_' + id_[3:], x0, lw, lab)
         tip = tooltip(e)
         topt = ['tooltip("%s")' % tip] if tip else []
+        if e.get('opt'):
+            topt.append('option(%s)' % e['opt'])   # optionarg trims the blanks around the value
         if ctl == 'varlist':
             self.add('VARLIST', id_, cx, cw, opts=['nomem'] + topt)
         elif ctl == 'edit':
@@ -132,7 +139,14 @@ class Layout:
                 o.append('values(%s_v)' % lst)
             if ctl == 'append':
                 o.append('append')
+            if e['id'] == 'cb_wave1' and lst == 'netlist' and self.d.name == 'nwsaom':
+                o = ['dropdownlist', 'contents(netlist)', 'values(netlist)', 'onselchangelist(netlist_a)']
             self.add('COMBOBOX', id_, cx, cw, opts=o + ['nomem'] + topt)
+        self.tag(n0, e)
+
+    def tag(self, n0, e):
+        for c in self.page.ctrls[n0:]:
+            c['ent'] = e['id']
 
     def is_half(self, e):
         return len(e['label']) * CHW <= self.halfpx
@@ -147,6 +161,8 @@ class Layout:
                 self.newpage(title)
             if first and d.modes:
                 self.put_modes()
+            if first and d.name == 'nwsaom':
+                self.put_nettype()
             first = False
             i = 0
             while i < len(items):
@@ -218,18 +234,32 @@ class Layout:
             return
         p = self.pages[-1]
         y0 = p.y + 14
+        rows_ = (len(RELATED) + 3) // 4
+        if y0 + 22 + (rows_ - 1) * 28 + 20 > self.d.height - 45:     # does not fit under the last page: own tab
+            p = self.newpage('Related')
+            y0 = TOP
         self.related = RELATED
-        c = Ctl(kind='GROUPBOX', id='gb_related', x=10, y=y0, w=self.W - 40, h=2 * 26 + 30, label=None,
+        c = Ctl(kind='GROUPBOX', id='gb_related', x=10, y=y0, w=self.W - 40, h=((len(RELATED) + 3) // 4) * 28 + 30, label=None,
                 opts=['label("Related dialogs")'])
         p.ctrls.append(c)
         self.ctl_page['gb_related'] = p
-        bw = (self.W - 40 - 40) // 3
+        bw = (self.W - 40 - 50) // 4
         for i, (cid, lab, dn) in enumerate(RELATED):
-            b = Ctl(kind='BUTTON', id=cid, x=22 + (i % 3) * (bw + 8), y=y0 + 22 + (i // 3) * 28, w=bw, h=22, label=None,
+            b = Ctl(kind='BUTTON', id=cid, x=22 + (i % 4) * (bw + 8), y=y0 + 22 + (i // 4) * 28, w=bw, h=22, label=None,
                     opts=['label("%s")' % lab, 'onpush(program open_%s)' % dn])
             p.ctrls.append(b)
             self.ctl_page[cid] = p
-        p.y = y0 + 2 * 26 + 30
+        p.y = y0 + ((len(RELATED) + 3) // 4) * 28 + 30
+
+    def put_nettype(self):
+        d = self.d
+        self.text('tx_nettype', 10, 120, 'Network type:')
+        self.add('COMBOBOX', 'cb_nettype', 140, 160, opts=['dropdownlist', 'contents(l_nettype)', 'values(l_nettype_v)',
+                                                      'onselchange(program type_apply)', 'nomem'])
+        self.text('tx_nettype_h', 320, self.W - 350, 'set from wave1; greys out (never hides) the options that do not apply to the type; auto switches all on')
+        self.row()
+        self.page.y += 6
+        d.lists['l_nettype'] = [('auto', ''), ('directed', ''), ('undirected', ''), ('two-mode', '')]
 
     # -- mode radios
     def put_modes(self):
@@ -244,7 +274,10 @@ class Layout:
             cid = 'rb_%s_%s' % (d.name, m)
             self.mode_ctl[m] = cid
             x = 10 + (k % per_row) * (300 if per_row == 3 else self.xr - 10)
-            self.add('RADIO', cid, x, 290 if per_row == 3 else self.xr - 20, label=san(lab), opts=[kind] + (['default(1)'] if k == 0 else []))
+            self.add('RADIO', cid, x, 290 if per_row == 3 else self.xr - 20, label=san(lab), opts=[kind] + (['default(1)'] if k == 0 else []) + (['onclickon(script sim_%s)' % ('dis' if m == 'last' else 'en')] if d.name == 'simulate' else []))
+        if d.name == 'simulate':
+            self.row()
+            self.add('COMBOBOX', 'cb_fitflag', 10, 60, opts=['dropdownlist', 'contents(fitlist)', 'values(fitlist)', 'nomem'])   # hidden at open; set by _nwsaom_dlgprep
         self.row()
         self.page.y += 6
 
@@ -345,6 +378,9 @@ class Layout:
         if e.get('arg') == 'names':
             self.ops.append(('raw', e['id'], e['modes']))
             return
+        if e.get('arg') == 'text':
+            self.ops.append(('text', e['id'], e['modes']))     # free text in command syntax, written inside the options
+            return
         self.ops.append(('val', e['id'], e['opt'], e['modes']))
 
     def add_wrappers(self):
@@ -390,8 +426,8 @@ def render_ops(d, lay):
 
     for op in lay.ops:
         kind = op[0]
-        modes = op[-1] if kind in ('flag', 'val', 'raw', 'group') else None
-        cond = mode_cond(d, lay, modes) if kind in ('flag', 'val', 'raw', 'group') else None
+        modes = op[-1] if kind in ('flag', 'val', 'raw', 'group', 'text') else None
+        cond = mode_cond(d, lay, modes) if kind in ('flag', 'val', 'raw', 'group', 'text') else None
         ind = 3
         if cond:
             emit('if %s {' % cond, ind)
@@ -402,7 +438,11 @@ def render_ops(d, lay):
             emit('}', ind)
         elif kind == 'val':
             emit('if %s.isneq("") {' % q(lay, op[1]), ind)
-            emit('put " %s(" %s ")"' % (op[2], q(lay, op[1])), ind + 1)
+            emit('optionarg /asis %s' % q(lay, op[1]), ind + 1)
+            emit('}', ind)
+        elif kind == 'text':
+            emit('if %s.isneq("") {' % q(lay, op[1]), ind)
+            emit('put " " %s' % q(lay, op[1]), ind + 1)
             emit('}', ind)
         elif kind == 'raw':
             emit('if %s.isneq("") {' % q(lay, op[1]), ind)
@@ -502,6 +542,7 @@ def command_program(d, lay):
     L.append('\tbeginoptions')
     for k in range(len(chunks)):
         L.append('\t\tput /program opt_part%d' % (k + 1))
+        L.append('\t\tput " "')   # the text of a sub-program is joined to the next one without a blank
     L.append('\tendoptions')
     L.append('\tstata')
     L.append('END')
@@ -532,6 +573,8 @@ def dlg_text(d, lay):
          'INCLUDE header', '', 'HELP hlp1, view("help %s")' % d.help, 'RESET res1', '']
     if d.name in HAS_NETLIST:
         L += ['SCRIPT PREINIT', 'BEGIN', '\tprogram initialize', 'END', '']
+    if d.name == 'simulate':
+        L += ['SCRIPT POSTINIT', 'BEGIN', '\tprogram postinit_sim', 'END', '']
     for p in lay.pages:
         L.append('DIALOG %s, tabtitle("%s")' % (p.slug, san(p.title)))
         L.append('BEGIN')
@@ -558,11 +601,50 @@ def dlg_text(d, lay):
         L += ['END', '']
         if items and isinstance(items[0], tuple):
             L += ['LIST %s_v' % name, 'BEGIN'] + ['\t%s' % san(it[0]) for it in items] + ['END', '']
+    if d.name == 'simulate':
+        # first choice = the model of the last fit: grey out (disable, never hide) the fields that only the second choice uses
+        spec_ = [c['id'] for p in lay.pages for c in p.ctrls if c.get('ent') and S.ENTRIES[c['ent']]['modes'] == ['spec']]
+        ids_ = ['%s.%s' % (lay.ctl_page[i].slug, i) for i in spec_]
+        for verb, nm in (('disable', 'sim_dis'), ('enable', 'sim_en')):
+            chunks_ = [ids_[i:i + 40] for i in range(0, len(ids_), 40)]
+            for k_, ch_ in enumerate(chunks_):
+                L += ['SCRIPT %s_%d' % (nm, k_), 'BEGIN'] + ['\t%s.%s' % (x, verb) for x in ch_] + ['END', '']
+            L += ['SCRIPT %s' % nm, 'BEGIN'] + ['\tscript %s_%d' % (nm, k_) for k_ in range(len(chunks_))] + ['END', '']
+        rl, rs_ = q(lay, lay.mode_ctl['last']), q(lay, lay.mode_ctl['spec'])
+        fl = q(lay, 'cb_fitflag')
+        L += ['PROGRAM postinit_sim', 'BEGIN', '\tif %s.iseq("fit") {' % fl, '\t\tcall %s.seton' % rl, '\t\tcall script sim_dis', '\t}',
+              '\tif !%s.iseq("fit") {' % fl, '\t\tcall %s.seton' % rs_, '\t\tcall script sim_en', '\t}', '\tcall %s.hide' % fl, 'END', '']
+        L += ['LIST fitlist', 'BEGIN', '\t// filled in when the dialog opens (_nwsaom_dlgprep.ado)', 'END', '']
+    if d.name == 'nwsaom':
+        keep_ = {'cb_nettype'}
+        # network type: disable the controls of options that do not apply (letters D, U, B from the spec's nets)
+        byent_ = {}
+        for p_ in lay.pages:
+            for c_ in p_.ctrls:
+                if c_.get('ent') and c_['id'] not in keep_:
+                    byent_.setdefault(c_['ent'], []).append('%s.%s' % (p_.slug, c_['id']))
+
+        def scr(nm, lines):
+            ch = [lines[i:i + 40] for i in range(0, len(lines), 40)]
+            for k_, c40 in enumerate(ch):
+                L.extend(['SCRIPT %s_%d' % (nm, k_), 'BEGIN'] + ['\t' + x for x in c40] + ['END', ''])
+            L.extend(['SCRIPT %s' % nm, 'BEGIN'] + ['\tscript %s_%d' % (nm, k_) for k_ in range(len(ch))] + ['END', ''])
+        scr('ty_auto', [i + '.enable' for ids in byent_.values() for i in ids])
+        for nm, letter in (('ty_d', 'D'), ('ty_u', 'U'), ('ty_b', 'B')):
+            scr(nm, ['%s.%s' % (i, 'enable' if letter in S.ENTRIES[e_]['nets'] else 'disable') for e_, ids in byent_.items() for i in ids])
+        cbt = '%s.cb_nettype' % lay.ctl_page['cb_nettype'].slug
+        for nm, v in (('nettype_auto', 'auto'), ('nettype_d', 'directed'), ('nettype_u', 'undirected'), ('nettype_b', 'two-mode')):
+            L += ['SCRIPT %s' % nm, 'BEGIN', '\t%s.setvalue "%s"' % (cbt, v), '\tprogram type_apply', 'END', '']
+        L += ['PROGRAM type_apply', 'BEGIN', '\tcall script ty_auto']
+        for v, sc in (('directed', 'ty_d'), ('undirected', 'ty_u'), ('two-mode', 'ty_b')):
+            L += ['\tif %s.iseq("%s") {' % (cbt, v), '\t\tcall script ' + sc, '\t}']
+        L += ['END', '']
+        L += ['LIST netlist_a', 'BEGIN', '\t// filled in when the dialog opens (_nwsaom_dlgprep.ado)', 'END', '']
     if d.name in HAS_NETLIST:
-        L += ['PROGRAM initialize', 'BEGIN', '\tput "_nwdialog %s"' % OUT_NAME[d.name], '\tstata hidden immediate', 'END', '']
+        L += ['PROGRAM initialize', 'BEGIN', ('\tput "_nwsaom_dlgprep %s"' if d.name in PREP_HELPER else '\tput "_nwdialog %s"') % OUT_NAME[d.name], '\tstata hidden immediate', 'END', '']
     if d.name == 'nwsaom':
         for cid, lab, dn in RELATED:
-            L += ['PROGRAM open_%s' % dn, 'BEGIN', '\tput "db %s"' % dn, '\tstata hidden', 'END', '']
+            L += ['PROGRAM open_%s' % dn, 'BEGIN', '\tput "db %s"' % dn, '\tstata hidden queue', 'END', '']
     L += command_program(d, lay)
     return '\n'.join(L) + '\n', width, height
 

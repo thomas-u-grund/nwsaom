@@ -18,11 +18,11 @@ END
 DIALOG data, tabtitle("Data")
 BEGIN
   TEXT tx_describe_waves 10 10 215 ., label("waves() - networks in time order")
-  COMBOBOX cb_describe_waves 230 10 225 ., dropdown contents(netlist) append nomem
+  COMBOBOX cb_describe_waves 230 10 225 ., dropdown contents(netlist) append nomem option(waves)
   TEXT tx_describe_behavior 10 31 430 ., label("behavior() - behavior variable per wave")
-  VARLIST vl_describe_behavior 450 31 470 ., nomem
+  VARLIST vl_describe_behavior 450 31 470 ., nomem option(behavior)
   TEXT tx_describe_actormode 10 52 430 ., label("actormode() - two-mode actor mode (1|2)")
-  EDIT ed_describe_actormode 450 52 470 ., nomem
+  EDIT ed_describe_actormode 450 52 470 ., nomem option(actormode)
 END
 
 LIST netlist
@@ -41,6 +41,7 @@ BEGIN
 	put "nwsaom describe"
 	beginoptions
 		put /program opt_part1
+		put " "
 	endoptions
 	stata
 END
@@ -48,12 +49,12 @@ END
 PROGRAM opt_part1
 BEGIN
 			if data.cb_describe_waves.isneq("") {
-				put " waves(" data.cb_describe_waves ")"
+				optionarg /asis data.cb_describe_waves
 			}
 			if data.vl_describe_behavior.isneq("") {
-				put " behavior(" data.vl_describe_behavior ")"
+				optionarg /asis data.vl_describe_behavior
 			}
 			if data.ed_describe_actormode.isneq("") {
-				put " actormode(" data.ed_describe_actormode ")"
+				optionarg /asis data.ed_describe_actormode
 			}
 END
