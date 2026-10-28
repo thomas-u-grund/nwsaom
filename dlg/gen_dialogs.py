@@ -131,7 +131,7 @@ class Layout:
         if ctl == 'varlist':
             self.add('VARLIST', id_, cx, cw, opts=['nomem'] + topt)
         elif ctl == 'edit':
-            self.add('EDIT', id_, cx, cw, opts=['nomem'] + topt)
+            self.add('EDIT', id_, cx, cw, opts=['nomem'] + (['default("%s")' % e['default']] if e.get('default') else []) + topt)
         else:
             lst = item.get('lst')
             o = ['dropdown', 'contents(%s)' % lst]

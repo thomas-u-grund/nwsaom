@@ -831,9 +831,10 @@ e = E('ed_simulate_other', 'simulate', 'edit', '_text', 'Other model options, in
       tip='for example: behavior(b1 b2 b3) linear tvcov(a1 a2 a3)')
 SM.tab(T).append(dict(t='field', e=e['id'], ctl='edit', lst=None))
 hdr(SM, T, 'Simulation')
-field(SM, T, 'nsim', 'nsim', 'nsim() - number of simulations (default 100)', modes=BOTH)
+field(SM, T, 'nsim', 'nsim', 'nsim() - number of simulations', modes=BOTH, default='1')
 field(SM, T, 'seed', 'seed', 'seed() - random-number seed', modes=BOTH)
-field(SM, T, 'generate', 'generate', 'generate() - stub of the networks created', modes=BOTH)
+field(SM, T, 'generate', 'generate', 'generate() - stub of the networks created', modes=BOTH, default='sim')
+note(SM, T, 'Clear generate() to only print the summary (no networks are created); increase nsim() for more simulated networks', 1)
 field(SM, T, 'grp', 'grp', 'grp() - one group of a groups() fit (0 = all)', modes=['last'], ctx='est')
 
 # --- estat
@@ -866,9 +867,10 @@ for o, lab in (('effect', 'effect() - coefficient name'), ('macro', 'macro() - n
     field(ES, T, 'mems_' + o, o, lab, modes=['mems'], help='nwsaom_estat', ctx='est', companion='effect(outdegree) macro(mm)' if o not in ('effect', 'macro') else '')
 flag(ES, T, 'mems_nodots', 'nodots', 'nodots - suppress progress dots', modes=['mems'], help='nwsaom_estat', ctx='est', companion='effect(outdegree) macro(mm)')
 hdr(ES, T, 'estat simulate: the model of the last nwsaom fit; theta() and rates() (optional) simulate at other coefficients instead')
-for o, lab in (('nsim', 'nsim() - replicates (default 100)'), ('seed', 'seed()'), ('theta', 'theta() - matrix of coefficients'),
+for o, lab in (('nsim', 'nsim() - replicates'), ('seed', 'seed()'), ('theta', 'theta() - matrix of coefficients'),
                ('rates', 'rates() - rate of each period'), ('ratesbeh', 'ratesbeh() - behavior rates'), ('generate', 'generate() - stub of new networks')):
-    field(ES, T, 'sim_' + o, o, lab, modes=['simulate'], help='nwsaom_estat', ctx='est')
+    field(ES, T, 'sim_' + o, o, lab, modes=['simulate'], help='nwsaom_estat', ctx='est', default={'nsim': '1', 'generate': 'sim'}.get(o))
+note(ES, T, 'Clear generate() to only print the summary (no networks are created); increase nsim() for more simulated networks', 1)
 T = 'Score, tt'
 hdr(ES, T, 'estat score')
 field(ES, T, 'score_tested', 'tested', 'tested() - effects of the full model to test', modes=['score'], help='nwsaom_estat', ctx='est')

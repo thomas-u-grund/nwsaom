@@ -56,8 +56,8 @@ BEGIN
   EDIT ed_estat_mems_interval 230 94 225 ., nomem option(interval)
   CHECKBOX cx_estat_mems_nodots 10 115 301 ., label("nodots - suppress progress dots")
   TEXT tx_h12_2 10 142 900 ., label("-- estat simulate: the model of the last nwsaom fit; theta() and rates() (optional) simulate at other coefficients instead --")
-  TEXT tx_estat_sim_nsim 10 163 215 ., label("nsim() - replicates (default 100)")
-  EDIT ed_estat_sim_nsim 230 163 225 ., nomem option(nsim)
+  TEXT tx_estat_sim_nsim 10 163 215 ., label("nsim() - replicates")
+  EDIT ed_estat_sim_nsim 230 163 225 ., nomem default("1") option(nsim)
   TEXT tx_estat_sim_seed 470 163 215 ., label("seed()")
   EDIT ed_estat_sim_seed 690 163 225 ., nomem option(seed)
   TEXT tx_estat_sim_theta 10 184 215 ., label("theta() - matrix of coefficients")
@@ -67,7 +67,8 @@ BEGIN
   TEXT tx_estat_sim_ratesbeh 10 205 215 ., label("ratesbeh() - behavior rates")
   EDIT ed_estat_sim_ratesbeh 230 205 225 ., nomem option(ratesbeh)
   TEXT tx_estat_sim_generate 470 205 215 ., label("generate() - stub of new networks")
-  EDIT ed_estat_sim_generate 690 205 225 ., nomem option(generate)
+  EDIT ed_estat_sim_generate 690 205 225 ., nomem default("sim") option(generate)
+  TEXT tx_n25_2 10 226 910 ., label("Clear generate() to only print the summary (no networks are created); increase nsim() for more simulated networks")
 END
 
 DIALOG score_tt, tabtitle("Score, tt")

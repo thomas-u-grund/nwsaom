@@ -33,12 +33,15 @@ CASES = {
     ],
     "nwsaom_simulate": [
         ("last fit", ["call simulate.rb_simulate_last.seton", 'call simulate.ed_simulate_nsim.setvalue "5"', 'call simulate.ed_simulate_seed.setvalue "3"'],
-         "estat simulate, nsim(5) seed(3)"),
+         "estat simulate, nsim(5) seed(3) generate(sim)"),
+        ("last fit, defaults", ["call simulate.rb_simulate_last.seton"], "estat simulate, nsim(1) generate(sim)"),
+        ("last fit, generate cleared", ["call simulate.rb_simulate_last.seton", 'call simulate.ed_simulate_generate.setvalue ""'],
+         "estat simulate, nsim(1)"),
         ("specify the model", ["call simulate.rb_simulate_spec.seton", 'call simulate.cb_simulate_waves.setvalue "w1 w2 w3"',
                                'call simulate.ed_simulate_effects.setvalue "outdegree reciprocity"',
                                'call simulate.ed_simulate_theta.setvalue "-1 0.5"', 'call simulate.ed_simulate_rates.setvalue "5 5"',
                                'call simulate.ed_simulate_other.setvalue "behavior(b1 b2 b3) linear"'],
-         "nwsaom simulate, waves(w1 w2 w3) outdegree reciprocity theta(-1 0.5) rates(5 5) behavior(b1 b2 b3) linear"),
+         "nwsaom simulate, waves(w1 w2 w3) outdegree reciprocity theta(-1 0.5) rates(5 5) behavior(b1 b2 b3) linear nsim(1) generate(sim)"),
     ],
     "nwsaom_multinet": [("default", [], "nwsaom multinet, eff1(outdegree reciprocity ) eff2(outdegree reciprocity )")],
     "nwsaom_describe": [("default", [], "nwsaom describe")],
@@ -46,7 +49,8 @@ CASES = {
     "nwsaom_meta": [("names", ['call meta.ed_meta_names.setvalue "a b"'], "nwsaom meta a b")],
     "nwsaom_multiplex": [("default", [], "nwsaom multiplex")],
     "nwsaom_estat": [("default", [], "estat gof"),
-                     ("importance", ["call statistic.rb_estat_importance.seton"], "estat importance")],
+                     ("importance", ["call statistic.rb_estat_importance.seton"], "estat importance"),
+                     ("simulate defaults", ["call statistic.rb_estat_simulate.seton"], "estat simulate, nsim(1) generate(sim)")],
 }
 
 
