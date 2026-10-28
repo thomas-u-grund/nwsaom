@@ -519,9 +519,7 @@ given for the waves of {cmd:waves()}; each group uses the values of its own peri
 
 {pstd}
 {bf:After the fit.} {cmd:estat timetest} gives, besides the joint and effect-wise tests, a test per group and per period (RSiena's sienaTimeTest with its group test), and
-{cmd:estat score} works for a model with {cmd:fix()}. Not yet available with {opt groups()}: {cmd:estat gof}, {cmd:estat simulate}, {cmd:estat importance}, {cmd:nwsaom bayes}, {opt ml},
-{opt structural()}, {opt joinat()}/{opt leaveat()}, two-mode and non-directed networks, several behaviors, {cmd:tvdyadcov()} and the other time-varying dyadic covariates, and effects that
-use the number of actors or averages of the whole data set (the centred degree effects, {cmd:avdeg}, {cmd:transtriads}). The command stops with a message for each of them.
+{cmd:estat score} works for a model with {cmd:fix()}. Not yet available with {opt groups()}: {cmd:nwsaom bayes}, {opt ml}, {opt structural()} and the structural codes 10/11, two-mode networks, {cmd:nwsaom multinet}/{cmd:multiplex}, several behaviors, and {cmd:tvdyadcov()} and the other time-varying dyadic covariates. {cmd:estat gof}, {cmd:estat simulate}, {cmd:nwsaom simulate} and {cmd:estat importance} work per group. {opt joinat()}/{opt leaveat()} (times on the scale of the waves of the actor's group), {opt behrate()}, non-directed networks and the effects with data constants (the centred degree effects, {cmd:ownx()}) work. The command stops with a message for each of them.
 
 {pstd}
 {bf:Validation.} Against RSiena 1.6.14 (three groups of 15, 20 and 15 actors cut out of the s50 data, ten runs of each program, conditional and unconditional estimation) the estimates,

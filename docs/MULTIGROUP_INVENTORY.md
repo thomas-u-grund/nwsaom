@@ -25,12 +25,12 @@ alternatives of an actor to its own group. Status = state at the last commit of 
 | 15 | Several dependent networks / behaviours | allowed | `multinet`, `multiplex` and several behaviors have no `groups()` | remaining |
 | 16 | Conditional estimation | default for one dependent variable without composition change | done (network only); validated | done |
 | 17 | Unconditional estimation | yes | done; validated | done |
-| 18 | Composition change per group | allowed | `present()` (joiners and leavers at the waves, RSiena's activeStart rule) done and validated; `joinat()`/`leaveat()` (fractional times) refused | partly: fractional times (`joinat`/`leaveat`) remaining |
+| 18 | Composition change per group | allowed | `present()` (joiners and leavers at the waves, RSiena's activeStart rule) done and validated; `joinat()`/`leaveat()` (fractional times, scale of the actor's group) done and validated | done |
 | 19 | Missing data per group | as single group | `missnet()`, `missbeh()` done and validated (ties, behavior effects, behegox/behaltx with missing behavior) | done |
 | 20 | Changing covariates | centring over all values of all groups | `tvcov()` done; validated | done |
 | 21 | Interactions | `includeInteraction` as usual | `interact()` done; validated (egoX x reciprocity) | done |
 | 22 | Rate covariates | `RateX`: one shared parameter | `ratecov()` done; validated | done |
-| 23 | Behaviour-based rate effects | as single group | `behratecov()` done and validated; `behrate()` (diffusion rate effects) refused | partly |
+| 23 | Behaviour-based rate effects | as single group | `behratecov()` done and validated; `behrate()` (network-dependent rate effects) done and validated | done |
 | 24 | Constraints (`higher`, `disjoint`, `atLeastOne`) | not supported with groups | not offered | same as RSiena |
 | 25 | `allowOnly` | `FALSE` recommended | nwsaom has no up/down-only restriction | n/a |
 | 26 | Maximum likelihood | allowed; checks per group; `mult` per period | `ml` refused | remaining: needs the ML plugin path (saom_ml.c) with groups |
@@ -41,9 +41,9 @@ alternatives of an actor to its own group. Status = state at the last commit of 
 | 31 | Score tests / importance / simulate | via `sienaFit` objects | `estat score` done and validated; `estat importance`, `estat simulate`, `nwsaom simulate` work per group (network-only); importance checked against the group fitted alone (sienaRI has no group version) | partly |
 | 32 | Output | rate rows numbered by period of the glued series | done | done |
 | 33 | Effects object | `sienaGroupEffects`, `group`/`groupName`/`period` columns for rate rows | `e(rates_group)`, `e(rates_period)`, `e(groupn)`, `e(groupwaves)` | done |
-| 34 | Two-mode networks | allowed | refused | remaining |
-| 35 | Non-directed (symmetric) networks | allowed | refused | remaining |
-| 36 | `structural` values | per group | `structural()` is not available for one-mode networks with `waves()` in nwsaom at all | remaining (not specific to groups) |
+| 34 | Two-mode networks | allowed | refused (clear message) | remaining: not implemented with groups |
+| 35 | Non-directed (symmetric) networks | allowed | `symmetric`, `symtype()` done; validated (modelType 2, 3 and 6) | done |
+| 36 | `structural` values | per group | the codes 10/11 and `structural()`: refused with groups (a message from both sides) | remaining: separate project (docs/STRUCTURAL_P5_P6_NOTES.md) |
 | 37 | Continuous behaviour | new in 1.6.14 | nwsaom has no continuous behaviour | n/a |
 | 38 | Parallel estimation | by period x group | threads over replicates and periods | automatic |
 

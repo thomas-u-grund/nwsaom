@@ -2,6 +2,10 @@
 
 Known, already diagnosed pitfalls. Entries copied from the nwcommands notes at the time of the split; some mention the core package.
 
+## Merged line: plugin protocol 151 (groups 144 + structural codes 150)
+
+Groups need plugin >= 144 (`ver < 151` check in `SaomNetCtxInit`) and the structural codes >= 150; the merged plugin reports 151. The two features exclude each other: `_nwsaom_structural` refuses `groups()`. `estat gof/simulate` read the observed graph through `SaomStructObsDense(<graph name prefix>...)` with the group prefix `__nwsaom_gofg_G`.
+
 ## Which constants are per group in RSiena (and here)
 
 `averageInDegree`/`averageOutDegree` (recomputed by `NetworkLongitudinalData::calculateProperties()` from the group's own networks over all its waves), `structmean` and `balmean` (from the group's data object) are PER GROUP in `siena07`; the group-level attributes set in `sienaGroupCreate()` serve the report only. A term whose constant comes from the data must therefore get one value per group: `td.decay` through `SaomGroupsRegister()` (kind 2, `p1` per period) or, for a term with a dummy attribute column (`ownx()`), a per-period `attrpd`. The Mata twin of the observed statistic is evaluated on the whole glued graph, so a statistic that contains the number of actors (`inStructEq`) needs the group size in Mata (`stat_saom_nat`) as in the plugin (`g->grpn`), or the targets and the simulated statistics disagree and phase 2 diverges.
