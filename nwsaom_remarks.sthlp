@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.2.0  27oct2026 author: Thomas Grund}{...}
+{* *! version 1.3.0  28oct2026 author: Thomas Grund}{...}
 
 {title:Title}
 
@@ -993,37 +993,54 @@ values missing: density, reciprocity, altX, egoX and simX agree to within sampli
 against RSiena's 0.78; before this was handled it was 1.02). An {opt interact()} that names a
 {opt samex()} or {opt simx()} effect whose variable has missing values is rejected.
 
-RSiena's own "structural zeros/ones" mechanism - a
-separate, simpler alternative to ordinary missing data for dyads whose value is fixed by design
-rather than merely unobserved - IS implemented; see {help nwsaom_remarks##structural:Structural zeros/ones}
+RSiena's own "structural zeros/ones" mechanism - dyads whose value is fixed by design
+rather than merely unobserved, coded 10 and 11 in the wave networks - IS implemented; see {help nwsaom_remarks##structural:Structural zeros/ones}
 below.
 
 {marker structural}{...}
 {title:Structural zeros/ones}
 
 {pstd}
-{opt structural(matname)} marks dyads whose tie value is fixed by design rather than chosen by an
-actor, RSiena's structural values. Unlike missing data, the value of a structural dyad is known
-and cannot change (e.g. a mandated reporting relationship, an impossible tie, or a dyad held fixed
-for a counterfactual). RSiena codes structural zeros and ones as 10 and 11 in the network data;
-{cmd:nwsaom} uses a separate 0/1 matrix instead, like {opt missnet()}.
+Structural zeros and ones are dyads whose tie value is fixed by design rather than chosen by an actor: a mandated reporting
+relationship, an impossible tie, or a dyad held fixed for a counterfactual. Unlike missing data, the value of a structural dyad is
+known. {cmd:nwsaom} follows RSiena: the values are part of the wave networks. In a wave network, a tie with the value
+{bf:10} is a structural zero and a tie with the value {bf:11} a structural one (a zero in the matrix is no tie as usual, a
+{bf:1} an ordinary tie). {cmd:nwsaom} detects the codes; no option is needed. With {cmd:nwset, mat()} the codes are simply the
+cell values of the matrix; with {cmd:nwfromedge} give the value variable the values 10 and 11. Diagonal codes are ignored. Any
+other tie value than 1, 10 and 11 stops the command.
 
 {pstd}
-{opt structural(matname)} takes one 0/1 n x n Stata matrix (not an {cmd:nwset} network; build it
-with {cmd:matrix input} or {cmd:mkmat}) with a zero diagonal; 1 marks a dyad whose value is fixed
-for the whole period. A marked dyad must have the same observed value in {opt wave1()} and
-{opt wave2()}; a dyad that changed between the waves is refused with an error.
+{bf:Rules} (RSiena's, checked against 1.6.14 with the data of the examples):
+
+{phang2}o  The codes belong to a wave, and the structural dyads may differ from wave to wave. A dyad that is structural at the {it:start}
+of a period keeps its start value during the whole period: it is not among the alternatives of the actors and its value is the value
+of the code (11 is a tie, 10 no tie). A dyad that is structural at the {it:end} of a period only is free during the period and gets
+its end value before the statistics are computed.{p_end}
+{phang2}o  The observed statistics of a period are those of the end network with the dyads that are structural at the start of the period set
+to their start value. The observed distance between the waves (the target of the rate, and of the conditional estimation) leaves out the
+dyads that are structural at either end of the period and the dyads that are missing at either end; the conditional estimation of
+{cmd:nwsaom} stops, as RSiena's, when the number of changes of the dyads that are not missing reaches that distance. With many structural values
+the unconditional estimation ({opt unconditional}) is usually the better choice, as in RSiena.{p_end}
+{phang2}o  An actor with no free alternative among the active actors does not act at all (rate 0), and the others cannot choose a
+structural dyad: a completely structural actor takes part only through the ties others send to it.{p_end}
+{phang2}o  Missing data: a dyad that is missing at a wave takes the code of the previous wave (with {opt missnet()}).{p_end}
+{phang2}o  Composition change ({opt present()}, {opt joinat()}/{opt leaveat()}) combines with the codes: an actor can act when it has a free alternative among the
+actors who are active at that moment. RSiena offers structural zeros as one way of coding absent actors; with {opt joinat()}/{opt leaveat()} the actors need no codes.{p_end}
+{phang2}o  Network endowment and creation ({opt endow()}/{opt creation()}) use the lost ties of the replaced network, as RSiena. RSiena advises against them when the structural
+dyads change from wave to wave.{p_end}
+{phang2}o  Covariate rate effects ({opt ratecov()}) and the structural rate effects are computed over the actors who can act.{p_end}
+{phang2}o  Two-mode networks: the codes are cells of the actors-by-events matrix.{p_end}
 
 {pstd}
-A structural dyad is removed from every actor's set of possible ministep changes. All effect
-statistics are used unchanged.
+{bf:Scope.} One directed one-mode or two-mode network, any number of waves, method of moments (conditional or unconditional),
+with or without missing data, composition change, covariates, interactions, endowment/creation and rate covariates, and with co-evolving
+behaviors (one or several). In a non-directed ({opt symmetric}) relation the codes must be given for both directions of a dyad, with the same value; all model types work. {cmd:nwsaom multinet} takes the codes in its one-mode directed networks (not with a two-mode or non-directed network or {opt behavior()}). Not yet with {cmd:groups()}, {cmd:nwsaom multiplex}, {cmd:ml}, {cmd:nwsaom bayes}. {cmd:nwsaom describe} counts the structural zeros and ones of each wave and leaves them out of the distance (RSiena's data report);
+{cmd:estat gof}, {cmd:simulate}/{cmd:nwsaom simulate}, {cmd:mems}, {cmd:importance}, {cmd:score} and {cmd:timetest} work after a fit with codes: the observed end network has the start-structural dyads at their start value,
+the simulated networks have the end-structural dyads at their end value (RSiena's gof), the choices of structural dyads are left out of the importance.
 
 {pstd}
-Scope: two waves ({opt wave1()}/{opt wave2()}, not {opt waves()}), network-only (no
-{opt behavior()}); cannot yet be combined with {opt symmetric}, {opt ratecov()}, or the network
-endowment/creation split ({opt outdegreeendow}/{opt outdegreecreation}/{opt reciprocityendow}/
-{opt reciprocitycreation}), each refused with {opt structural()}. A fit on glasgow takes about
-0.2 s.
+{bf:The older option} {opt structural(matname)} marks dyads by a 0/1 matrix that is the same in all periods and needs the same observed value at every wave. It
+is deprecated and replaced by the codes 10 and 11 in the wave networks: the matrix is converted to the codes of every wave (a note is printed), so it works with {opt waves()} and the other options too; the value of a marked dyad is its value in the data, which must be the same at every wave.
 
 {marker estimation}{...}
 {title:Estimation}
@@ -1128,4 +1145,4 @@ The same estimates are available as {cmd:nwsaom_ml} after an {cmd:nwsaom} fit. T
     {help nwsaom}, {help nwsaom_estat}, {help nwergm}
 
 {hline}
-{pstd}{it:nwsaom version 1.2.0, 27 October 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.3.0, 28 October 2026}{p_end}{* nwversion}

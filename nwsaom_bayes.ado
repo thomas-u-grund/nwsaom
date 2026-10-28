@@ -1,4 +1,4 @@
-*! version 1.2.0  27oct2026 nwcommands: Bayesian estimation of a SAOM (data augmentation, Metropolis-Hastings) after nwsaom
+*! version 1.3.0  28oct2026 nwcommands: Bayesian estimation of a SAOM (data augmentation, Metropolis-Hastings) after nwsaom
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -32,6 +32,11 @@ program nwsaom_bayes, eclass
 	if _rc {
 		di as err "no fitted nwsaom model available - re-run nwsaom before nwsaom bayes."
 		exit 498
+	}
+	mata: st_numscalar("__nwsaom_sflast", SaomStructLastOn())
+	if scalar(__nwsaom_sflast) == 1 {
+		di as err "nwsaom bayes is not yet available with structural zeros or ones (the codes 10 and 11 in the wave networks)."
+		exit 198
 	}
 	if e(twomode) == 1 | `"`e(symtype)'"' != "" | `"`e(ratecov)'"' != "" {
 		di as err "nwsaom bayes covers one directed one-mode network with at most one co-evolving behavior, without two-mode data, non-directed models or rate covariates."
@@ -227,7 +232,7 @@ program nwsaom_bayes, eclass
 	local cent_keep = e(centered)
 	ereturn post `bb' `Vb', obs(`nodes_keep')
 	ereturn local cmd "nwsaom_bayes"
-	ereturn local version "1.2.0"
+	ereturn local version "1.3.0"
 	ereturn local title "Stochastic actor-oriented model (Bayesian: data augmentation, Metropolis-Hastings)"
 	ereturn local waves `"`waves_keep'"'
 	ereturn local post_frame "`frame'"

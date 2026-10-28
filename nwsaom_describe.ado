@@ -1,4 +1,4 @@
-*! version 1.2.0  27oct2026 nwcommands: nwsaom describe - the data description that comes before a SAOM fit
+*! version 1.3.0  28oct2026 nwcommands: nwsaom describe - the data description that comes before a SAOM fit
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -29,7 +29,7 @@ program define nwsaom_describe, rclass
 	local n0 = .
 	local ntm 0
 	matrix `P' = J(`=`nw'-1', 6, .)
-	matrix `W' = J(`nw', 3, .)
+	matrix `W' = J(`nw', 5, .)
 	forvalues w = 1/`nw' {
 		local nm : word `w' of `waves'
 		_nwsyntax `nm', max(1)
@@ -70,11 +70,16 @@ program define nwsaom_describe, rclass
 		}
 	}
 	local div = cond(`tm', 1, cond(`dir1', 1, 2))
-	tempname MA MB
+	tempname MA MB EX
 	forvalues w = 1/`nw' {
-		mata: `MA' = (*`obj`w''->get_matrix_mod(0, `dir1')) :!= 0
+		mata: `MA' = SaomStructWeights(`obj`w'')
 		if `tm' mata: `MA' = `MA'[selectindex(`ISA'), selectindex(1 :- `ISA')]
 		else mata: _diag(`MA', 0)
+		mata: st_numscalar("__nwsd_s0", sum(`MA' :== 10) / `div')
+		mata: st_numscalar("__nwsd_s1", sum(`MA' :== 11) / `div')
+		matrix `W'[`w', 4] = scalar(__nwsd_s0)
+		matrix `W'[`w', 5] = scalar(__nwsd_s1)
+		mata: `MA' = (`MA' :!= 0) :& (`MA' :!= 10)
 		mata: st_numscalar("__nwsd_ties", sum(`MA') / `div')
 		local ties = scalar(__nwsd_ties)
 		matrix `W'[`w', 1] = `ties'
@@ -89,9 +94,13 @@ program define nwsaom_describe, rclass
 	}
 	forvalues w = 1/`=`nw'-1' {
 		local w2 = `w' + 1
-		mata: `MA' = (*`obj`w''->get_matrix_mod(0, `dir1')) :!= 0
-		mata: `MB' = (*`obj`w2''->get_matrix_mod(0, `dir1')) :!= 0
+		mata: `MA' = SaomStructWeights(`obj`w'')
+		mata: `MB' = SaomStructWeights(`obj`w2'')
+		mata: `EX' = ((`MA' :== 10) :| (`MA' :== 11) :| (`MB' :== 10) :| (`MB' :== 11))
+		mata: `MA' = (`MA' :!= 0) :& (`MA' :!= 10)
+		mata: `MB' = (`MB' :!= 0) :& (`MB' :!= 10)
 		if `tm' {
+			mata: `EX' = `EX'[selectindex(`ISA'), selectindex(1 :- `ISA')]
 			mata: `MA' = `MA'[selectindex(`ISA'), selectindex(1 :- `ISA')]
 			mata: `MB' = `MB'[selectindex(`ISA'), selectindex(1 :- `ISA')]
 		}
@@ -99,9 +108,11 @@ program define nwsaom_describe, rclass
 			mata: _diag(`MA', 0)
 			mata: _diag(`MB', 0)
 		}
+		else mata: _diag(`EX', 0)
 		mata: st_numscalar("__nwsd_k", sum(`MA' :& `MB') / `div')
 		mata: st_numscalar("__nwsd_c", sum(!`MA' :& `MB') / `div')
 		mata: st_numscalar("__nwsd_d", sum(`MA' :& !`MB') / `div')
+		mata: st_numscalar("__nwsd_h", sum(((`MA' :& !`MB') :| (!`MA' :& `MB')) :& !`EX') / `div')
 		local kept = scalar(__nwsd_k)
 		local cre = scalar(__nwsd_c)
 		local dis = scalar(__nwsd_d)
@@ -109,10 +120,10 @@ program define nwsaom_describe, rclass
 		matrix `P'[`w', 2] = `cre'
 		matrix `P'[`w', 3] = `dis'
 		matrix `P'[`w', 4] = cond(`kept' + `cre' + `dis' > 0, `kept' / (`kept' + `cre' + `dis'), .)
-		matrix `P'[`w', 5] = `cre' + `dis'
+		matrix `P'[`w', 5] = scalar(__nwsd_h)
 		matrix `P'[`w', 6] = cond(`kept' + `dis' > 0, `kept' / (`kept' + `dis'), .)
 	}
-	capture mata: mata drop `MA' `MB' `ISA'
+	capture mata: mata drop `MA' `MB' `EX' `ISA'
 	di
 	if `tm' di as txt "Network data: " as res `nw' as txt " waves, two-mode network, " as res `na' as txt " actors (mode `actormode') x " as res `ne' as txt " events; ties are attendances (actor-event cells), density is over the " as res `na' * `ne' as txt " cells"
 	else di as txt "Network data: " as res `nw' as txt " waves, " as res `n0' as txt " actors, " as res cond(`dir1', "directed", "undirected")
@@ -120,6 +131,13 @@ program define nwsaom_describe, rclass
 	di as txt %-8s "wave" %10s "ties" %12s "density" %14s "avg. degree"
 	forvalues w = 1/`nw' {
 		di as res %-8s "`w'" %10.0f `W'[`w', 1] %12.4f `W'[`w', 2] %14.3f `W'[`w', 3]
+	}
+	mata: st_numscalar("__nwsd_anys", sum(st_matrix("`W'")[., 4..5]) > 0)
+	if scalar(__nwsd_anys) {
+		di as txt "Structural values (codes 10 and 11), counted as ties when 11; the distance (Hamming) between two waves leaves out the dyads that are structural at either end, as RSiena (the kept/created/dissolved counts and the Jaccard index include them):"
+		forvalues w = 1/`nw' {
+			di as txt "  wave `w': " as res `W'[`w', 4] as txt " structural zeros, " as res `W'[`w', 5] as txt " structural ones"
+		}
 	}
 	di as txt "{hline 58}"
 	di as txt %-8s "period" %8s "kept" %9s "created" %10s "dissolved" %9s "Jaccard" %10s "Hamming"
@@ -129,7 +147,7 @@ program define nwsaom_describe, rclass
 	}
 	di as txt "{hline 58}"
 	matrix colnames `P' = kept created dissolved jaccard hamming persistence
-	matrix colnames `W' = ties density avgdegree
+	matrix colnames `W' = ties density avgdegree structural0 structural1
 	return matrix periods = `P'
 	return matrix waves = `W'
 	return scalar twomode = `tm'

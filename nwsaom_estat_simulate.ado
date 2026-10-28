@@ -1,4 +1,4 @@
-*! version 1.2.0  27oct2026 nwcommands: estat simulate after nwsaom
+*! version 1.3.0  28oct2026 nwcommands: estat simulate after nwsaom
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -160,7 +160,7 @@ program define nwsaom_estat_simulate, rclass
 	matrix `obs' = J(`nperiods', 6, .)
 	forvalues pd = 1/`nperiods' {
 		local pe = `pd' + 1
-		mata: st_matrix("__nwsaom_sim_row", SaomSimSummary(`__sim_gname'`pe'.to_dense(), `pd', `=cond(`coev', "mean(*__nwsaom_last_Behwaves[`pe'])", ".")'))
+		mata: st_matrix("__nwsaom_sim_row", SaomSimSummary(SaomStructObsDense(`__sim_gname'`pe', `pd'), `pd', `=cond(`coev', "mean(*__nwsaom_last_Behwaves[`pe'])", ".")'))
 		forvalues c = 1/6 {
 			if `tm' & inlist(`c', 4, 5) continue
 			matrix `obs'[`pd', `c'] = __nwsaom_sim_row[1, `c']
@@ -173,6 +173,7 @@ program define nwsaom_estat_simulate, rclass
 			local ++row
 			mata: __nwsaom_sim_G = SaomGraph()
 			mata: SaomCopyGraph(`__sim_gname'`pd', __nwsaom_sim_G)
+			mata: SaomStructPeriodSet(`pd')
 			if `coev' {
 				mata: __nwsaom_sim_B = SaomBehavior()
 				mata: __nwsaom_sim_B.init(*__nwsaom_last_Behwaves[`pd'], __nwsaom_beh_minval, __nwsaom_beh_maxval, `behoverall', __nwsaom_last_Mbeh.simMean)

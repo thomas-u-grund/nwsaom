@@ -5222,6 +5222,8 @@ void SaomRatesReset() {
 	SaomRateTVReset()
 	SaomBRReset()
 	SaomGroupsReset()
+	if (SaomStructOn()) SaomStructKeepLast(); else rmexternal("__nwsaom_last_sset")
+	SaomStructReset()
 }
 real scalar SaomBRAddData(real matrix vals) {
 	external real rowvector __saom_brdattv
@@ -8295,6 +8297,9 @@ void SaomNetCtxInit(struct SaomNetCtx scalar C, pointer(class SaomGraph scalar) 
 		if (cols(SaomSRTypes()) > 0) C.targetRateCov[pd, (C.hasratecov - cols(SaomSRTypes()) + 1)..C.hasratecov] = SaomCovariateDifferingSum(*Gwaves[pd], *Gwaves[pd+1], SaomStructRateAttr(*Gwaves[pd], SaomSRTypes()), J(0, 0, 0))
 	}
 
+	// structural zeros and ones (the codes 10 and 11 of the wave networks): targets and distances of the periods (unw_saom_struct.do)
+	if (SaomStructOn()) SaomStructTargets(C, M, Gwaves, fntype, missMaskPd)
+
 	// native dispatch, decided once per fit. Endowment/creation gating
 	// and structural zeros/ones exist only in Mata. The distance
 	// statistic comes from the plugin from protocol 5 on; with an older
@@ -8330,12 +8335,16 @@ void SaomNetCtxInit(struct SaomNetCtx scalar C, pointer(class SaomGraph scalar) 
 	else if (!C.cfg.eligible) why = C.cfg.whynot
 	else why = "native plugin too old for this model"
 	SaomSetEngine(C.use_native, why)
+	if (SaomStructOn() & ver < 150) {
+		errprintf("nwsaom: structural zeros and ones (the codes 10 and 11) need the native plugin of this release (update nwsaom: net install ... replace); there is no Mata implementation.\n")
+		exit(198)
+	}
 	C.native_netdist = (ver >= 5)
 	C.perok = (ver >= 18)
 	// the threaded batch path: every model from protocol 11 on
 	C.use_batch = C.use_native & (!C.hastimed | ver >= 27) & (ver >= 5) & ((!C.hasratecov & C.symtype == 0 & !C.hasnetgate & !C.hasstructural) | ver >= 11)
 	if (SaomGroupsMode()) {
-		if (!C.use_batch | ver < 144) {
+		if (!C.use_batch | ver < 151) {
 			errprintf("nwsaom: groups() needs the native plugin of this release (update nwsaom: net install ... replace); there is no Mata implementation.\n")
 			exit(198)
 		}
@@ -8376,6 +8385,11 @@ void SaomNetCtxInit(struct SaomNetCtx scalar C, pointer(class SaomGraph scalar) 
 		SaomBatchSetup(Gwaves, C.P, C.cfg, J(1, 0, 0), J(1, 0, NULL), 0, 0, 0, 0,
 			C.hasmiss, C.missDyadsPd, J(C.n, C.P, 0), C.haspresent, C.presentPd,
 			J(1, 0, 0), C.symtype, (C.hasratecov ? C.ratecovattr : J(0, 0, 0)), C.compEv)
+		if (SaomStructOn()) SaomStructSend(C.P, C.n)
+	}
+	else if (SaomStructOn()) {
+		errprintf("nwsaom: structural zeros and ones (the codes 10 and 11) need the native plugin of this release (update nwsaom: net install ... replace); there is no Mata implementation.\n")
+		exit(198)
 	}
 }
 
@@ -11797,7 +11811,7 @@ void SaomMNAddEff(class SaomModel scalar M, string scalar eff, string scalar vn,
    __nwsaom_mn_nA (actors; 0 = no two-mode member), __nwsaom_mn_tm1/2 (the member is two-mode), __nwsaom_mn_nsr (senders and receivers of both members).
    =================================================================== */
 /* a wave of the member `slot': a one-mode network (nOne nodes; embedded in n) or a two-mode one (actors of mode actmode first) */
-void SaomMNAddWave(pointer(class nw_def scalar) scalar netobj, real scalar n, real scalar slot, real scalar tm, real scalar actmode, real scalar nOne) {
+void SaomMNAddWave(pointer(class nw_def scalar) scalar netobj, real scalar n, real scalar slot, real scalar tm, real scalar actmode, real scalar nOne, | real scalar key) {
 	external pointer(class SaomGraph scalar) rowvector __nwsaom_mn_Gs1, __nwsaom_mn_Gs2
 	class SaomGraph scalar G
 	real rowvector isact, ia, ie, inv
@@ -11826,6 +11840,7 @@ void SaomMNAddWave(pointer(class nw_def scalar) scalar netobj, real scalar n, re
 			for (k=1; k<=rows(nb); k++) G.toggle(i, nb[k])
 		}
 	}
+	if (args() >= 7) if (key > 0) SaomStructFix(netobj, G, key, 0, J(1, 0, 0))
 	if (slot == 1) __nwsaom_mn_Gs1 = (__nwsaom_mn_Gs1, &(G))
 	else __nwsaom_mn_Gs2 = (__nwsaom_mn_Gs2, &(G))
 }
@@ -12181,7 +12196,8 @@ struct SaomMNFit scalar SaomEstimateMN(pointer(class SaomGraph scalar) rowvector
 	SaomSetBatchSlot(1)
 	SaomBatchSetup(G2, P, cfg2, J(1, 0, 0), J(1, 0, NULL), 0, 0, 0, 0, 0, J(0, 3, 0), J(n, P, 0), 0, J(n, P, 1), J(1, 0, 0), (args() >= 11 ? 4 * sym2 : 0), J(0, 0, 0), noev)
 	SaomSetBatchSlot(0)
-	SaomMNObs(G1, G2, P, p1, p2, C.target, C.tr1, C.tr2)
+	SaomStructSendMN(P, n)
+	SaomStructMNObs(G1, G2, P, p1, p2, C.target, C.tr1, C.tr2)
 	rate10 = J(1, P, 0)
 	rate20 = J(1, P, 0)
 	for (pd=1; pd<=P; pd++) {
@@ -13338,6 +13354,7 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 
 		if (C.hasmiss) C.targetRateNet[pd] = SaomCountDifferingMasked(Gp, Gpend, *missMaskNetPd[pd])
 		else C.targetRateNet[pd] = SaomCountDiffering(Gp, Gpend)
+		if (SaomStructOn()) SaomStructCoevPd(C, M, pd, (args() >= 15 ? fntype : J(1, 0, 0)))
 		C.targetRateBeh[pd] = sum(abs((*Behwaves[pd+1] - *Behwaves[pd]) :* (1 :- C.missBehPd[.,pd])))
 
 		ratesNet0[pd] = C.npresentPd[pd] * (0.2 + 2*C.targetRateNet[pd]) / (C.npresentPd[pd]*(C.npresentPd[pd]-1) + 1)
@@ -13355,6 +13372,8 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 			C.simMean, C.overallMean, C.hasmiss, C.missDyadsPd, C.missBehPd, C.haspresent, C.presentPd,
 			C.cfgBeh.fntype, C.symtype, (C.nrcN > 0 ? C.rcattr : J(0, 0, 0)), C.compEv)
 	}
+	SaomStructNeedBatch(C.use_batch)
+	if (SaomStructOn()) SaomStructSend(P, n)
 	// the observed statistics of the covariate rate effects, from the start values of the plugin (one implementation of every effect)
 	C.targetRC = J(P, max((nrcT, 1)), 0)
 	if (nrcT > 0) {
@@ -13363,6 +13382,7 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 		for (pd=1; pd<=P; pd++) {
 			rcA = rcs[., ((pd-1) * nrcT + 1)..(pd * nrcT)]
 			if (C.nrcN > 0) C.targetRC[pd, 1..C.nrcN] = SaomCovariateDifferingSum(*Gwaves[pd], *Gwaves[pd+1], rcA[., 1..C.nrcN], (C.hasmiss ? *missMaskNetPd[pd] : J(0, 0, 0)))
+			if (C.nrcN > 0 & SaomStructOn()) C.targetRC[pd, 1..C.nrcN] = SaomStructRC(C, pd, rcA[., 1..C.nrcN])
 			if (C.nrcB > 0) C.targetRC[pd, (C.nrcN+1)..nrcT] = (abs(*Behwaves[pd+1] - *Behwaves[pd]) :* (1 :- C.missBehPd[., pd]))' * rcA[., (C.nrcN+1)..nrcT]
 		}
 	}
@@ -15617,7 +15637,7 @@ void SaomImportanceCore(pointer(class SaomGraph scalar) rowvector Gstart, real s
 	struct SaomNativeConfig scalar cfg
 	struct SaomBehaviorNativeConfig scalar cfgB
 	pointer(real matrix) rowvector Cm, Cb
-	real matrix expRI, expI, sigmas, st0, X0, mk, expRIb, expIb, sigmasb
+	real matrix expRI, expI, sigmas, st0, X0, mk, mkw, expRIb, expIb, sigmasb
 	real rowvector RH, RHb
 	real colvector eRI, eI, sg
 	real scalar n, K, Kb, w, k, junk, ver, rh, overallMean
@@ -15680,10 +15700,11 @@ void SaomImportanceCore(pointer(class SaomGraph scalar) rowvector Gstart, real s
 	}
 	for (w=1; w<=P; w++) {
 		Cm = J(1, K, NULL)
+		mkw = (SaomStructOn() ? SaomStructAvail(w, n, mk) : mk)
 		for (k=1; k<=K; k++) {
 			stata("plugin call saomnativesim " + invtokens("c" :+ strofreal(1..n)) + ", " + char(34) + "CONTRIBK|" + strofreal(w) + " " + strofreal(k) + char(34))
 			X0 = st_data((1::n), (1..n))
-			if (rows(mk) > 0) X0 = X0 :/ mk
+			if (rows(mkw) > 0) X0 = X0 :/ mkw
 			Cm[k] = &(X0 :+ 0)
 		}
 		SaomImpPeriod(Cm, theta, eRI, eI, sg, rh)
@@ -15757,9 +15778,14 @@ real scalar SaomGofSimNet(class SaomGraph scalar G, class SaomModel scalar M,
 	if (native) {
 		if (hasfn) cfg.fntype = fn
 		if (hasst) cfg.structpairs = SaomMaskToDyadList(st :== 1)
+		SaomStructSend1(G.n)
 		if (rows(rcattr) > 0) r = SaomSimulateIntervalNative(G, M, cfg, theta, rate, 1, 0, J(0, 2, 0), (haspr ? pr : J(0, 1, 0)), symtype, rcattr, rccoef)
 		else r = SaomSimulateIntervalNative(G, M, cfg, theta, rate, 1, 0, J(0, 2, 0), (haspr ? pr : J(0, 1, 0)), symtype)
 		return(1)
+	}
+	if (SaomStructOn()) {
+		errprintf("estat gof/simulate with structural zeros and ones needs the native plugin of this release (no Mata implementation).\n")
+		exit(198)
 	}
 	if (symtype != 0) {
 		errprintf("estat gof needs the native (C) simulator for a non-directed fit.\n")
@@ -15785,8 +15811,13 @@ real scalar SaomGofSimCoev(class SaomGraph scalar G, class SaomModel scalar M, r
 	native = cfg.eligible & cfgBeh.eligible & SaomNativeAvailable()
 	if (native) native = (SaomNativePluginVersion() >= (any(cfgBeh.fntype :!= 0) ? 12 : 3))
 	if (native) {
+		SaomStructSend1(G.n)
 		r = SaomSimulateIntervalCoevNative(G, M, cfg, thetaNet, Beh, Mbeh, cfgBeh, thetaBeh, rateNet, rateBeh, 1)
 		return(1)
+	}
+	if (SaomStructOn()) {
+		errprintf("estat gof/simulate with structural zeros and ones needs the native plugin of this release (no Mata implementation).\n")
+		exit(198)
 	}
 	rm = SaomSimulateIntervalCoev(G, M, thetaNet, Beh, Mbeh, thetaBeh, rateNet, rateBeh)
 	return(0)
@@ -16657,10 +16688,13 @@ struct SaomMBCtx scalar SaomMBInit(
 			ratesBeh0[b,pd] = SaomBehaviorRateStart(*Behwaves[b,pd], *Behwaves[b,pd+1])
 		}
 		C.targetRateNet[pd] = SaomCountDiffering(*Gwaves[pd], Gend)
+		if (SaomStructOn()) SaomStructMBPd(C, M, pd)
 		ratesNet0[pd] = SaomRateStart(C.npresentPd[pd], C.targetRateNet[pd])
 	}
 
+	SaomStructNeedBatch(C.use_native)
 	if (C.use_native) SaomBatchSetupMB(Gwaves, C.P, C.cfg, C.codes, C.fnt, C.pB, Behwaves, behmin, behmax, simMean, overallMean, C.hastimed, C.presentPd, C.compEv)
+	if (SaomStructOn()) SaomStructSend(C.P, C.n)
 	ratesNet0out = ratesNet0
 	ratesBeh0out = rowshape(ratesBeh0, 1)
 	return(C)
@@ -18939,3 +18973,4 @@ void SaomGroupsTimedApply() {
 	rmexternal("__ns_gtev")
 }
 end
+do unw_saom_struct.do

@@ -12,7 +12,7 @@ This chapter takes you from data to a first fitted model, shows how to read the 
 
 \paragraph{Covariates and behavior.} Actor attributes are ordinary variables in the dataset that holds the nodes. \opt{samex(smoke1)} refers to the variable \texttt{smoke1} in the current dataset. A time-varying attribute or a behavior is given as one variable per wave, and the variables are listed in the temporal order of the waves, for example \opt{behavior(alcohol1 alcohol2 alcohol3)}. Dyadic covariates and the indicators for missing data are Stata matrices; see the chapters on rates and data and on missing data.
 
-\paragraph{Binary ties.} The ties must be binary: every tie has the value 1. A network with other tie values (real shares, counts, or the values 10 and 11 that RSiena uses for structural zeros and ones) is rejected with an error; a network that is flagged as valued but whose ties are all 1 is accepted.
+\paragraph{Binary ties.} The ties must be binary: every tie has the value 1, or 10 or 11 (RSiena's codes for structural zeros and ones, Section~\ref{sec:structural}). A network with other tie values (real shares, counts) is rejected with an error; a network that is flagged as valued but whose ties are all 1 is accepted.
 
 \subsection*{The Glasgow data}
 

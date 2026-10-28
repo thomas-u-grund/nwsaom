@@ -1,4 +1,4 @@
-*! version 1.2.0  27oct2026 nwcommands: maximum likelihood estimation of a SAOM (Robbins-Monro on the score of the augmented data) after nwsaom
+*! version 1.3.0  28oct2026 nwcommands: maximum likelihood estimation of a SAOM (Robbins-Monro on the score of the augmented data) after nwsaom
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -23,6 +23,11 @@ program nwsaom_ml, eclass
 	if _rc {
 		di as err "no fitted nwsaom model available."
 		exit 498
+	}
+	mata: st_numscalar("__nwsaom_sflast", SaomStructLastOn())
+	if scalar(__nwsaom_sflast) == 1 {
+		di as err "maximum likelihood estimation is not yet available with structural zeros or ones (the codes 10 and 11 in the wave networks)."
+		exit 198
 	}
 	if e(twomode) == 1 | `"`e(symtype)'"' != "" | `"`e(ratecov)'"' != "" {
 		di as err "maximum likelihood estimation covers one directed one-mode network with at most one co-evolving behavior, without two-mode data, non-directed models or rate covariates."
