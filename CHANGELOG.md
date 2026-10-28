@@ -5,6 +5,14 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.2] - 2026-10-28
+
+Patch release. The Mata libraries and the plugin are unchanged.
+
+### Changed
+- **Dialog box.** The main dialog (`db nwsaom`) has a group "Related dialogs" on its last tab (Estimate 2) with buttons that open the dialogs for Bayesian estimation, several networks (multinet), multiplex networks, postestimation, describing the data and meta-analysis. The commands the dialogs build are unchanged.
+- The dialog for `nwsaom describe` now has the `actormode()` field that the command already had.
+
 ## [1.3.1] - 2026-10-28
 
 Patch release. Works with nwcommands 3.6.0 and later; the Mata libraries and the plugin are unchanged.

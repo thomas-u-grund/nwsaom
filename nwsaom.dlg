@@ -567,6 +567,13 @@ BEGIN
   EDIT ed_sim_nsim 450 52 610 ., nomem
   TEXT tx_sim_generate 10 73 430 ., label("generate() - stub of the networks created")
   EDIT ed_sim_generate 450 73 610 ., nomem
+  GROUPBOX gb_related 10 108 1040 82, label("Related dialogs")
+  BUTTON bt_bayes 22 130 333 22, label("Bayesian estimation...") onpush(program open_nwsaom_bayes)
+  BUTTON bt_multinet 363 130 333 22, label("Several networks (multinet)...") onpush(program open_nwsaom_multinet)
+  BUTTON bt_multiplex 704 130 333 22, label("Multiplex...") onpush(program open_nwsaom_multiplex)
+  BUTTON bt_estat 22 158 333 22, label("Postestimation...") onpush(program open_nwsaom_estat)
+  BUTTON bt_describe 363 158 333 22, label("Describe data...") onpush(program open_nwsaom_describe)
+  BUTTON bt_meta 704 158 333 22, label("Meta-analysis...") onpush(program open_nwsaom_meta)
 END
 
 LIST netlist
@@ -1278,6 +1285,42 @@ PROGRAM initialize
 BEGIN
 	put "_nwdialog nwsaom"
 	stata hidden immediate
+END
+
+PROGRAM open_nwsaom_bayes
+BEGIN
+	put "db nwsaom_bayes"
+	stata hidden
+END
+
+PROGRAM open_nwsaom_multinet
+BEGIN
+	put "db nwsaom_multinet"
+	stata hidden
+END
+
+PROGRAM open_nwsaom_multiplex
+BEGIN
+	put "db nwsaom_multiplex"
+	stata hidden
+END
+
+PROGRAM open_nwsaom_estat
+BEGIN
+	put "db nwsaom_estat"
+	stata hidden
+END
+
+PROGRAM open_nwsaom_describe
+BEGIN
+	put "db nwsaom_describe"
+	stata hidden
+END
+
+PROGRAM open_nwsaom_meta
+BEGIN
+	put "db nwsaom_meta"
+	stata hidden
 END
 
 PROGRAM command

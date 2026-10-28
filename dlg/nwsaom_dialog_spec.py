@@ -770,9 +770,9 @@ auto_dialog(MT, META_OPTS, OrderedDict([('Meta', ['bound', 'alpha', 'maxit', 'ra
 
 # --- describe
 DS = Dlg('describe', 'nwsaom describe - data description before a SAOM fit', 'nwsaom', 'nwsaom describe')
-auto_dialog(DS, DESC_OPTS, OrderedDict([('Data', ['waves', 'behavior'])]),
-            {'waves': 'waves() - networks in time order', 'behavior': 'behavior() - behavior variable per wave'},
-            ctx='dir', ctlmap={'waves': 'append', 'behavior': 'varlist'})
+auto_dialog(DS, DESC_OPTS, OrderedDict([('Data', ['waves', 'behavior', 'actormode'])]),
+            {'actormode': 'actormode() - two-mode actor mode (1|2)', 'waves': 'waves() - networks in time order', 'behavior': 'behavior() - behavior variable per wave'},
+            ctx='dir', ctlmap={'waves': 'append', 'behavior': 'varlist', 'actormode': 'edit'})
 
 # --- multiplex (deprecated, forwards to multinet)
 MX = Dlg('multiplex', 'nwsaom multiplex (deprecated: use nwsaom multinet)', 'nwsaom', 'nwsaom multiplex')

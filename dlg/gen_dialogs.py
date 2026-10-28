@@ -17,6 +17,9 @@ import nwsaom_dialog_spec as S  # noqa: E402
 
 ROOT = S.ROOT
 TOP, PITCH, YMAX = 10, 21, 376       # first row, row pitch, last row start
+RELATED = [('bt_bayes', 'Bayesian estimation...', 'nwsaom_bayes'), ('bt_multinet', 'Several networks (multinet)...', 'nwsaom_multinet'),
+           ('bt_multiplex', 'Multiplex...', 'nwsaom_multiplex'), ('bt_estat', 'Postestimation...', 'nwsaom_estat'),
+           ('bt_describe', 'Describe data...', 'nwsaom_describe'), ('bt_meta', 'Meta-analysis...', 'nwsaom_meta')]
 CHW = 6.4                           # estimated pixels per character
 OUT_NAME = {'nwsaom': 'nwsaom', 'multinet': 'nwsaom_multinet', 'bayes': 'nwsaom_bayes', 'meta': 'nwsaom_meta',
             'describe': 'nwsaom_describe', 'multiplex': 'nwsaom_multiplex', 'estat': 'nwsaom_estat'}
@@ -206,7 +209,27 @@ class Layout:
                 else:
                     raise RuntimeError('item type ' + t)
         self.add_wrappers()
+        self.add_related()
         return self
+
+    def add_related(self):
+        """Group box 'Related dialogs' with push buttons that open the other nwsaom dialogs (main dialog only), on the last tab."""
+        if self.d.name != 'nwsaom':
+            return
+        p = self.pages[-1]
+        y0 = p.y + 14
+        self.related = RELATED
+        c = Ctl(kind='GROUPBOX', id='gb_related', x=10, y=y0, w=self.W - 40, h=2 * 26 + 30, label=None,
+                opts=['label("Related dialogs")'])
+        p.ctrls.append(c)
+        self.ctl_page['gb_related'] = p
+        bw = (self.W - 40 - 40) // 3
+        for i, (cid, lab, dn) in enumerate(RELATED):
+            b = Ctl(kind='BUTTON', id=cid, x=22 + (i % 3) * (bw + 8), y=y0 + 22 + (i // 3) * 28, w=bw, h=22, label=None,
+                    opts=['label("%s")' % lab, 'onpush(program open_%s)' % dn])
+            p.ctrls.append(b)
+            self.ctl_page[cid] = p
+        p.y = y0 + 2 * 26 + 30
 
     # -- mode radios
     def put_modes(self):
@@ -517,7 +540,7 @@ def dlg_text(d, lay):
             opts = list(c['opts'])
             if c['label'] is not None and k in ('CHECKBOX', 'RADIO', 'TEXT'):
                 opts.insert(0, 'label("%s")' % c['label'])
-            L.append('  %s %s %d %d %d .%s' % (k, c['id'], c['x'], c['y'], c['w'], (', ' + ' '.join(opts)) if opts else ''))
+            L.append('  %s %s %d %d %d %s%s' % (k, c['id'], c['x'], c['y'], c['w'], c['h'], (', ' + ' '.join(opts)) if opts else ''))
         L.append('END')
         L.append('')
     # lists
@@ -537,6 +560,9 @@ def dlg_text(d, lay):
             L += ['LIST %s_v' % name, 'BEGIN'] + ['\t%s' % san(it[0]) for it in items] + ['END', '']
     if d.name in HAS_NETLIST:
         L += ['PROGRAM initialize', 'BEGIN', '\tput "_nwdialog %s"' % OUT_NAME[d.name], '\tstata hidden immediate', 'END', '']
+    if d.name == 'nwsaom':
+        for cid, lab, dn in RELATED:
+            L += ['PROGRAM open_%s' % dn, 'BEGIN', '\tput "db %s"' % dn, '\tstata hidden', 'END', '']
     L += command_program(d, lay)
     return '\n'.join(L) + '\n', width, height
 

@@ -21,6 +21,8 @@ BEGIN
   COMBOBOX cb_describe_waves 230 10 225 ., dropdown contents(netlist) append nomem
   TEXT tx_describe_behavior 10 31 430 ., label("behavior() - behavior variable per wave")
   VARLIST vl_describe_behavior 450 31 470 ., nomem
+  TEXT tx_describe_actormode 10 52 430 ., label("actormode() - two-mode actor mode (1|2)")
+  EDIT ed_describe_actormode 450 52 470 ., nomem
 END
 
 LIST netlist
@@ -50,5 +52,8 @@ BEGIN
 			}
 			if data.vl_describe_behavior.isneq("") {
 				put " behavior(" data.vl_describe_behavior ")"
+			}
+			if data.ed_describe_actormode.isneq("") {
+				put " actormode(" data.ed_describe_actormode ")"
 			}
 END

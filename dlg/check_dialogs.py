@@ -58,7 +58,7 @@ def parse_dlg(path):
                 kind = None
             continue
         if depth == 1 and kind == 'DIALOG':
-            m = re.match(r'^(TEXT|CHECKBOX|RADIO|EDIT|VARLIST|COMBOBOX|SPINNER|BUTTON)\s+(\S+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\S+)(.*)$', s)
+            m = re.match(r'^(TEXT|CHECKBOX|RADIO|EDIT|VARLIST|COMBOBOX|SPINNER|BUTTON|GROUPBOX)\s+(\S+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\S+)(.*)$', s)
             if not m:
                 err('%s:%d unparsable control line: %s' % (os.path.basename(path), ln, s[:80]))
                 continue
@@ -154,7 +154,7 @@ def check_dialog(name, res):
     # all controls of the layout appear and every non-label control id is used in the program or is a helper
     used = set(c for _, c in refs)
     for id_, c in d['ctrls'].items():
-        if c['kind'] != 'TEXT' and id_ not in used:
+        if c['kind'] not in ('TEXT', 'BUTTON', 'GROUPBOX') and id_ not in used:
             err('%s: control %s is never used by the command program' % (base, id_))
     # lists non-empty
     for ln_, items in d['lists'].items():
