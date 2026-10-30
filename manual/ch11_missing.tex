@@ -69,20 +69,20 @@ RSiena's effects table, as returned by \texttt{getEffects()} for twelve data con
 \begin{itemize}
 \item \nImpl{} are implemented, \nPartial{} is partly implemented;
 \item \nNotImpl{} are \emph{not implemented};
-\item \nNotPlanned{} are deliberately out of scope: continuous (SDE) behavior and the effects that involve a continuous dependent variable.
+\item \nNotPlanned{} are not implemented either because they belong to continuous (SDE) behavior and the effects that involve a continuous dependent variable, a model that is not yet available.
 \end{itemize}
-Of the \nPlannable{} rows that are not out of scope, \pctImpl\% are implemented. The percentage is by \emph{rows}, not by how often an effect is used: the effects most often used in applied papers are largely covered, and the missing rows are concentrated in a few groups. The groups follow; the row-level list is at the end of the chapter.
+The counts are by \emph{rows}, not by how often an effect is used: the effects most often used in applied papers are largely covered, and the missing rows are concentrated in a few groups. The groups follow; the row-level list is at the end of the chapter.
 
 \subsection{Effects not implemented, by reason}
-The \nImpl{} implemented rows are \pctImpl\% of the plannable ones. The \nNotImpl{} rows that are not implemented are of five kinds.
+The \nNotImpl{} rows that are not implemented are of five kinds.
 \begin{description}[leftmargin=0pt,labelindent=0pt]
 \item[The generalised method of moments (31 rows).] RSiena's GMoM estimator uses its own statistics (the effects named like \texttt{egoX\_gmm}, \texttt{avAlt\_gmm}, \texttt{crprod\_gmm}, and related placeholders). \nwsaom{} implements the standard method of moments, and maximum likelihood and Bayesian estimation, but not the generalised method of moments.
 \item[The settings model (12 rows).] The \texttt{setting*} effects (\texttt{settingSizeAct}, \texttt{settingOppAct} and relatives) belong to RSiena's settings model, a separate model family with setting steps and a rate for each setting; \nwsaom{} has the standard tie-change model only. There is also nothing to validate against by estimation: in \texttt{siena07} eight of the twelve effects have a statistic that is constant under simulation (the estimate stays 0 and has no standard error), and the four variants with the suffix D have a zero derivative and are fixed at 0.
 \item[Effects that RSiena cannot evaluate or does not offer (15 rows).] \texttt{siena07} stops or returns nothing useful for these combinations, so there is nothing to compare with and \nwsaom{} refuses them with an error message (Table below and Section~\ref{sec:cannoteval}).
 \item[Placeholders (2 rows).] \texttt{minXAlt} and \texttt{maxXAlt} in a non-directed network with unspecified variables are entries of RSiena's effects table that \texttt{siena07} does not offer.
-\item[Two further effects.] \texttt{sameWXClosure} for a two-mode network together with a co-evolving behavior inside \texttt{nwsaom multinet} (a two-mode member and a behavior cannot be combined there), and \texttt{RateX} for a continuous behavior variable (continuous behavior is not planned).
+\item[Two further effects.] \texttt{sameWXClosure} for a two-mode network together with a co-evolving behavior inside \texttt{nwsaom multinet} (a two-mode member and a behavior cannot be combined there), and \texttt{RateX} for a continuous behavior variable (continuous behavior is not yet implemented).
 \end{description}
-\noindent In addition \nNotPlanned{} rows are out of scope: continuous (stochastic differential equation) dependent variables and all effects that involve them.
+\noindent In addition \nNotPlanned{} rows are not implemented: continuous (stochastic differential equation) dependent variables and all effects that involve them.
 
 \subsection{Effects that RSiena cannot evaluate}\label{sec:cannoteval}
 \begin{center}\small

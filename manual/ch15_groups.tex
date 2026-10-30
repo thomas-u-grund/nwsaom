@@ -384,13 +384,16 @@ Beyond these examples the implementation was compared with RSiena for a changing
 The following stop with a message when combined with \opt{groups()}:
 \begin{itemize}[nosep]
   \item maximum likelihood (\opt{ml}) and Bayesian estimation (\texttt{nwsaom bayes}), which run in separate parts of the program that do not yet know the group chain;
-  \item two-mode networks, \texttt{nwsaom multinet} and \texttt{nwsaom multiplex} (several dependent networks), and several behaviors in \opt{behavior()};
+  \item two-mode networks and \texttt{nwsaom multinet} and \texttt{nwsaom multiplex} (several dependent networks);
+  \item \texttt{estat} after a fit with several behaviors in \opt{behavior()} (as in a single group);
   \item \opt{structural()} and the structural codes 10 and 11 in the wave networks (see Section~\ref{sec:structural});
   \item \opt{tvdyadcov()} and the other time-varying dyadic covariates;
   \item \texttt{estat gof}, \texttt{estat simulate} and \texttt{estat importance} after a fit with \opt{ratecov()} together with a behavior or with \opt{behratecov()}/\opt{behrate()} (\texttt{estat importance} also after \opt{present()}).
 \end{itemize}
-Available with groups since version 1.3: \texttt{estat gof}, \texttt{estat simulate} (and \texttt{nwsaom simulate}) and \texttt{estat importance}, each for one group (\opt{group(\#)}) or for all groups in turn, \texttt{estat gof} also with the p-values of the groups combined (inverse-normal method); the centered degree effects (\opt{inpopc}, \opt{outpopc}, \opt{outactc}, \opt{inactc}), \opt{ownx()} effects and structural equivalence, whose data constants (average degrees, \texttt{structmean}) are, as in RSiena, those of each group; \opt{joinat()}/\opt{leaveat()} (times on the scale of the waves of the actor's group); \opt{behrate()}; and non-directed networks (\opt{symmetric}, \opt{symtype()}).
+Available with groups since version 1.3: \texttt{estat gof}, \texttt{estat simulate} (and \texttt{nwsaom simulate}) and \texttt{estat importance}, each for one group (\opt{group(\#)}) or for all groups in turn, \texttt{estat gof} also with the p-values of the groups combined (inverse-normal method); the centered degree effects (\opt{inpopc}, \opt{outpopc}, \opt{outactc}, \opt{inactc}), \opt{ownx()} effects and structural equivalence, whose data constants (average degrees, \texttt{structmean}) are, as in RSiena, those of each group; \opt{joinat()}/\opt{leaveat()} (times on the scale of the waves of the actor's group); \opt{behrate()}; and non-directed networks (\opt{symmetric}, \opt{symtype()}). Since version 1.4 several co-evolving behaviors can be given in \opt{behavior()} (\texttt{behavior(a1 a2 a3 : linear quadratic avalt | b1 b2 b3 : linear quadratic avalt)}): every behavior has its own constants in every group (overall mean, similarity mean) and its own rate in every period of every group.
 Constraints on effects (\texttt{higher}, \texttt{disjoint}, \texttt{atLeastOne}) are not supported with groups in RSiena either.
+
+\paragraph{Validation since version 1.4.}\ Two co-evolving behaviors (alcohol and smoking) in the three groups of the examples above were compared with RSiena 1.6.14, ten runs of each program: the effects of the network and of both behaviors and all eighteen rates (a network rate and two behavior rates in each of six periods) agree within the simulation error.
 
 \paragraph{Validation since version 1.3.}\ The per-group constants, \opt{joinat()}/\opt{leaveat()}, \opt{behrate()}, non-directed networks (model types 2, 3 and 6) and the postestimation commands were compared with RSiena 1.6.14 (ten runs of each program; \texttt{sienaGOF} for \texttt{estat gof}). For model type 6 several of RSiena\'s own runs did not converge, so that comparison is coarse.
 

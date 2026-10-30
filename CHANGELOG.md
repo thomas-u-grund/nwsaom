@@ -5,6 +5,10 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-10-30
+
+Minor release: joint estimation of several groups with several co-evolving behaviors. Works with nwcommands 3.6.0 and later. The Mata libraries `lnwsaom1.mlib` and `lnwsaom2.mlib` are rebuilt (Stata 17); the compiled plugin of this release is needed for this feature (an older plugin gives a clear message). Fits without this feature are unchanged.
+
 ### Added
 - `groups()` now works with several co-evolving behaviors (`behavior(a1 a2 a3 : ... | b1 b2 b3 : ...)`): the constants RSiena keeps per group (mean, similarity mean) are per group for every behavior, each period of each group has its own network rate and its own rate for every behavior. Needs the compiled plugin of this release (protocol 152). Not with `estat` after such a fit. Validated against `siena07` (three groups, alcohol and smoking, 10 seeds): effects and all rates agree; test `test_nwsaom_groups_mb.do`.
 

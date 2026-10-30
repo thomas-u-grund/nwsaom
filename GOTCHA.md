@@ -712,3 +712,7 @@ fit time of a small model (X2 of the article's extra benchmark: 0.77 s -> 0.26 s
 ## Dialog: OK does nothing, no message (parentheses in an `if` condition)
 
 The dialog engine cannot evaluate parentheses inside an `if` condition of a PROGRAM; it aborts the whole program silently, so OK builds no command and shows no error (nwsaom 1.0.3 to 1.3.2, the interact() block). `a & b | c` works (`&` binds tighter than `|`). Never emit parentheses in generated conditions. `check_dialogs.py` cannot see this (it only loads the dialogs); `python3 dlg/cmd_assembly_test.py --nwcore <core>` runs every PROGRAM command in the engine and does. Note: a PROGRAM name `sub1` collides with the `SUBMIT sub1` of the header include.
+
+## test_nwsaom_fallbackwarn gives r(111) in the runner (explained 2026-10-30)
+
+`cscripts/run_tests.sh` starts Stata with the owner's real PLUS folder, which holds a plugin copy: the test's loop that removes every reachable plugin from the adopath then stops with `".../ado/plus/s" not found in adopath`, r(111). The test passes with an empty scratch PLUS (`sysdir set PLUS <empty dir>`, plus `adopath ++` of the core `lib`, the package `lib` and `lib/plugins/macos`). Not a package error.
