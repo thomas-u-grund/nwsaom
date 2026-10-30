@@ -1038,7 +1038,6 @@ program nwsaom, eclass
 	local __ns_gW = 0
 	if `__ns_isgrp' {
 		local __ns_gbad ""
-		if `__ns_mb' local __ns_gbad "behavior(several)"
 		foreach __o in structural tvdyadcov tvdyadcovrecip tvdyadx dyadx netx netbeh ml {
 			if `"``__o''"' != "" local __ns_gbad "`__ns_gbad' `__o'"
 		}
@@ -1062,6 +1061,16 @@ program nwsaom, eclass
 			_nwsaom_groups behvars, names(`__gbl') names2(`__gbl2') behavior(`behavior') nodes(`nodes') missbeh(`missbeh')
 			local behavior "`r(behavior)'"
 			local missbeh "`r(missbeh)'"
+			if `__ns_mb' forvalues __b = 2/`__ns_nbehv' {
+				local __gl ""
+				forvalues __i = 1/`__nwsaom_nwaves' {
+					tempvar __gx`__b'_`__i'
+					local __gl "`__gl' `__gx`__b'_`__i''"
+				}
+				_nwsaom_groups behvars, names(`__gl') behavior(`__ns_mbv`__b'') nodes(`nodes') idx(`__b')
+				local __ns_mbo`__b' : word 1 of `__ns_mbv`__b''
+				local __ns_mbv`__b' "`r(behavior)'"
+			}
 		}
 	}
 	capture mata: mata drop __nwsaom_compstart __nwsaom_compev
@@ -2936,6 +2945,7 @@ program nwsaom, eclass
 		}
 		forvalues __b = 1/`__ns_nbehv' {
 			local __v1 : word 1 of `__ns_mbv`__b''
+			if `__ns_isgrp' & `__b' > 1 local __v1 "`__ns_mbo`__b''"
 			local __stem = ustrregexra("`__v1'", "[0-9]+$", "")
 			if "`__stem'" == "" local __stem "beh`__b'"
 			local __ns_mbname`__b' "`__stem'"
@@ -3611,6 +3621,7 @@ program nwsaom, eclass
 		forvalues __p = 1/`=`__nwsaom_nwaves'-1' {
 			local __ns_periodnames "`__ns_periodnames' period`__p'"
 		}
+		if `__ns_isgrp' local __ns_periodnames "`__ns_gpn'"
 		forvalues __b = 1/`__ns_nbehv' {
 			local __ns_behrows "`__ns_behrows' rate_`__ns_mbname`__b''"
 		}
@@ -3627,12 +3638,12 @@ program nwsaom, eclass
 		matrix rownames `ratetrbeh' = `__ns_behrows'
 		matrix rownames `ratesbehse' = `__ns_behrows'
 		local __ns_tconvnames "`__ns_coefnames'"
-		forvalues __p = 1/`=`__nwsaom_nwaves'-1' {
-			local __ns_tconvnames "`__ns_tconvnames' rate_period`__p'"
+		foreach __pn of local __ns_periodnames {
+			local __ns_tconvnames "`__ns_tconvnames' rate_`__pn'"
 		}
 		forvalues __b = 1/`__ns_nbehv' {
-			forvalues __p = 1/`=`__nwsaom_nwaves'-1' {
-				local __ns_tconvnames "`__ns_tconvnames' rate_`__ns_mbname`__b''_period`__p'"
+			foreach __pn of local __ns_periodnames {
+				local __ns_tconvnames "`__ns_tconvnames' rate_`__ns_mbname`__b''_`__pn'"
 			}
 		}
 		matrix colnames `tconv' = `__ns_tconvnames'
@@ -3651,6 +3662,7 @@ program nwsaom, eclass
 		di as text "SAOM co-evolution of the network and `__ns_nbehv' behaviors (Method of Moments), waves: " as result "`__ns_wavelist'"
 		di as text "Actors: " as result `nodes' _col(40) as text "Periods: " as result `=`__nwsaom_nwaves'-1'
 		di as text "Behaviors:" as result "`__ns_allbeh'"
+		if `__ns_isgrp' _nwsaom_groups show, groups(`groups') w(`__ns_gW')
 		di as text "{hline}"
 		ereturn display
 		di as text "Rate parameters (estimated, one per inter-wave period; network, then each behavior):"
@@ -3666,6 +3678,7 @@ program nwsaom, eclass
 		ereturn matrix rates_beh_se = `ratesbehse'
 		ereturn matrix tconv = `tconv'
 		ereturn scalar tconv_max = `__ns_tconvmax'
+		if `__ns_isgrp' _nwsaom_groupspost, groups(`groups') w(`__ns_gW')
 	}
 	else if `__nwsaom_coev' & `__ns_multi' {
 		// harmonisation unit 26 ("extend it to N waves"): FOUR separate

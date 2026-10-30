@@ -126,6 +126,12 @@ program define nwsaom_estat, rclass
 	_nwsaom_libcheck
 	gettoken subcmd rest : 0, parse(" ,")
 	local subcmd = lower(trim("`subcmd'"))
+	if `"`e(cmd)'"' == "nwsaom" & e(ngroups) < . & e(nbeh) < . {
+		if e(nbeh) > 1 {
+			di as err "estat `subcmd' is not yet available after a fit with several behaviors in {bf:behavior()}."
+			exit 198
+		}
+	}
 	if `"`e(cmd)'"' == "nwsaom" & e(ngroups) < . & "`subcmd'" == "gof" & !strpos(`"`rest'"', "grp(") {
 		nwsaom_estat_gofgroups `rest'
 		return add

@@ -87,10 +87,10 @@ program define _nwsaom_groups, rclass
 	}
 	else if "`sub'" == "behvars" {
 		* the behavior at the virtual waves (one new variable per virtual wave), the group constants of the behavior (RSiena keeps them per group)
-		syntax , NAMES(string) BEHAVIOR(string) NODES(integer) [NAMES2(string) MISSBEH(string)]
+		syntax , NAMES(string) BEHAVIOR(string) NODES(integer) [NAMES2(string) MISSBEH(string) IDX(integer 1)]
 		confirm numeric variable `behavior'
-		if "`missbeh'" != "" mata: SaomGroupsBehConstants(st_data(1::`nodes', "`behavior'"), st_data(1::`nodes', "`missbeh'"))
-		else mata: SaomGroupsBehConstants(st_data(1::`nodes', "`behavior'"), J(0, 0, 0))
+		if "`missbeh'" != "" mata: SaomGroupsBehConstants(st_data(1::`nodes', "`behavior'"), st_data(1::`nodes', "`missbeh'"), `idx')
+		else mata: SaomGroupsBehConstants(st_data(1::`nodes', "`behavior'"), J(0, 0, 0), `idx')
 		foreach v of local names {
 			quietly gen double `v' = .
 		}

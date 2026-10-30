@@ -2,7 +2,7 @@
 # Writes the stacked data (wave matrices block-diagonal, actors.csv) for nwsaom and the RSiena estimates.
 # Usage: Rscript dev/saom_rsiena_groups.R <outdir> [cond 0/1] [seeds] [feature]
 # feature: degc | sequiv | ownass (group-level data constants) | base | balsim | unequal (group 2 has waves 1,2 and group 3 waves 2,3) | tvcov | comp (composition change) | miss (missing ties)
-#          | ratecov | inter (interaction) | dyad (dyadic covariate)
+#          | ratecov | inter (interaction) | dyad (dyadic covariate) | coevmb (two behaviors: alc and smk = s50a and s50s)
 library(RSiena)
 args <- commandArgs(TRUE)
 out <- args[1]; cond <- if (length(args) >= 2) as.logical(as.integer(args[2])) else TRUE
@@ -69,16 +69,17 @@ D0 <- outer(s50a[, 1], s50a[, 1], function(a, b) as.numeric(abs(a - b) <= 1)); d
 D0 <- D0 * outer(grp, grp, "==")
 write.table(D0, file.path(out, "dyad.csv"), row.names = FALSE, col.names = FALSE, sep = ",")
 ccv <- (1:50 %% 4) + 0.5 * (s50a[, 2] > 2)
-actors <- data.frame(group = grp, ccv = ccv, alc = s50a[, 1], alc1 = s50b[, 1], alc2 = s50b[, 2], alc3 = s50b[, 3], p1 = present[, 1], p2 = present[, 2], p3 = present[, 3], bm1 = bmiss[, 1], bm2 = bmiss[, 2], bm3 = bmiss[, 3])
+actors <- data.frame(group = grp, ccv = ccv, alc = s50a[, 1], alc1 = s50b[, 1], alc2 = s50b[, 2], alc3 = s50b[, 3], smk1 = s50s[, 1], smk2 = s50s[, 2], smk3 = s50s[, 3], p1 = present[, 1], p2 = present[, 2], p3 = present[, 3], bm1 = bmiss[, 1], bm2 = bmiss[, 2], bm3 = bmiss[, 3])
 write.csv(actors, file.path(out, "actors.csv"), row.names = FALSE)
 mk <- function(gi) {
   g <- gsets[[gi]]; i <- which(grp == g); ws <- gw[[gi]]
   arr <- array(unlist(lapply(ws, function(w) waves[[w]][i, i])), dim = c(length(i), length(i), length(ws)))
   if (feat == 'miss') for (k in seq_along(ws)) { m <- miss[[ws[k]]][i, i]; a <- arr[, , k]; a[m == 1] <- NA; arr[, , k] <- a }
   net <- sienaDependent(arr, allowOnly = FALSE)
-  if (feat %in% c('coev', 'coevq', 'coevsim', 'coevcomp', 'coevmiss', 'coevmiss0', 'coevrate', 'coevbr')) alc <- sienaDependent({ bb <- s50b[i, ws, drop = FALSE]; bb[bmiss[i, ws, drop = FALSE] == 1] <- NA; bb }, type = 'behavior', allowOnly = FALSE)
+  if (feat %in% c('coev', 'coevq', 'coevsim', 'coevcomp', 'coevmiss', 'coevmiss0', 'coevrate', 'coevbr', 'coevmb')) alc <- sienaDependent({ bb <- s50b[i, ws, drop = FALSE]; bb[bmiss[i, ws, drop = FALSE] == 1] <- NA; bb }, type = 'behavior', allowOnly = FALSE)
   else if (feat == 'tvcov') alc <- varCovar(as.matrix(s50a[i, ws]))
   else alc <- coCovar(s50a[i, 1], centered = (feat != 'unequal'))
+  if (feat == 'coevmb') { smk <- sienaDependent(as.matrix(s50s[i, ws, drop = FALSE]), type = 'behavior', allowOnly = FALSE); return(sienaDataCreate(net, alc, smk)) }
   if (feat == 'dyad') { D <- coDyadCovar(D0[i, i]); return(sienaDataCreate(net, alc, D)) }
   if (feat == 'timed') return(sienaDataCreate(net, alc, sienaCompositionChange(lapply(i, function(a) c(jt[a], lt[a])))))
   if (feat %in% c('comp', 'compl')) {
@@ -106,6 +107,7 @@ if (feat %in% c('coevq', 'coevmiss0')) { eff <- includeEffects(eff, transTrip); 
 if (feat == 'coevsim') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, avSim, name = 'alc', interaction1 = 'net'); eff <- includeEffects(eff, simX, interaction1 = 'alc') }
 if (feat == 'coevrate') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, avAlt, name = 'alc', interaction1 = 'net'); eff <- includeEffects(eff, RateX, name = 'alc', interaction1 = 'ccv', type = 'rate') }
 if (feat %in% c('coev', 'coevcomp', 'coevmiss')) { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, altX, interaction1 = 'alc'); eff <- includeEffects(eff, avAlt, name = 'alc', interaction1 = 'net') }
+if (feat == 'coevmb') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, egoX, altX, interaction1 = 'alc'); eff <- includeEffects(eff, avAlt, name = 'alc', interaction1 = 'net'); eff <- includeEffects(eff, avAlt, name = 'smk', interaction1 = 'net') }
 if (feat == 'coevbr') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, avAlt, name = 'alc', interaction1 = 'net'); eff <- includeEffects(eff, outRate, avExposure, name = 'alc', interaction1 = 'net', type = 'rate') }   # rate effects of the behavior (behrate()); needs a small first gain
 if (feat == 'sym') { if (as.integer(Sys.getenv('MODELTYPE', '2')) < 4) eff <- includeEffects(eff, transTriads); eff <- includeEffects(eff, degPlus.c); eff <- includeEffects(eff, egoX, interaction1 = 'alc') }
 if (feat == 'dyad') { eff <- includeEffects(eff, transTrip); eff <- includeEffects(eff, X, interaction1 = "D"); }

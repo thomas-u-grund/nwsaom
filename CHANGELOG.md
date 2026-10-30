@@ -5,6 +5,9 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- `groups()` now works with several co-evolving behaviors (`behavior(a1 a2 a3 : ... | b1 b2 b3 : ...)`): the constants RSiena keeps per group (mean, similarity mean) are per group for every behavior, each period of each group has its own network rate and its own rate for every behavior. Needs the compiled plugin of this release (protocol 152). Not with `estat` after such a fit. Validated against `siena07` (three groups, alcohol and smoking, 10 seeds): effects and all rates agree; test `test_nwsaom_groups_mb.do`.
+
 ## [1.3.4] - 2026-10-28
 
 Patch release (dialogs only). The Mata libraries and the plugin are unchanged.

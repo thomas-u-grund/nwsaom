@@ -9227,6 +9227,7 @@ void SaomModelSubsetEnd(class SaomModel scalar M) {
 }
 
 void SaomGroupsReset() {
+	real scalar r
 	if (SaomGroupsMode()) SaomGroupsKeep()
 	rmexternal("__nwsaom_groupmode")
 	rmexternal("__nwsaom_groupid")
@@ -9235,7 +9236,7 @@ void SaomGroupsReset() {
 	rmexternal("__nwsaom_grouppres")
 	rmexternal("__nwsaom_gcreg")
 	rmexternal("__nwsaom_gcval")
-	rmexternal("__nwsaom_gbeh")
+	for (r=1; r<=9; r++) rmexternal(SaomGroupsBehName(r))
 }
 
 /* the group codes of the actors (n x 1, the values 1..G in the order of the sorted group variable) or 0 x 1 */
@@ -9621,7 +9622,7 @@ real rowvector SaomGroupsSimMeansOwnTV(real matrix xpd) {
    mean of the non-missing values; simMean = mean over the pairs of the group of 1 - |z_i - z_j| / range of the base waves (all but the last)
    of the group, the range of all the group's values; variance of the values of the base waves. Row 1: overallMean, 2: simMean, 3: variance
    (one column per group), stored in the external __nwsaom_gbeh. */
-void SaomGroupsBehConstants(real matrix Z, real matrix MISS) {
+void SaomGroupsBehConstants(real matrix Z, real matrix MISS, | real scalar bidx) {
 	real colvector code, idx, nw, v, ms, allv
 	real matrix wl, res, B
 	pointer(real matrix) scalar pb
@@ -9667,8 +9668,8 @@ void SaomGroupsBehConstants(real matrix Z, real matrix MISS) {
 		res[2, h] = (r > 0 & cnt > 0 ? tot / cnt : 0)
 		res[3, h] = (nn > 0 ? sq / nn - (sm / nn)^2 : 0)
 	}
-	rmexternal("__nwsaom_gbeh")
-	pb = crexternal("__nwsaom_gbeh")
+	rmexternal(SaomGroupsBehName(args() >= 3 ? bidx : 1))
+	pb = crexternal(SaomGroupsBehName(args() >= 3 ? bidx : 1))
 	*pb = res
 }
 
@@ -9694,18 +9695,23 @@ real matrix SaomGroupsBehVirtual(real matrix Z) {
 	return(out)
 }
 
-/* 3 x G constants of the behavior, or 0 x 0 */
-real matrix SaomGroupsBehGet() {
+/* name of the external that holds the group constants of behavior idx (1 = the first behavior; several behaviors: 2, 3, ...) */
+string scalar SaomGroupsBehName(real scalar idx) {
+	return(idx <= 1 ? "__nwsaom_gbeh" : "__nwsaom_gbeh" + strofreal(idx))
+}
+
+/* 3 x G constants of behavior idx (default the first), or 0 x 0 */
+real matrix SaomGroupsBehGet(| real scalar idx) {
 	pointer(real matrix) scalar p
-	p = findexternal("__nwsaom_gbeh")
+	p = findexternal(SaomGroupsBehName(args() >= 1 ? idx : 1))
 	if (p == NULL) return(J(0, 0, 0))
 	return(*p)
 }
 
 /* one constant (row 1 overallMean, 2 simMean, 3 variance) of the behavior for every virtual period; missing when not available */
-real rowvector SaomGroupsBehPd(real scalar row) {
+real rowvector SaomGroupsBehPd(real scalar row, | real scalar idx) {
 	real matrix b
-	b = SaomGroupsBehGet()
+	b = SaomGroupsBehGet(args() >= 2 ? idx : 1)
 	if (rows(b) == 0) return(J(1, 0, .))
 	return(b[row, SaomGroupsPeriodGroup()])
 }
@@ -16254,10 +16260,11 @@ struct SaomMBResult scalar SaomSimulateIntervalCoevMB(class SaomGraph scalar G, 
 void SaomBatchSetupMB(pointer(class SaomGraph scalar) rowvector Gwaves, real scalar P,
 	struct SaomNativeConfig scalar cfg, real rowvector codes, real rowvector fnt, real rowvector pB,
 	pointer(real colvector) matrix Bw, real rowvector bmin, real rowvector bmax, real rowvector bsim,
-	real rowvector bover, | real scalar hastimed, real matrix presentPd, pointer(real matrix) rowvector compEv) {
+	real rowvector bover, | real scalar hastimed, real matrix presentPd, pointer(real matrix) rowvector compEv,
+	real matrix omPd, real matrix smPd) {
 
-	real matrix E, t, EV
-	real scalar n, pd, nattr, nb, b, nrows, i, junk, o, k, sframe, haspres, ntv
+	real matrix E, t, EV, attrmat
+	real scalar n, pd, nattr, nb, b, nrows, i, junk, o, k, sframe, haspres, ntv, grpcol
 	real rowvector off
 	string rowvector names
 	string scalar origframe, argstr
@@ -16271,9 +16278,17 @@ void SaomBatchSetupMB(pointer(class SaomGraph scalar) rowvector Gwaves, real sca
 		if (rows(t) > 0) E = E \ (J(rows(t), 1, pd), t)
 	}
 	nattr = cols(cfg.attrmat)
-	haspres = (args() >= 13 ? hastimed : 0)
+	grpcol = 0
+	attrmat = cfg.attrmat
+	if (SaomGroupsMode()) {
+		// protocol 141: the group of every actor is one more attribute column (the last one)
+		attrmat = (rows(attrmat) > 0 ? attrmat : J(n, 0, 0)), SaomGroupsId()
+		nattr = nattr + 1
+		grpcol = nattr
+	}
+	haspres = (args() >= 13 ? hastimed : 0) | grpcol > 0
 	EV = J(0, 4, 0)
-	if (haspres) for (pd=1; pd<=P; pd++) if (compEv[pd] != NULL) if (rows(*compEv[pd]) > 0) EV = EV \ (J(rows(*compEv[pd]), 1, pd), *compEv[pd])
+	if (hastimed) for (pd=1; pd<=P; pd++) if (compEv[pd] != NULL) if (rows(*compEv[pd]) > 0) EV = EV \ (J(rows(*compEv[pd]), 1, pd), *compEv[pd])
 	nrows = max((rows(E), n, rows(cfg.structpairs), rows(EV), 1))
 
 	names = ("e_pd", "e_i", "e_j")
@@ -16296,7 +16311,7 @@ void SaomBatchSetupMB(pointer(class SaomGraph scalar) rowvector Gwaves, real sca
 	junk = st_addvar("double", names)
 	SaomBehDyStore(n)
 	if (rows(E) > 0) st_store((1::rows(E)), ("e_pd", "e_i", "e_j"), E)
-	for (i=1; i<=nattr; i++) st_store((1::n), "a" + strofreal(i), cfg.attrmat[1::n, i])
+	for (i=1; i<=nattr; i++) st_store((1::n), "a" + strofreal(i), attrmat[1::n, i])
 	for (pd=1; pd<=P; pd++) st_store((1::n), "b" + strofreal(pd), *Bw[1,pd])
 	if (haspres) for (pd=1; pd<=P; pd++) st_store((1::n), "pr" + strofreal(pd), presentPd[., pd])
 	if (rows(EV) > 0) st_store((1::rows(EV)), ("ev_p", "ev_t", "ev_a", "ev_k"), EV)
@@ -16324,6 +16339,15 @@ void SaomBatchSetupMB(pointer(class SaomGraph scalar) rowvector Gwaves, real sca
 	argstr = argstr + " " + strofreal(rows(EV))		// protocol 21: time-varying attributes; protocol 27: composition-change events
 	argstr = argstr + SaomBehCovTrailer(n)
 	argstr = argstr + SaomBehDyTrailer(n)
+	if (grpcol > 0) {
+		// the trailers the single-behavior setup has before the group fields (structural rate effects, variance, changing rate covariates, behavior rate effects: none),
+		// the group constants of the network terms and of behavior 1, then (after the missing-data flag) the constants of behaviors 2.. per period
+		argstr = argstr + " 0 0 0 0 0 " + strofreal(grpcol) + SaomGroupsTrailer(P) + SaomGroupsBehTrailer(P) + " 0 1"
+		for (b=2; b<=nb; b++) {
+			for (pd=1; pd<=P; pd++) argstr = argstr + " " + strofreal(omPd[b,pd], "%25.17g")
+			for (pd=1; pd<=P; pd++) argstr = argstr + " " + strofreal(smPd[b,pd], "%25.17g")
+		}
+	}
 
 	stata("capture program saomnativesim, plugin using(" + char(34) + SaomNativePluginPath() + char(34) + ")")
 	stata("plugin call saomnativesim " + invtokens(names) + ", " + char(34) + argstr + char(34))
@@ -16403,6 +16427,7 @@ struct SaomMBCtx {
 	real matrix presentPd				// n x P: active at the start of the period
 	real rowvector npresentPd			// time-integrated number of active actors
 	pointer(real matrix) rowvector compEv
+	real matrix overallMeanPd, simMeanPd		// nb x P: the constants of the behaviors of the group of each period (several groups), else the pooled ones
 }
 
 /* one period of the several-behaviors model with composition change at fractional times (see SaomCoevPeriodTimed()) */
@@ -16637,6 +16662,20 @@ struct SaomMBCtx scalar SaomMBInit(
 	C.compEv = J(1, C.P, NULL)
 	C.hastimed = SaomTimedLoad(C.n, C.P, C.presentPd, C.compEv, C.npresentPd)
 	C.hastv = SaomModelHasTV(M)
+	C.overallMeanPd = overallMean' * J(1, C.P, 1)
+	C.simMeanPd = simMean' * J(1, C.P, 1)
+	if (SaomGroupsMode()) {
+		// several groups: the actors of the group of the period are present, the others rest; the constants of every behavior are those of the group of the period
+		if (!C.hastimed) {
+			C.presentPd = (*findexternal("__nwsaom_presentmat"))[., 1..C.P]
+			C.npresentPd = colsum(C.presentPd :!= 0)
+		}
+		for (b=1; b<=C.nb; b++) if (rows(SaomGroupsBehGet(b)) > 0) {
+			C.overallMeanPd[b, .] = SaomGroupsBehPd(1, b)
+			C.simMeanPd[b, .] = SaomGroupsBehPd(2, b)
+		}
+		SaomGroupsRegister(M)
+	}
 
 	// native dispatch: every term on every side natively covered, and a plugin that knows several behaviors
 	C.cfg = SaomNativeSetup(M)
@@ -16657,6 +16696,7 @@ struct SaomMBCtx scalar SaomMBInit(
 		C.fnt = (C.fnt, cb.fntype)
 	}
 	C.use_native = why_ok & SaomNativeAvailable()
+	if (C.use_native & SaomGroupsMode()) C.use_native = (SaomNativePluginVersion() >= 152)
 	if (C.use_native) C.use_native = (SaomNativePluginVersion() >= (C.hastimed ? 27 : 19) & (!anyneed35 | SaomNativePluginVersion() >= 35) & (!anyneed36 | SaomNativePluginVersion() >= 38) & (!anyneed43 | SaomNativePluginVersion() >= 44))
 	why = ""
 	if (!SaomNativeAvailable()) why = "no native plugin for this platform"
@@ -16664,6 +16704,10 @@ struct SaomMBCtx scalar SaomMBInit(
 	else if (!why_ok) why = "a behavior effect without a native implementation"
 	else why = "native plugin too old for several behaviors"
 	SaomSetEngine(C.use_native, why)
+	if (SaomGroupsMode() & !C.use_native) {
+		errprintf("nwsaom: several behaviors with groups() need the native plugin of this release (update nwsaom); there is no Mata implementation.\n")
+		exit(198)
+	}
 
 	// targets per period: end network statistics, each behavior's end statistics on the START network (lagged)
 	p = C.p
@@ -16675,12 +16719,13 @@ struct SaomMBCtx scalar SaomMBInit(
 	for (pd=1; pd<=C.P; pd++) {
 		Gend = *Gwaves[pd+1]
 		if (C.hastv) SaomTVSync(M, pd)
+		SaomGroupsSync(M, pd)
 		SaomBehCovPd(pd)
 		if (SaomHasBehSim(M)) SaomBehSimSync(M, *Behwaves[1,pd])		// lagged: starting behavior
 		C.target[pd, 1..C.pNet] = M.full_statistic(Gend)
 		for (b=1; b<=C.nb; b++) {
 			Bend = SaomBehavior()
-			Bend.init(*Behwaves[b,pd+1], behmin[b], behmax[b], overallMean[b], simMean[b])
+			Bend.init(*Behwaves[b,pd+1], behmin[b], behmax[b], C.overallMeanPd[b,pd], C.simMeanPd[b,pd])
 			stb = SaomCoevStatBeh(Bend, *Gwaves[pd], *Mbehs[b], zero)
 			stb = SaomBehaviorPatchEndowCreation(*Mbehs[b], (J(1, 0, 0), stb), 0, *Behwaves[b,pd], *Behwaves[b,pd+1], Gwaves[pd], overallMean[b], zero)
 			C.target[pd, (C.pNet + C.off[b])..(C.pNet + C.off[b+1] - 1)] = stb
@@ -16693,7 +16738,7 @@ struct SaomMBCtx scalar SaomMBInit(
 	}
 
 	SaomStructNeedBatch(C.use_native)
-	if (C.use_native) SaomBatchSetupMB(Gwaves, C.P, C.cfg, C.codes, C.fnt, C.pB, Behwaves, behmin, behmax, simMean, overallMean, C.hastimed, C.presentPd, C.compEv)
+	if (C.use_native) SaomBatchSetupMB(Gwaves, C.P, C.cfg, C.codes, C.fnt, C.pB, Behwaves, behmin, behmax, simMean, overallMean, C.hastimed, C.presentPd, C.compEv, C.overallMeanPd, C.simMeanPd)
 	if (SaomStructOn()) SaomStructSend(C.P, C.n)
 	ratesNet0out = ratesNet0
 	ratesBeh0out = rowshape(ratesBeh0, 1)
