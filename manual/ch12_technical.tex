@@ -22,6 +22,14 @@ The C source of the plugin is part of the package. \texttt{net install} installs
 \end{lstlisting}
 copies the source files, the build rules and a short build note into the current directory. The same files are in the folder \texttt{native/} of the repository (\url{https://github.com/thomas-u-grund/nwsaom}). \nwsaom{} is free software under the GNU General Public License, version 3; the plugin interface files in \texttt{native/spi/} are StataCorp's Stata Plugin Interface, redistributed unchanged. The plugin is built with \texttt{make macos} (macOS, universal binary) or \texttt{make unix} in \texttt{native/}, and with the Visual Studio command line for Windows.
 
+\subsection{Building the plugin on your computer}
+
+If the plugin of your platform is missing, older than the \texttt{.ado} files, or does not work on your computer (for example a Linux system with an older C library), compile it there:
+\begin{lstlisting}
+. nwinstall, buildplugin(nwsaom)
+\end{lstlisting}
+The command copies the source from the repository, compiles it with the compiler of your computer, and installs the plugin next to the one that \texttt{net install} put into the PLUS directory; an existing file is kept with the extension \texttt{.prev}. You need a C compiler and \texttt{make} (on macOS the command line tools of Xcode, \texttt{xcode-select --install}; on Linux \texttt{gcc} and \texttt{make}). Restart Stata afterwards, because a plugin that is already loaded is not replaced in a running session. The plugin depends on the operating system and the processor, not on the version or the flavour of Stata (BE, SE, MP): a plugin built on your computer works in every Stata installed there. The routine was tested on macOS; on Windows it stops with a message, and the build note that comes with the source gives the command for the Visual Studio command line. \texttt{buildfrom()} reads the source from a local copy of the repository, and \texttt{release()} from a tagged release.
+
 \subsection{Plugin versions}
 
 The plugin and the Mata layer communicate through a versioned interface. The plugin reports its version, and the Mata layer checks it before it uses a feature that needs a newer plugin. New effects, and new ways of combining existing ones, make the plugin newer.

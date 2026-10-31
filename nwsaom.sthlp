@@ -594,6 +594,11 @@ The C source of the plugin comes with the package: {cmd:net get nwsaom, from(htt
 copies it into the current directory, together with a file that explains how to build the plugin; it is also in the folder
 {cmd:native/} of the repository at {browse "https://github.com/thomas-u-grund/nwsaom"}. {cmd:net install} installs the compiled plugins only.
 
+{pstd}
+If the plugin of your platform is missing, older than the {cmd:.ado} files or does not work on your computer, compile it there:
+{cmd:nwinstall, buildplugin(nwsaom)} fetches the source, compiles it with the compiler of your computer (macOS and Linux; a C compiler and
+{cmd:make} are needed) and installs the plugin; restart Stata afterwards. See {help nwinstall##buildplugin:nwinstall}.
+
 {title:Supported network types}
 
 {pstd}

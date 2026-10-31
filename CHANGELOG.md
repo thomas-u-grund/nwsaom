@@ -6,7 +6,8 @@ project uses [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
-- The C source of the native plugin (`native/*.c`, the `Makefile`, StataCorp's plugin interface files and a build note `saom_native_readme.txt`) is listed in `nwsaom.pkg` as ancillary files: `net get nwsaom, from(...)` copies it; `net install` still installs the compiled plugins only. The help file, the manual and the article say so.
+- The C source of the native plugin (`native/*.c`, the `Makefile`, StataCorp's plugin interface files and a build note `saom_native_readme.txt`) is listed in `nwsaom.pkg` as ancillary files: `net get nwsaom, from(...)` copies it; `net install` still installs the compiled plugins only.
+- If the shipped plugin does not work on a computer, `nwinstall, buildplugin(nwsaom)` (nwcommands 3.13.0 or later) fetches the source, compiles it there and installs the plugin (macOS and Linux). The help file, the manual and the article say so.
 
 ### Changed
 - `estat score`, `estat timetest`, `estat importance`, `estat gof` (also the combined test over groups) and `estat simulate` / `nwsaom simulate` print Stata-style tables (label column, `|` separator, rules, `Prob>chi2`, `Std. err.`). The numbers and the `r()` results are unchanged. The manual, the tutorials and the article show the new layout.
