@@ -1,9 +1,10 @@
-\chapter{RSiena quirks reproduced on purpose}\label{app:quirks}
+\chapter{RSiena definitions reproduced on purpose}\label{app:quirks}
 
-\nwsaom{} is built to give the same numbers as RSiena. Where RSiena's own
-behaviour is odd, for example where it counts a tie twice or reads a covariate
-at another node's index, the quirk is copied on purpose, because a different but
-more sensible definition would give statistics and estimates that no longer
+\nwsaom{} is built to give the same numbers as RSiena. Where RSiena's
+definition of an effect has a feature that a reader might not expect, for example
+where a tie enters a statistic twice or a covariate is read at the index of another
+node, the definition is reproduced on purpose, because a different definition
+would give statistics and estimates that no longer
 match \texttt{siena07}. This appendix lists the cases that matter to a user who
 compares output of the two programs or reads the effect definitions closely.
 Each was found by comparing the observed statistics (the targets) with those of
@@ -99,8 +100,8 @@ Each was found by comparing the observed statistics (the targets) with those of
   RSiena 1.6.13 changed the default to parameter~1. \nwsaom{} implements the documented effect, which
   equals the current RSiena default (the benchmark in Chapter~\ref{ch:benchmark} ran with a RSiena
   version in which this is the default).
-\item \textbf{Refusal instead of noise.} Some combinations are not reproduced
-  because RSiena itself fails or returns noise: \texttt{sameXOutAct} and
+\item \textbf{Refusal where RSiena gives no usable result.} Some combinations are not reproduced
+  because RSiena gives no usable result for them: \texttt{sameXOutAct} and
   \texttt{diffXOutAct} in a two-mode network abort \texttt{siena07}; \texttt{inPop\_ego}
   in a two-mode network throws an exception in RSiena and \texttt{homXOutAct2} with a behavior is not implemented there;
   the non-directed \texttt{higher} effect is collinear with density. \nwsaom{}

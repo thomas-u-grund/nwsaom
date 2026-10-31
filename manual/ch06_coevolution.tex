@@ -77,7 +77,7 @@ option & RSiena effect & what it does \\
 \midrule
 \endhead
 \opt{linear} & \texttt{linear} & Baseline tendency to higher values. Ministep statistic: the raw change ($\pm1$); observed statistic: sum of the current values. Required unless \opt{behshape()} replaces the shape effects. \\
-\opt{quadratic} & \texttt{quad} & Quadratic shape. Copied from RSiena including its quirk: the ministep uses the \emph{centered} value ($(2(z-\bar z)+d)\,d$), while the global statistic sums the raw, uncentered squared value. \\
+\opt{quadratic} & \texttt{quad} & Quadratic shape. Copied from RSiena as defined there: the ministep uses the \emph{centered} value ($(2(z-\bar z)+d)\,d$), while the global statistic sums the raw, uncentered squared value. \\
 \opt{behshape(quad\_cc)}, \opt{behshape(quad\_nc)} & \texttt{quad} variants (centred / non-centred) & Alternatives to \opt{quadratic}; use them \emph{instead of} it, never together. \\
 \opt{behshape(threshold:\#)} & \texttt{threshold} & Indicator for values at or above a threshold. \\
 \opt{behshape(simallnear:\#)}, \opt{behshape(simallfar:\#)} & \texttt{simAllNear}, \texttt{simAllFar} & Similarity to \emph{all} actors within / beyond a distance (defaults 2 and 4). \\
@@ -94,7 +94,7 @@ Influence effects make an actor's behavior depend on its network neighbours.
 
 \subsection{The two main effects: avalt and avsim}
 
-\opt{avalt} (RSiena's \texttt{avAlt}) pulls an actor's value towards the average value of its out-neighbours: the ministep contribution is $d\,(\bar z_{\mathrm{alters}} - \bar z)$ (zero for an actor without out-ties), with $\bar z$ the overall behavior mean. \opt{avsim} (RSiena's \texttt{avSim}) is the alternative parameterisation: the actor maximises its average \emph{similarity} $1 - |z_i - z_j|/\text{range}$ to its neighbours, net of a data-derived centring constant (the similarity mean, computed from the observed data and never supplied by the user). One RSiena quirk is copied: this constant is exactly 0 when the pooled behavior has zero variance. The two effects are alternatives; the examples below use them separately.
+\opt{avalt} (RSiena's \texttt{avAlt}) pulls an actor's value towards the average value of its out-neighbours: the ministep contribution is $d\,(\bar z_{\mathrm{alters}} - \bar z)$ (zero for an actor without out-ties), with $\bar z$ the overall behavior mean. \opt{avsim} (RSiena's \texttt{avSim}) is the alternative parameterisation: the actor maximises its average \emph{similarity} $1 - |z_i - z_j|/\text{range}$ to its neighbours, net of a data-derived centring constant (the similarity mean, computed from the observed data and never supplied by the user). One RSiena convention is reproduced: this constant is exactly 0 when the pooled behavior has zero variance. The two effects are alternatives; the examples below use them separately.
 
 \begin{lstlisting}
 nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip ///
