@@ -13,24 +13,35 @@ Before a fit, \texttt{nwsaom describe} prints what RSiena prints before an estim
 . nwwebuse glasgow, nwclear
 . nwsaom describe, waves(glasgow1 glasgow2 glasgow3) behavior(alcohol1 alcohol2 alcohol3)
 Network data: 3 waves, 50 actors, directed
-----------------------------------------------------------
-wave          ties     density   avg. degree
-1              113      0.0461         2.260
-2              116      0.0473         2.320
-3              122      0.0498         2.440
-----------------------------------------------------------
-period      kept  created dissolved  Jaccard   Hamming
-1->2          57       59        56    0.331       115
-2->3          66       56        50    0.384       106
-----------------------------------------------------------
-wave            mean          sd   missing
-1              2.880       1.118         0
-2              3.100       1.199         0
-3              3.360       0.985         0
-----------------------------------------------------------
-period          up      down      same
-1->2            16         6        28
-2->3            18         9        23
+-----------------------------------------------------
+        wave |     ties     density   avg. degree
+-------------+---------------------------------------
+           1 |      113      0.0461         2.260
+           2 |      116      0.0473         2.320
+           3 |      122      0.0498         2.440
+-----------------------------------------------------
+
+----------------------------------------------------------------------
+      period |    kept   created  dissolved   Jaccard   Hamming
+-------------+--------------------------------------------------------
+        1->2 |      57        59         56     0.331       115
+        2->3 |      66        56         50     0.384       106
+----------------------------------------------------------------------
+
+--------------------------------------------------
+    behavior |        mean          sd     missing
+-------------+------------------------------------
+      wave 1 |       2.880       1.118           0
+      wave 2 |       3.100       1.199           0
+      wave 3 |       3.360       0.985           0
+--------------------------------------------------
+
+--------------------------------------------------
+      change |          up        down        same
+-------------+------------------------------------
+        1->2 |          16           6          28
+        2->3 |          18           9          23
+--------------------------------------------------
 \end{lstlisting}
 A period with a Jaccard index below about 0.3 has few stable ties and carries little information about the change process; here the two periods are at 0.33 and 0.38. The results are in \texttt{r(periods)}, \texttt{r(waves)} and \texttt{r(behchange)}. For a two-mode network the ties are the attendances (the cells of the actors-by-events matrix), the density is taken over those cells and the average degree is the mean number of events per actor; the option \opt{actormode(\#)} names the mode of the actors (default 2, as in \texttt{nwsaom}), and \texttt{r(n\_actors)} and \texttt{r(n\_events)} hold the numbers of actors and events. The description of a stacked data set with groups (Chapter~\ref{ch:groups}) is that of the combined network; describe the groups one by one by making a network of each.
 

@@ -5,12 +5,21 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-10-31
+
+Patch release: names and layout. Works with nwcommands 3.6.0 and later. No change to the compiled plugin or the Mata libraries.
+
 ### Added
-- `waves()` (and `nwsaom describe, waves()`) takes a netlist of nwcommands: patterns such as `glasgow*`, `w1-w3` and `_all` expand in the order in which the networks were created. The help and manual call the argument `netlist`; `wave1()`/`wave2()` stay as the older spelling for two waves.
+- `waves()` (and `nwsaom describe, waves()`) takes a netlist of nwcommands: patterns such as `glasgow*`, `w1-w3` and `_all` expand in the order in which the networks were created. The help and the manual call the argument `netlist`; `wave1()`/`wave2()` stay as the older spelling for exactly two waves, and `waves(a b)` gives the same results.
 - `degree` and `density`, RSiena's names of the outdegree effect (the effect is the degree of an actor in a non-directed network). The coefficient is labelled as typed; `outdegree` works as before.
 
 ### Changed
-- `nwsaom describe` prints Stata-style tables (label column, `|` separator, rules); the Jaccard warning is a note below the table.
+- `nwsaom describe` prints Stata-style tables (label column, `|` separator, rules); the Jaccard warning is a note below the tables.
+- The dialog labels `waves()` as the way to give the waves and `wave1()`/`wave2()` as the older spelling for two waves; `degree` and `density` are flags of the baseline tab.
+- The manual and the tutorials use `waves(a b)` also for two waves.
+
+### Fixed
+- `estat mems` accepted only a fit made with `wave1()`/`wave2()`; it now also accepts a fit with two waves given in `waves()` (more than two waves are still refused).
 
 ## [1.4.0] - 2026-10-30
 

@@ -6,8 +6,8 @@ authors:
   - family-names: Grund
     given-names: Thomas U.
     affiliation: RWTH Aachen University
-version: 1.4.0
-date-released: '2026-10-30'
+version: 1.4.1
+date-released: '2026-10-31'
 license: GPL-3.0-only
 repository-code: "https://github.com/thomas-u-grund/nwsaom"
 preferred-citation:
