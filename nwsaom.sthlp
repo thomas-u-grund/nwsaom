@@ -587,7 +587,12 @@ parameter agrees with RSiena 1.6.6 within 0.06 standard errors (five seeds). See
 {pstd}
 {cmd:nwsaom} has a native (C) simulation backend, used automatically whenever the fitted model's
 effects all have native coverage (no option needed to opt in). See {help nwsaom_remarks:Remarks}
-for a full wall-clock benchmark against real RSiena and the performance-tuning history behind it.
+for a comparison with RSiena and the performance-tuning history behind it.
+
+{pstd}
+The C source of the plugin comes with the package: {cmd:net get nwsaom, from(https://raw.githubusercontent.com/thomas-u-grund/nwsaom/main)}
+copies it into the current directory, together with a file that explains how to build the plugin; it is also in the folder
+{cmd:native/} of the repository at {browse "https://github.com/thomas-u-grund/nwsaom"}. {cmd:net install} installs the compiled plugins only.
 
 {title:Supported network types}
 

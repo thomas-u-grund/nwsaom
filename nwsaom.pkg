@@ -56,3 +56,11 @@ f lib/lnwsaom2.mlib
 f lib/plugins/macos/saom_sim_macos.plugin
 f lib/plugins/windows/saom_sim_windows.plugin
 f lib/plugins/unix/saom_sim_unix.plugin
+f native/saom_sim.c
+f native/saom_ml.c
+f native/saom_bayes.c
+f native/saom_struct.c
+f native/Makefile
+f native/spi/stplugin.c
+f native/spi/stplugin.h
+f native/saom_native_readme.txt
