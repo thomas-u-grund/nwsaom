@@ -359,14 +359,14 @@ M = Dlg('nwsaom', 'nwsaom - stochastic actor-oriented model (SAOM) estimation', 
 EST = ['est']
 MN = M.name
 T = 'Waves'
-hdr(M, T, 'Observed waves (a dependent network per wave; wave1()/wave2() OR waves())')
-field(M, T, 'wave1', 'wave1', 'wave1()', 'combo', 'netlist', ctx='dir')
-field(M, T, 'wave2', 'wave2', 'wave2()', 'combo', 'netlist')
-field(M, T, 'waves', 'waves', 'waves() - 2+ networks in time order', 'append', 'netlist')
+hdr(M, T, 'Observed waves (a dependent network per wave: waves() with two or more networks, or the older wave1()/wave2() for exactly two)')
+field(M, T, 'wave1', 'wave1', 'wave1() - first wave (older spelling for two waves)', 'combo', 'netlist', ctx='dir')
+field(M, T, 'wave2', 'wave2', 'wave2() - second wave (with wave1())', 'combo', 'netlist')
+field(M, T, 'waves', 'waves', 'waves() - netlist, 2+ networks in time order', 'append', 'netlist')
 field(M, T, 'tvcov', 'tvcov', 'tvcov() - changing covariates a1 a2 a3 | s1 s2 s3')
 field(M, T, 'actormode', 'actormode', 'actormode() - two-mode actor mode (1|2)', cond='twomode', ctx='two')
 hdr(M, T, 'Baseline: outdegree is required unless split into endowment + creation (reciprocity is optional)')
-for o in ('outdegree', 'reciprocity', 'outdegreeendow', 'outdegreecreation', 'reciprocityendow', 'reciprocitycreation',
+for o in ('outdegree', 'degree', 'density', 'reciprocity', 'outdegreeendow', 'outdegreecreation', 'reciprocityendow', 'reciprocitycreation',
           'transtiesendow', 'transtiescreation'):
     flag(M, T, o, o, modes=None)
 M.lists['endow_list'] = ['outdegree', 'reciprocity', 'transties', 'cycle4', 'gwesp', 'balance', 'transtrip', 'cycle3',

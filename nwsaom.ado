@@ -124,7 +124,7 @@ program nwsaom, eclass
 		nwsaom_multiplex , `0'
 		exit
 	}
-	syntax [, ML MLOPTIONS(string) WAVE1(string) WAVE2(string) WAVES(string) OUTDEGREE RECIPROCITY NODEMATCH(string) ///
+	syntax [, ML MLOPTIONS(string) WAVE1(string) WAVE2(string) WAVES(string) OUTDEGREE DEGREE DENSITY RECIPROCITY NODEMATCH(string) ///
 		OUTDEGREEENDOW OUTDEGREECREATION RECIPROCITYENDOW RECIPROCITYCREATION TRANSTIESENDOW TRANSTIESCREATION ///
 		NODECOV(string) NODEICOV(string) NODEOCOV(string) ///
 		GWESPFB(string) GWESPBF(string) GWESPBB(string) GWESPRR(string) SQRTCYCLE4 DBLNBRDIST2 NBRDIST2 GWDSPFF(string) GWDSPFB(string) BETWEEN RECIPOP RECIPOPSQRT RECIACT RECIACTSQRT OUTTRUNC(numlist >=1) OUTMORE(numlist >=1) OUTTHRESHOLD(numlist >=1) OUTINV(numlist >=1) OUTSQINV(numlist >=1) INDEGPOPULARITY OUTACTIVITY TRANSTRIP TRANSMEDTRIP CYCLE3 CYCLE4 OUTPOPULARITY INACTIVITY INPOP OUTPOP INACT OUTACTSQRT SIMCOV(string) ///
@@ -226,6 +226,10 @@ program nwsaom, eclass
 		local nodeicov "`altx'"
 		local __ns_altlab "altx"
 	}
+	// degree/density: RSiena's names of the outdegree effect (helper _nwsaom_degree); the label follows the spelling typed
+	_nwsaom_degree "`degree'" "`density'" "`outdegree'"
+	local outdegree "`s(od)'"
+	local __ns_dlab "`s(lab)'"
 	local __ns_samelab "nodematch"
 	if "`samex'" != "" {
 		if "`nodematch'" != "" {
@@ -259,9 +263,10 @@ program nwsaom, eclass
 	local __ns_multi = 0
 	if "`waves'" != "" {
 		if "`wave1'" != "" | "`wave2'" != "" {
-			di "{err}specify either {bf:wave1(netname)}/{bf:wave2(netname)} (exactly two waves) or {bf:waves(namelist)} (two or more waves), not both."
+			di "{err}specify either {bf:wave1(netname)}/{bf:wave2(netname)} (exactly two waves) or {bf:waves(netlist)} (two or more waves), not both."
 			error 198
 		}
+		nwunab waves : `waves', min(2)
 		local __ns_wavelist "`waves'"
 		local __nwsaom_nwaves : word count `waves'
 		if `__nwsaom_nwaves' < 2 {
@@ -1195,8 +1200,8 @@ program nwsaom, eclass
 	else {
 		local __td_od "__nstd_`++__ns_n'"
 		mata: `__td_od' = SaomTermData()
-		mata: __nwsaom_last_M.addterm("outdegree", 1, &sn_stat_edges(), &sn_change_edges(), `__td_od', ("outdegree"))
-		local __nwsaom_efflist "outdegree"
+		mata: __nwsaom_last_M.addterm("outdegree", 1, &sn_stat_edges(), &sn_change_edges(), `__td_od', ("`__ns_dlab'"))
+		local __nwsaom_efflist "`__ns_dlab'"
 		local __ns_netfntype_list "0"
 	}
 

@@ -16,7 +16,7 @@
 {cmd:,}
 {opt wave1(netname)} {opt wave2(netname)}
 {it:or}
-{opt waves(namelist)}
+{opt waves(netlist)}
 {opt outdegree} [{opt reciprocity}]
 {it:or} {opt outdegreeendow} {opt outdegreecreation} [{opt reciprocity} {it:or} {opt reciprocityendow} {opt reciprocitycreation}]
 [{opt endow(effects)} {opt creation(effects)}]
@@ -60,7 +60,7 @@ Two networks that change together ({help nwsaom##multiplex:nwsaom multiplex}):
 {syntab:Observed waves}
 {synopt:{opt wave1(netname)}}First observed wave; requires {opt wave2()}, exactly two waves. Not combinable with {opt waves()}{p_end}
 {synopt:{opt wave2(netname)}}Second (ending) observed wave; requires {opt wave1()}{p_end}
-{synopt:{opt waves(namelist)}}Two or more observed waves, in temporal order (e.g. {cmd:waves(w1 w2 w3)}) - chains {it:namelist}{cmd:-1} inter-wave periods into one pooled fit. Not combinable with {opt wave1()}/{opt wave2()}{p_end}
+{synopt:{opt waves(netlist)}}Two or more observed waves, in temporal order (e.g. {cmd:waves(w1 w2 w3)}) - chains {it:netlist}{cmd:-1} inter-wave periods into one pooled fit. A {help netlist} may use patterns ({cmd:waves(glasgow*)}, {cmd:waves(w1-w3)}), which expand in the order in which the networks were created; with two waves this is the form to use, {opt wave1()}/{opt wave2()} is the older spelling of the same thing{p_end}
 {synopt:{opt groups(varname)}}Joint estimation of several groups (RSiena's {cmd:sienaGroupCreate()} + {cmd:siena07()}): the actors of all groups are the observations of the data set, {it:varname} gives the group of each actor, and every wave network has no ties between groups. The effects are shared by all groups, every period of every group has its own rate (also of a behavior). Works with actor and dyadic covariates, changing covariates, a behavior, composition change, missing data and interactions. See {help nwsaom_remarks##groups:Several groups}{p_end}
 {synopt:{opt gwaves(spec)}}With {opt groups()}: the waves of the groups when they differ, e.g. {cmd:gwaves(2: 1 2 | 3: 2 3)} (group value, colon, indices into {opt waves()}); a group not named has all waves{p_end}
 {synopt:{opt tvcov(groups)}}Time-varying covariates (RSiena's {cmd:varCovar}): {cmd:tvcov(a1 a2 a3 | s1 s2 s3)} declares covariates with one variable per wave ('|' separates
@@ -92,6 +92,7 @@ nwsaom_remarks{p_end}
 that variable (do not also give it in {opt altx()}); coefficients {cmd:altxendow_alc}, {cmd:altxcreation_alc}. No missing values yet{p_end}
 {synopt:{opt creation(effects)}}Creation role (RSiena effect type "creation": the effect counts only for new ties / value gains); see {opt endow()}{p_end}
 {synopt:{opt outdegree}}Outdegree (density) effect, evaluation-function role; {bf:required} in every model UNLESS {opt outdegreeendow}/{opt outdegreecreation} are given instead{p_end}
+{synopt:{opt degree}, {opt density}}RSiena's names of the same effect (for a non-directed network the effect is the degree of an actor); the coefficient is labelled as typed, and only one of the three may be given{p_end}
 {synopt:{opt outdegreeendow}}Outdegree effect, ENDOWMENT (tie-withdrawal) role - splits outdegree's own contribution so it fires only on ties that are REMOVED between waves; must
 be given together with {opt outdegreecreation}, and not combined with plain {opt outdegree} (all three roles together are exactly collinear). {bf:Currently refused}: the endowment
 and creation statistics (lost and gained ties) add up to the rate's distance statistic, so with the rate estimated the model is not identified (RSiena reports a singular covariance
@@ -459,7 +460,7 @@ parameter whose t-ratio is 0.1 or more in absolute value; the full information i
 {title:Describing the data before a fit: nwsaom describe}
 
 {p 8 17 2}
-{cmd:nwsaom describe,} {opt waves(namelist)} [{opt beh:avior(varlist)} {opt actormode(#)}]
+{cmd:nwsaom describe,} {opt waves(netlist)} [{opt beh:avior(varlist)} {opt actormode(#)}]
 
 {p 4 4 2}
 Prints what RSiena prints before an estimation: for every wave the number of ties, the density and the average degree; for every period the numbers of ties kept, created and dissolved, the Jaccard index and the Hamming distance; and, with {opt behavior()}, the mean of the behavior in every wave and the numbers of actors whose behavior goes up, down or stays the same.

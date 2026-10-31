@@ -1074,15 +1074,22 @@ program define nwsaom_estat_mems, rclass
 		di as err "estat mems does not yet support co-evolution ({bf:behavior()}) fits - v1 scope, network-only (see this file's own header comment on why)."
 		exit 498
 	}
+	local __mems_rate = .
 	capture confirm matrix e(rates)
 	if _rc == 0 {
-		di as err "estat mems does not yet support multi-wave ({bf:waves()}) fits - v1 scope, exactly two waves ({bf:wave1()}/{bf:wave2()})."
-		exit 498
+		if colsof(e(rates)) > 1 {
+			di as err "estat mems does not yet support fits with more than two waves - v1 scope, exactly two waves ({bf:waves(a b)})."
+			exit 498
+		}
+		local __mems_rate = el(e(rates), 1, 1)
 	}
-	capture confirm scalar e(rate)
-	if _rc {
-		di as err "estat mems requires an ordinary two-wave network-only nwsaom fit (no {bf:symmetric}, multiplex, or other v1-excluded combination)."
-		exit 498
+	else {
+		capture confirm scalar e(rate)
+		if _rc {
+			di as err "estat mems requires an ordinary two-wave network-only nwsaom fit (no {bf:symmetric}, multiplex, or other v1-excluded combination)."
+			exit 498
+		}
+		local __mems_rate = e(rate)
 	}
 
 	if "`interval'" == "" local interval "0 1"
@@ -1108,7 +1115,6 @@ program define nwsaom_estat_mems, rclass
 		exit 198
 	}
 
-	local __mems_rate = e(rate)
 
 	// Validate macro() with a real trial call (on the observed starting
 	// network) BEFORE burning time on nsim simulations - there is no

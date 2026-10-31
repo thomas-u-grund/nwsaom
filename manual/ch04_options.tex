@@ -5,7 +5,7 @@ This chapter lists the options of \nwsaom{} by topic. The definition of each eff
 \section{Syntax}
 
 \begin{lstlisting}
-nwsaom, wave1(netname) wave2(netname)  |  waves(namelist)
+nwsaom, waves(netlist)
         outdegree [reciprocity]  |  outdegreeendow outdegreecreation [...]
         [ endow(effects) creation(effects) ]
         [ covariate, structural, interaction and alias options ]
@@ -26,7 +26,7 @@ Every model needs the waves and the baseline effect \opt{outdegree}. Everything 
 \begin{longtable}{@{}>{\raggedright\arraybackslash}p{5.2cm}>{\raggedright\arraybackslash}p{9.8cm}@{}}
 \toprule Option & Meaning \\ \midrule \endhead
 \opt{wave1(netname)}, \opt{wave2(netname)} & The two waves of a model with exactly two waves. Both are required together; not combinable with \opt{waves()}. \\
-\opt{waves(namelist)} & Two or more waves in temporal order. The $W-1$ periods are chained into one pooled fit with one rate per period. \\
+\opt{waves(netlist)} & Two or more waves in temporal order; a netlist may use patterns such as \texttt{glasgow*} or \texttt{w1-w3}, which expand in the order in which the networks were created. The $W-1$ periods are chained into one pooled fit with one rate per period. \\
 \opt{tvcov(groups)} & Time-varying covariates (RSiena's \texttt{varCovar}). \opt{tvcov(a1 a2 a3 | s1 s2 s3)} declares covariates with one variable per wave; \texttt{|} separates covariates. Period $p$ uses the value of wave $p$ (the value of the last wave is not used). A covariate is named after its first variable without trailing digits (here \texttt{a} and \texttt{s}) and used under that name in \opt{nodeocov()}, \opt{nodeicov()}, \opt{nodecov()}, \opt{nodematch()}, \opt{simcov()} or their aliases, for example \opt{tvcov(a1 a2 a3) egox(a) simx(a)}. Centred by the mean over all periods. No missing values. Possible with \opt{behavior()} (network covariate effects only) and in two-mode networks; not with \opt{interact()}, \opt{symmetric} or \texttt{estat gof}. \\
 \opt{groups(\emph{varname})} & Joint estimation of several groups (RSiena's \texttt{sienaGroupCreate} and \texttt{siena07}): the observations are the actors of all groups, \emph{varname} gives the group of each actor, and the wave networks have no ties between groups. One set of effect parameters for all groups; every period of every group has its own rate (also of a behavior). Needs \opt{waves()}. Chapter~\ref{ch:groups}. \\
 \opt{gwaves(\emph{spec})} & With \opt{groups()}: the waves of the groups when they differ, \opt{gwaves(2: 1 2 | 3: 2 3)} (group value, colon, positions in \opt{waves()}); a group not named has all waves. \\

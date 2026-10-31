@@ -5,6 +5,13 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- `waves()` (and `nwsaom describe, waves()`) takes a netlist of nwcommands: patterns such as `glasgow*`, `w1-w3` and `_all` expand in the order in which the networks were created. The help and manual call the argument `netlist`; `wave1()`/`wave2()` stay as the older spelling for two waves.
+- `degree` and `density`, RSiena's names of the outdegree effect (the effect is the degree of an actor in a non-directed network). The coefficient is labelled as typed; `outdegree` works as before.
+
+### Changed
+- `nwsaom describe` prints Stata-style tables (label column, `|` separator, rules); the Jaccard warning is a note below the table.
+
 ## [1.4.0] - 2026-10-30
 
 Minor release: joint estimation of several groups with several co-evolving behaviors. Works with nwcommands 3.6.0 and later. The Mata libraries `lnwsaom1.mlib` and `lnwsaom2.mlib` are rebuilt (Stata 17); the compiled plugin of this release is needed for this feature (an older plugin gives a clear message). Fits without this feature are unchanged.

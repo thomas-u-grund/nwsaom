@@ -20,6 +20,7 @@ program define nwsaom_describe, rclass
 	version 14
 	_nwsaom_libcheck
 	syntax , WAVES(string) [ BEHavior(string) ACTORMODE(integer 2) ]
+	nwunab waves : `waves', min(2)
 	local nw : word count `waves'
 	if `nw' < 2 {
 		di as err "waves() needs at least two networks."
@@ -127,10 +128,11 @@ program define nwsaom_describe, rclass
 	di
 	if `tm' di as txt "Network data: " as res `nw' as txt " waves, two-mode network, " as res `na' as txt " actors (mode `actormode') x " as res `ne' as txt " events; ties are attendances (actor-event cells), density is over the " as res `na' * `ne' as txt " cells"
 	else di as txt "Network data: " as res `nw' as txt " waves, " as res `n0' as txt " actors, " as res cond(`dir1', "directed", "undirected")
-	di as txt "{hline 58}"
-	di as txt %-8s "wave" %10s "ties" %12s "density" %14s "avg. degree"
+	di as txt "{hline 13}{c TT}{hline 39}"
+	di as txt %12s "wave" " {c |}" %9s "ties" %12s "density" %14s "avg. degree"
+	di as txt "{hline 13}{c +}{hline 39}"
 	forvalues w = 1/`nw' {
-		di as res %-8s "`w'" %10.0f `W'[`w', 1] %12.4f `W'[`w', 2] %14.3f `W'[`w', 3]
+		di as txt %12s "`w'" " {c |}" as res %9.0f `W'[`w', 1] %12.4f `W'[`w', 2] %14.3f `W'[`w', 3]
 	}
 	mata: st_numscalar("__nwsd_anys", sum(st_matrix("`W'")[., 4..5]) > 0)
 	if scalar(__nwsd_anys) {
@@ -139,13 +141,18 @@ program define nwsaom_describe, rclass
 			di as txt "  wave `w': " as res `W'[`w', 4] as txt " structural zeros, " as res `W'[`w', 5] as txt " structural ones"
 		}
 	}
-	di as txt "{hline 58}"
-	di as txt %-8s "period" %8s "kept" %9s "created" %10s "dissolved" %9s "Jaccard" %10s "Hamming"
+	di as txt "{hline 13}{c BT}{hline 39}"
+	di
+	di as txt "{hline 13}{c TT}{hline 56}"
+	di as txt %12s "period" " {c |}" %8s "kept" %10s "created" %11s "dissolved" %10s "Jaccard" %10s "Hamming"
+	di as txt "{hline 13}{c +}{hline 56}"
 	forvalues w = 1/`=`nw'-1' {
-		di as res %-8s "`w'->`=`w'+1'" %8.0f `P'[`w', 1] %9.0f `P'[`w', 2] %10.0f `P'[`w', 3] %9.3f `P'[`w', 4] %10.0f `P'[`w', 5]
-		if `P'[`w', 4] < 0.3 di as txt "  (Jaccard below 0.3: few ties stay, so the data say little about the change process; see the SAOM literature)"
+		di as txt %12s "`w'->`=`w'+1'" " {c |}" as res %8.0f `P'[`w', 1] %10.0f `P'[`w', 2] %11.0f `P'[`w', 3] %10.3f `P'[`w', 4] %10.0f `P'[`w', 5]
 	}
-	di as txt "{hline 58}"
+	di as txt "{hline 13}{c BT}{hline 56}"
+	forvalues w = 1/`=`nw'-1' {
+		if `P'[`w', 4] < 0.3 di as txt "Note: Jaccard < 0.3 in period `w'->`=`w'+1'; few ties stay, the data say little about change."
+	}
 	matrix colnames `P' = kept created dissolved jaccard hamming persistence
 	matrix colnames `W' = ties density avgdegree structural0 structural1
 	return matrix periods = `P'
@@ -163,19 +170,25 @@ program define nwsaom_describe, rclass
 		}
 		tempname Bh
 		matrix `Bh' = J(`nw', 3, .)
-		di as txt %-8s "wave" %12s "mean" %12s "sd" %10s "missing"
+		di
+		di as txt "{hline 13}{c TT}{hline 36}"
+		di as txt %12s "behavior" " {c |}" %12s "mean" %12s "sd" %12s "missing"
+		di as txt "{hline 13}{c +}{hline 36}"
 		forvalues w = 1/`nw' {
 			local v : word `w' of `behavior'
 			qui count if missing(`v') in 1/`n0'
 			local nmiss = r(N)
 			qui summarize `v' in 1/`n0'
 			matrix `Bh'[`w', 1] = r(mean)
-			di as res %-8s "`w'" %12.3f r(mean) %12.3f r(sd) %10.0f `nmiss'
+			di as txt %12s "wave `w'" " {c |}" as res %12.3f r(mean) %12.3f r(sd) %12.0f `nmiss'
 		}
 		tempname Bc
 		matrix `Bc' = J(`=`nw'-1', 3, .)
-		di as txt "{hline 58}"
-		di as txt %-8s "period" %10s "up" %10s "down" %10s "same"
+		di as txt "{hline 13}{c BT}{hline 36}"
+		di
+		di as txt "{hline 13}{c TT}{hline 36}"
+		di as txt %12s "change" " {c |}" %12s "up" %12s "down" %12s "same"
+		di as txt "{hline 13}{c +}{hline 36}"
 		forvalues w = 1/`=`nw'-1' {
 			local v1 : word `w' of `behavior'
 			local v2 : word `=`w'+1' of `behavior'
@@ -188,8 +201,9 @@ program define nwsaom_describe, rclass
 			matrix `Bc'[`w', 1] = `up'
 			matrix `Bc'[`w', 2] = `dn'
 			matrix `Bc'[`w', 3] = `sm'
-			di as res %-8s "`w'->`=`w'+1'" %10.0f `up' %10.0f `dn' %10.0f `sm'
+			di as txt %12s "`w'->`=`w'+1'" " {c |}" as res %12.0f `up' %12.0f `dn' %12.0f `sm'
 		}
+		di as txt "{hline 13}{c BT}{hline 36}"
 		matrix colnames `Bc' = up down same
 		return matrix behchange = `Bc'
 	}

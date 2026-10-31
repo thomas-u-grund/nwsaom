@@ -20,236 +20,238 @@ BEGIN
   TEXT tx_nettype 10 10 120 ., label("Network type:")
   COMBOBOX cb_nettype 140 10 160 ., dropdownlist contents(l_nettype) values(l_nettype_v) onselchange(program type_apply) nomem
   TEXT tx_nettype_h 320 10 730 ., label("set from wave1; greys out (never hides) the options that do not apply to the type; auto switches all on")
-  TEXT tx_h3_1 10 43 1040 ., label("-- Observed waves (a dependent network per wave; wave1()/wave2() OR waves()) --")
-  TEXT tx_wave1 10 64 185 ., label("wave1()")
-  COMBOBOX cb_wave1 200 64 150 ., dropdownlist contents(netlist) values(netlist) onselchangelist(netlist_a) nomem option(wave1)
-  TEXT tx_wave2 363 64 185 ., label("wave2()")
-  COMBOBOX cb_wave2 553 64 150 ., dropdown contents(netlist) nomem option(wave2)
-  TEXT tx_waves 10 85 430 ., label("waves() - 2+ networks in time order")
-  COMBOBOX cb_waves 450 85 610 ., dropdown contents(netlist) append nomem option(waves)
-  TEXT tx_tvcov 10 106 430 ., label("tvcov() - changing covariates a1 a2 a3 | s1 s2 s3")
-  EDIT ed_tvcov 450 106 610 ., nomem option(tvcov)
-  TEXT tx_actormode 10 127 430 ., label("actormode() - two-mode actor mode (1|2)")
-  EDIT ed_actormode 450 127 610 ., nomem tooltip("for: twomode") option(actormode)
-  TEXT tx_h14_1 10 154 1040 ., label("-- Baseline: outdegree is required unless split into endowment + creation (reciprocity is optional) --")
-  CHECKBOX cx_outdegree 10 175 260 ., label("outdegree (density)") tooltip("RSiena: density")
-  CHECKBOX cx_reciprocity 275 175 260 ., label("reciprocity (recip)") tooltip("RSiena: recip")
-  CHECKBOX cx_outdegreeendow 540 175 260 ., label("outdegreeendow")
-  CHECKBOX cx_outdegreecreation 805 175 260 ., label("outdegreecreation")
-  CHECKBOX cx_reciprocityendow 10 196 260 ., label("reciprocityendow")
-  CHECKBOX cx_reciprocitycreation 275 196 260 ., label("reciprocitycreation")
-  CHECKBOX cx_transtiesendow 540 196 260 ., label("transtiesendow")
-  CHECKBOX cx_transtiescreation 805 196 260 ., label("transtiescreation")
-  TEXT tx_endow 10 217 430 ., label("endow() - effects split into endowment")
-  COMBOBOX cb_endow 450 217 610 ., dropdown contents(endow_list) append nomem tooltip("Name the same effect in endow() and creation(); covariate effects as altx:var") option(endow)
-  TEXT tx_creation 10 238 430 ., label("creation() - the same effects, creation role")
-  COMBOBOX cb_creation 450 238 610 ., dropdown contents(endow_list) append nomem option(creation)
-  TEXT tx_h27_1 10 265 1040 ., label("-- Undirected networks --")
-  CHECKBOX cx_symmetric 10 286 260 ., label("symmetric (non-directed network)")
-  TEXT tx_symtype 10 307 430 ., label("symtype() - model type for undirected ties")
-  COMBOBOX cb_symtype 450 307 610 ., dropdown contents(symtype_list) nomem tooltip("for: symmetric") option(symtype)
-  TEXT tx_h31_1 10 334 1040 ., label("-- Degree-based effects (flags) --")
-  CHECKBOX cx_indegpopularity 10 355 260 ., label("indegpopularity (inPopSqrt)") tooltip("RSiena: inPopSqrt")
-  CHECKBOX cx_outpopularity 275 355 260 ., label("outpopularity (outPopSqrt)") tooltip("RSiena: outPopSqrt")
-  CHECKBOX cx_outactivity 540 355 260 ., label("outactivity (outAct)") tooltip("RSiena: outAct")
-  CHECKBOX cx_inactivity 805 355 260 ., label("inactivity (inActSqrt)") tooltip("RSiena: inActSqrt")
-  CHECKBOX cx_inpop 10 376 260 ., label("inpop") tooltip("RSiena: inPop")
-  CHECKBOX cx_outpop 275 376 260 ., label("outpop") tooltip("RSiena: outPop")
-  CHECKBOX cx_inact 540 376 260 ., label("inact") tooltip("RSiena: inAct")
-  CHECKBOX cx_outactsqrt 805 376 260 ., label("outactsqrt") tooltip("RSiena: outActSqrt")
-  CHECKBOX cx_inpopc 10 397 260 ., label("inpopc (inPop.c)") tooltip("RSiena: inPop.c. native plugin only")
-  CHECKBOX cx_outpopc 275 397 260 ., label("outpopc (outPop.c)") tooltip("RSiena: outPop.c. native plugin only")
-  CHECKBOX cx_outactc 540 397 260 ., label("outactc (outAct.c)") tooltip("RSiena: outAct.c. native plugin only")
-  CHECKBOX cx_inactc 805 397 260 ., label("inactc (inAct.c)") tooltip("RSiena: inAct.c. native plugin only")
-  CHECKBOX cx_degplus 10 418 260 ., label("degplus") tooltip("RSiena: degPlus. native plugin only")
-  CHECKBOX cx_degplusc 275 418 260 ., label("degplusc (degPlus.c)") tooltip("RSiena: degPlus.c. native plugin only")
-  CHECKBOX cx_recipop 540 418 260 ., label("recipop") tooltip("RSiena: reciPop")
-  CHECKBOX cx_recipopsqrt 805 418 260 ., label("recipopsqrt") tooltip("RSiena: reciPopSqrt")
-  CHECKBOX cx_reciact 10 439 260 ., label("reciact")
-  CHECKBOX cx_reciactsqrt 275 439 260 ., label("reciactsqrt")
-  CHECKBOX cx_between 540 439 260 ., label("between") tooltip("RSiena: between")
-  TEXT tx_h51_1 10 466 1040 ., label("-- Degree effects with a parameter (number or numlist) --")
-  TEXT tx_outtrunc 10 487 185 ., label("outtrunc()")
-  EDIT ed_outtrunc 200 487 150 ., nomem tooltip("RSiena: outTrunc") option(outtrunc)
-  TEXT tx_outmore 363 487 185 ., label("outmore()")
-  EDIT ed_outmore 553 487 150 ., nomem tooltip("RSiena: outMore") option(outmore)
-  TEXT tx_outthreshold 716 487 185 ., label("outthreshold()")
-  EDIT ed_outthreshold 906 487 150 ., nomem tooltip("RSiena: outThreshold") option(outthreshold)
+  TEXT tx_h3_1 10 43 1040 ., label("-- Observed waves (a dependent network per wave: waves() with two or more networks, or the older wave1()/wave2() for exactly two) --")
+  TEXT tx_wave1 10 64 430 ., label("wave1() - first wave (older spelling for two waves)")
+  COMBOBOX cb_wave1 450 64 610 ., dropdownlist contents(netlist) values(netlist) onselchangelist(netlist_a) nomem option(wave1)
+  TEXT tx_wave2 10 85 430 ., label("wave2() - second wave (with wave1())")
+  COMBOBOX cb_wave2 450 85 610 ., dropdown contents(netlist) nomem option(wave2)
+  TEXT tx_waves 10 106 430 ., label("waves() - netlist, 2+ networks in time order")
+  COMBOBOX cb_waves 450 106 610 ., dropdown contents(netlist) append nomem option(waves)
+  TEXT tx_tvcov 10 127 430 ., label("tvcov() - changing covariates a1 a2 a3 | s1 s2 s3")
+  EDIT ed_tvcov 450 127 610 ., nomem option(tvcov)
+  TEXT tx_actormode 10 148 430 ., label("actormode() - two-mode actor mode (1|2)")
+  EDIT ed_actormode 450 148 610 ., nomem tooltip("for: twomode") option(actormode)
+  TEXT tx_h14_1 10 175 1040 ., label("-- Baseline: outdegree is required unless split into endowment + creation (reciprocity is optional) --")
+  CHECKBOX cx_outdegree 10 196 260 ., label("outdegree (density)") tooltip("RSiena: density")
+  CHECKBOX cx_degree 275 196 260 ., label("degree")
+  CHECKBOX cx_density 540 196 260 ., label("density")
+  CHECKBOX cx_reciprocity 805 196 260 ., label("reciprocity (recip)") tooltip("RSiena: recip")
+  CHECKBOX cx_outdegreeendow 10 217 260 ., label("outdegreeendow")
+  CHECKBOX cx_outdegreecreation 275 217 260 ., label("outdegreecreation")
+  CHECKBOX cx_reciprocityendow 540 217 260 ., label("reciprocityendow")
+  CHECKBOX cx_reciprocitycreation 805 217 260 ., label("reciprocitycreation")
+  CHECKBOX cx_transtiesendow 10 238 260 ., label("transtiesendow")
+  CHECKBOX cx_transtiescreation 275 238 260 ., label("transtiescreation")
+  TEXT tx_endow 10 259 430 ., label("endow() - effects split into endowment")
+  COMBOBOX cb_endow 450 259 610 ., dropdown contents(endow_list) append nomem tooltip("Name the same effect in endow() and creation(); covariate effects as altx:var") option(endow)
+  TEXT tx_creation 10 280 430 ., label("creation() - the same effects, creation role")
+  COMBOBOX cb_creation 450 280 610 ., dropdown contents(endow_list) append nomem option(creation)
+  TEXT tx_h29_1 10 307 1040 ., label("-- Undirected networks --")
+  CHECKBOX cx_symmetric 10 328 260 ., label("symmetric (non-directed network)")
+  TEXT tx_symtype 10 349 430 ., label("symtype() - model type for undirected ties")
+  COMBOBOX cb_symtype 450 349 610 ., dropdown contents(symtype_list) nomem tooltip("for: symmetric") option(symtype)
+  TEXT tx_h33_1 10 376 1040 ., label("-- Degree-based effects (flags) --")
+  CHECKBOX cx_indegpopularity 10 397 260 ., label("indegpopularity (inPopSqrt)") tooltip("RSiena: inPopSqrt")
+  CHECKBOX cx_outpopularity 275 397 260 ., label("outpopularity (outPopSqrt)") tooltip("RSiena: outPopSqrt")
+  CHECKBOX cx_outactivity 540 397 260 ., label("outactivity (outAct)") tooltip("RSiena: outAct")
+  CHECKBOX cx_inactivity 805 397 260 ., label("inactivity (inActSqrt)") tooltip("RSiena: inActSqrt")
+  CHECKBOX cx_inpop 10 418 260 ., label("inpop") tooltip("RSiena: inPop")
+  CHECKBOX cx_outpop 275 418 260 ., label("outpop") tooltip("RSiena: outPop")
+  CHECKBOX cx_inact 540 418 260 ., label("inact") tooltip("RSiena: inAct")
+  CHECKBOX cx_outactsqrt 805 418 260 ., label("outactsqrt") tooltip("RSiena: outActSqrt")
+  CHECKBOX cx_inpopc 10 439 260 ., label("inpopc (inPop.c)") tooltip("RSiena: inPop.c. native plugin only")
+  CHECKBOX cx_outpopc 275 439 260 ., label("outpopc (outPop.c)") tooltip("RSiena: outPop.c. native plugin only")
+  CHECKBOX cx_outactc 540 439 260 ., label("outactc (outAct.c)") tooltip("RSiena: outAct.c. native plugin only")
+  CHECKBOX cx_inactc 805 439 260 ., label("inactc (inAct.c)") tooltip("RSiena: inAct.c. native plugin only")
+  CHECKBOX cx_degplus 10 460 260 ., label("degplus") tooltip("RSiena: degPlus. native plugin only")
+  CHECKBOX cx_degplusc 275 460 260 ., label("degplusc (degPlus.c)") tooltip("RSiena: degPlus.c. native plugin only")
+  CHECKBOX cx_recipop 540 460 260 ., label("recipop") tooltip("RSiena: reciPop")
+  CHECKBOX cx_recipopsqrt 805 460 260 ., label("recipopsqrt") tooltip("RSiena: reciPopSqrt")
+  CHECKBOX cx_reciact 10 481 260 ., label("reciact")
+  CHECKBOX cx_reciactsqrt 275 481 260 ., label("reciactsqrt")
+  CHECKBOX cx_between 540 481 260 ., label("between") tooltip("RSiena: between")
 END
 
 DIALOG structure, tabtitle("Structure")
 BEGIN
-  TEXT tx_outinv 10 10 185 ., label("outinv()")
-  EDIT ed_outinv 200 10 150 ., nomem tooltip("RSiena: outInv") option(outinv)
-  TEXT tx_outsqinv 363 10 185 ., label("outsqinv()")
-  EDIT ed_outsqinv 553 10 150 ., nomem tooltip("RSiena: outSqInv") option(outsqinv)
-  TEXT tx_avdeg 716 10 185 ., label("avdeg()")
-  EDIT ed_avdeg 906 10 150 ., nomem tooltip("RSiena: avDeg. native plugin only") option(avdeg)
-  TEXT tx_h6_2 10 37 1040 ., label("-- Triadic closure, cycles, balance (flags) --")
-  CHECKBOX cx_transtrip 10 58 260 ., label("transtrip") tooltip("RSiena: transTrip")
-  CHECKBOX cx_transmedtrip 275 58 260 ., label("transmedtrip") tooltip("RSiena: transMedTrip")
-  CHECKBOX cx_transrectrip 540 58 260 ., label("transrectrip") tooltip("RSiena: transRecTrip")
-  CHECKBOX cx_cycle3 805 58 260 ., label("cycle3") tooltip("RSiena: cycle3")
-  CHECKBOX cx_cycle4 10 79 260 ., label("cycle4") tooltip("RSiena: cycle4")
-  CHECKBOX cx_sqrtcycle4 275 79 260 ., label("sqrtcycle4")
-  CHECKBOX cx_dblnbrdist2 540 79 260 ., label("dblnbrdist2 (nbrDist2twice)") tooltip("RSiena: nbrDist2twice")
-  CHECKBOX cx_nbrdist2 805 79 260 ., label("nbrdist2") tooltip("RSiena: nbrDist2")
-  CHECKBOX cx_transties 10 100 260 ., label("transties") tooltip("RSiena: transTies")
-  CHECKBOX cx_balance 275 100 260 ., label("balance") tooltip("RSiena: balance")
-  CHECKBOX cx_transtriads 540 100 260 ., label("transtriads") tooltip("RSiena: transTriads. native plugin only")
-  TEXT tx_h18_2 10 127 1040 ., label("-- Geometrically weighted effects: give the decay parameter --")
-  TEXT tx_gwesp 10 148 185 ., label("gwesp()")
-  EDIT ed_gwesp 200 148 150 ., nomem tooltip("RSiena: gwesp") option(gwesp)
-  TEXT tx_gwespfb 363 148 185 ., label("gwespfb()")
-  EDIT ed_gwespfb 553 148 150 ., nomem tooltip("RSiena: gwespFB") option(gwespfb)
-  TEXT tx_gwespbf 716 148 185 ., label("gwespbf()")
-  EDIT ed_gwespbf 906 148 150 ., nomem tooltip("RSiena: gwespBF") option(gwespbf)
-  TEXT tx_gwespbb 10 169 185 ., label("gwespbb()")
-  EDIT ed_gwespbb 200 169 150 ., nomem tooltip("RSiena: gwespBB") option(gwespbb)
-  TEXT tx_gwesprr 363 169 185 ., label("gwesprr()")
-  EDIT ed_gwesprr 553 169 150 ., nomem tooltip("RSiena: gwespRR") option(gwesprr)
-  TEXT tx_gwdspff 716 169 185 ., label("gwdspff()")
-  EDIT ed_gwdspff 906 169 150 ., nomem tooltip("RSiena: gwdspFF") option(gwdspff)
-  TEXT tx_gwdspfb 10 190 185 ., label("gwdspfb()")
-  EDIT ed_gwdspfb 200 190 150 ., nomem tooltip("RSiena: gwdspFB") option(gwdspfb)
-  TEXT tx_h33_2 10 217 1040 ., label("-- Isolates and assortativity --")
-  CHECKBOX cx_isolatenet 10 238 260 ., label("isolatenet") tooltip("RSiena: isolateNet")
-  CHECKBOX cx_outiso 275 238 260 ., label("outiso") tooltip("RSiena: outIso")
-  CHECKBOX cx_antiiso 540 238 260 ., label("antiiso") tooltip("RSiena: antiIso")
-  CHECKBOX cx_antiiniso 805 238 260 ., label("antiiniso") tooltip("RSiena: antiInIso")
-  CHECKBOX cx_antiiniso2 10 259 260 ., label("antiiniso2") tooltip("RSiena: antiInIso2")
-  CHECKBOX cx_inplus3 275 259 260 ., label("inplus3 (in3Plus)") tooltip("RSiena: in3Plus")
-  CHECKBOX cx_isolatepop 540 259 260 ., label("isolatepop") tooltip("RSiena: isolatePop")
-  CHECKBOX cx_outoutass 805 259 260 ., label("outoutass")
-  CHECKBOX cx_ininass 10 280 260 ., label("ininass")
-  CHECKBOX cx_outinass 275 280 260 ., label("outinass")
-  CHECKBOX cx_inoutass 540 280 260 ., label("inoutass")
-  TEXT tx_h45_2 10 307 1040 ., label("-- Node covariate effects: one effect per variable (Statnet name = RSiena alias) --")
-  TEXT tx_nodematch 10 328 185 ., label("nodematch() (sameX)")
-  VARLIST vl_nodematch 200 328 150 ., nomem tooltip("RSiena: sameX") option(nodematch)
-  TEXT tx_samex 363 328 185 ., label("samex()")
-  VARLIST vl_samex 553 328 150 ., nomem tooltip("RSiena: sameX") option(samex)
-  TEXT tx_nodecov 716 328 185 ., label("nodecov() (altX+egoX)")
-  VARLIST vl_nodecov 906 328 150 ., nomem tooltip("RSiena: altX+egoX") option(nodecov)
-  TEXT tx_nodeicov 10 349 185 ., label("nodeicov() (altX)")
-  VARLIST vl_nodeicov 200 349 150 ., nomem tooltip("RSiena: altX") option(nodeicov)
-  TEXT tx_altx 363 349 185 ., label("altx()")
-  VARLIST vl_altx 553 349 150 ., nomem tooltip("RSiena: altX") option(altx)
-  TEXT tx_nodeocov 716 349 185 ., label("nodeocov() (egoX)")
-  VARLIST vl_nodeocov 906 349 150 ., nomem tooltip("RSiena: egoX") option(nodeocov)
-  TEXT tx_egox 10 370 185 ., label("egox()")
-  VARLIST vl_egox 200 370 150 ., nomem tooltip("RSiena: egoX") option(egox)
-  TEXT tx_simcov 363 370 185 ., label("simcov() (simX)")
-  VARLIST vl_simcov 553 370 150 ., nomem tooltip("RSiena: simX") option(simcov)
-  TEXT tx_simx 716 370 185 ., label("simx()")
-  VARLIST vl_simx 906 370 150 ., nomem tooltip("RSiena: simX") option(simx)
-  TEXT tx_absdiffx 10 391 185 ., label("absdiffx()")
-  VARLIST vl_absdiffx 200 391 150 ., nomem tooltip("RSiena: absDiffX") option(absdiffx)
-  TEXT tx_egoxaltx 363 391 185 ., label("egoxaltx()")
-  VARLIST vl_egoxaltx 553 391 150 ., nomem tooltip("RSiena: egoXaltX") option(egoxaltx)
-  TEXT tx_diffx 716 391 185 ., label("diffx()")
-  VARLIST vl_diffx 906 391 150 ., nomem tooltip("RSiena: diffX") option(diffx)
-  TEXT tx_higher 10 412 185 ., label("higher()")
-  VARLIST vl_higher 200 412 150 ., nomem tooltip("RSiena: higher") option(higher)
-  TEXT tx_egosqx 363 412 185 ., label("egosqx()")
-  VARLIST vl_egosqx 553 412 150 ., nomem tooltip("RSiena: egoSqX") option(egosqx)
-  TEXT tx_altsqx 716 412 185 ., label("altsqx()")
-  VARLIST vl_altsqx 906 412 150 ., nomem tooltip("RSiena: altSqX") option(altsqx)
-  TEXT tx_samexrecip 10 433 185 ., label("samexrecip()")
-  VARLIST vl_samexrecip 200 433 150 ., nomem tooltip("RSiena: sameXRecip") option(samexrecip)
-  TEXT tx_simrecipx 363 433 185 ., label("simrecipx()")
-  VARLIST vl_simrecipx 553 433 150 ., nomem tooltip("RSiena: simRecipX") option(simrecipx)
-  CHECKBOX cx_nocenter 10 454 260 ., label("nocenter - raw covariate values")
-  TEXT tx_h81_2 10 481 1040 ., label("-- Contrast and threshold covariate effects --")
+  TEXT tx_h0_2 10 10 1040 ., label("-- Degree effects with a parameter (number or numlist) --")
+  TEXT tx_outtrunc 10 31 185 ., label("outtrunc()")
+  EDIT ed_outtrunc 200 31 150 ., nomem tooltip("RSiena: outTrunc") option(outtrunc)
+  TEXT tx_outmore 363 31 185 ., label("outmore()")
+  EDIT ed_outmore 553 31 150 ., nomem tooltip("RSiena: outMore") option(outmore)
+  TEXT tx_outthreshold 716 31 185 ., label("outthreshold()")
+  EDIT ed_outthreshold 906 31 150 ., nomem tooltip("RSiena: outThreshold") option(outthreshold)
+  TEXT tx_outinv 10 52 185 ., label("outinv()")
+  EDIT ed_outinv 200 52 150 ., nomem tooltip("RSiena: outInv") option(outinv)
+  TEXT tx_outsqinv 363 52 185 ., label("outsqinv()")
+  EDIT ed_outsqinv 553 52 150 ., nomem tooltip("RSiena: outSqInv") option(outsqinv)
+  TEXT tx_avdeg 716 52 185 ., label("avdeg()")
+  EDIT ed_avdeg 906 52 150 ., nomem tooltip("RSiena: avDeg. native plugin only") option(avdeg)
+  TEXT tx_h13_2 10 79 1040 ., label("-- Triadic closure, cycles, balance (flags) --")
+  CHECKBOX cx_transtrip 10 100 260 ., label("transtrip") tooltip("RSiena: transTrip")
+  CHECKBOX cx_transmedtrip 275 100 260 ., label("transmedtrip") tooltip("RSiena: transMedTrip")
+  CHECKBOX cx_transrectrip 540 100 260 ., label("transrectrip") tooltip("RSiena: transRecTrip")
+  CHECKBOX cx_cycle3 805 100 260 ., label("cycle3") tooltip("RSiena: cycle3")
+  CHECKBOX cx_cycle4 10 121 260 ., label("cycle4") tooltip("RSiena: cycle4")
+  CHECKBOX cx_sqrtcycle4 275 121 260 ., label("sqrtcycle4")
+  CHECKBOX cx_dblnbrdist2 540 121 260 ., label("dblnbrdist2 (nbrDist2twice)") tooltip("RSiena: nbrDist2twice")
+  CHECKBOX cx_nbrdist2 805 121 260 ., label("nbrdist2") tooltip("RSiena: nbrDist2")
+  CHECKBOX cx_transties 10 142 260 ., label("transties") tooltip("RSiena: transTies")
+  CHECKBOX cx_balance 275 142 260 ., label("balance") tooltip("RSiena: balance")
+  CHECKBOX cx_transtriads 540 142 260 ., label("transtriads") tooltip("RSiena: transTriads. native plugin only")
+  TEXT tx_h25_2 10 169 1040 ., label("-- Geometrically weighted effects: give the decay parameter --")
+  TEXT tx_gwesp 10 190 185 ., label("gwesp()")
+  EDIT ed_gwesp 200 190 150 ., nomem tooltip("RSiena: gwesp") option(gwesp)
+  TEXT tx_gwespfb 363 190 185 ., label("gwespfb()")
+  EDIT ed_gwespfb 553 190 150 ., nomem tooltip("RSiena: gwespFB") option(gwespfb)
+  TEXT tx_gwespbf 716 190 185 ., label("gwespbf()")
+  EDIT ed_gwespbf 906 190 150 ., nomem tooltip("RSiena: gwespBF") option(gwespbf)
+  TEXT tx_gwespbb 10 211 185 ., label("gwespbb()")
+  EDIT ed_gwespbb 200 211 150 ., nomem tooltip("RSiena: gwespBB") option(gwespbb)
+  TEXT tx_gwesprr 363 211 185 ., label("gwesprr()")
+  EDIT ed_gwesprr 553 211 150 ., nomem tooltip("RSiena: gwespRR") option(gwesprr)
+  TEXT tx_gwdspff 716 211 185 ., label("gwdspff()")
+  EDIT ed_gwdspff 906 211 150 ., nomem tooltip("RSiena: gwdspFF") option(gwdspff)
+  TEXT tx_gwdspfb 10 232 185 ., label("gwdspfb()")
+  EDIT ed_gwdspfb 200 232 150 ., nomem tooltip("RSiena: gwdspFB") option(gwdspfb)
+  TEXT tx_h40_2 10 259 1040 ., label("-- Isolates and assortativity --")
+  CHECKBOX cx_isolatenet 10 280 260 ., label("isolatenet") tooltip("RSiena: isolateNet")
+  CHECKBOX cx_outiso 275 280 260 ., label("outiso") tooltip("RSiena: outIso")
+  CHECKBOX cx_antiiso 540 280 260 ., label("antiiso") tooltip("RSiena: antiIso")
+  CHECKBOX cx_antiiniso 805 280 260 ., label("antiiniso") tooltip("RSiena: antiInIso")
+  CHECKBOX cx_antiiniso2 10 301 260 ., label("antiiniso2") tooltip("RSiena: antiInIso2")
+  CHECKBOX cx_inplus3 275 301 260 ., label("inplus3 (in3Plus)") tooltip("RSiena: in3Plus")
+  CHECKBOX cx_isolatepop 540 301 260 ., label("isolatepop") tooltip("RSiena: isolatePop")
+  CHECKBOX cx_outoutass 805 301 260 ., label("outoutass")
+  CHECKBOX cx_ininass 10 322 260 ., label("ininass")
+  CHECKBOX cx_outinass 275 322 260 ., label("outinass")
+  CHECKBOX cx_inoutass 540 322 260 ., label("inoutass")
+  TEXT tx_h52_2 10 349 1040 ., label("-- Node covariate effects: one effect per variable (Statnet name = RSiena alias) --")
+  TEXT tx_nodematch 10 370 185 ., label("nodematch() (sameX)")
+  VARLIST vl_nodematch 200 370 150 ., nomem tooltip("RSiena: sameX") option(nodematch)
+  TEXT tx_samex 363 370 185 ., label("samex()")
+  VARLIST vl_samex 553 370 150 ., nomem tooltip("RSiena: sameX") option(samex)
+  TEXT tx_nodecov 716 370 185 ., label("nodecov() (altX+egoX)")
+  VARLIST vl_nodecov 906 370 150 ., nomem tooltip("RSiena: altX+egoX") option(nodecov)
+  TEXT tx_nodeicov 10 391 185 ., label("nodeicov() (altX)")
+  VARLIST vl_nodeicov 200 391 150 ., nomem tooltip("RSiena: altX") option(nodeicov)
+  TEXT tx_altx 363 391 185 ., label("altx()")
+  VARLIST vl_altx 553 391 150 ., nomem tooltip("RSiena: altX") option(altx)
+  TEXT tx_nodeocov 716 391 185 ., label("nodeocov() (egoX)")
+  VARLIST vl_nodeocov 906 391 150 ., nomem tooltip("RSiena: egoX") option(nodeocov)
+  TEXT tx_egox 10 412 185 ., label("egox()")
+  VARLIST vl_egox 200 412 150 ., nomem tooltip("RSiena: egoX") option(egox)
+  TEXT tx_simcov 363 412 185 ., label("simcov() (simX)")
+  VARLIST vl_simcov 553 412 150 ., nomem tooltip("RSiena: simX") option(simcov)
+  TEXT tx_simx 716 412 185 ., label("simx()")
+  VARLIST vl_simx 906 412 150 ., nomem tooltip("RSiena: simX") option(simx)
+  TEXT tx_absdiffx 10 433 185 ., label("absdiffx()")
+  VARLIST vl_absdiffx 200 433 150 ., nomem tooltip("RSiena: absDiffX") option(absdiffx)
+  TEXT tx_egoxaltx 363 433 185 ., label("egoxaltx()")
+  VARLIST vl_egoxaltx 553 433 150 ., nomem tooltip("RSiena: egoXaltX") option(egoxaltx)
+  TEXT tx_diffx 716 433 185 ., label("diffx()")
+  VARLIST vl_diffx 906 433 150 ., nomem tooltip("RSiena: diffX") option(diffx)
+  TEXT tx_higher 10 454 185 ., label("higher()")
+  VARLIST vl_higher 200 454 150 ., nomem tooltip("RSiena: higher") option(higher)
+  TEXT tx_egosqx 363 454 185 ., label("egosqx()")
+  VARLIST vl_egosqx 553 454 150 ., nomem tooltip("RSiena: egoSqX") option(egosqx)
+  TEXT tx_altsqx 716 454 185 ., label("altsqx()")
+  VARLIST vl_altsqx 906 454 150 ., nomem tooltip("RSiena: altSqX") option(altsqx)
+  TEXT tx_samexrecip 10 475 185 ., label("samexrecip()")
+  VARLIST vl_samexrecip 200 475 150 ., nomem tooltip("RSiena: sameXRecip") option(samexrecip)
+  TEXT tx_simrecipx 363 475 185 ., label("simrecipx()")
+  VARLIST vl_simrecipx 553 475 150 ., nomem tooltip("RSiena: simRecipX") option(simrecipx)
+  CHECKBOX cx_nocenter 10 496 260 ., label("nocenter - raw covariate values")
 END
 
 DIALOG covariates, tabtitle("Covariates")
 BEGIN
-  TEXT tx_egoplusaltsqx 10 10 185 ., label("egoplusaltsqx()")
-  VARLIST vl_egoplusaltsqx 200 10 150 ., nomem tooltip("RSiena: egoPlusAltSqX. native plugin only") option(egoplusaltsqx)
-  TEXT tx_diffsqx 363 10 185 ., label("diffsqx()")
-  VARLIST vl_diffsqx 553 10 150 ., nomem tooltip("RSiena: diffSqX. native plugin only") option(diffsqx)
-  TEXT tx_egodiffx 716 10 185 ., label("egodiffx()")
-  VARLIST vl_egodiffx 906 10 150 ., nomem tooltip("RSiena: egoDiffX. native plugin only") option(egodiffx)
-  TEXT tx_althigheregox 10 31 185 ., label("althigheregox()")
-  VARLIST vl_althigheregox 200 31 150 ., nomem tooltip("RSiena: altHigherEgoX. native plugin only") option(althigheregox)
-  TEXT tx_unequalx 363 31 185 ., label("unequalx()")
-  VARLIST vl_unequalx 553 31 150 ., nomem tooltip("RSiena: unequalX. native plugin only") option(unequalx)
-  TEXT tx_egolthresholdx 716 31 185 ., label("egolthresholdx()")
-  VARLIST vl_egolthresholdx 906 31 150 ., nomem tooltip("RSiena: egoLThresholdX. native plugin only") option(egolthresholdx)
-  TEXT tx_egorthresholdx 10 52 185 ., label("egorthresholdx()")
-  VARLIST vl_egorthresholdx 200 52 150 ., nomem tooltip("RSiena: egoRThresholdX. native plugin only") option(egorthresholdx)
-  TEXT tx_altlthresholdx 363 52 185 ., label("altlthresholdx()")
-  VARLIST vl_altlthresholdx 553 52 150 ., nomem tooltip("RSiena: altLThresholdX. native plugin only") option(altlthresholdx)
-  TEXT tx_altrthresholdx 716 52 185 ., label("altrthresholdx()")
-  VARLIST vl_altrthresholdx 906 52 150 ., nomem tooltip("RSiena: altRThresholdX. native plugin only") option(altrthresholdx)
-  TEXT tx_degabsdiffx 10 73 185 ., label("degabsdiffx()")
-  VARLIST vl_degabsdiffx 200 73 150 ., nomem tooltip("RSiena: degAbsDiffX. native plugin only") option(degabsdiffx)
-  TEXT tx_degposdiffx 363 73 185 ., label("degposdiffx()")
-  VARLIST vl_degposdiffx 553 73 150 ., nomem tooltip("RSiena: degPosDiffX. native plugin only") option(degposdiffx)
-  TEXT tx_degnegdiffx 716 73 185 ., label("degnegdiffx()")
-  VARLIST vl_degnegdiffx 906 73 150 ., nomem tooltip("RSiena: degNegDiffX. native plugin only") option(degnegdiffx)
-  TEXT tx_covthreshold 10 94 430 ., label("covthreshold() - threshold of the 4 threshold effects (default 0)")
-  EDIT ed_covthreshold 450 94 610 ., nomem tooltip("native plugin only") option(covthreshold)
-  TEXT tx_xparam 10 115 430 ., label("xparam() - parameter of netx() effects (default 1)")
-  EDIT ed_xparam 450 115 610 ., nomem tooltip("native plugin only") option(xparam)
-  TEXT tx_h28_3 10 142 1040 ., label("-- Covariate x triad / popularity / activity effects (directed one-mode networks) --")
-  TEXT tx_samextranstrip 10 163 185 ., label("samextranstrip()")
-  VARLIST vl_samextranstrip 200 163 150 ., nomem tooltip("RSiena: sameXTransTrip. native plugin only") option(samextranstrip)
-  TEXT tx_diffxtranstrip 363 163 185 ., label("diffxtranstrip()")
-  VARLIST vl_diffxtranstrip 553 163 150 ., nomem tooltip("RSiena: diffXTransTrip. native plugin only") option(diffxtranstrip)
-  TEXT tx_simxtranstrip 716 163 185 ., label("simxtranstrip()")
-  VARLIST vl_simxtranstrip 906 163 150 ., nomem tooltip("RSiena: simXTransTrip. native plugin only") option(simxtranstrip)
-  TEXT tx_homxtranstrip 10 184 185 ., label("homxtranstrip()")
-  VARLIST vl_homxtranstrip 200 184 150 ., nomem tooltip("RSiena: homXTransTrip. native plugin only") option(homxtranstrip)
-  TEXT tx_samexoutact 363 184 185 ., label("samexoutact()")
-  VARLIST vl_samexoutact 553 184 150 ., nomem tooltip("RSiena: sameXOutAct. native plugin only") option(samexoutact)
-  TEXT tx_diffxoutact 716 184 185 ., label("diffxoutact()")
-  VARLIST vl_diffxoutact 906 184 150 ., nomem tooltip("RSiena: diffXOutAct. native plugin only") option(diffxoutact)
-  TEXT tx_samexreciact 10 205 185 ., label("samexreciact()")
-  VARLIST vl_samexreciact 200 205 150 ., nomem tooltip("RSiena: sameXReciAct. native plugin only") option(samexreciact)
-  TEXT tx_diffxreciact 363 205 185 ., label("diffxreciact()")
-  VARLIST vl_diffxreciact 553 205 150 ., nomem tooltip("RSiena: diffXReciAct. native plugin only") option(diffxreciact)
-  TEXT tx_homxoutact 716 205 185 ., label("homxoutact()")
-  VARLIST vl_homxoutact 906 205 150 ., nomem tooltip("RSiena: homXOutAct. native plugin only") option(homxoutact)
-  TEXT tx_altxoutact 10 226 185 ., label("altxoutact()")
-  VARLIST vl_altxoutact 200 226 150 ., nomem tooltip("RSiena: altXOutAct. native plugin only") option(altxoutact)
-  TEXT tx_inpopx 363 226 185 ., label("inpopx()")
-  VARLIST vl_inpopx 553 226 150 ., nomem tooltip("RSiena: inPopX. native plugin only") option(inpopx)
-  TEXT tx_outpopx 716 226 185 ., label("outpopx()")
-  VARLIST vl_outpopx 906 226 150 ., nomem tooltip("RSiena: outPopX. native plugin only") option(outpopx)
-  TEXT tx_inactx 10 247 185 ., label("inactx()")
-  VARLIST vl_inactx 200 247 150 ., nomem tooltip("RSiena: inActX. native plugin only") option(inactx)
-  TEXT tx_outactx 363 247 185 ., label("outactx()")
-  VARLIST vl_outactx 553 247 150 ., nomem tooltip("RSiena: outActX. native plugin only") option(outactx)
-  TEXT tx_samexinpop 716 247 185 ., label("samexinpop()")
-  VARLIST vl_samexinpop 906 247 150 ., nomem tooltip("RSiena: sameXInPop. native plugin only") option(samexinpop)
-  TEXT tx_diffxinpop 10 268 185 ., label("diffxinpop()")
-  VARLIST vl_diffxinpop 200 268 150 ., nomem tooltip("RSiena: diffXInPop. native plugin only") option(diffxinpop)
-  TEXT tx_h61_3 10 295 1040 ., label("-- Dyadic covariates: names of Stata n x n matrices (tv...: the stem of matrices stem1 stem2 ...) --")
-  TEXT tx_dyadcov 10 316 185 ., label("dyadcov() (X)")
-  EDIT ed_dyadcov 200 316 150 ., nomem tooltip("RSiena: X") option(dyadcov)
-  TEXT tx_dyadcovrecip 363 316 185 ., label("dyadcovrecip() (XRecip)")
-  EDIT ed_dyadcovrecip 553 316 150 ., nomem tooltip("RSiena: XRecip") option(dyadcovrecip)
-  TEXT tx_tvdyadcov 716 316 185 ., label("tvdyadcov() (X (changing))")
-  EDIT ed_tvdyadcov 906 316 150 ., nomem tooltip("RSiena: X (changing)") option(tvdyadcov)
-  TEXT tx_tvdyadcovrecip 10 337 430 ., label("tvdyadcovrecip() (XRecip (changing))")
-  EDIT ed_tvdyadcovrecip 450 337 610 ., nomem tooltip("RSiena: XRecip (changing)") option(tvdyadcovrecip)
-  TEXT tx_dyadx_t 10 358 1050 ., label("-- dyadx() - effects of a constant dyadic covariate: effect:matrix -- box next to the effect: matrix name")
-  COMBOBOX cb_dyadx_1 10 379 215 ., dropdown contents(lst_dyadx) values(lst_dyadx_v) nomem
-  EDIT ed_dyadx_1a 230 379 115 ., nomem
-  COMBOBOX cb_dyadx_2 363 379 215 ., dropdown contents(lst_dyadx) values(lst_dyadx_v) nomem
-  EDIT ed_dyadx_2a 583 379 115 ., nomem
-  COMBOBOX cb_dyadx_3 716 379 215 ., dropdown contents(lst_dyadx) values(lst_dyadx_v) nomem
-  EDIT ed_dyadx_3a 936 379 115 ., nomem
-  COMBOBOX cb_dyadx_4 10 400 215 ., dropdown contents(lst_dyadx) values(lst_dyadx_v) nomem
-  EDIT ed_dyadx_4a 230 400 115 ., nomem
-  COMBOBOX cb_dyadx_5 363 400 215 ., dropdown contents(lst_dyadx) values(lst_dyadx_v) nomem
-  EDIT ed_dyadx_5a 583 400 115 ., nomem
-  COMBOBOX cb_dyadx_6 716 400 215 ., dropdown contents(lst_dyadx) values(lst_dyadx_v) nomem
-  EDIT ed_dyadx_6a 936 400 115 ., nomem
-  TEXT tx_dyadx_more 10 421 215 ., label("more tokens (typed)")
-  EDIT ed_dyadx_more 230 421 830 ., nomem
+  TEXT tx_h0_3 10 10 1040 ., label("-- Contrast and threshold covariate effects --")
+  TEXT tx_egoplusaltsqx 10 31 185 ., label("egoplusaltsqx()")
+  VARLIST vl_egoplusaltsqx 200 31 150 ., nomem tooltip("RSiena: egoPlusAltSqX. native plugin only") option(egoplusaltsqx)
+  TEXT tx_diffsqx 363 31 185 ., label("diffsqx()")
+  VARLIST vl_diffsqx 553 31 150 ., nomem tooltip("RSiena: diffSqX. native plugin only") option(diffsqx)
+  TEXT tx_egodiffx 716 31 185 ., label("egodiffx()")
+  VARLIST vl_egodiffx 906 31 150 ., nomem tooltip("RSiena: egoDiffX. native plugin only") option(egodiffx)
+  TEXT tx_althigheregox 10 52 185 ., label("althigheregox()")
+  VARLIST vl_althigheregox 200 52 150 ., nomem tooltip("RSiena: altHigherEgoX. native plugin only") option(althigheregox)
+  TEXT tx_unequalx 363 52 185 ., label("unequalx()")
+  VARLIST vl_unequalx 553 52 150 ., nomem tooltip("RSiena: unequalX. native plugin only") option(unequalx)
+  TEXT tx_egolthresholdx 716 52 185 ., label("egolthresholdx()")
+  VARLIST vl_egolthresholdx 906 52 150 ., nomem tooltip("RSiena: egoLThresholdX. native plugin only") option(egolthresholdx)
+  TEXT tx_egorthresholdx 10 73 185 ., label("egorthresholdx()")
+  VARLIST vl_egorthresholdx 200 73 150 ., nomem tooltip("RSiena: egoRThresholdX. native plugin only") option(egorthresholdx)
+  TEXT tx_altlthresholdx 363 73 185 ., label("altlthresholdx()")
+  VARLIST vl_altlthresholdx 553 73 150 ., nomem tooltip("RSiena: altLThresholdX. native plugin only") option(altlthresholdx)
+  TEXT tx_altrthresholdx 716 73 185 ., label("altrthresholdx()")
+  VARLIST vl_altrthresholdx 906 73 150 ., nomem tooltip("RSiena: altRThresholdX. native plugin only") option(altrthresholdx)
+  TEXT tx_degabsdiffx 10 94 185 ., label("degabsdiffx()")
+  VARLIST vl_degabsdiffx 200 94 150 ., nomem tooltip("RSiena: degAbsDiffX. native plugin only") option(degabsdiffx)
+  TEXT tx_degposdiffx 363 94 185 ., label("degposdiffx()")
+  VARLIST vl_degposdiffx 553 94 150 ., nomem tooltip("RSiena: degPosDiffX. native plugin only") option(degposdiffx)
+  TEXT tx_degnegdiffx 716 94 185 ., label("degnegdiffx()")
+  VARLIST vl_degnegdiffx 906 94 150 ., nomem tooltip("RSiena: degNegDiffX. native plugin only") option(degnegdiffx)
+  TEXT tx_covthreshold 10 115 430 ., label("covthreshold() - threshold of the 4 threshold effects (default 0)")
+  EDIT ed_covthreshold 450 115 610 ., nomem tooltip("native plugin only") option(covthreshold)
+  TEXT tx_xparam 10 136 430 ., label("xparam() - parameter of netx() effects (default 1)")
+  EDIT ed_xparam 450 136 610 ., nomem tooltip("native plugin only") option(xparam)
+  TEXT tx_h29_3 10 163 1040 ., label("-- Covariate x triad / popularity / activity effects (directed one-mode networks) --")
+  TEXT tx_samextranstrip 10 184 185 ., label("samextranstrip()")
+  VARLIST vl_samextranstrip 200 184 150 ., nomem tooltip("RSiena: sameXTransTrip. native plugin only") option(samextranstrip)
+  TEXT tx_diffxtranstrip 363 184 185 ., label("diffxtranstrip()")
+  VARLIST vl_diffxtranstrip 553 184 150 ., nomem tooltip("RSiena: diffXTransTrip. native plugin only") option(diffxtranstrip)
+  TEXT tx_simxtranstrip 716 184 185 ., label("simxtranstrip()")
+  VARLIST vl_simxtranstrip 906 184 150 ., nomem tooltip("RSiena: simXTransTrip. native plugin only") option(simxtranstrip)
+  TEXT tx_homxtranstrip 10 205 185 ., label("homxtranstrip()")
+  VARLIST vl_homxtranstrip 200 205 150 ., nomem tooltip("RSiena: homXTransTrip. native plugin only") option(homxtranstrip)
+  TEXT tx_samexoutact 363 205 185 ., label("samexoutact()")
+  VARLIST vl_samexoutact 553 205 150 ., nomem tooltip("RSiena: sameXOutAct. native plugin only") option(samexoutact)
+  TEXT tx_diffxoutact 716 205 185 ., label("diffxoutact()")
+  VARLIST vl_diffxoutact 906 205 150 ., nomem tooltip("RSiena: diffXOutAct. native plugin only") option(diffxoutact)
+  TEXT tx_samexreciact 10 226 185 ., label("samexreciact()")
+  VARLIST vl_samexreciact 200 226 150 ., nomem tooltip("RSiena: sameXReciAct. native plugin only") option(samexreciact)
+  TEXT tx_diffxreciact 363 226 185 ., label("diffxreciact()")
+  VARLIST vl_diffxreciact 553 226 150 ., nomem tooltip("RSiena: diffXReciAct. native plugin only") option(diffxreciact)
+  TEXT tx_homxoutact 716 226 185 ., label("homxoutact()")
+  VARLIST vl_homxoutact 906 226 150 ., nomem tooltip("RSiena: homXOutAct. native plugin only") option(homxoutact)
+  TEXT tx_altxoutact 10 247 185 ., label("altxoutact()")
+  VARLIST vl_altxoutact 200 247 150 ., nomem tooltip("RSiena: altXOutAct. native plugin only") option(altxoutact)
+  TEXT tx_inpopx 363 247 185 ., label("inpopx()")
+  VARLIST vl_inpopx 553 247 150 ., nomem tooltip("RSiena: inPopX. native plugin only") option(inpopx)
+  TEXT tx_outpopx 716 247 185 ., label("outpopx()")
+  VARLIST vl_outpopx 906 247 150 ., nomem tooltip("RSiena: outPopX. native plugin only") option(outpopx)
+  TEXT tx_inactx 10 268 185 ., label("inactx()")
+  VARLIST vl_inactx 200 268 150 ., nomem tooltip("RSiena: inActX. native plugin only") option(inactx)
+  TEXT tx_outactx 363 268 185 ., label("outactx()")
+  VARLIST vl_outactx 553 268 150 ., nomem tooltip("RSiena: outActX. native plugin only") option(outactx)
+  TEXT tx_samexinpop 716 268 185 ., label("samexinpop()")
+  VARLIST vl_samexinpop 906 268 150 ., nomem tooltip("RSiena: sameXInPop. native plugin only") option(samexinpop)
+  TEXT tx_diffxinpop 10 289 185 ., label("diffxinpop()")
+  VARLIST vl_diffxinpop 200 289 150 ., nomem tooltip("RSiena: diffXInPop. native plugin only") option(diffxinpop)
+  TEXT tx_h62_3 10 316 1040 ., label("-- Dyadic covariates: names of Stata n x n matrices (tv...: the stem of matrices stem1 stem2 ...) --")
+  TEXT tx_dyadcov 10 337 185 ., label("dyadcov() (X)")
+  EDIT ed_dyadcov 200 337 150 ., nomem tooltip("RSiena: X") option(dyadcov)
+  TEXT tx_dyadcovrecip 363 337 185 ., label("dyadcovrecip() (XRecip)")
+  EDIT ed_dyadcovrecip 553 337 150 ., nomem tooltip("RSiena: XRecip") option(dyadcovrecip)
+  TEXT tx_tvdyadcov 716 337 185 ., label("tvdyadcov() (X (changing))")
+  EDIT ed_tvdyadcov 906 337 150 ., nomem tooltip("RSiena: X (changing)") option(tvdyadcov)
+  TEXT tx_tvdyadcovrecip 10 358 430 ., label("tvdyadcovrecip() (XRecip (changing))")
+  EDIT ed_tvdyadcovrecip 450 358 610 ., nomem tooltip("RSiena: XRecip (changing)") option(tvdyadcovrecip)
+  TEXT tx_dyadx_t 10 379 1050 ., label("-- dyadx() - effects of a constant dyadic covariate: effect:matrix -- box next to the effect: matrix name")
+  COMBOBOX cb_dyadx_1 10 400 215 ., dropdown contents(lst_dyadx) values(lst_dyadx_v) nomem
+  EDIT ed_dyadx_1a 230 400 115 ., nomem
+  COMBOBOX cb_dyadx_2 363 400 215 ., dropdown contents(lst_dyadx) values(lst_dyadx_v) nomem
+  EDIT ed_dyadx_2a 583 400 115 ., nomem
+  COMBOBOX cb_dyadx_3 716 400 215 ., dropdown contents(lst_dyadx) values(lst_dyadx_v) nomem
+  EDIT ed_dyadx_3a 936 400 115 ., nomem
+  COMBOBOX cb_dyadx_4 10 421 215 ., dropdown contents(lst_dyadx) values(lst_dyadx_v) nomem
+  EDIT ed_dyadx_4a 230 421 115 ., nomem
+  COMBOBOX cb_dyadx_5 363 421 215 ., dropdown contents(lst_dyadx) values(lst_dyadx_v) nomem
+  EDIT ed_dyadx_5a 583 421 115 ., nomem
+  COMBOBOX cb_dyadx_6 716 421 215 ., dropdown contents(lst_dyadx) values(lst_dyadx_v) nomem
+  EDIT ed_dyadx_6a 936 421 115 ., nomem
+  TEXT tx_dyadx_more 10 442 215 ., label("more tokens (typed)")
+  EDIT ed_dyadx_more 230 442 830 ., nomem
 END
 
 DIALOG dyadic, tabtitle("Dyadic")
@@ -1304,6 +1306,8 @@ BEGIN
 	waves.tx_actormode.enable
 	waves.ed_actormode.enable
 	waves.cx_outdegree.enable
+	waves.cx_degree.enable
+	waves.cx_density.enable
 	waves.cx_reciprocity.enable
 	waves.cx_outdegreeendow.enable
 	waves.cx_outdegreecreation.enable
@@ -1331,22 +1335,22 @@ BEGIN
 	waves.cx_outactc.enable
 	waves.cx_inactc.enable
 	waves.cx_degplus.enable
-	waves.cx_degplusc.enable
-	waves.cx_recipop.enable
 END
 
 SCRIPT ty_auto_1
 BEGIN
+	waves.cx_degplusc.enable
+	waves.cx_recipop.enable
 	waves.cx_recipopsqrt.enable
 	waves.cx_reciact.enable
 	waves.cx_reciactsqrt.enable
 	waves.cx_between.enable
-	waves.tx_outtrunc.enable
-	waves.ed_outtrunc.enable
-	waves.tx_outmore.enable
-	waves.ed_outmore.enable
-	waves.tx_outthreshold.enable
-	waves.ed_outthreshold.enable
+	structure.tx_outtrunc.enable
+	structure.ed_outtrunc.enable
+	structure.tx_outmore.enable
+	structure.ed_outmore.enable
+	structure.tx_outthreshold.enable
+	structure.ed_outthreshold.enable
 	structure.tx_outinv.enable
 	structure.ed_outinv.enable
 	structure.tx_outsqinv.enable
@@ -1375,12 +1379,12 @@ BEGIN
 	structure.tx_gwesprr.enable
 	structure.ed_gwesprr.enable
 	structure.tx_gwdspff.enable
-	structure.ed_gwdspff.enable
-	structure.tx_gwdspfb.enable
 END
 
 SCRIPT ty_auto_2
 BEGIN
+	structure.ed_gwdspff.enable
+	structure.tx_gwdspfb.enable
 	structure.ed_gwdspfb.enable
 	structure.cx_isolatenet.enable
 	structure.cx_outiso.enable
@@ -1419,12 +1423,12 @@ BEGIN
 	structure.vl_diffx.enable
 	structure.tx_higher.enable
 	structure.vl_higher.enable
-	structure.tx_egosqx.enable
-	structure.vl_egosqx.enable
 END
 
 SCRIPT ty_auto_3
 BEGIN
+	structure.tx_egosqx.enable
+	structure.vl_egosqx.enable
 	structure.tx_altsqx.enable
 	structure.vl_altsqx.enable
 	structure.tx_samexrecip.enable
@@ -1463,12 +1467,12 @@ BEGIN
 	covariates.tx_samextranstrip.enable
 	covariates.vl_samextranstrip.enable
 	covariates.tx_diffxtranstrip.enable
-	covariates.vl_diffxtranstrip.enable
-	covariates.tx_simxtranstrip.enable
 END
 
 SCRIPT ty_auto_4
 BEGIN
+	covariates.vl_diffxtranstrip.enable
+	covariates.tx_simxtranstrip.enable
 	covariates.vl_simxtranstrip.enable
 	covariates.tx_homxtranstrip.enable
 	covariates.vl_homxtranstrip.enable
@@ -1507,12 +1511,12 @@ BEGIN
 	rates.cx_outrate.enable
 	rates.cx_inrate.enable
 	rates.cx_reciprate.enable
-	rates.cx_outrateinv.enable
-	rates.cx_inrateinv.enable
 END
 
 SCRIPT ty_auto_5
 BEGIN
+	rates.cx_outrateinv.enable
+	rates.cx_inrateinv.enable
 	rates.cx_reciprateinv.enable
 	rates.cx_outratelog.enable
 	rates.cx_inratelog.enable
@@ -1551,12 +1555,12 @@ BEGIN
 	rates_2.cx_avsim.enable
 	rates_2.cx_avsimendow.enable
 	rates_2.cx_avsimcreation.enable
-	rates_2.cx_behsim.enable
-	rates_2.cx_behegox.enable
 END
 
 SCRIPT ty_auto_6
 BEGIN
+	rates_2.cx_behsim.enable
+	rates_2.cx_behegox.enable
 	rates_2.cx_behaltx.enable
 	rates_2.cx_behegoplusalt.enable
 	rates_2.tx_behtheta0.enable
@@ -1595,12 +1599,12 @@ BEGIN
 	estimate.ed_ml_n1.enable
 	estimate.tx_ml_nsub.enable
 	estimate.ed_ml_nsub.enable
-	estimate.tx_ml_nstart2.enable
-	estimate.ed_ml_nstart2.enable
 END
 
 SCRIPT ty_auto_7
 BEGIN
+	estimate.tx_ml_nstart2.enable
+	estimate.ed_ml_nstart2.enable
 	estimate.tx_ml_n3.enable
 	estimate.ed_ml_n3.enable
 	estimate.tx_ml_mult.enable
@@ -1650,6 +1654,8 @@ BEGIN
 	waves.tx_actormode.disable
 	waves.ed_actormode.disable
 	waves.cx_outdegree.enable
+	waves.cx_degree.enable
+	waves.cx_density.enable
 	waves.cx_reciprocity.enable
 	waves.cx_outdegreeendow.enable
 	waves.cx_outdegreecreation.enable
@@ -1677,22 +1683,22 @@ BEGIN
 	waves.cx_outactc.enable
 	waves.cx_inactc.enable
 	waves.cx_degplus.disable
-	waves.cx_degplusc.disable
-	waves.cx_recipop.enable
 END
 
 SCRIPT ty_d_1
 BEGIN
+	waves.cx_degplusc.disable
+	waves.cx_recipop.enable
 	waves.cx_recipopsqrt.enable
 	waves.cx_reciact.enable
 	waves.cx_reciactsqrt.enable
 	waves.cx_between.enable
-	waves.tx_outtrunc.enable
-	waves.ed_outtrunc.enable
-	waves.tx_outmore.enable
-	waves.ed_outmore.enable
-	waves.tx_outthreshold.enable
-	waves.ed_outthreshold.enable
+	structure.tx_outtrunc.enable
+	structure.ed_outtrunc.enable
+	structure.tx_outmore.enable
+	structure.ed_outmore.enable
+	structure.tx_outthreshold.enable
+	structure.ed_outthreshold.enable
 	structure.tx_outinv.enable
 	structure.ed_outinv.enable
 	structure.tx_outsqinv.enable
@@ -1721,12 +1727,12 @@ BEGIN
 	structure.tx_gwesprr.enable
 	structure.ed_gwesprr.enable
 	structure.tx_gwdspff.enable
-	structure.ed_gwdspff.enable
-	structure.tx_gwdspfb.enable
 END
 
 SCRIPT ty_d_2
 BEGIN
+	structure.ed_gwdspff.enable
+	structure.tx_gwdspfb.enable
 	structure.ed_gwdspfb.enable
 	structure.cx_isolatenet.enable
 	structure.cx_outiso.enable
@@ -1765,12 +1771,12 @@ BEGIN
 	structure.vl_diffx.enable
 	structure.tx_higher.enable
 	structure.vl_higher.enable
-	structure.tx_egosqx.enable
-	structure.vl_egosqx.enable
 END
 
 SCRIPT ty_d_3
 BEGIN
+	structure.tx_egosqx.enable
+	structure.vl_egosqx.enable
 	structure.tx_altsqx.enable
 	structure.vl_altsqx.enable
 	structure.tx_samexrecip.enable
@@ -1809,12 +1815,12 @@ BEGIN
 	covariates.tx_samextranstrip.enable
 	covariates.vl_samextranstrip.enable
 	covariates.tx_diffxtranstrip.enable
-	covariates.vl_diffxtranstrip.enable
-	covariates.tx_simxtranstrip.enable
 END
 
 SCRIPT ty_d_4
 BEGIN
+	covariates.vl_diffxtranstrip.enable
+	covariates.tx_simxtranstrip.enable
 	covariates.vl_simxtranstrip.enable
 	covariates.tx_homxtranstrip.enable
 	covariates.vl_homxtranstrip.enable
@@ -1853,12 +1859,12 @@ BEGIN
 	rates.cx_outrate.enable
 	rates.cx_inrate.enable
 	rates.cx_reciprate.enable
-	rates.cx_outrateinv.enable
-	rates.cx_inrateinv.enable
 END
 
 SCRIPT ty_d_5
 BEGIN
+	rates.cx_outrateinv.enable
+	rates.cx_inrateinv.enable
 	rates.cx_reciprateinv.enable
 	rates.cx_outratelog.enable
 	rates.cx_inratelog.enable
@@ -1897,12 +1903,12 @@ BEGIN
 	rates_2.cx_avsim.enable
 	rates_2.cx_avsimendow.enable
 	rates_2.cx_avsimcreation.enable
-	rates_2.cx_behsim.enable
-	rates_2.cx_behegox.enable
 END
 
 SCRIPT ty_d_6
 BEGIN
+	rates_2.cx_behsim.enable
+	rates_2.cx_behegox.enable
 	rates_2.cx_behaltx.enable
 	rates_2.cx_behegoplusalt.enable
 	rates_2.tx_behtheta0.enable
@@ -1941,12 +1947,12 @@ BEGIN
 	estimate.ed_ml_n1.enable
 	estimate.tx_ml_nsub.enable
 	estimate.ed_ml_nsub.enable
-	estimate.tx_ml_nstart2.enable
-	estimate.ed_ml_nstart2.enable
 END
 
 SCRIPT ty_d_7
 BEGIN
+	estimate.tx_ml_nstart2.enable
+	estimate.ed_ml_nstart2.enable
 	estimate.tx_ml_n3.enable
 	estimate.ed_ml_n3.enable
 	estimate.tx_ml_mult.enable
@@ -1996,6 +2002,8 @@ BEGIN
 	waves.tx_actormode.disable
 	waves.ed_actormode.disable
 	waves.cx_outdegree.enable
+	waves.cx_degree.enable
+	waves.cx_density.enable
 	waves.cx_reciprocity.disable
 	waves.cx_outdegreeendow.enable
 	waves.cx_outdegreecreation.enable
@@ -2023,22 +2031,22 @@ BEGIN
 	waves.cx_outactc.enable
 	waves.cx_inactc.disable
 	waves.cx_degplus.enable
-	waves.cx_degplusc.enable
-	waves.cx_recipop.disable
 END
 
 SCRIPT ty_u_1
 BEGIN
+	waves.cx_degplusc.enable
+	waves.cx_recipop.disable
 	waves.cx_recipopsqrt.disable
 	waves.cx_reciact.disable
 	waves.cx_reciactsqrt.disable
 	waves.cx_between.enable
-	waves.tx_outtrunc.enable
-	waves.ed_outtrunc.enable
-	waves.tx_outmore.enable
-	waves.ed_outmore.enable
-	waves.tx_outthreshold.enable
-	waves.ed_outthreshold.enable
+	structure.tx_outtrunc.enable
+	structure.ed_outtrunc.enable
+	structure.tx_outmore.enable
+	structure.ed_outmore.enable
+	structure.tx_outthreshold.enable
+	structure.ed_outthreshold.enable
 	structure.tx_outinv.enable
 	structure.ed_outinv.enable
 	structure.tx_outsqinv.enable
@@ -2067,12 +2075,12 @@ BEGIN
 	structure.tx_gwesprr.disable
 	structure.ed_gwesprr.disable
 	structure.tx_gwdspff.disable
-	structure.ed_gwdspff.disable
-	structure.tx_gwdspfb.disable
 END
 
 SCRIPT ty_u_2
 BEGIN
+	structure.ed_gwdspff.disable
+	structure.tx_gwdspfb.disable
 	structure.ed_gwdspfb.disable
 	structure.cx_isolatenet.enable
 	structure.cx_outiso.enable
@@ -2111,12 +2119,12 @@ BEGIN
 	structure.vl_diffx.enable
 	structure.tx_higher.enable
 	structure.vl_higher.enable
-	structure.tx_egosqx.enable
-	structure.vl_egosqx.enable
 END
 
 SCRIPT ty_u_3
 BEGIN
+	structure.tx_egosqx.enable
+	structure.vl_egosqx.enable
 	structure.tx_altsqx.enable
 	structure.vl_altsqx.enable
 	structure.tx_samexrecip.disable
@@ -2155,12 +2163,12 @@ BEGIN
 	covariates.tx_samextranstrip.enable
 	covariates.vl_samextranstrip.enable
 	covariates.tx_diffxtranstrip.enable
-	covariates.vl_diffxtranstrip.enable
-	covariates.tx_simxtranstrip.disable
 END
 
 SCRIPT ty_u_4
 BEGIN
+	covariates.vl_diffxtranstrip.enable
+	covariates.tx_simxtranstrip.disable
 	covariates.vl_simxtranstrip.disable
 	covariates.tx_homxtranstrip.enable
 	covariates.vl_homxtranstrip.enable
@@ -2199,12 +2207,12 @@ BEGIN
 	rates.cx_outrate.disable
 	rates.cx_inrate.disable
 	rates.cx_reciprate.disable
-	rates.cx_outrateinv.enable
-	rates.cx_inrateinv.disable
 END
 
 SCRIPT ty_u_5
 BEGIN
+	rates.cx_outrateinv.enable
+	rates.cx_inrateinv.disable
 	rates.cx_reciprateinv.disable
 	rates.cx_outratelog.enable
 	rates.cx_inratelog.disable
@@ -2243,12 +2251,12 @@ BEGIN
 	rates_2.cx_avsim.enable
 	rates_2.cx_avsimendow.enable
 	rates_2.cx_avsimcreation.enable
-	rates_2.cx_behsim.enable
-	rates_2.cx_behegox.enable
 END
 
 SCRIPT ty_u_6
 BEGIN
+	rates_2.cx_behsim.enable
+	rates_2.cx_behegox.enable
 	rates_2.cx_behaltx.enable
 	rates_2.cx_behegoplusalt.enable
 	rates_2.tx_behtheta0.enable
@@ -2287,12 +2295,12 @@ BEGIN
 	estimate.ed_ml_n1.enable
 	estimate.tx_ml_nsub.enable
 	estimate.ed_ml_nsub.enable
-	estimate.tx_ml_nstart2.enable
-	estimate.ed_ml_nstart2.enable
 END
 
 SCRIPT ty_u_7
 BEGIN
+	estimate.tx_ml_nstart2.enable
+	estimate.ed_ml_nstart2.enable
 	estimate.tx_ml_n3.enable
 	estimate.ed_ml_n3.enable
 	estimate.tx_ml_mult.enable
@@ -2342,6 +2350,8 @@ BEGIN
 	waves.tx_actormode.enable
 	waves.ed_actormode.enable
 	waves.cx_outdegree.enable
+	waves.cx_degree.enable
+	waves.cx_density.enable
 	waves.cx_reciprocity.disable
 	waves.cx_outdegreeendow.enable
 	waves.cx_outdegreecreation.enable
@@ -2369,22 +2379,22 @@ BEGIN
 	waves.cx_outactc.enable
 	waves.cx_inactc.disable
 	waves.cx_degplus.disable
-	waves.cx_degplusc.disable
-	waves.cx_recipop.disable
 END
 
 SCRIPT ty_b_1
 BEGIN
+	waves.cx_degplusc.disable
+	waves.cx_recipop.disable
 	waves.cx_recipopsqrt.disable
 	waves.cx_reciact.disable
 	waves.cx_reciactsqrt.disable
 	waves.cx_between.disable
-	waves.tx_outtrunc.enable
-	waves.ed_outtrunc.enable
-	waves.tx_outmore.enable
-	waves.ed_outmore.enable
-	waves.tx_outthreshold.enable
-	waves.ed_outthreshold.enable
+	structure.tx_outtrunc.enable
+	structure.ed_outtrunc.enable
+	structure.tx_outmore.enable
+	structure.ed_outmore.enable
+	structure.tx_outthreshold.enable
+	structure.ed_outthreshold.enable
 	structure.tx_outinv.enable
 	structure.ed_outinv.enable
 	structure.tx_outsqinv.enable
@@ -2413,12 +2423,12 @@ BEGIN
 	structure.tx_gwesprr.disable
 	structure.ed_gwesprr.disable
 	structure.tx_gwdspff.disable
-	structure.ed_gwdspff.disable
-	structure.tx_gwdspfb.enable
 END
 
 SCRIPT ty_b_2
 BEGIN
+	structure.ed_gwdspff.disable
+	structure.tx_gwdspfb.enable
 	structure.ed_gwdspfb.enable
 	structure.cx_isolatenet.disable
 	structure.cx_outiso.enable
@@ -2457,12 +2467,12 @@ BEGIN
 	structure.vl_diffx.disable
 	structure.tx_higher.disable
 	structure.vl_higher.disable
-	structure.tx_egosqx.enable
-	structure.vl_egosqx.enable
 END
 
 SCRIPT ty_b_3
 BEGIN
+	structure.tx_egosqx.enable
+	structure.vl_egosqx.enable
 	structure.tx_altsqx.enable
 	structure.vl_altsqx.enable
 	structure.tx_samexrecip.disable
@@ -2501,12 +2511,12 @@ BEGIN
 	covariates.tx_samextranstrip.disable
 	covariates.vl_samextranstrip.disable
 	covariates.tx_diffxtranstrip.disable
-	covariates.vl_diffxtranstrip.disable
-	covariates.tx_simxtranstrip.disable
 END
 
 SCRIPT ty_b_4
 BEGIN
+	covariates.vl_diffxtranstrip.disable
+	covariates.tx_simxtranstrip.disable
 	covariates.vl_simxtranstrip.disable
 	covariates.tx_homxtranstrip.disable
 	covariates.vl_homxtranstrip.disable
@@ -2545,12 +2555,12 @@ BEGIN
 	rates.cx_outrate.enable
 	rates.cx_inrate.disable
 	rates.cx_reciprate.disable
-	rates.cx_outrateinv.enable
-	rates.cx_inrateinv.disable
 END
 
 SCRIPT ty_b_5
 BEGIN
+	rates.cx_outrateinv.enable
+	rates.cx_inrateinv.disable
 	rates.cx_reciprateinv.disable
 	rates.cx_outratelog.enable
 	rates.cx_inratelog.disable
@@ -2589,12 +2599,12 @@ BEGIN
 	rates_2.cx_avsim.enable
 	rates_2.cx_avsimendow.enable
 	rates_2.cx_avsimcreation.enable
-	rates_2.cx_behsim.disable
-	rates_2.cx_behegox.disable
 END
 
 SCRIPT ty_b_6
 BEGIN
+	rates_2.cx_behsim.disable
+	rates_2.cx_behegox.disable
 	rates_2.cx_behaltx.disable
 	rates_2.cx_behegoplusalt.disable
 	rates_2.tx_behtheta0.enable
@@ -2633,12 +2643,12 @@ BEGIN
 	estimate.ed_ml_n1.enable
 	estimate.tx_ml_nsub.enable
 	estimate.ed_ml_nsub.enable
-	estimate.tx_ml_nstart2.enable
-	estimate.ed_ml_nstart2.enable
 END
 
 SCRIPT ty_b_7
 BEGIN
+	estimate.tx_ml_nstart2.enable
+	estimate.ed_ml_nstart2.enable
 	estimate.tx_ml_n3.enable
 	estimate.ed_ml_n3.enable
 	estimate.tx_ml_mult.enable
@@ -2820,6 +2830,12 @@ BEGIN
 			if waves.cx_outdegree {
 				put " outdegree"
 			}
+			if waves.cx_degree {
+				put " degree"
+			}
+			if waves.cx_density {
+				put " density"
+			}
 			if waves.cx_reciprocity {
 				put " reciprocity"
 			}
@@ -2895,16 +2911,16 @@ BEGIN
 			if waves.cx_degplusc {
 				put " degplusc"
 			}
+END
+
+PROGRAM opt_part2
+BEGIN
 			if waves.cx_recipop {
 				put " recipop"
 			}
 			if waves.cx_recipopsqrt {
 				put " recipopsqrt"
 			}
-END
-
-PROGRAM opt_part2
-BEGIN
 			if waves.cx_reciact {
 				put " reciact"
 			}
@@ -2914,14 +2930,14 @@ BEGIN
 			if waves.cx_between {
 				put " between"
 			}
-			if waves.ed_outtrunc.isneq("") {
-				optionarg /asis waves.ed_outtrunc
+			if structure.ed_outtrunc.isneq("") {
+				optionarg /asis structure.ed_outtrunc
 			}
-			if waves.ed_outmore.isneq("") {
-				optionarg /asis waves.ed_outmore
+			if structure.ed_outmore.isneq("") {
+				optionarg /asis structure.ed_outmore
 			}
-			if waves.ed_outthreshold.isneq("") {
-				optionarg /asis waves.ed_outthreshold
+			if structure.ed_outthreshold.isneq("") {
+				optionarg /asis structure.ed_outthreshold
 			}
 			if structure.ed_outinv.isneq("") {
 				optionarg /asis structure.ed_outinv
@@ -2998,16 +3014,16 @@ BEGIN
 			if structure.cx_antiiniso {
 				put " antiiniso"
 			}
+END
+
+PROGRAM opt_part3
+BEGIN
 			if structure.cx_antiiniso2 {
 				put " antiiniso2"
 			}
 			if structure.cx_inplus3 {
 				put " inplus3"
 			}
-END
-
-PROGRAM opt_part3
-BEGIN
 			if structure.cx_isolatepop {
 				put " isolatepop"
 			}
@@ -3101,16 +3117,16 @@ BEGIN
 			if covariates.vl_altlthresholdx.isneq("") {
 				optionarg /asis covariates.vl_altlthresholdx
 			}
+END
+
+PROGRAM opt_part4
+BEGIN
 			if covariates.vl_altrthresholdx.isneq("") {
 				optionarg /asis covariates.vl_altrthresholdx
 			}
 			if covariates.vl_degabsdiffx.isneq("") {
 				optionarg /asis covariates.vl_degabsdiffx
 			}
-END
-
-PROGRAM opt_part4
-BEGIN
 			if covariates.vl_degposdiffx.isneq("") {
 				optionarg /asis covariates.vl_degposdiffx
 			}

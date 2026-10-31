@@ -13,6 +13,7 @@ f _nwsaom_libcheck.ado
 f _nwsaom_mnbeh.ado
 f _nwsaom_nx.ado
 f _nwsaom_groups.ado
+f _nwsaom_degree.ado
 f nwsaom_estat_gofgroups.ado
 f nwsaom_gof_groupbegin.ado
 f nwsaom_estat_simgroups.ado
