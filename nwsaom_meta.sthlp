@@ -73,7 +73,7 @@ each group is then fitted on its own, and the four fits are combined. The combin
 {pstd}
 The first table gives, for every effect, the combined mean (IWLS), its standard error and t test, the estimated standard deviation between the groups, and the
 heterogeneity test Q (a small p value means that the groups differ more than their standard errors allow). In the example the means are about -2.26 (outdegree), 1.87 (reciprocity) and 0.47 (transtrip) and no effect differs between groups
-(p(Q) = 0.48, 0.80, 0.98), as it should be for groups simulated from the same model.
+(P>Q = 0.48, 0.80, 0.98), as it should be for groups simulated from the same model.
 
 {title:Reference}
 

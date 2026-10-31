@@ -87,42 +87,55 @@ program nwsaom_meta, rclass
 	matrix colnames `M' = n_used corr corr_p iwls_mean iwls_se iwls_t iwls_p iwls_sd Tsq Tsq_p Q Q_p ml_mean ml_se mu_lo mu_hi ml_sd sd_lo sd_hi fisher_right fisher_right_p fisher_left fisher_left_p level
 	if "`notable'" == "" {
 		di
-		di as text "Meta-analysis of {result:`ng'} fits (RSiena siena08): estimates with a standard error of at least " as result `bound' as text " are excluded"
-		di as text "Tests of mean parameters use a t distribution with n-1 d.f. (n = number of included groups)."
+		di as text "Meta-analysis of " as result `ng' as text " fits (as RSiena {bf:siena08})"
+		di as text "Estimates with a standard error of " as result `bound' as text " or more are excluded;"
+		di as text "tests of the means use a t distribution with n-1 d.f."
 		di
-		di as text "{bf:IWLS estimates} (Snijders & Baerveldt 2003)"
-		di as text "{hline 13}{c TT}{hline 66}"
-		di as text %12s "effect" " {c |}" %4s "n" %10s "mean" %9s "s.e." %8s "t" %8s "p" %9s "sd" %9s "Q" %8s "p(Q)"
-		di as text "{hline 13}{c +}{hline 66}"
+		di as text "{bf:IWLS estimates} (Snijders and Baerveldt 2003)"
+		di as text "{hline 13}{c TT}{hline 65}"
+		di as text %12s "effect" " {c |}" %4s "n" %10s "Mean" %11s "Std. err." %8s "t" %8s "P>|t|" %8s "SD" %8s "Q" %8s "P>Q"
+		di as text "{hline 13}{c +}{hline 65}"
 		local i 0
 		foreach c of local rn {
 			local ++i
-			di as text %12s abbrev("`c'", 12) " {c |}" as result %4.0f `M'[`i', 1] %10.4f `M'[`i', 4] %9.4f `M'[`i', 5] %8.2f `M'[`i', 6] %8.3f `M'[`i', 7] %9.4f `M'[`i', 8] %9.2f `M'[`i', 11] %8.3f `M'[`i', 12]
+			di as text %12s abbrev("`c'", 12) " {c |}" as result %4.0f `M'[`i', 1] %10.4f `M'[`i', 4] %11.4f `M'[`i', 5] %8.2f `M'[`i', 6] %8.3f `M'[`i', 7] %8.4f `M'[`i', 8] %8.2f `M'[`i', 11] %8.3f `M'[`i', 12]
 		}
-		di as text "{hline 13}{c BT}{hline 66}"
+		di as text "{hline 13}{c BT}{hline 65}"
 		di
-		di as text "{bf:Maximum likelihood under normality} with " as result %3.0f 100*(1-`alpha') as text "% profile-likelihood intervals"
-		di as text "{hline 13}{c TT}{hline 80}"
-		di as text %12s "effect" " {c |}" %9s "mean" %9s "s.e." %10s "lower" %9s "upper" %10s "sd" %9s "lower" %9s "upper"
-		di as text "{hline 13}{c +}{hline 80}"
-		local i 0
-		foreach c of local rn {
-			local ++i
-			di as text %12s abbrev("`c'", 12) " {c |}" as result %9.4f `M'[`i', 13] %9.4f `M'[`i', 14] %10.4f `M'[`i', 15] %9.4f `M'[`i', 16] %10.4f `M'[`i', 17] %9.4f `M'[`i', 18] %9.4f `M'[`i', 19]
-		}
-		di as text "{hline 13}{c BT}{hline 80}"
-		di
-		di as text "{bf:Fisher's combination of one-sided tests} (chi-squared, 2n d.f.)"
+		di as text "{bf:Maximum likelihood under normality}: mean of the parameter"
 		di as text "{hline 13}{c TT}{hline 44}"
-		di as text %12s "effect" " {c |}" %10s "right" %8s "p" %10s "left" %8s "p"
+		di as text %12s "effect" " {c |}" %10s "Mean" %11s "Std. err." "   [" as result %2.0f 100*(1-`alpha') as text "% conf. interval]"
 		di as text "{hline 13}{c +}{hline 44}"
 		local i 0
 		foreach c of local rn {
 			local ++i
-			di as text %12s abbrev("`c'", 12) " {c |}" as result %10.3f `M'[`i', 20] %8.3f `M'[`i', 21] %10.3f `M'[`i', 22] %8.3f `M'[`i', 23]
+			di as text %12s abbrev("`c'", 12) " {c |}" as result %10.4f `M'[`i', 13] %11.4f `M'[`i', 14] "   " %10.4f `M'[`i', 15] %10.4f `M'[`i', 16]
 		}
 		di as text "{hline 13}{c BT}{hline 44}"
-		di as text "Correlation of estimates and standard errors (Spearman, t approximation for p): see r(meta) columns corr, corr_p."
+		di
+		di as text "{bf:Maximum likelihood under normality}: standard deviation between groups"
+		di as text "{hline 13}{c TT}{hline 34}"
+		di as text %12s "effect" " {c |}" %10s "SD" "    [" as result %2.0f 100*(1-`alpha') as text "% conf. interval]"
+		di as text "{hline 13}{c +}{hline 34}"
+		local i 0
+		foreach c of local rn {
+			local ++i
+			di as text %12s abbrev("`c'", 12) " {c |}" as result %10.4f `M'[`i', 17] "    " %10.4f `M'[`i', 18] %10.4f `M'[`i', 19]
+		}
+		di as text "{hline 13}{c BT}{hline 34}"
+		di
+		di as text "{bf:Fisher's combination of one-sided tests} (chi-squared, 2n d.f.)"
+		di as text "{hline 13}{c TT}{hline 44}"
+		di as text %12s "" " {c |}" %20s "Right-sided" %20s "Left-sided"
+		di as text %12s "effect" " {c |}" %9s "chi2" %11s "Prob>chi2" %9s "chi2" %11s "Prob>chi2"
+		di as text "{hline 13}{c +}{hline 44}"
+		local i 0
+		foreach c of local rn {
+			local ++i
+			di as text %12s abbrev("`c'", 12) " {c |}" as result %9.3f `M'[`i', 20] %11.3f `M'[`i', 21] %9.3f `M'[`i', 22] %11.3f `M'[`i', 23]
+		}
+		di as text "{hline 13}{c BT}{hline 44}"
+		di as text "Correlations of estimates and standard errors are in {bf:r(meta)}."
 	}
 	return matrix meta = `M'
 	return matrix theta = `B'

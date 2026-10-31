@@ -221,15 +221,17 @@ The following example runs with the data of the package. It makes four groups by
 .     estimates store grp`s'
 . }
 . nwsaom meta grp1 grp2 grp3 grp4
-Meta-analysis of 4 fits (RSiena siena08): estimates with a standard error of at least 10 are excluded
-IWLS estimates (Snijders & Baerveldt 2003)
-      effect |   n      mean     s.e.       t       p       sd        Q    p(Q)
--------------+------------------------------------------------------------------
-   outdegree |   4   -2.2557   0.0572  -39.47   0.000   0.1143     2.49   0.477
- reciprocity |   4    1.8729   0.0691   27.09   0.000   0.1383     0.99   0.804
-   transtrip |   4    0.4749   0.0121   39.27   0.000   0.0242     0.16   0.983
+Meta-analysis of 4 fits (as RSiena siena08)
+Estimates with a standard error of 10 or more are excluded;
+tests of the means use a t distribution with n-1 d.f.
+IWLS estimates (Snijders and Baerveldt 2003)
+      effect |   n      Mean  Std. err.       t   P>|t|      SD       Q     P>Q
+-------------+-----------------------------------------------------------------
+   outdegree |   4   -2.2557     0.0572  -39.47   0.000  0.1143    2.49   0.477
+ reciprocity |   4    1.8729     0.0691   27.09   0.000  0.1383    0.99   0.804
+   transtrip |   4    0.4749     0.0121   39.27   0.000  0.0242    0.16   0.983
 \end{lstlisting}
-The combined means recover the coefficients, and no effect differs between the groups ($p(Q)$ between 0.48 and 0.98), as it should for groups simulated from the same model. In a real analysis a small $p(Q)$ for an effect means that the groups differ in that effect by more than their standard errors allow, and the estimated between-group standard deviation shows by how much. The full set of results is returned in \texttt{r(meta)}; the option \opt{rates} combines the rate parameters as well, and \opt{bound(\#)} excludes groups with a standard error of at least \# (default 10), as RSiena does. The option \opt{rates} uses the standard errors of the rates, \texttt{e(rates\_se)}, of each fit (version 1.1 took them from a row that does not exist, so that every rate was dropped without a message); the rows are named \texttt{rate\_period1}, \texttt{rate\_period2}, \ldots. The matrices \texttt{r(theta)} and \texttt{r(se)} (one row per stored estimate, one column per effect) carry the names of the stored estimates and of the effects. The results reproduce RSiena's functions to five decimals (Chapter~\ref{ch:validation}).
+The combined means recover the coefficients, and no effect differs between the groups (\texttt{P>Q} between 0.48 and 0.98), as it should for groups simulated from the same model. In a real analysis a small \texttt{P>Q} for an effect means that the groups differ in that effect by more than their standard errors allow, and the estimated between-group standard deviation shows by how much. The full set of results is returned in \texttt{r(meta)}; the option \opt{rates} combines the rate parameters as well, and \opt{bound(\#)} excludes groups with a standard error of at least \# (default 10), as RSiena does. The option \opt{rates} uses the standard errors of the rates, \texttt{e(rates\_se)}, of each fit (version 1.1 took them from a row that does not exist, so that every rate was dropped without a message); the rows are named \texttt{rate\_period1}, \texttt{rate\_period2}, \ldots. The matrices \texttt{r(theta)} and \texttt{r(se)} (one row per stored estimate, one column per effect) carry the names of the stored estimates and of the effects. The results reproduce RSiena's functions to five decimals (Chapter~\ref{ch:validation}).
 
 \section{What is not available}
 
