@@ -1,4 +1,4 @@
-*! version 1.4.1  31oct2026 _nwsaom_degree: spelling of the outdegree (density) effect: outdegree, degree or density (RSiena's names); the label follows the spelling typed
+*! version 1.4.2  31oct2026 _nwsaom_degree: spelling of the outdegree (density) effect: outdegree, degree or density (RSiena's names); the label follows the spelling typed
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General

@@ -4,7 +4,7 @@ d Thomas U. Grund, University College Dublin, www.grund.co.uk
 d email: thomas.u.grund@gmail.com
 d GPL-3. Requires the core package nwcommands.
 d Requires nwcommands (core), version 3.6.0 or later
-d Version: 1.4.1
+d Version: 1.4.2
 d Distribution-Date: 31oct2026
 f _nwsaom_chkbin.ado
 f _nwsaom_dlgprep.ado
@@ -63,4 +63,4 @@ f native/saom_struct.c
 f native/Makefile
 f native/spi/stplugin.c
 f native/spi/stplugin.h
-f native/saom_native_readme.txt
+f saom_native_readme.txt

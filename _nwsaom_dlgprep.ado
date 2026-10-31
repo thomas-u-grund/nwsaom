@@ -1,4 +1,4 @@
-*! version 1.4.1  31oct2026 _nwsaom_dlgprep.ado -- fills the lists of the nwsaom dialogs when a dialog opens
+*! version 1.4.2  31oct2026 _nwsaom_dlgprep.ado -- fills the lists of the nwsaom dialogs when a dialog opens
 * Copyright (C) 2026 Thomas U. Grund
 * Part of nwsaom (GPL-3, see LICENSE). Called by the dialogs (PROGRAM initialize); works with core 3.12.1.
 * Fills, for the dialog named in the argument: netlist (network names) and netlist_a (one action per network that sets the

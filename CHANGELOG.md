@@ -3,7 +3,9 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.4.2] - 2026-10-31
+
+Patch release. Works with nwcommands 3.6.0 and later; the build routine `nwinstall, buildplugin(nwsaom)` needs nwcommands 3.13.0. The compiled plugin is unchanged.
 
 ### Added
 - The C source of the native plugin (`native/*.c`, the `Makefile`, StataCorp's plugin interface files and a build note `saom_native_readme.txt`) is listed in `nwsaom.pkg` as ancillary files: `net get nwsaom, from(...)` copies it; `net install` still installs the compiled plugins only.
