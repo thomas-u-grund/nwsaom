@@ -82,7 +82,7 @@ program define nwsaom_estat_importance, rclass
 	}
 
 	di
-	di as txt "Relative importance of effects (RSiena's sienaRI); expected over the actors at the start of each period"
+	di as txt "Relative importance of effects (as RSiena {bf:sienaRI})" _n "Expected over the actors at the start of each period"
 	if "`e(symtype)'" != "" di as txt "Non-directed network: effect sizes are for the forcing model (RSiena modelType 2), as in RSiena."
 	if `coev' di as txt "Network effects"
 	nwsaom_imp_table, names(`names_net') first(1) b(`b') v(`V') sg(`sg') ri(`RI') rh(`RH') nper(`nper')
@@ -104,7 +104,7 @@ program define nwsaom_estat_importance, rclass
 		return matrix sigma_beh = `sgb'
 		return matrix certainty_beh = `RHb'
 	}
-	di as txt "RI: expected relative importance of the effect (shares sum to 1 within a period); semi-std. = estimate x sigma."
+	di as txt "RI: share of the effect in the actors' choices. Semi-std. = estimate x sigma."
 	capture scalar drop __nwsaom_imp_bad
 	matrix rownames `RI' = `names_net'
 	matrix rownames `I' = `names_net'
@@ -120,26 +120,28 @@ capture program drop nwsaom_imp_table
 program define nwsaom_imp_table
 	syntax , NAMES(string) FIRST(integer) B(name) V(name) SG(name) RI(name) RH(name) NPER(integer)
 	local p : word count `names'
-	di as txt "{hline 78}"
-	di as txt %-22s "effect" %10s "estimate" %9s "s.e." %10s "sigma" %12s "semi-std." _continue
+	local w = 40 + 10 * `nper'
+	di as txt %18s "effect" " {c |}" %9s "Estimate" %11s "Std. err." %9s "Sigma" %11s "Semi-std." _continue
 	forvalues pd = 1/`nper' {
-		di as txt %9s "RI p`pd'" _continue
+		di as txt %10s "RI p`pd'" _continue
 	}
 	di
+	di as txt "{hline 19}{c +}{hline `w'}"
 	forvalues j = 1/`p' {
 		local nm : word `j' of `names'
 		local k = `first' + `j' - 1
 		local se = sqrt(`v'[`k', `k'])
-		di as res %-22s abbrev("`nm'", 22) %10.4f `b'[1, `k'] %9.4f `se' %10.4f `sg'[`j', 1] %12.4f `b'[1, `k'] * `sg'[`j', 1] _continue
+		di as txt %18s abbrev("`nm'", 18) " {c |}" as res %9.4f `b'[1, `k'] %11.4f `se' %9.4f `sg'[`j', 1] %11.4f `b'[1, `k'] * `sg'[`j', 1] _continue
 		forvalues pd = 1/`nper' {
-			di as res %9.4f `ri'[`j', `pd'] _continue
+			di as res %10.4f `ri'[`j', `pd'] _continue
 		}
 		di
 	}
-	di as txt "{hline 78}"
-	di as txt "Certainty R_H of the actors' choices:" _continue
+	di as txt "{hline 19}{c +}{hline `w'}"
+	di as txt %18s "Certainty R_H" " {c |}" as res %9s "" %11s "" %9s "" %11s "" _continue
 	forvalues pd = 1/`nper' {
-		di as res %9.4f `rh'[1, `pd'] _continue
+		di as res %10.4f `rh'[1, `pd'] _continue
 	}
 	di
+	di as txt "{hline 19}{c BT}{hline `w'}"
 end

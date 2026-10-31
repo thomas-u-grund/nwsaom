@@ -6,6 +6,9 @@ project uses [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Changed
+- `estat score`, `estat timetest`, `estat importance`, `estat gof` (also the combined test over groups) and `estat simulate` / `nwsaom simulate` print Stata-style tables (label column, `|` separator, rules, `Prob>chi2`, `Std. err.`). The numbers and the `r()` results are unchanged. The manual, the tutorials and the article show the new layout.
+
+### Changed
 - `nwsaom meta` prints Stata-style tables (label column, `|` separator, rules; `Mean`, `Std. err.`, `P>|t|`, `P>Q`); the maximum-likelihood and Fisher results are separate tables. The numbers and `r()` results are unchanged. The manual, help file and tutorials show the new layout.
 
 ## [1.4.1] - 2026-10-31

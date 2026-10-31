@@ -77,52 +77,59 @@ program define nwsaom_estat_timetest, rclass
 	local ne = colsof(`idx')
 
 	di
-	di as txt "Test of time heterogeneity (score-type test; RSiena's sienaTimeTest)"
-	di as txt "{hline 70}"
-	di as txt "Joint test of all period-specific deviations:  c = " as res %9.4f `joint'[1,1] as txt "   d.f. = " as res `joint'[1,2] ///
-		as txt "   p-value = " as res %6.4f chi2tail(`joint'[1,2], `joint'[1,1])
+	di as txt "Test of time heterogeneity (score-type test; as RSiena {bf:sienaTimeTest})"
+	di as txt "Is the parameter of an effect the same in all periods?"
 	di
-	di as txt "Test of each effect (is its parameter the same in all periods?)"
-	di as txt %-24s "effect" %10s "c" %6s "d.f." %10s "p-value"
+	di as txt %18s "effect" " {c |}" %10s "chi2" %6s "d.f." %11s "Prob>chi2"
+	di as txt "{hline 19}{c +}{hline 27}"
 	local rows ""
 	forvalues j = 1/`ne' {
 		local k = `idx'[1, `j']
 		local nm : word `k' of `names'
-		di as res %-24s "`nm'" %10.3f `eff'[`j', 1] %6.0f `eff'[`j', 2] %10.4f chi2tail(`eff'[`j', 2], `eff'[`j', 1])
+		di as txt %18s abbrev("`nm'", 18) " {c |}" as res %10.3f `eff'[`j', 1] %6.0f `eff'[`j', 2] %11.4f chi2tail(`eff'[`j', 2], `eff'[`j', 1])
 		local rows `rows' `nm'
 	}
+	di as txt "{hline 19}{c +}{hline 27}"
+	di as txt %18s "Joint test" " {c |}" as res %10.3f `joint'[1,1] %6.0f `joint'[1,2] %11.4f chi2tail(`joint'[1,2], `joint'[1,1])
+	di as txt "{hline 19}{c BT}{hline 27}"
 	if e(ngroups) < . {
 		tempname gt
 		matrix `gt' = __nwsaom_tt_group
 		di
-		di as txt "Test of each group (are the parameters of the periods of the group the same as in the other groups?)"
-		di as txt %-24s "group" %10s "c" %6s "d.f." %10s "p-value"
+		di as txt "Are the parameters of the periods of a group the same as in the other groups?"
+		di as txt %18s "group" " {c |}" %10s "chi2" %6s "d.f." %11s "Prob>chi2"
+		di as txt "{hline 19}{c +}{hline 27}"
 		forvalues g = 1/`=rowsof(`gt')' {
-			di as res %-24s "Group `g'" %10.3f `gt'[`g', 1] %6.0f `gt'[`g', 2] %10.4f chi2tail(`gt'[`g', 2], `gt'[`g', 1])
+			di as txt %18s "`g'" " {c |}" as res %10.3f `gt'[`g', 1] %6.0f `gt'[`g', 2] %11.4f chi2tail(`gt'[`g', 2], `gt'[`g', 1])
 		}
+		di as txt "{hline 19}{c BT}{hline 27}"
 		return matrix group = `gt'
 		tempname pt
 		matrix `pt' = __nwsaom_tt_periodtest
 		di
 		di as txt "Test of each period (all effects)"
-		di as txt %-24s "period" %10s "c" %6s "d.f." %10s "p-value"
+		di as txt %18s "period" " {c |}" %10s "chi2" %6s "d.f." %11s "Prob>chi2"
+		di as txt "{hline 19}{c +}{hline 27}"
 		forvalues g = 1/`=rowsof(`pt')' {
-			di as res %-24s "Period `g'" %10.3f `pt'[`g', 1] %6.0f `pt'[`g', 2] %10.4f chi2tail(`pt'[`g', 2], `pt'[`g', 1])
+			di as txt %18s "`g'" " {c |}" as res %10.3f `pt'[`g', 1] %6.0f `pt'[`g', 2] %11.4f chi2tail(`pt'[`g', 2], `pt'[`g', 1])
 		}
+		di as txt "{hline 19}{c BT}{hline 27}"
 		return matrix period = `pt'
 	}
 	di
 	di as txt "Period-specific deviations (one-step estimates) and separate tests"
-	di as txt %-24s "effect" %8s "period" %12s "deviation" %10s "c" %10s "p-value"
+	di as txt %18s "effect" " {c |}" %8s "Period" %12s "Deviation" %10s "chi2" %11s "Prob>chi2"
+	di as txt "{hline 19}{c +}{hline 41}"
 	local r 0
 	forvalues j = 1/`ne' {
 		local k = `idx'[1, `j']
 		local nm : word `k' of `names'
 		forvalues q = 2/`nper' {
 			local ++r
-			di as res %-24s "`nm'" %8.0f `ind'[`r', 3] %12.4f `ind'[`r', 2] %10.3f `ind'[`r', 1] %10.4f chi2tail(1, `ind'[`r', 1])
+			di as txt %18s abbrev("`nm'", 18) " {c |}" as res %8.0f `ind'[`r', 3] %12.4f `ind'[`r', 2] %10.3f `ind'[`r', 1] %11.4f chi2tail(1, `ind'[`r', 1])
 		}
 	}
+	di as txt "{hline 19}{c BT}{hline 41}"
 	matrix colnames `eff' = c df
 	matrix colnames `ind' = c deviation period
 	capture scalar drop __nwsaom_tt_have

@@ -62,18 +62,25 @@ The fixed coefficient equals its start value and its variance is 0. Fixing is us
 \begin{lstlisting}
 . nwsaom, wave1(glasgow1) wave2(glasgow2) outdegree reciprocity transtrip k3(200) seed(1)
 . estat simulate, nsim(20) seed(5)
-Simulation from the fitted model: 20 replication(s) of 1 period(s).
-Mean over replications (observed end wave in brackets):
-period          ties      mutual    transitive    behavior
-1          110.2 ( 116)    33.4 (  35)      77.2 (  88)
+Simulation from the fitted model: 20 replication(s) of 1 period(s)
+Sim is the mean over the replications, Obs the observed end wave.
+
+             |          Ties        Mutual    Transitive
+      period |     Sim   Obs     Sim   Obs     Sim   Obs
+-------------+-------------------------------------------
+           1 |   110.2   116    33.4    35    77.2    88
+---------------------------------------------------------
 \end{lstlisting}
 Options: \opt{theta(\emph{matname})} replaces the coefficients (a row vector in the order of \texttt{e(b)}), \opt{rates()} and \opt{ratesbeh()} replace the rates, \opt{generate(\emph{stub})} saves the simulated networks as networks named \emph{stub}\texttt{\_}\emph{s}\texttt{\_p}\emph{period} (and the behaviors as variables of the same names). The result \texttt{r(sim)} has one row per replication and period (number of ties, mutual dyads, transitive triples, mean behavior), \texttt{r(obs)} the same for the observed end waves.
 
 \paragraph{Simulation-only mode.} \texttt{nwsaom simulate} simulates at coefficients you choose, without any estimation (RSiena's \texttt{siena07} with \texttt{simOnly = TRUE}). The model is specified exactly as in \texttt{nwsaom}; \opt{theta()} gives one coefficient per network effect in the order of the coefficient table of a fit of the same model (the order in which \nwsaom{} lists the effects, which is not always the order in which you typed them), \opt{behtheta()} one per behavior effect, \opt{rates()} the rate of each period.
 \begin{lstlisting}
 . nwsaom simulate, wave1(glasgow1) wave2(glasgow2) outdegree reciprocity transtrip theta(-2.3 2 0.5) rates(5) nsim(30) seed(3)
-period          ties      mutual    transitive    behavior
-1          127.1 ( 116)    36.3 (  35)      72.0 (  88)
+             |          Ties        Mutual    Transitive
+      period |     Sim   Obs     Sim   Obs     Sim   Obs
+-------------+-------------------------------------------
+           1 |   127.1   116    36.3    35    72.0    88
+---------------------------------------------------------
 \end{lstlisting}
 Internally the model is set up by a short call of \texttt{nwsaom} with all coefficients fixed, so every data option of \texttt{nwsaom} is understood. Both commands work for a two-mode model: the simulation runs on the actors-by-events network, the table shows the number of ties (attendances) only (the columns for mutual dyads and transitive triples are missing), and \opt{generate()} saves two-mode networks (one row per actor, one column per event). A \opt{theta()} matrix of the wrong shape stops with a message that says what was expected. After a fit with \opt{groups()}, \texttt{estat simulate} is not available.
 
@@ -83,18 +90,26 @@ The score-type test of Schweinberger (2012) asks, for effects that are not in th
 \begin{lstlisting}
 . nwsaom, wave1(glasgow1) wave2(glasgow2) outdegree reciprocity transtrip cycle3 theta0(-2.3 2 0 0) fix(transtrip cycle3) k0(100) k3(1000) seed(1)
 . estat score
-Generalised score-type test of the model restricted by:
-  (1)  transtrip                =    0.0000
-  (2)  cycle3                   =    0.0000
-------------------------------------------------------------
-Joint test:  c =  82.2543   d.f. = 2   p-value = 0.0000
-  (1) transtrip separately: c =  82.0640  d.f. = 1  p-value = 0.0000   one-sided:   9.0589
-  (2) cycle3 separately: c =  67.8301  d.f. = 1  p-value = 0.0000   one-sided:   8.2359
-One-step estimates (restricted estimate plus the one-step correction):
-  outdegree                 -2.6919
-  reciprocity                2.2197
-  transtrip                  1.2905
-  cycle3                     0.1595
+
+Score-type test of the restricted model (as RSiena score.Test)
+Tests whether the fixed effects below differ from their fixed values.
+
+            effect |  Fixed at     chi2  d.f. Prob>chi2 One-sided z
+-------------------+-----------------------------------------------
+         transtrip |    0.0000   82.064     1    0.0000       9.059
+            cycle3 |    0.0000   67.830     1    0.0000       8.236
+-------------------+-----------------------------------------------
+        Joint test |             82.254     2    0.0000
+-------------------------------------------------------------------
+
+One-step estimates (restricted estimate plus the one-step correction)
+            effect |  Estimate
+-------------------+----------
+         outdegree |   -2.6919
+       reciprocity |    2.2197
+         transtrip |    1.2905
+            cycle3 |    0.1595
+------------------------------
 \end{lstlisting}
 The joint statistic $c$ is chi-squared with as many degrees of freedom as tested effects. The one-sided variate is a normal variate with the sign changed, as in RSiena, so that it is positive when the effect is expected to be positive. The one-step estimates give the value each coefficient would approximately take if the tested effects were freed, which is a quick way to see the size of the effects before fitting the larger model. \opt{tested(\emph{effects})} restricts the test to some of the fixed effects; the others stay fixed and are treated as redundant. The test works for network effects and for the effects of a co-evolving behavior.
 
@@ -102,23 +117,30 @@ The joint statistic $c$ is chi-squared with as many degrees of freedom as tested
 \begin{lstlisting}
 . nwsaom multinet, net1(glasgow1 glasgow2 glasgow3) net2(advice1 advice2 advice3) eff1(outdegree reciprocity transtrip) eff2(outdegree reciprocity) cross1(crprod) cross2(from) theta0(-2.6 2.5 0.6 0 -1.9 1 0) fix(net1_x_crprod) seed(1) k3(300)
 . estat score
-Generalised score-type test of the model restricted by:
-  (1)  net1_x_crprod            =    0.0000
-------------------------------------------------------------
-Joint test:  c =    2.2103   d.f. = 1  p-value = 0.1371
-One-sided (normal variate):   -1.4867
-One-step estimates (restricted estimate plus the one-step correction):
-  net1_outdegree            -2.6514
-  net1_reciprocity           2.5509
-  net1_transtrip             0.6455
-  net1_x_crprod             -0.5391
-  net2_outdegree            -1.9176
-  net2_reciprocity           1.0531
-  net2_x_from                0.2872
-  rate1                      6.0133
-  rate2                      4.6088
-  rate3                      1.7523
-  rate4                      1.6747
+
+Score-type test of the restricted model (as RSiena score.Test)
+Tests whether the fixed effects below differ from their fixed values.
+
+            effect |  Fixed at     chi2  d.f. Prob>chi2 One-sided z
+-------------------+-----------------------------------------------
+     net1_x_crprod |    0.0000    2.210     1    0.1371      -1.487
+-------------------------------------------------------------------
+
+One-step estimates (restricted estimate plus the one-step correction)
+            effect |  Estimate
+-------------------+----------
+    net1_outdegree |   -2.6514
+  net1_reciprocity |    2.5509
+    net1_transtrip |    0.6455
+     net1_x_crprod |   -0.5391
+    net2_outdegree |   -1.9176
+  net2_reciprocity |    1.0531
+       net2_x_from |    0.2872
+             rate1 |    6.0133
+             rate2 |    4.6088
+             rate3 |    1.7523
+             rate4 |    1.6747
+------------------------------
 \end{lstlisting}
 On the artificial advice network \texttt{crprod} has no evidence in its favour, as in the fit of Section~\ref{sec:multinet}. The rates are listed as \texttt{rate1}, \texttt{rate2} (the first network in periods 1 and 2) and \texttt{rate3}, \texttt{rate4} (the second network).
 

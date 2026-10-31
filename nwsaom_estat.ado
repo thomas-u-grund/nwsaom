@@ -557,7 +557,9 @@ program define nwsaom_estat_gof, rclass
 	}
 	else di as txt " (one test per period)"
 	local __gof_graphs ""
-	di as txt "{hline 60}"
+	di
+	di as txt %20s "statistic" " {c |}" %14s "Mahalanobis" %9s "P-value" %9s "Fit"
+	di as txt "{hline 21}{c +}{hline 32}"
 	foreach __gof_s of local stats {
 	  if `__gof_join' {
 		mata: st_numscalar("__nwsaom_gof_p", .)
@@ -567,8 +569,8 @@ program define nwsaom_estat_gof, rclass
 		local __gof_mhd = __nwsaom_gof_obsmhd
 
 		local __gof_label = proper("`__gof_s'")
-		di as txt %-14s "`__gof_label'" "{c |}" as res " Mahalanobis dist. = " %8.3f `__gof_mhd' as txt "   p = " as res %6.3f `__gof_pval' ///
-			as txt cond(`__gof_pval' < 0.05, " (evidence AGAINST fit)", " (no evidence against fit)")
+		di as txt %20s "`__gof_label'" " {c |}" as res %14.3f `__gof_mhd' %9.3f `__gof_pval' ///
+			as txt %9s cond(`__gof_pval' < 0.05, "rejected", "ok")
 
 		local __gof_thisname = cond("`name'"=="", "gof_`__gof_s'", "`name'_`__gof_s'")
 		local __gof_graphs "`__gof_graphs' `__gof_thisname'"
@@ -589,8 +591,8 @@ program define nwsaom_estat_gof, rclass
 			local __gof_mhd = __nwsaom_gof_obsmhd
 
 			local __gof_label = proper("`__gof_s'") + " (period `__pd')"
-			di as txt %-24s "`__gof_label'" "{c |}" as res " Mahalanobis dist. = " %8.3f `__gof_mhd' as txt "   p = " as res %6.3f `__gof_pval' ///
-				as txt cond(`__gof_pval' < 0.05, " (evidence AGAINST fit)", " (no evidence against fit)")
+			di as txt %20s abbrev("`__gof_label'", 20) " {c |}" as res %14.3f `__gof_mhd' %9.3f `__gof_pval' ///
+				as txt %9s cond(`__gof_pval' < 0.05, "rejected", "ok")
 
 			local __gof_thisname = cond("`name'"=="", "gof_`__gof_s'_p`__pd'", "`name'_`__gof_s'_p`__pd'")
 			local __gof_graphs "`__gof_graphs' `__gof_thisname'"
@@ -604,8 +606,8 @@ program define nwsaom_estat_gof, rclass
 		}
 	  }
 	}
-	di as txt "{hline 60}"
-	di as txt "p < 0.05: the observed statistic is unlikely under the fitted model (" cond(`__gof_twotailed', "two", "one") "-tailed test)."
+	di as txt "{hline 21}{c BT}{hline 32}"
+	di as txt "Fit is rejected when P < 0.05 (" cond(`__gof_twotailed', "two", "one") "-tailed test)."
 	di as txt "Violin plots:" as res "`__gof_graphs'"
 
 	capture mata: mata drop __nwsaom_gof_cfg

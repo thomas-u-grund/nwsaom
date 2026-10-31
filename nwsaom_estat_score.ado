@@ -70,28 +70,29 @@ program define nwsaom_estat_score, rclass
 	local pv = chi2tail(`df', `c')
 
 	di
-	di as txt "Generalised score-type test of the model restricted by:"
-	local j 0
-	foreach w of local tested {
-		local ++j
-		local pos : list posof "`w'" in names
-		di as txt "  (`j')  " as res %-24s "`w'" as txt " = " as res %9.4f `b'[1, `pos']
-	}
-	di as txt "{hline 60}"
-	di as txt "Joint test:  c = " as res %9.4f `c' as txt "   d.f. = " as res `df' as txt "   p-value = " as res %6.4f `pv'
+	di as txt "Score-type test of the restricted model (as RSiena {bf:score.Test})"
+	di as txt "Tests whether the fixed effects below differ from their fixed values."
 	tempname sep
 	matrix `sep' = __nwsaom_score_res
+	di
+	di as txt %18s "effect" " {c |}" %10s "Fixed at" %9s "chi2" %6s "d.f." %10s "Prob>chi2" %12s "One-sided z"
+	di as txt "{hline 19}{c +}{hline 47}"
 	if `df' == 1 {
-		di as txt "One-sided (normal variate): " as res %9.4f scalar(__nwsaom_score_oneS)
+		local w : word 1 of `tested'
+		local pos : list posof "`w'" in names
+		di as txt %18s abbrev("`w'", 18) " {c |}" as res %10.4f `b'[1, `pos'] %9.3f `c' %6.0f 1 %10.4f `pv' %12.3f scalar(__nwsaom_score_oneS)
 	}
 	else {
 		local j 0
 		foreach w of local tested {
 			local ++j
-			di as txt "  (`j') `w' separately: c = " as res %8.4f `sep'[`j', 1] as txt "  d.f. = 1  p-value = " as res %6.4f chi2tail(1, `sep'[`j', 1]) ///
-				as txt "   one-sided: " as res %8.4f `sep'[`j', 2]
+			local pos : list posof "`w'" in names
+			di as txt %18s abbrev("`w'", 18) " {c |}" as res %10.4f `b'[1, `pos'] %9.3f `sep'[`j', 1] %6.0f 1 %10.4f chi2tail(1, `sep'[`j', 1]) %12.3f `sep'[`j', 2]
 		}
+		di as txt "{hline 19}{c +}{hline 47}"
+		di as txt %18s "Joint test" " {c |}" as res %10s "" %9.3f `c' %6.0f `df' %10.4f `pv'
 	}
+	di as txt "{hline 19}{c BT}{hline 47}"
 	tempname os
 	matrix `os' = __nwsaom_score_onestep
 	local onames `names'
@@ -100,11 +101,14 @@ program define nwsaom_estat_score, rclass
 	}
 	matrix colnames `os' = `onames'
 	di
-	di as txt "One-step estimates (restricted estimate plus the one-step correction):"
+	di as txt "One-step estimates (restricted estimate plus the one-step correction)"
+	di as txt %18s "effect" " {c |}" %10s "Estimate"
+	di as txt "{hline 19}{c +}{hline 10}"
 	forvalues i = 1/`nall' {
 		local nm : word `i' of `onames'
-		di as txt "  " %-24s "`nm'" as res %9.4f `os'[1, `i']
+		di as txt %18s abbrev("`nm'", 18) " {c |}" as res %10.4f `os'[1, `i']
 	}
+	di as txt "{hline 19}{c BT}{hline 10}"
 	capture scalar drop __nwsaom_score_have __nwsaom_score_nfix __nwsaom_score_same
 	return scalar chi2 = `c'
 	return scalar df = `df'

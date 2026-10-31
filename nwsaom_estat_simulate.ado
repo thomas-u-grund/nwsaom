@@ -215,25 +215,33 @@ program define nwsaom_estat_simulate, rclass
 
 	matrix colnames `sim' = sim period ties mutual transitive behmean
 	matrix colnames `obs' = sim period ties mutual transitive behmean
-	di as txt "Simulation from the fitted model: " as res `nsim' as txt " replication(s) of " as res `nperiods' as txt " period(s)."
-	di as txt "Mean over replications (observed end wave in brackets):"
+	di as txt "Simulation from the fitted model: " as res `nsim' as txt " replication(s) of " as res `nperiods' as txt " period(s)"
+	di as txt "Sim is the mean over the replications, Obs the observed end wave."
 	if `tm' di as txt "(two-mode network: " e(n_actors) " actors x " e(n_events) " events; ties are attendances)"
-	if `tm' di as txt %-8s "period" %12s "ties" %12s "behavior"
-	else di as txt %-8s "period" %12s "ties" %12s "mutual" %14s "transitive" %12s "behavior"
+	local ncol = 1 + (!`tm') * 2 + `coev'
+	di
+	di as txt %12s "" " {c |}" %14s "Ties" _continue
+	if !`tm' di as txt %14s "Mutual" %14s "Transitive" _continue
+	if `coev' di as txt %14s "Behavior" _continue
+	di
+	di as txt %12s "period" " {c |}" %8s "Sim" %6s "Obs" _continue
+	if !`tm' di as txt %8s "Sim" %6s "Obs" %8s "Sim" %6s "Obs" _continue
+	if `coev' di as txt %8s "Sim" %6s "Obs" _continue
+	di
+	di as txt "{hline 13}{c +}{hline `=14 * `ncol' + 1'}"
 	forvalues pd = 1/`nperiods' {
 		mata: st_numscalar("__nwsaom_sim_m3", mean(select(st_matrix("`sim'")[., 3], st_matrix("`sim'")[., 2] :== `pd')))
 		mata: st_numscalar("__nwsaom_sim_m4", mean(select(st_matrix("`sim'")[., 4], st_matrix("`sim'")[., 2] :== `pd')))
 		mata: st_numscalar("__nwsaom_sim_m5", mean(select(st_matrix("`sim'")[., 5], st_matrix("`sim'")[., 2] :== `pd')))
-		if `tm' di as res %-8.0f `pd' %8.1f __nwsaom_sim_m3 as txt " (" as res %4.0f `obs'[`pd', 3] as txt ")" _continue
-		else di as res %-8.0f `pd' %8.1f __nwsaom_sim_m3 as txt " (" as res %4.0f `obs'[`pd', 3] as txt ")" ///
-			as res %8.1f __nwsaom_sim_m4 as txt " (" as res %4.0f `obs'[`pd', 4] as txt ")" ///
-			as res %10.1f __nwsaom_sim_m5 as txt " (" as res %4.0f `obs'[`pd', 5] as txt ")" _continue
+		di as txt %12.0f `pd' " {c |}" as res %8.1f __nwsaom_sim_m3 %6.0f `obs'[`pd', 3] _continue
+		if !`tm' di as res %8.1f __nwsaom_sim_m4 %6.0f `obs'[`pd', 4] %8.1f __nwsaom_sim_m5 %6.0f `obs'[`pd', 5] _continue
 		if `coev' {
 			mata: st_numscalar("__nwsaom_sim_m6", mean(select(st_matrix("`sim'")[., 6], st_matrix("`sim'")[., 2] :== `pd')))
-			di as res %8.2f __nwsaom_sim_m6 as txt " (" as res %5.2f `obs'[`pd', 6] as txt ")"
+			di as res %8.2f __nwsaom_sim_m6 %6.2f `obs'[`pd', 6] _continue
 		}
-		else di
+		di
 	}
+	di as txt "{hline 13}{c BT}{hline `=14 * `ncol' + 1'}"
 	capture scalar drop __nwsaom_sim_m3 __nwsaom_sim_m4 __nwsaom_sim_m5 __nwsaom_sim_m6
 	return matrix sim = `sim'
 	return matrix obs = `obs'

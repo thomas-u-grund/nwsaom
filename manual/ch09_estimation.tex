@@ -158,9 +158,14 @@ Stored estimates can be combined across networks with \texttt{nwsaom meta}, the 
 \begin{lstlisting}
 . estat gof, nsim(30) seed(1)
 Goodness of fit (nwsaom), Mahalanobis-distance test ..., 30 simulated repl.
-Outdegree | Mahalanobis dist. = 20.498  p = 0.000 (evidence AGAINST fit)
-Indegree  | Mahalanobis dist. = 21.567  p = 0.000 (evidence AGAINST fit)
-Geodesic  | Mahalanobis dist. = 34.322  p = 0.000 (evidence AGAINST fit)
+
+           statistic |   Mahalanobis  P-value      Fit
+---------------------+--------------------------------
+           Outdegree |        20.498    0.000 rejected
+            Indegree |        21.567    0.000 rejected
+            Geodesic |        34.322    0.000 rejected
+---------------------+--------------------------------
+Fit is rejected when P < 0.05 (one-tailed test).
 \end{lstlisting}
 This three-effect model on the Glasgow data is deliberately minimal; the output shows how a poorly fitting specification is reported, and that it is a reason to extend the model, not a failure of the command. \opt{nsim()} defaults to 50 (minimum 5); \texttt{nsim(30)} was used here only to be quick.
 

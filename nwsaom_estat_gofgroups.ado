@@ -37,7 +37,9 @@ program define nwsaom_estat_gofgroups, rclass
 	if `group' == 0 & `G' > 1 & "`join'" != "off" {
 		di
 		di as txt "Combined over the groups (inverse normal method, Liptak; the manual of RSiena)"
-		di as txt "{hline 60}"
+		di
+		di as txt %12s "statistic" " {c |}" %12s "Combined P"
+		di as txt "{hline 13}{c +}{hline 12}"
 		foreach s of local stats {
 			local z 0
 			forvalues g = 1/`G' {
@@ -45,10 +47,10 @@ program define nwsaom_estat_gofgroups, rclass
 				local z = `z' + invnormal(1 - `pp')
 			}
 			local pc = 1 - normal(`z' / sqrt(`G'))
-			di as txt %-14s proper("`s'") "{c |}" as res "   combined p = " %6.3f `pc'
+			di as txt %12s proper("`s'") " {c |}" as res %12.3f `pc'
 			return scalar p_`s' = `pc'
 		}
-		di as txt "{hline 60}"
+		di as txt "{hline 13}{c BT}{hline 12}"
 	}
 end
 

@@ -21,7 +21,7 @@ The following postestimation command is available after {helpb nwsaom}:
 {p2col: {cmd:estat gof}}RSiena-style goodness-of-fit test and violin plot{p_end}
 {p2col: {cmd:estat mems}}Micro Effects on Macro Structure (Duxbury) mediation-style sensitivity analysis{p_end}
 {p2col: {cmd:estat simulate}}Simulate the fitted model (or the model at chosen coefficients) forward from the observed waves{p_end}
-{p2col: {cmd:estat score}}Generalised score-type test of the effects held fixed with {opt fix()}{p_end}
+{p2col: {cmd:estat score}}Score-type test of the effects held fixed with {opt fix()}{p_end}
 {p2col: {cmd:estat timetest}}Test of time heterogeneity of the effects (RSiena's {cmd:sienaTimeTest}){p_end}
 {p2col: {cmd:estat importance}}Relative importance of the effects (RSiena's {cmd:sienaRI}){p_end}
 {p2colreset}{...}

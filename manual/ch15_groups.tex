@@ -283,32 +283,38 @@ Four periods remain (two in group~1, one each in groups 2 and 3), numbered 1, 2,
 (output omitted: outdegree -2.976, reciprocity 2.920, altx_alc 0.006, egox_alc -0.053, transtrip 0.652; six rates)
 . estat timetest, fixrates
 
-Test of time heterogeneity (score-type test; RSiena's sienaTimeTest)
-----------------------------------------------------------------------
-Joint test of all period-specific deviations:  c =   36.3357   d.f. = 25   p-value = 0.0667
+Test of time heterogeneity (score-type test; as RSiena sienaTimeTest)
+Is the parameter of an effect the same in all periods?
 
-Test of each effect (is its parameter the same in all periods?)
-effect                           c  d.f.   p-value
-outdegree                    3.080     5    0.6876
-reciprocity                  2.672     5    0.7503
-altx_alc                    10.794     5    0.0556
-egox_alc                     8.384     5    0.1363
-transtrip                   11.680     5    0.0394
+            effect |      chi2  d.f.  Prob>chi2
+-------------------+---------------------------
+         outdegree |     3.080     5     0.6876
+       reciprocity |     2.672     5     0.7503
+          altx_alc |    10.794     5     0.0556
+          egox_alc |     8.384     5     0.1363
+         transtrip |    11.680     5     0.0394
+-------------------+---------------------------
+        Joint test |    36.336    25     0.0667
+-----------------------------------------------
 
-Test of each group (are the parameters of the periods of the group the same as in the other groups?)
-group                            c  d.f.   p-value
-Group 1                      2.320     5    0.8033
-Group 2                     13.036    10    0.2217
-Group 3                     21.967    10    0.0153
+Are the parameters of the periods of a group the same as in the other groups?
+             group |      chi2  d.f.  Prob>chi2
+-------------------+---------------------------
+                 1 |     2.320     5     0.8033
+                 2 |    13.036    10     0.2217
+                 3 |    21.967    10     0.0153
+-----------------------------------------------
 
 Test of each period (all effects)
-period                           c  d.f.   p-value
-Period 1                     2.320     5    0.8033
-Period 2                     6.085     5    0.2980
-Period 3                     8.021     5    0.1551
-Period 4                     7.133     5    0.2109
-Period 5                    18.300     5    0.0026
-Period 6                     4.452     5    0.4864
+            period |      chi2  d.f.  Prob>chi2
+-------------------+---------------------------
+                 1 |     2.320     5     0.8033
+                 2 |     6.085     5     0.2980
+                 3 |     8.021     5     0.1551
+                 4 |     7.133     5     0.2109
+                 5 |    18.300     5     0.0026
+                 6 |     4.452     5     0.4864
+-----------------------------------------------
 \end{lstlisting}
 (The table of the period-specific deviations follows in the output and is omitted here.) The joint test is borderline ($p=0.067$); the effect of closure (\texttt{transtrip}) varies most, group~3 is the group that differs from the others ($p=0.015$), and period~5, which is the first period of group~3, is the period where the model fits worst ($p=0.003$). The periods are numbered 1 to 6 here (not with RSiena's numbers of the rates). The test per group follows RSiena (for the first group it is the test of the sum of the period dummies of each effect). The returned matrices are \texttt{r(group)} and \texttt{r(period)}. In RSiena 1.6.14 the test printed under the name \emph{group test} is the per-period test.
 
@@ -318,13 +324,16 @@ The score test works as in one group (Chapter~\ref{ch:tools}): fit the restricte
 (output omitted)
 . estat score
 
-Generalised score-type test of the model restricted by:
-  (1)  altx_alc                 =    0.0000
-  (2)  egox_alc                 =    0.0000
-------------------------------------------------------------
-Joint test:  c =    0.1870   d.f. = 2   p-value = 0.9107
-  (1) altx_alc separately: c =   0.0405  d.f. = 1  p-value = 0.8404   one-sided:  -0.2014
-  (2) egox_alc separately: c =   0.1719  d.f. = 1  p-value = 0.6785   one-sided:  -0.4146
+Score-type test of the restricted model (as RSiena score.Test)
+Tests whether the fixed effects below differ from their fixed values.
+
+            effect |  Fixed at     chi2  d.f. Prob>chi2 One-sided z
+-------------------+-----------------------------------------------
+          altx_alc |    0.0000    0.041     1    0.8404      -0.201
+          egox_alc |    0.0000    0.172     1    0.6785      -0.415
+-------------------+-----------------------------------------------
+        Joint test |              0.187     2    0.9107
+-------------------------------------------------------------------
 \end{lstlisting}
 The alcohol effects are not needed in the network model ($p=0.91$). In the fit of the restricted model the program prints that the convergence criteria are not met for the two fixed effects: their t-ratios are exactly the quantity the score test examines, not a failure of the estimation.
 

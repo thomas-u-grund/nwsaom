@@ -189,10 +189,14 @@ After a fit, \texttt{estat gof} compares the observed network with networks simu
 . estat gof
 Goodness of fit (nwsaom), Mahalanobis-distance test (Lospinoso & Snijders 2019, ...), 50 simulated repl. at the fitted coefficients
 (pooled across all 2 periods by summation - real RSiena's own join=TRUE default)
-------------------------------------------------------------
-Outdegree     | Mahalanobis dist. =    8.739   p =  0.420 (no evidence against fit)
-Indegree      | Mahalanobis dist. =    9.308   p =  0.460 (no evidence against fit)
-Geodesic      | Mahalanobis dist. =   21.918   p =  0.020 (evidence AGAINST fit)
+
+           statistic |   Mahalanobis  P-value      Fit
+---------------------+--------------------------------
+           Outdegree |         8.739    0.420       ok
+            Indegree |         9.308    0.460       ok
+            Geodesic |        21.918    0.020 rejected
+---------------------+--------------------------------
+Fit is rejected when P < 0.05 (one-tailed test).
 ------------------------------------------------------------
 \end{lstlisting}
 (In the output the plots are announced as well; the lines about them are omitted here.) A small $p$-value is evidence against the model for that statistic: here the three-effect model does not reproduce the distribution of the geodesic distances. The $p$-values are returned in \texttt{r(p\_outdegree)}, \texttt{r(p\_indegree)} and \texttt{r(p\_geodesic)}. Goodness of fit has its own chapter.
