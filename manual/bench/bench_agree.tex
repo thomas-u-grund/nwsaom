@@ -1,43 +1,63 @@
-\begin{table}[htbp]
-\centering
-\caption{\texttt{nwsaom} and RSiena 1.6.6 on the same models and data:
-largest difference in a mean estimate (in RSiena standard errors)}
-\label{tab:bench}
-\footnotesize
-\begin{tabular}{l>{\raggedright\arraybackslash}p{0.30\textwidth}rrr}
+{\footnotesize
+\begin{longtable}{l>{\raggedright\arraybackslash}p{0.33\textwidth}rrr}
+\caption{\texttt{nwsaom} and RSiena 1.6.14 on the same models and data: largest difference in a mean estimate (in RSiena standard errors)}\label{tab:bench}\\
 \toprule
  & Specification & $n$ & Waves & Max diff \\
 \midrule
+\endfirsthead
+\multicolumn{5}{l}{\textit{Table \thetable{} continued}}\\
+\toprule
+ & Specification & $n$ & Waves & Max diff \\
+\midrule
+\endhead
+\midrule
+\multicolumn{5}{r}{\textit{continued on the next page}}\\
+\endfoot
+\bottomrule
+\endlastfoot
 \multicolumn{5}{l}{\textit{Network}} \\
-N1 & \texttt{outdegree}, \texttt{reciprocity} & 50 & 2 & 0.02 \\
-N2 & + \texttt{gwesp} & 50 & 3 & 0.07 \\
-N4 & + \texttt{gwesp}, \texttt{samex()} & 50 & 3 & 0.03 \\
+N1 & \texttt{outdegree}, \texttt{reciprocity} & 50 & 2 & 0.06 \\
+N2 & + \texttt{gwesp} & 50 & 3 & 0.02 \\
+N4 & + \texttt{gwesp}, \texttt{samex()} & 50 & 3 & 0.05 \\
 N5 & + \texttt{gwesp}, \texttt{indegpopularity}, \texttt{outactivity} & 50 & 3 & 0.07 \\
-N6 & + \texttt{gwesp}, \texttt{egox()}, \texttt{altx()}, \texttt{simx()} & 50 & 3 & 0.06 \\
+N6 & + \texttt{gwesp}, \texttt{egox()}, \texttt{altx()}, \texttt{simx()} & 50 & 3 & 0.05 \\
 N7 & N2, unconditional estimation & 50 & 3 & 0.03 \\
 \addlinespace
 \multicolumn{5}{l}{\textit{Undirected}} \\
-U1 & \texttt{outdegree}, default model (forcing) & 50 & 2 & 0.02 \\
-U2 & \texttt{outdegree}, \texttt{symtype(joint)} & 50 & 2 & 0.06 \\
+U1 & \texttt{outdegree}, default model (forcing) & 50 & 2 & 0.03 \\
+U2 & \texttt{outdegree}, \texttt{symtype(joint)} & 50 & 2 & 0.05 \\
 \addlinespace
 \multicolumn{5}{l}{\textit{Co-evolution}} \\
-C1 & N2 + alcohol: \texttt{linear}, \texttt{quadratic}, \texttt{avalt} & 50 & 3 & 0.07 \\
-C2 & N2 + smoking: \texttt{linear}, \texttt{quadratic}, \texttt{avsim} & 50 & 3 & 0.06 \\
-C3 & N1 + alcohol: \texttt{linear}, \texttt{avalt} & 50 & 2 & 0.04 \\
+C1 & N2 + alcohol: \texttt{linear}, \texttt{quadratic}, \texttt{avalt} & 50 & 3 & 0.05 \\
+C2 & N2 + smoking: \texttt{linear}, \texttt{quadratic}, \texttt{avsim} & 50 & 3 & 0.08 \\
+C3 & N1 + alcohol: \texttt{linear}, \texttt{avalt} & 50 & 2 & 0.02 \\
 \addlinespace
 \multicolumn{5}{l}{\textit{Realistic}} \\
-R1 & full network model (see text) & 50 & 3 & 0.06 \\
+R1 & full network model (see text) & 50 & 3 & 0.03 \\
 R2 & R1 network part + alcohol co-evolution & 50 & 3 & 0.05 \\
-R3 & undirected: \texttt{gwesp}, \texttt{samex()}, \texttt{simx()} & 50 & 2 & 0.03 \\
-R4 & R1 & 200 & 3 & 0.05 \\
-R5 & R2 & 200 & 3 & 0.07 \\
+R3 & undirected: \texttt{gwesp}, \texttt{samex()}, \texttt{simx()} & 50 & 2 & 0.01 \\
+R4 & R1 & 200 & 3 & 0.03 \\
+R5 & R2 & 200 & 3 & 0.02 \\
 \addlinespace
 \multicolumn{5}{l}{\textit{Larger networks}} \\
-S100 & N2 & 100 & 3 & 0.04 \\
+S100 & N2 & 100 & 3 & 0.02 \\
 S200 & N2 & 200 & 3 & 0.04 \\
-S500 & N2 & 500 & 3 & 0.03 \\
+S500 & N2 & 500 & 3 & 0.07 \\
 T200 & C1 & 200 & 3 & 0.05 \\
-\bottomrule
-\end{tabular}
-
-\end{table}
+\addlinespace
+\multicolumn{5}{l}{\textit{Two-mode}} \\
+X1 & \texttt{outdegree}, \texttt{indegpopularity}, \texttt{cycle4} & 40$\times$20 & 3 & 0.07 \\
+X2 & \texttt{outdegree}, \texttt{indegpopularity}, \texttt{outactivity}, \texttt{cycle4}, \texttt{outiso}, \texttt{antiiniso2} & 40$\times$30 & 3 & 0.04 \\
+\addlinespace
+\multicolumn{5}{l}{\textit{Two networks}} \\
+X3 & both: \texttt{outdegree}, \texttt{reciprocity}; \texttt{crprod} & 50 & 3 & 0.02 \\
+X4 & X3 without \texttt{crprod} + smoking: \texttt{linear}, \texttt{quadratic}, \texttt{avalt} (both networks) & 50 & 3 & 0.03 \\
+X5 & X4 with \texttt{avalt} on network 1 only; \texttt{behegox}, \texttt{behaltx}, \texttt{behsim}, \texttt{samewwclosure:behavior} & 50 & 3 & 0.05 \\
+X6 & undirected network 1 (\texttt{sym1}) + directed network 2; \texttt{crprod} & 50 & 3 & 0.04 \\
+\addlinespace
+\multicolumn{5}{l}{\textit{Single network}} \\
+X7 & \texttt{outdegree}, \texttt{reciprocity}, \texttt{gwesp}, \texttt{samextranstrip()}, \texttt{altxoutact()}, \texttt{egoplusaltsqx()} & 50 & 3 & 0.03 \\
+X8 & \texttt{outdegree}, \texttt{reciprocity}, \texttt{ownx(transtrip1 transrectrip2 jout)} & 50 & 3 & 0.07 \\
+\end{longtable}
+}
+\par\smallskip\footnotesize Medians over seven fits (seeds 1--7; five above one minute, three above three minutes) per program, run alternately. Max diff includes the rate parameters and uses the fits that converged (overall convergence ratio $<0.25$) in both programs. N7, X1, X2: unconditional estimation in both programs (\texttt{unconditional}; \texttt{cond = FALSE}); X3--X6: \texttt{nwsaom multinet} with \texttt{k0(100) k3(1000)} against RSiena \texttt{n3 = 1000, nsub = 4}. Fits that converged, RSiena / \texttt{nwsaom}, for the models with at least one that did not: R1 7/7, 6/7; R2 6/7, 7/7; R4 4/5, 5/5; R5 4/5, 5/5; X1 1/7, 7/7; X4 6/7, 7/7; X5 6/7, 7/7; X8 6/7, 6/7.

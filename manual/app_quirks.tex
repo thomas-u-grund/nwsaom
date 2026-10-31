@@ -97,8 +97,8 @@ Each was found by comparing the observed statistics (the targets) with those of
   default parameter~0 of \texttt{outPopSqrt} made the statistic use unrooted start-of-period
   outdegrees while the ministep still used the square root, and models with it did not converge.
   RSiena 1.6.13 changed the default to parameter~1. \nwsaom{} implements the documented effect, which
-  equals the current RSiena default (the benchmark in Chapter~\ref{ch:benchmark} sets the parameter
-  to 1 for the older version it used).
+  equals the current RSiena default (the benchmark in Chapter~\ref{ch:benchmark} ran with a RSiena
+  version in which this is the default).
 \item \textbf{Refusal instead of noise.} Some combinations are not reproduced
   because RSiena itself fails or returns noise: \texttt{sameXOutAct} and
   \texttt{diffXOutAct} in a two-mode network abort \texttt{siena07}; \texttt{inPop\_ego}
