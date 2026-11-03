@@ -63,24 +63,29 @@ The fixed coefficient equals its start value and its variance is 0. Fixing is us
 . nwsaom, wave1(glasgow1) wave2(glasgow2) outdegree reciprocity transtrip k3(200) seed(1)
 . estat simulate, nsim(20) seed(5)
 Simulation from the fitted model: 20 replication(s) of 1 period(s)
-Sim is the mean over the replications, Obs the observed end wave.
 
-             |          Ties        Mutual    Transitive
-      period |     Sim   Obs     Sim   Obs     Sim   Obs
--------------+-------------------------------------------
-           1 |   110.2   116    33.4    35    77.2    88
----------------------------------------------------------
+    statistic |       Sim       Obs
+--------------+---------------------
+Period 1      |
+         Ties |     110.2       116
+       Mutual |      33.4        35
+   Transitive |      77.2        88
+------------------------------------
+Sim is the mean over the replications; Obs is the observed end wave.
 \end{lstlisting}
 Options: \opt{theta(\emph{matname})} replaces the coefficients (a row vector in the order of \texttt{e(b)}), \opt{rates()} and \opt{ratesbeh()} replace the rates, \opt{generate(\emph{stub})} saves the simulated networks as networks named \emph{stub}\texttt{\_}\emph{s}\texttt{\_p}\emph{period} (and the behaviors as variables of the same names). The result \texttt{r(sim)} has one row per replication and period (number of ties, mutual dyads, transitive triples, mean behavior), \texttt{r(obs)} the same for the observed end waves.
 
 \paragraph{Simulation-only mode.} \texttt{nwsaom simulate} simulates at coefficients you choose, without any estimation (RSiena's \texttt{siena07} with \texttt{simOnly = TRUE}). The model is specified exactly as in \texttt{nwsaom}; \opt{theta()} gives one coefficient per network effect in the order of the coefficient table of a fit of the same model (the order in which \nwsaom{} lists the effects, which is not always the order in which you typed them), \opt{behtheta()} one per behavior effect, \opt{rates()} the rate of each period.
 \begin{lstlisting}
 . nwsaom simulate, wave1(glasgow1) wave2(glasgow2) outdegree reciprocity transtrip theta(-2.3 2 0.5) rates(5) nsim(30) seed(3)
-             |          Ties        Mutual    Transitive
-      period |     Sim   Obs     Sim   Obs     Sim   Obs
--------------+-------------------------------------------
-           1 |   127.1   116    36.3    35    72.0    88
----------------------------------------------------------
+    statistic |       Sim       Obs
+--------------+---------------------
+Period 1      |
+         Ties |     127.1       116
+       Mutual |      36.3        35
+   Transitive |      72.0        88
+------------------------------------
+Sim is the mean over the replications; Obs is the observed end wave.
 \end{lstlisting}
 Internally the model is set up by a short call of \texttt{nwsaom} with all coefficients fixed, so every data option of \texttt{nwsaom} is understood. Both commands work for a two-mode model: the simulation runs on the actors-by-events network, the table shows the number of ties (attendances) only (the columns for mutual dyads and transitive triples are missing), and \opt{generate()} saves two-mode networks (one row per actor, one column per event). A \opt{theta()} matrix of the wrong shape stops with a message that says what was expected. After a fit with \opt{groups()}, \texttt{estat simulate} is not available.
 

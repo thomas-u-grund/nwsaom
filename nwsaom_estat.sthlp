@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.4.2  31oct2026 author: Thomas Grund}{...}
+{* *! version 1.4.3  03nov2026 author: Thomas Grund}{...}
 
 {title:Title}
 
@@ -205,6 +205,10 @@ runs on the actors-by-events network; the table shows the number of ties (attend
 (one row per actor, one column per event).
 
 {pstd}
+The table has one block per period with the number of ties, mutual dyads and transitive triples (and the mean behavior
+after a co-evolution fit): {cmd:Sim} is the mean over the replications and {cmd:Obs} the observed end wave.
+
+{pstd}
 Returns {cmd:r(sim)} (one row per simulation and period: simulation, period, number of ties, mutual dyads,
 transitive triples, mean behavior), {cmd:r(obs)} (the same for the observed end waves) and {cmd:r(nsim)}.
 To simulate without a prior fit, give the model options of {cmd:nwsaom} and the coefficients to
@@ -343,4 +347,4 @@ Duxbury, S.W., Zhao, X. {cmd:netmediate}: Micro-Macro Analysis for Social Networ
 	{help nwsaom}
 
 {hline}
-{pstd}{it:nwsaom version 1.4.2, 31 October 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.4.3, 3 November 2026}{p_end}{* nwversion}

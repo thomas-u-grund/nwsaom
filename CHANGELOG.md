@@ -3,6 +3,13 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.4.3] - 2026-11-03
+
+Patch release: layout of one table. Works with nwcommands 3.6.0 and later. No change to the compiled plugin, the Mata libraries or any number.
+
+### Changed
+- `estat simulate` and `nwsaom simulate` print one table with a single header row (`statistic | Sim Obs`), a block per period and one line per statistic (ties, mutual dyads, transitive triples, mean behavior), and the explanation of Sim and Obs as a note below the table, as the other Stata-style tables of the package. `r(sim)`, `r(obs)` and `r(nsim)` are unchanged. The manual and the help show the new layout.
+
 ## [1.4.2] - 2026-10-31
 
 Patch release. Works with nwcommands 3.6.0 and later; the build routine `nwinstall, buildplugin(nwsaom)` needs nwcommands 3.13.0. The compiled plugin is unchanged.
