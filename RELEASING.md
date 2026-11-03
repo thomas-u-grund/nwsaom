@@ -23,6 +23,7 @@ Two rules from there that are easy to miss: push the release tag by name (`git p
 `NWCORE=/path/to/nwcommands "/Applications/Stata 17.0/StataBE.app/Contents/MacOS/StataBE" -e do lib/build.do`, then `NWCORE=/path/to/nwcommands python3 tools/record_core_lib.py`
 (writes `lib/core_mlib.sha256`). Whenever the core library changes, rebuild, record, test and release this package in the same batch as the core (master B.5, C3), core first.
 Without that, a fresh install fails with r(3021) "class compiled at different times".
+- `nwinstall, buildmata(nwsaom)` (core `nwinstall_buildmata.ado`) rebuilds lnwsaom1.mlib and lnwsaom2.mlib on the user's computer from `unw_saom.do` and `unw_saom_struct.do` on `main`. A new or renamed Mata source file or library of this package must be added to `nwinstall_buildmata_tab` in the core (see its GOTCHA.md), and the `mata mlib add` patterns there must match `lib/build.do`.
 
 ## Tests
 

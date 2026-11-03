@@ -599,6 +599,11 @@ If the plugin of your platform is missing, older than the {cmd:.ado} files or do
 {cmd:nwinstall, buildplugin(nwsaom)} fetches the source, compiles it with the compiler of your computer (macOS and Linux; a C compiler and
 {cmd:make} are needed) and installs the plugin; restart Stata afterwards. See {help nwinstall##buildplugin:nwinstall}.
 
+{pstd}
+If the Mata library of nwsaom (lnwsaom1.mlib and lnwsaom2.mlib) does not load in your Stata (for example r(3499) because it was built by a newer Stata than yours), build it with your own Stata:
+{cmd:nwinstall, buildmata(nwsaom)} fetches the Mata source, compiles it and installs the library; restart Stata afterwards. The library of nwsaom is compiled against the core library, so if the core library does not load either, use {cmd:nwinstall, buildmata(all)}, which rebuilds the core first and then the installed model packages.
+The build clears the data and the Mata objects in memory. See {help nwinstall##buildmata:nwinstall}.
+
 {title:Supported network types}
 
 {pstd}

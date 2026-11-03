@@ -60,3 +60,7 @@ nwsaom follows the Siena project. The stochastic actor-oriented model is due to 
 
 GNU General Public License version 3 (see `LICENSE`); see `NOTICE.md` for what the package is derived from and
 how to cite it.
+
+## If the Mata library does not load
+
+The Mata library (lnwsaom1.mlib and lnwsaom2.mlib) is built with Stata 17. A library built by an older Stata loads in every later Stata; one built by a newer Stata is ignored by an older one (r(3499), "too new to be run by this version of Stata"). Build it with your own Stata: `nwinstall, buildmata(nwsaom)` (or `nwinstall, buildmata(all)` for the core and every installed package). The command fetches the Mata source from this repository, compiles it, installs the library and keeps the old file as `.prev`. It clears the data and the Mata objects in memory, so save first; restart Stata afterwards. Needs nwcommands 3.14 or later.

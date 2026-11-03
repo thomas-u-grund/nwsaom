@@ -17,6 +17,7 @@ program define _nwsaom_libcheck
 	if _rc == 3021 | _rc == 3260 {
 		di as error "the installed core nwcommands and nwsaom were built for different versions"
 		di as error "reinstall the model package: nwinstall, models   (or: net install nwsaom, from(...) replace)"
+		di as error "or build the libraries with your own Stata: nwinstall, buildmata(all)"
 		exit 3021
 	}
 end
