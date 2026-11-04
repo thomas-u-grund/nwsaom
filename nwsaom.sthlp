@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.4.3  03nov2026 author: Thomas Grund}{...}
+{* *! version 1.5.0  03nov2026 author: Thomas Grund}{...}
 {marker topic}
 {helpb nwtopical##analysis_statmodels:[NW-2.6.6] Statistical Estimation of Networks}
 
@@ -382,6 +382,8 @@ covariate; with {opt behavior()} the behavior's name is the behavior itself. Not
 {synopt:{opt behrate(list)}}Network-dependent rate effects of the behavior (outrate, inrate, reciprate, avexposure, totexposure, infectin, ... ); see {help nwsaom_remarks##behrate:Remarks}{p_end}
 {synopt:{opt behratecoef(numlist)}}Starting values for the {opt behratecov()}/{opt behrate()} coefficients (default 0){p_end}
 {synopt:{opt nocenter}}Use the raw values of the covariates of {opt egox()}, {opt altx()}, {opt nodecov()} and {opt ratecov()}. By default they are centred by their means (missing
+{synopt:{opt uncentered(varlist)}}Keep the raw values of the listed covariates of {opt egox()}, {opt altx()}, {opt samex()} and {opt nodecov()} and centre the others as usual: RSiena's {cmd:coCovar(..., centered = FALSE)} for single covariates. Centring changes only the outdegree parameter (by the covariate's coefficient times its mean), so use this option to reproduce a script that does not centre a covariate, such as the log of the group size in RSiena's multi-group examples.{p_end}
+{synopt:{opt uncentered(varlist)}}Use the raw values of the listed covariates of {opt egox()}, {opt altx()}, {opt samex()}, {opt nodecov()} and related effects, and centre the others as usual: RSiena's {cmd:coCovar(..., centered = FALSE)} for single covariates. Centring changes only the outdegree parameter (by the covariate's coefficient times its mean), so use this option to reproduce a script that sets {cmd:centered = FALSE} for a covariate, such as the log of the group size in RSiena's multi-group examples.{p_end}
 values set to the mean), as RSiena's {cmd:coCovar(centered = TRUE)}, so that all coefficients, including outdegree and the rate, are RSiena's; the means are returned in
 {bf:e(covmeans)} and listed under the table with {opt detail}. Centring changes only the outdegree coefficient (and the rate intercept), not the covariate coefficients.
 {opt samex()} does not depend on it; {opt simx()} is centred by its similarity mean either way{p_end}
@@ -926,4 +928,4 @@ It is not affiliated with or endorsed by the RSiena project.
 	{help nwergm}, {help nwset}, {help nwrandom}
 
 {hline}
-{pstd}{it:nwsaom version 1.4.3, 3 November 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.5.0, 3 November 2026}{p_end}{* nwversion}

@@ -1,4 +1,4 @@
-*! version 1.4.3  03nov2026 nwcommands: stochastic actor-oriented model (SAOM) estimation, v1 (+ harmonisation unit 26 co-evolution, N-wave, avsim, native backend)
+*! version 1.5.0  03nov2026 nwcommands: stochastic actor-oriented model (SAOM) estimation, v1 (+ harmonisation unit 26 co-evolution, N-wave, avsim, native backend)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -137,7 +137,7 @@ program nwsaom, eclass
 		PRESENT(string) JOINAT(string) LEAVEAT(string) MISSNET(string) MISSBEH(string) STRUCTURAL(string) ///
 		RATECOV(string) RATECOVCOEF(string) BEHRATECOV(string) BEHRATE(string) BEHRATECOEF(string) SYMMETRIC SYMTYPE(string) ///
 		RATE0(numlist >0) THETA0(string) FIX(string) K0(integer 50) K3(integer 1000) ///
-		FIRSTG(real 0.2) SEED(integer -1) CORES(integer 0) UNCONDitional NOCENTER ///
+		FIRSTG(real 0.2) SEED(integer -1) CORES(integer 0) UNCONDitional NOCENTER UNCENTERED(string) ///
 		ENDOW(string) CREATION(string) ACTORMODE(integer 0) TVCOV(string) DETail GROUPS(string) GWAVES(string) ]
 	set more off
 	mata: SaomRatesReset()
@@ -617,79 +617,16 @@ program nwsaom, eclass
 	// leaveat() (missing: from the first wave / to the last wave); one interval
 	// per actor. present() is the special case of whole-period presence.
 	local __ns_hastimed = 0
+	local __ns_timedopts ""
 	if "`joinat'`leaveat'" != "" {
-		if "`present'" != "" {
-			di "{err}{bf:joinat()}/{bf:leaveat()} and {bf:present()} are alternatives: give the actors' joining and leaving times, or their presence at each wave, not both."
-			error 198
+		foreach __opt in endow creation behsim linearendow linearcreation quadraticendow quadraticcreation avaltendow avaltcreation avsimendow avsimcreation outdegreeendow outdegreecreation reciprocityendow reciprocitycreation transtiesendow transtiescreation {
+			if "``__opt''" != "" local __ns_timedopts "`__ns_timedopts' `__opt'"
 		}
-		foreach __opt in joinat leaveat {
-			if "``__opt''" != "" {
-				confirm numeric variable ``__opt''
-			}
-		}
-		foreach __opt in endow creation {
-			if "``__opt''" != "" {
-				di "{err}{bf:joinat()}/{bf:leaveat()} cannot yet be combined with {bf:`__opt'}."
-				error 198
-			}
-		}
-		// co-evolution: the lagged behavior statistics (behsim, endowment/creation) need the period-start state inside the segments
-		foreach __opt in behsim linearendow linearcreation quadraticendow quadraticcreation avaltendow avaltcreation avsimendow avsimcreation ///
-			outdegreeendow outdegreecreation reciprocityendow reciprocitycreation transtiesendow transtiescreation {
-			if "``__opt''" != "" {
-				di "{err}{bf:joinat()}/{bf:leaveat()} cannot yet be combined with {bf:`__opt'}."
-				error 198
-			}
-		}
+		_nwsaom_precheck timed, joinat(`joinat') leaveat(`leaveat') present(`present') opts(`__ns_timedopts')
 		local __ns_haspresent = 1
 		local __ns_hastimed = 1
 	}
-
-	// --- missnet()/missbeh(): missing tie/behavior data (harmonisation
-	// unit 35), matching RSiena's own real Section 5.3.2 mechanism -
-	// missnet() takes one n x n 0/1 MATRIX name per wave (1=dyad
-	// missing at that wave; a raw Stata matrix, not an nwset network
-	// object - a deliberate, disclosed design choice that avoids any
-	// dependency on nwset/NWdef's own data model, which this initiative
-	// does not own), missbeh() takes one 0/1 VARIABLE per wave
-	// (matching present()'s own "one variable per wave" convention),
-	// marking which actors' behavior value is missing at that wave.
-	// Missing dyads/actors are (a) IMPUTED for simulation-starting-value
-	// purposes (last-observation-carried-forward for the network,
-	// previous/next/observationwise-mode for behavior -
-	// unw_saom.do's own SaomImputeNetworkWave()/SaomImputeBehaviorWave()),
-	// and (b) EXCLUDED from every period's own target/simulated
-	// statistic if missing at EITHER endpoint wave (unw_saom.do's own
-	// SaomMaskedStatistic()/SaomMaskedBehaviorStatistic() - see those
-	// functions' own header comments for the full account, including
-	// why behavior-side masking uses overallMean rather than 0).
-	// Optional - omitting missnet()/missbeh() entirely is a true no-op
-	// (every dyad/actor fully observed), matching every pre-existing
-	// model; combines freely with present() (composition change) and
-	// behavior() (co-evolution).
-	local __ns_hasmissnet = 0
-	if "`missnet'" != "" {
-		local __ns_nmissnet : word count `missnet'
-		if `__ns_nmissnet' != `__nwsaom_nwaves' {
-			di "{err}option {bf:missnet()} must supply exactly `__nwsaom_nwaves' matrix name(s), one per wave, in the same temporal order."
-			error 198
-		}
-		local __ns_hasmissnet = 1
-	}
-	local __ns_hasmissbeh = 0
-	if "`missbeh'" != "" {
-		if `__nwsaom_coev' == 0 {
-			di "{err}option {bf:missbeh()} requires {bf:behavior()} to be specified."
-			error 198
-		}
-		local __ns_nmissbeh : word count `missbeh'
-		if `__ns_nmissbeh' != `__nwsaom_nwaves' {
-			di "{err}option {bf:missbeh()} must supply exactly `__nwsaom_nwaves' variable name(s), one per wave, in the same temporal order."
-			error 198
-		}
-		local __ns_hasmissbeh = 1
-	}
-	local __ns_hasmiss = (`__ns_hasmissnet' | `__ns_hasmissbeh')
+	_nwsaom_precheck miss, nwaves(`__nwsaom_nwaves') coev(`__nwsaom_coev') missnet(`missnet') missbeh(`missbeh')
 
 	// --- structural(): structural zeros/ones ("expansion", 2026-09-02) -
 	// RSiena's own SIMPLER alternative to present()'s "joiners and
@@ -716,53 +653,7 @@ program nwsaom, eclass
 	// (unw_saom.do's own SaomEstimateRM() header comment) - a disclosed
 	// follow-on, not a correctness gap; the Mata fallback is fully
 	// certified (dev/saom_structural_crosscheck.do).
-	local __ns_hasstructural = 0
-	local __ns_ustruct ""
-	if "`structural'" != "" & !`__nwsaom_tm' {
-		local __ns_ustruct "`structural'"
-		local structural ""
-	}
-	if "`structural'" != "" {
-		if `__ns_multi' & !`__nwsaom_tm' {
-			di "{err}option {bf:structural()} is v1 scope: exactly two waves ({bf:wave1()}/{bf:wave2()}, not {bf:waves()})."
-			error 198
-		}
-		if `__nwsaom_coev' & !`__nwsaom_tm' {
-			di "{err}option {bf:structural()} is v1 scope: network-only, not combinable with {bf:behavior()}."
-			error 198
-		}
-		if "`symmetric'" != "" {
-			di "{err}option {bf:structural()} is v1 scope: not yet combinable with {bf:symmetric}."
-			error 198
-		}
-		if "`ratecov'" != "" & !`__nwsaom_tm' {
-			di "{err}option {bf:structural()} is v1 scope: not yet combinable with {bf:ratecov()}."
-			error 198
-		}
-		if "`outdegreeendow'" != "" | "`outdegreecreation'" != "" | "`reciprocityendow'" != "" | "`reciprocitycreation'" != "" {
-			di "{err}option {bf:structural()} is v1 scope: not yet combinable with {bf:outdegreeendow()}/{bf:outdegreecreation()}/{bf:reciprocityendow()}/{bf:reciprocitycreation()} (network endowment/creation)."
-			error 198
-		}
-		confirm matrix `structural'
-		tempname __ns_structcheck
-		mata: `__ns_structcheck' = st_matrix("`structural'")
-		mata: st_local("__ns_struct_dimok", strofreal(rows(`__ns_structcheck') == `nodes' & cols(`__ns_structcheck') == `nodes'))
-		if `__ns_struct_dimok' == 0 {
-			di "{err}option {bf:structural()} matrix must be `nodes' x `nodes' (one row/column per actor) - `structural' is not."
-			error 198
-		}
-		mata: st_local("__ns_struct_ok", strofreal(all((`__ns_structcheck' :== 0) :| (`__ns_structcheck' :== 1))))
-		if `__ns_struct_ok' == 0 {
-			di "{err}option {bf:structural()} matrix must be coded 0/1 (1=dyad frozen, not toggleable this period) - `structural' has a value outside {0,1}."
-			error 198
-		}
-		mata: st_local("__ns_struct_diagok", strofreal(sum(diagonal(`__ns_structcheck')) == 0))
-		if `__ns_struct_diagok' == 0 {
-			di "{err}option {bf:structural()} matrix must have an all-zero diagonal (no self-ties)."
-			error 198
-		}
-		local __ns_hasstructural = 1
-	}
+	_nwsaom_precheck structural, nodes(`nodes') tm(`__nwsaom_tm') multi(`__ns_multi') coev(`__nwsaom_coev') structural(`structural') symmetric(`symmetric') ratecov(`ratecov') ode(`outdegreeendow') odc(`outdegreecreation') rce(`reciprocityendow') rcc(`reciprocitycreation')
 
 	// --- harmonisation unit 167 (network-side endowment/creation):
 	// outdegreeendow/outdegreecreation and reciprocityendow/
@@ -1043,7 +934,7 @@ program nwsaom, eclass
 	local __ns_gW = 0
 	if `__ns_isgrp' {
 		local __ns_gbad ""
-		foreach __o in structural tvdyadcov tvdyadcovrecip tvdyadx dyadx netx netbeh ml {
+		foreach __o in structural tvdyadcov tvdyadcovrecip tvdyadx dyadx netx ml {
 			if `"``__o''"' != "" local __ns_gbad "`__ns_gbad' `__o'"
 		}
 		_nwsaom_groups build, groups(`groups') nodes(`nodes') nwaves(`__nwsaom_nwaves') multi(`__ns_multi') tm(`__nwsaom_tm') coev(`__nwsaom_coev') haspres(`__ns_haspresent') hasmissnet(`__ns_hasmissnet') gwaves(`gwaves') bad(`__ns_gbad') tvcov(`"`tvcov'"') joinat(`joinat') leaveat(`leaveat')
@@ -1229,6 +1120,8 @@ program nwsaom, eclass
 	// the raw values (RSiena's centered = FALSE). sameX and simX do not
 	// depend on centring (simX is centred by its similarity mean).
 	local __nwsaom_center = ("`nocenter'" == "")
+	// uncentered(varlist): RSiena's coCovar(centered = FALSE) for single covariates; the variables listed keep their raw values
+	if "`uncentered'" != "" confirm numeric variable `uncentered'
 	local __ns_cmeans ""
 	capture mata: mata drop __ns_cm
 	mata: __ns_cm = .
@@ -1335,7 +1228,7 @@ program nwsaom, eclass
 		foreach __v of local nodematch {
 			local __td_nm "__nstd_`++__ns_n'"
 			mata: `__td_nm' = SaomTermData()
-			mata: SaomRegCov(__nwsaom_last_M, "nodematch", "`__v'", `nodes', `__nwsaom_center', `__td_nm', ("`__ns_samelab'_`__v'"), __ns_cm)
+			mata: SaomRegCov(__nwsaom_last_M, "nodematch", "`__v'", `nodes', `=`__nwsaom_center'*(`:list posof "`__v'" in uncentered'==0)', `__td_nm', ("`__ns_samelab'_`__v'"), __ns_cm)
 			local __nwsaom_efflist "`__nwsaom_efflist' `__ns_samelab'(`__v')"
 		}
 	}
@@ -1350,7 +1243,7 @@ program nwsaom, eclass
 		foreach __v of local nodecov {
 			local __td_nc "__nstd_`++__ns_n'"
 			mata: `__td_nc' = SaomTermData()
-			mata: SaomRegCov(__nwsaom_last_M, "nodecov", "`__v'", `nodes', `__nwsaom_center', `__td_nc', ("nodecov_`__v'"), __ns_cm)
+			mata: SaomRegCov(__nwsaom_last_M, "nodecov", "`__v'", `nodes', `=`__nwsaom_center'*(`:list posof "`__v'" in uncentered'==0)', `__td_nc', ("nodecov_`__v'"), __ns_cm)
 			mata: st_local("__m", strofreal(__ns_cm, "%21.0g"))
 			if !strpos(" `__ns_cmeans' ", " `__v' ") local __ns_cmeans "`__ns_cmeans' `__v' `__m'"
 			local __nwsaom_efflist "`__nwsaom_efflist' nodecov(`__v')"
@@ -1361,7 +1254,7 @@ program nwsaom, eclass
 		foreach __v of local nodeicov {
 			local __td_nic "__nstd_`++__ns_n'"
 			mata: `__td_nic' = SaomTermData()
-			mata: SaomRegCov(__nwsaom_last_M, "nodeicov", "`__v'", `nodes', `__nwsaom_center', `__td_nic', ("`__ns_altlab'_`__v'"), __ns_cm`__ns_idxE')
+			mata: SaomRegCov(__nwsaom_last_M, "nodeicov", "`__v'", `nodes', `=`__nwsaom_center'*(`:list posof "`__v'" in uncentered'==0)', `__td_nic', ("`__ns_altlab'_`__v'"), __ns_cm`__ns_idxE')
 			mata: st_local("__m", strofreal(__ns_cm, "%21.0g"))
 			if !strpos(" `__ns_cmeans' ", " `__v' ") local __ns_cmeans "`__ns_cmeans' `__v' `__m'"
 			local __nwsaom_efflist "`__nwsaom_efflist' `__ns_altlab'(`__v')"
@@ -1372,7 +1265,7 @@ program nwsaom, eclass
 		foreach __v of local nodeocov {
 			local __td_noc "__nstd_`++__ns_n'"
 			mata: `__td_noc' = SaomTermData()
-			mata: SaomRegCov(__nwsaom_last_M, "nodeocov", "`__v'", `nodes', `__nwsaom_center', `__td_noc', ("`__ns_egolab'_`__v'"), __ns_cm`__ns_idxA')
+			mata: SaomRegCov(__nwsaom_last_M, "nodeocov", "`__v'", `nodes', `=`__nwsaom_center'*(`:list posof "`__v'" in uncentered'==0)', `__td_noc', ("`__ns_egolab'_`__v'"), __ns_cm`__ns_idxA')
 			mata: st_local("__m", strofreal(__ns_cm, "%21.0g"))
 			if !strpos(" `__ns_cmeans' ", " `__v' ") local __ns_cmeans "`__ns_cmeans' `__v' `__m'"
 			local __nwsaom_efflist "`__nwsaom_efflist' `__ns_egolab'(`__v')"
@@ -1411,7 +1304,7 @@ program nwsaom, eclass
 		local __td_s2 "__nstd_`++__ns_n'"
 		mata: `__td_s1' = SaomTermData()
 		mata: `__td_s2' = SaomTermData()
-		mata: SaomRegCovSplit(__nwsaom_last_M, "`__kind'", "`__vv'", `nodes', `__nwsaom_center', `__td_s1', `__td_s2', ("`__ef'endow_`__vv'", "`__ef'creation_`__vv'"), __ns_cm)
+		mata: SaomRegCovSplit(__nwsaom_last_M, "`__kind'", "`__vv'", `nodes', `=`__nwsaom_center'*(`:list posof "`__vv'" in uncentered'==0)', `__td_s1', `__td_s2', ("`__ef'endow_`__vv'", "`__ef'creation_`__vv'"), __ns_cm)
 		local __nwsaom_efflist "`__nwsaom_efflist' `__ef'endow(`__vv') `__ef'creation(`__vv')"
 	}
 
@@ -1465,9 +1358,9 @@ program nwsaom, eclass
 				}
 				else if `__nwsaom_tm' {
 					local __tmidx = cond("`__dk'" == "egosqx", "__nwsaom_tm_actidx", "__nwsaom_tm_evidx")
-					mata: `__td_cv'.attr = SaomCovPrepIdx(st_data(1::`nodes', "`__v'"), `__tmidx', `__nwsaom_center', __ns_cm)
+					mata: `__td_cv'.attr = SaomCovPrepIdx(st_data(1::`nodes', "`__v'"), `__tmidx', `=`__nwsaom_center'*(`:list posof "`__v'" in uncentered'==0)', __ns_cm)
 				}
-				else mata: `__td_cv'.attr = SaomCovPrep(st_data(1::`nodes', "`__v'"), `__nwsaom_center', __ns_cm)
+				else mata: `__td_cv'.attr = SaomCovPrep(st_data(1::`nodes', "`__v'"), `=`__nwsaom_center'*(`:list posof "`__v'" in uncentered'==0)', __ns_cm)
 				mata: __nwsaom_last_M.addterm("`__dk'", 1, &stat_saom_`__dk'(), &change_saom_`__dk'(), `__td_cv', ("`__dk'_`__v'"))
 				local __nwsaom_efflist "`__nwsaom_efflist' `__dk'(`__v')"
 			}
@@ -1533,9 +1426,9 @@ program nwsaom, eclass
 				}
 				else if `__nwsaom_tm' {
 					local __tmidx = cond(`: list __dk in __tm_actcov', "__nwsaom_tm_actidx", "__nwsaom_tm_evidx")
-					mata: `__td_cv'.attr = SaomCovPrepIdx(st_data(1::`nodes', "`__v'"), `__tmidx', `__nwsaom_center', __ns_cm)
+					mata: `__td_cv'.attr = SaomCovPrepIdx(st_data(1::`nodes', "`__v'"), `__tmidx', `=`__nwsaom_center'*(`:list posof "`__v'" in uncentered'==0)', __ns_cm)
 				}
-				else mata: `__td_cv'.attr = SaomCovPrep(st_data(1::`nodes', "`__v'"), `__nwsaom_center', __ns_cm)
+				else mata: `__td_cv'.attr = SaomCovPrep(st_data(1::`nodes', "`__v'"), `=`__nwsaom_center'*(`:list posof "`__v'" in uncentered'==0)', __ns_cm)
 				mata: __nwsaom_last_M.addterm("`__dk'", 1, &stat_saom_`__dk'(), &change_saom_`__dk'(), `__td_cv', ("`__dk'_`__v'"))
 				local __nwsaom_efflist "`__nwsaom_efflist' `__dk'(`__v')"
 			}
@@ -1641,9 +1534,9 @@ program nwsaom, eclass
 				mata: `__td_ct'.levels = J(0, 1, 0)
 				if `__nwsaom_tm' {
 					local __tmidx = cond(`: list __dk in __tm_actcov', "__nwsaom_tm_actidx", "__nwsaom_tm_evidx")
-					mata: `__td_ct'.attr = SaomCovPrepIdx(st_data(1::`nodes', "`__v'"), `__tmidx', `__nwsaom_center', __ns_cm)
+					mata: `__td_ct'.attr = SaomCovPrepIdx(st_data(1::`nodes', "`__v'"), `__tmidx', `=`__nwsaom_center'*(`:list posof "`__v'" in uncentered'==0)', __ns_cm)
 				}
-				else mata: `__td_ct'.attr = SaomCovPrep(st_data(1::`nodes', "`__v'"), `__nwsaom_center', __ns_cm)
+				else mata: `__td_ct'.attr = SaomCovPrep(st_data(1::`nodes', "`__v'"), `=`__nwsaom_center'*(`:list posof "`__v'" in uncentered'==0)', __ns_cm)
 				// RSiena compares the threshold with the CENTRED covariate value
 				mata: `__td_ct'.decay = `covthreshold'
 				mata: __nwsaom_last_M.addterm("`__dk'", 1, &stat_saom_`__dk'(), &change_saom_`__dk'(), `__td_ct', ("`__dk'_`__v'"))
@@ -1688,7 +1581,7 @@ program nwsaom, eclass
 				mata: `__td_ad' = SaomTermData()
 				mata: __ns_xx = st_data(1::`nodes', "`__v'")
 				mata: `__td_ad'.levels = (any(__ns_xx :>= .) ? (__ns_xx :>= .) : J(0, 1, 0))
-				mata: `__td_ad'.attr = SaomCovPrep(st_data(1::`nodes', "`__v'"), `__nwsaom_center', __ns_cm)
+				mata: `__td_ad'.attr = SaomCovPrep(st_data(1::`nodes', "`__v'"), `=`__nwsaom_center'*(`:list posof "`__v'" in uncentered'==0)', __ns_cm)
 				mata: __nwsaom_last_M.addterm("`__dk'", 1, &stat_saom_`__dk'(), &change_saom_`__dk'(), `__td_ad', ("`__dk'_`__v'"))
 				local __nwsaom_efflist "`__nwsaom_efflist' `__dk'(`__v')"
 			}
@@ -2210,7 +2103,7 @@ program nwsaom, eclass
 			mata: `__td_sc' = SaomTermData()
 			// simX: missing values imputed by the mean (RSiena); centring
 			// does not change a similarity
-			mata: SaomRegCov(__nwsaom_last_M, "simcov", "`__v'", `nodes', `__nwsaom_center', `__td_sc', ("`__ns_simlab'_`__v'"), __ns_cm)
+			mata: SaomRegCov(__nwsaom_last_M, "simcov", "`__v'", `nodes', `=`__nwsaom_center'*(`:list posof "`__v'" in uncentered'==0)', `__td_sc', ("`__ns_simlab'_`__v'"), __ns_cm)
 			local __nwsaom_efflist "`__nwsaom_efflist' `__ns_simlab'(`__v')"
 		}
 	}
@@ -3537,7 +3430,7 @@ program nwsaom, eclass
 	// nwsaom versions carried.
 	ereturn post `b' `V', depname("`__ns_depname'") obs(`nodes')
 	ereturn local cmd "nwsaom"
-	ereturn local version "1.4.3"
+	ereturn local version "1.5.0"
 	_nwsaom_postengine
 	// RSiena's effect names and the covariate centring means (RSiena
 	// prints both), 2026-10-01

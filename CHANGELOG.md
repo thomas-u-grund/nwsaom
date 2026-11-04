@@ -3,10 +3,20 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.5.0] - 2026-11-03
 
 ### Added
+- `uncentered(varlist)`: keep the raw values of single covariates of `egox()`, `altx()`, `samex()` and `nodecov()` (RSiena's `coCovar(..., centered = FALSE)`); `nocenter` still applies to all covariates.
+- `groups()` can be combined with `netbeh()`, the network effects of the dependent behavior as the covariate (for example `netbeh(egoxaltx)`, RSiena's egoXaltX of the behavior). The behavior is centered by the mean of its own group, as RSiena does for the data objects of a joint model. Checked against `siena07` on five classes of the Dutch school data (Baerveldt; Snijders's multi-group example), largest difference of an estimate in units of its standard error 0.08.
 - Documentation of `nwinstall, buildmata(nwsaom)` (nwcommands 3.14 and later): a Mata library that does not load in the user's Stata (built by a newer Stata, r(3499)) is rebuilt from the source in this repository with the Stata that runs. README and help file describe it. No change of the Mata library, the plugin or the estimators.
+
+### Changed
+- The option checks of `structural()`, `joinat()`/`leaveat()`, `missnet()` and `missbeh()` moved from `nwsaom.ado` to the new helper `_nwsaom_precheck.ado`. Stata refuses to load an ado program above a fixed size, and `nwsaom.ado` had no room left for new options. Behavior and messages are unchanged.
+
+### Fixed
+- Joint models with `groups()` and many actors (about 800 or more) and a per-actor behavior covariate such as `behfrom()` stopped with "too many options": the model description handed to the compiled plugin exceeded Stata's limit for the options of a plugin call (about 4,000 characters). It is now handed over in pieces. This needs the plugin of this release; with an older plugin only these long descriptions fail, as before.
+- Joint models were slow to start: the observed statistic of `behfrom()` effects was a Mata loop of one call per actor (about 20 ms per call, once per group). It is now one vector product. A 15-group, 810-actor model started after about 4.5 minutes before and starts after about 3 seconds now; the whole fit takes about 2 minutes on a laptop.
+- `nwsaom meta`: an effect that a group fitted with `fix()` has a standard error of 0 and is no longer counted as an estimate. Before, such a group raised the number of groups `n` of that effect and the degrees of freedom of its tests, although it did not enter the weights; siena08 leaves it out (NA), and now so does `nwsaom meta`. Estimates and heterogeneity statistics of the other effects are unchanged.
 
 ## [1.4.3] - 2026-11-03
 

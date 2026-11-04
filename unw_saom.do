@@ -3345,8 +3345,9 @@ real rowvector SaomMetaOne(real colvector theta, real colvector se, real scalar 
 	real colvector x, s, rk1, rk2
 	real scalar n1, rho, tsq, ttilde, qst, cjp, cjm, chi, mu, sig, mu1, mu2, sg1, sg2, mindev, chidev, ra, mlesig, mlemu, tt
 	R = J(1, 24, .)
-	x = select(theta, theta :< . :& se :< . :& se :< bound)
-	s = select(se, theta :< . :& se :< . :& se :< bound)
+	// a fixed effect has a standard error of 0 (siena08 sees NA): it is not an estimate and is left out, as are estimates with se >= bound
+	x = select(theta, theta :< . :& se :< . :& se :> 0 :& se :< bound)
+	s = select(se, theta :< . :& se :< . :& se :> 0 :& se :< bound)
 	n1 = rows(x)
 	R[1] = n1
 	if (n1 < 1) return(R)
@@ -9764,6 +9765,12 @@ void SaomGroupsRegister(class SaomModel scalar M) {
 			reg = reg \ (t, 1)
 			val = val \ SaomGroupsBehGet()[2, .]
 		}
+		else if ((strpos(nm, "bv_") == 1 | strpos(nm, "natb_") == 1) & rows(SaomGroupsBehGet()) > 0) {
+			// netbeh(): network effects of the dependent behavior as the covariate, centred by the mean of the behavior WITHIN the group (RSiena);
+			// kind 3: the center of the Mata statistic changes with the group, and the plugin takes the per-period mean from the behavior constants of the groups, so nothing is sent in the trailer
+			reg = reg \ (t, 3)
+			val = val \ SaomGroupsBehGet()[1, .]
+		}
 		else if (strpos(nm, "balance") == 1) {
 			reg = reg \ (t, 2)
 			pbal = findexternal("__nwsaom_groupbal")
@@ -9810,7 +9817,7 @@ void SaomGroupsSync(class SaomModel scalar M, real scalar pd) {
 	g = pg[pd]
 	for (r=1; r<=rows(*preg); r++) {
 		tdp = M.td[(*preg)[r, 1]]
-		if ((*preg)[r, 2] == 1) (*tdp).center = (*pval)[r, g]
+		if ((*preg)[r, 2] == 1 | (*preg)[r, 2] == 3) (*tdp).center = (*pval)[r, g]
 		else (*tdp).decay = (*pval)[r, g]
 	}
 }
@@ -9826,8 +9833,9 @@ string scalar SaomGroupsTrailer(real scalar P) {
 	if (preg == NULL) return(" 0")
 	pval = findexternal("__nwsaom_gcval")
 	pg = SaomGroupsPeriodGroup()
-	s = " " + strofreal(rows(*preg))
+	s = " " + strofreal(sum((*preg)[., 2] :!= 3))
 	for (r=1; r<=rows(*preg); r++) {
+		if ((*preg)[r, 2] == 3) continue
 		s = s + " " + strofreal((*preg)[r, 1] - 1)
 		for (pd=1; pd<=P; pd++) s = s + " " + strofreal((*pval)[r, pg[pd]], "%25.17g")
 	}
@@ -15870,6 +15878,33 @@ real scalar SaomNativePluginVersion(){
 	return(v)
 }
 
+/* Stata rejects plugin-call options longer than a few thousand characters
+   ("too many options" / "options too long"). A long BATCHSETUP string is cut
+   at spaces: every piece after the first is sent in its own short
+   BATCHARG| call (the plugin buffers them) and the first piece is returned
+   for the BATCHSETUP call itself, to which the plugin appends the buffer. */
+string scalar SaomSendTail(string scalar s)
+{
+	string scalar head, piece
+	real scalar cut
+	if (strlen(s) <= 2500) return(s)
+	if (SaomNativePluginVersion() < 153) return(s)		// an older plugin does not know BATCHARG
+	cut = 2500
+	while (cut > 1 & substr(s, cut, 1) != " ") cut--
+	if (cut <= 1) cut = 2500
+	head = substr(s, 1, cut - 1)
+	s = substr(s, cut, .)		// the cut space starts the next piece
+	while (strlen(s) > 0) {
+		cut = min((strlen(s), 2500))
+		if (cut < strlen(s)) while (cut > 1 & substr(s, cut + 1, 1) != " ") cut--
+		if (cut <= 1) cut = min((strlen(s), 2500))
+		piece = substr(s, 1, cut)
+		stata("plugin call saomnativesim, " + char(34) + "BATCHARG|" + piece + char(34))
+		s = substr(s, cut + 1, .)
+	}
+	return(head)
+}
+
 /* ===================================================================
    Batch simulation (plugin protocol >= 4, 2026-10-01): the estimator
    hands the plugin every period's starting data ONCE
@@ -15988,6 +16023,7 @@ void SaomBatchSetup(pointer(class SaomGraph scalar) rowvector Gwaves, real scala
 
 	stata("capture program saomnativesim, plugin using(" + char(34) + SaomNativePluginPath() + char(34) + ")")
 	if (strtoreal(st_global("NWSAOM_TRACE")) == 4) printf("TRACE BATCHSETUP argument string: %f characters\n", strlen(argstr))
+	argstr = SaomSendTail(argstr)
 	stata("plugin call saomnativesim " + invtokens(names) + ", " + char(34) + argstr + char(34))
 	st_framecurrent(origframe)
 	stata("capture frame drop __saom_batch")
@@ -17052,10 +17088,12 @@ real scalar change_saom_avsimpopego(class SaomBehavior scalar Beh, class SaomGra
    term effcovJ is RSiena's MainCovariateEffect on covariate column J: contribution diff * x_i, statistic z_i * x_i */
 real rowvector stat_saom_effcov(class SaomBehavior scalar Beh, real scalar j) {
 	external real matrix __saom_behcov
-	real scalar i, tot
-	tot = 0
-	for (i=1; i<=Beh.n; i++) tot = tot + _sb_c(Beh, i) * _sb_cv(i, j)
-	return(tot)
+	external real rowvector __saom_behcovoff, __saom_behcovper
+	external real scalar __saom_behcov_pd
+	real scalar col
+	// one vector product instead of a loop of 810+ calls (each call costs about 20 ms in a joint model)
+	col = __saom_behcovoff[j] + (__saom_behcovper[j] > 1 ? __saom_behcov_pd - 1 : 0)
+	return(quadcross(Beh.values[1::Beh.n] :- Beh.overallMean, __saom_behcov[1::Beh.n, col]))
 }
 real scalar change_saom_effcov(class SaomBehavior scalar Beh, real scalar i, real scalar diff, real scalar j) {
 	external real matrix __saom_behcov
