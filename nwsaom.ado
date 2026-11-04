@@ -1,4 +1,4 @@
-*! version 1.5.0  03nov2026 nwcommands: stochastic actor-oriented model (SAOM) estimation, v1 (+ harmonisation unit 26 co-evolution, N-wave, avsim, native backend)
+*! version 1.5.1  04nov2026 nwcommands: stochastic actor-oriented model (SAOM) estimation, v1 (+ harmonisation unit 26 co-evolution, N-wave, avsim, native backend)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -580,7 +580,21 @@ program nwsaom, eclass
 	// are read by row position: make sure the rows are in the waves'
 	// node order (they are not after a network with another node order
 	// was declared later), and that all waves share one node order.
-	if !`__nwsaom_tm' _nwrowalign `__ns_wavelist'
+	// The rows are only touched when the command names a variable of the data (an attribute, a behavior, a group
+	// variable, ...). A model without any - for example one class of a stacked data set fitted on its own - leaves the
+	// data in memory as they are: aligning rows to a network with other node names would extend and re-sort them.
+	local __ns_needrows 0
+	local __ns_cmdtext : subinstr local 0 "(" " ", all
+	local __ns_cmdtext : subinstr local __ns_cmdtext ")" " ", all
+	local __ns_cmdtext : subinstr local __ns_cmdtext "," " ", all
+	foreach __ns_tok of local __ns_cmdtext {
+		capture confirm variable `__ns_tok'
+		if _rc == 0 {
+			local __ns_needrows 1
+			continue, break
+		}
+	}
+	if !`__nwsaom_tm' & `__ns_needrows' _nwrowalign `__ns_wavelist'
 
 	// --- present(): composition change ("joiners and leavers", harmonisation
 	// unit 33) - one 0/1 Stata variable per wave, same "one variable per
@@ -3430,7 +3444,7 @@ program nwsaom, eclass
 	// nwsaom versions carried.
 	ereturn post `b' `V', depname("`__ns_depname'") obs(`nodes')
 	ereturn local cmd "nwsaom"
-	ereturn local version "1.5.0"
+	ereturn local version "1.5.1"
 	_nwsaom_postengine
 	// RSiena's effect names and the covariate centring means (RSiena
 	// prints both), 2026-10-01

@@ -1,6 +1,6 @@
 # NOTICE
 
-<!--version-->**Version 1.5.0** (released 3 November 2026)<!--/version-->
+<!--version-->**Version 1.5.1** (released 4 November 2026)<!--/version-->
 
 nwsaom is Copyright (C) 2026 Thomas U. Grund and is distributed under the GNU General Public License, version 3 (file `LICENSE`).
 

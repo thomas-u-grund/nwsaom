@@ -3,6 +3,11 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.5.1] - 2026-11-04
+
+### Fixed
+- **A model that names no variable of the data leaves the data in memory alone.** Fitting a network whose nodes have other names than the rows of the data (one class of a stacked data set, say) used to extend the data by the nodes of that network and re-sort them, so that a later fit of the whole stacked network ran on rows with missing attributes. The rows are now aligned to the network only when the command names a variable (an attribute, a behavior, a group variable, ...).
+
 ## [1.5.0] - 2026-11-03
 
 ### Added
