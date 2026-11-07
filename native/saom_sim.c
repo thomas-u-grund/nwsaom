@@ -4597,6 +4597,76 @@ static const long *saom_alt_list(const model_t *M, long n, long actor, const dou
 	return saom_altbuf;
 }
 
+/* Fast paths of eval_core() (1.5.2): the two-path counts of the ego with EVERY node in one pass over its neighbours, instead of
+   one pairwise count (pair_otp() ...) per alternative, and the gw kernel from a per-term table instead of exp()/pow() per
+   alternative. The counts are integers and the table holds gw_kernel()'s own values, so every change statistic equals the
+   pairwise function's to the last bit (the estimates are identical). Entries of the ego itself are not meaningful (never read).
+     EC_OTP    OTP(ego, m)  = #{k: ego->k, k->m}          (pair_otp(g, ego, m))
+     EC_OSP    OSP(ego, m)  = #{k: ego->k, m->k}          (pair_osp(g, ego, m))
+     EC_ISP    ISP(ego, m)  = #{k: k->ego, k->m}          (pair_isp(g, ego, m))
+     EC_OTPR   OTP(m, ego)  = #{k: m->k, k->ego}          (pair_otp(g, m, ego))
+     EC_RR     #{k: ego<->k, m<->k}                       (saom_rr_count(g, ego, m))
+     EC_TRB    #{h: ego<->h, m->h}                        (the neighbour loop of transRecTrip) */
+enum { EC_OTP = 0, EC_OSP, EC_ISP, EC_OTPR, EC_RR, EC_TRB, EC_N };
+static __thread double *ec_buf[EC_N];
+static __thread long ec_cap[EC_N];
+static const double *ec_counts(graph_t *g, long ego, int which, long stride, unsigned *done) {
+	long a, b, k, m;
+	double *c;
+	if (ec_cap[which] < stride) { free(ec_buf[which]); ec_buf[which] = (double *)malloc((size_t)stride * sizeof(double)); ec_cap[which] = stride; }
+	c = ec_buf[which];
+	if (*done & (1u << which)) return c;
+	*done |= (1u << which);
+	memset(c, 0, (size_t)stride * sizeof(double));
+	switch (which) {
+		case EC_OTP:
+			for (a = 0; a < g->outadj[ego].len; a++) { k = g->outadj[ego].nb[a]; for (b = 0; b < g->outadj[k].len; b++) c[g->outadj[k].nb[b]] += 1.0; }
+			break;
+		case EC_OSP:
+			for (a = 0; a < g->outadj[ego].len; a++) { k = g->outadj[ego].nb[a]; for (b = 0; b < g->inadj[k].len; b++) c[g->inadj[k].nb[b]] += 1.0; }
+			break;
+		case EC_ISP:
+			for (a = 0; a < g->inadj[ego].len; a++) { k = g->inadj[ego].nb[a]; for (b = 0; b < g->outadj[k].len; b++) c[g->outadj[k].nb[b]] += 1.0; }
+			break;
+		case EC_OTPR:
+			for (a = 0; a < g->inadj[ego].len; a++) { k = g->inadj[ego].nb[a]; for (b = 0; b < g->inadj[k].len; b++) c[g->inadj[k].nb[b]] += 1.0; }
+			break;
+		case EC_RR:
+			for (a = 0; a < g->outadj[ego].len; a++) {
+				k = g->outadj[ego].nb[a];
+				if (!has_edge(g, k, ego)) continue;
+				for (b = 0; b < g->outadj[k].len; b++) { m = g->outadj[k].nb[b]; if (has_edge(g, m, k)) c[m] += 1.0; }
+			}
+			break;
+		case EC_TRB:
+			for (a = 0; a < g->outadj[ego].len; a++) {
+				k = g->outadj[ego].nb[a];
+				if (!has_edge(g, k, ego)) continue;
+				for (b = 0; b < g->inadj[k].len; b++) c[g->inadj[k].nb[b]] += 1.0;
+			}
+			break;
+	}
+	return c;
+}
+/* gw_kernel(c, decay) for c = 0 .. stride-1, one table per term (rebuilt when the decay or the size changes) */
+static __thread double *ec_gwtab[MAXTERMS];
+static __thread long ec_gwn[MAXTERMS];
+static __thread double ec_gwd[MAXTERMS];
+static const double *ec_gwtable(long k, double decay, long stride) {
+	if (ec_gwn[k] < stride || ec_gwd[k] != decay) {
+		long c;
+		free(ec_gwtab[k]);
+		ec_gwtab[k] = (double *)malloc((size_t)stride * sizeof(double));
+		for (c = 0; c < stride; c++) ec_gwtab[k][c] = gw_kernel((double)c, decay);
+		ec_gwn[k] = stride; ec_gwd[k] = decay;
+	}
+	return ec_gwtab[k];
+}
+SAOM_FORCEINLINE double ec_gw(const double *tab, long ntab, double c, double decay) {
+	long ic = (long)c;
+	return (ic >= 0 && ic < ntab) ? tab[ic] : gw_kernel(c, decay);
+}
+
 /* Term-major evaluation of every alternative j of `actor' (the list fl[0..nfl-1], ascending; NULL = saom_alt_list() of
    `presentArr'): chg[k*(n+1)+j] receives term k's change statistic, u[j] the utility (sum over k of theta[k]*chg,
    accumulated in term order), and the maximum utility (including "stay" = 0) is returned.  Entries of chg and u for nodes
@@ -4608,6 +4678,7 @@ SAOM_FORCEINLINE double eval_core(const model_t *M, const simparams_t *P, graph_
 	long n = M->n, j, k, q, stride = n + 1;
 	const unsigned char *row = g->adjm ? g->adjm + actor * stride : NULL;
 	double maxu = 0.0;
+	unsigned ecdone = 0;		/* ec_counts() computed in this call */
 
 	/* fl == NULL: all nodes 1..n in order (the actor's own entry is computed by the simple terms and skipped by the others) */
 	for (q = 0; q < nfl; q++) { j = lst ? fl[q] : q + 1; ijx[j] = row ? row[j] : (unsigned char)has_edge(g, actor, j); }
@@ -4620,6 +4691,9 @@ SAOM_FORCEINLINE double eval_core(const model_t *M, const simparams_t *P, graph_
 #endif
 		double *a = (tc != TERMCODE_INTERACT2 && tc != TERMCODE_INTERACT3 && M->attridx[k] > 0) ? attrs[M->attridx[k] - 1] : NULL;
 		double p1 = M->p1[k];
+		const int hasadj = (g->outadj != NULL && g->inadj != NULL);
+		/* covariate terms with missing values: the change statistic is the unmasked term's (saom_eval_change(); 149 has its own rule) */
+		if (tc != 149) { int tcb = saom_masked_base(tc); if (tcb) tc = tcb; }
 		switch (tc) {
 			case TERMCODE_OUTDEGREE:
 				for (q = 0; q < nfl; q++) { j = lst ? fl[q] : q + 1; c[j] = ijx[j] ? -1.0 : 1.0; }
@@ -4661,6 +4735,173 @@ SAOM_FORCEINLINE double eval_core(const model_t *M, const simparams_t *P, graph_
 					if (!lst && j == actor) continue;
 					c[j] = saom_eval_change((int)k, (int *)M->termcodes, (int *)M->attridx, (double *)M->p1, attrs, g, actor, j, ijx[j], tt_arr, c3_arr);
 				}
+				break;
+			/* 1.5.2 fast paths (see ec_counts()): the expressions of saom_change_term(), evaluated for all alternatives at once */
+			case TERMCODE_GWESP: case TERMCODE_GWESPFB: case TERMCODE_GWESPBF: case TERMCODE_GWESPBB: case TERMCODE_GWESPRR: if (hasadj) {
+				int w = tc == TERMCODE_GWESP ? EC_OTP : tc == TERMCODE_GWESPFB ? EC_OSP : tc == TERMCODE_GWESPBF ? EC_ISP : tc == TERMCODE_GWESPBB ? EC_OTPR : EC_RR;
+				const double *cn = ec_counts(g, actor, w, stride, &ecdone), *tab = ec_gwtable(k, p1, stride);
+				for (q = 0; q < nfl; q++) { j = lst ? fl[q] : q + 1; if (!lst && j == actor) continue; double d = ec_gw(tab, stride, cn[j], p1); c[j] = ijx[j] ? -d : d; }
+				break;
+			}
+				for (q = 0; q < nfl; q++) {
+					j = lst ? fl[q] : q + 1;
+					if (!lst && j == actor) continue;
+					c[j] = saom_eval_change((int)k, (int *)M->termcodes, (int *)M->attridx, (double *)M->p1, attrs, g, actor, j, ijx[j], tt_arr, c3_arr);
+				}
+				break;
+			case TERMCODE_GWDSPFF: case TERMCODE_GWDSPFB: if (hasadj) {
+				const int fb = (tc == TERMCODE_GWDSPFB);
+				const double *cn = ec_counts(g, actor, fb ? EC_OSP : EC_OTP, stride, &ecdone), *tab = ec_gwtable(k, p1, stride);
+				for (q = 0; q < nfl; q++) { j = lst ? fl[q] : q + 1; if (!lst && j == actor) continue; 
+					long b2, h;
+					double contr = 0.0;
+					adjlist_t *L = fb ? &g->inadj[j] : &g->outadj[j];
+					const int tied = ijx[j];
+					for (b2 = 0; b2 < L->len; b2++) {
+						double cc;
+						h = L->nb[b2];
+						if (h == actor) continue;
+						cc = cn[h];
+						if (tied) contr += ec_gw(tab, stride, cc, p1) - ec_gw(tab, stride, cc - 1.0, p1);
+						else contr += ec_gw(tab, stride, cc + 1.0, p1) - ec_gw(tab, stride, cc, p1);
+					}
+					c[j] = tied ? -contr : contr;
+				}
+				break;
+			}
+				for (q = 0; q < nfl; q++) {
+					j = lst ? fl[q] : q + 1;
+					if (!lst && j == actor) continue;
+					c[j] = saom_eval_change((int)k, (int *)M->termcodes, (int *)M->attridx, (double *)M->p1, attrs, g, actor, j, ijx[j], tt_arr, c3_arr);
+				}
+				break;
+			case TERMCODE_TRANSRECTRIP: if (hasadj) {
+				const double *A = ec_counts(g, actor, EC_OTP, stride, &ecdone), *Bc = ec_counts(g, actor, EC_TRB, stride, &ecdone);
+				for (q = 0; q < nfl; q++) { j = lst ? fl[q] : q + 1; if (!lst && j == actor) continue; double d = has_edge(g, j, actor) ? A[j] : 0.0; d += Bc[j]; c[j] = ijx[j] ? -d : d; }
+				break;
+			}
+				for (q = 0; q < nfl; q++) {
+					j = lst ? fl[q] : q + 1;
+					if (!lst && j == actor) continue;
+					c[j] = saom_eval_change((int)k, (int *)M->termcodes, (int *)M->attridx, (double *)M->p1, attrs, g, actor, j, ijx[j], tt_arr, c3_arr);
+				}
+				break;
+			case TERMCODE_TRANSMEDTRIP: if (hasadj) {
+				const double *I = ec_counts(g, actor, EC_ISP, stride, &ecdone);
+				for (q = 0; q < nfl; q++) { j = lst ? fl[q] : q + 1; if (!lst && j == actor) continue; double d = I[j]; c[j] = ijx[j] ? -d : d; }
+				break;
+			}
+				for (q = 0; q < nfl; q++) {
+					j = lst ? fl[q] : q + 1;
+					if (!lst && j == actor) continue;
+					c[j] = saom_eval_change((int)k, (int *)M->termcodes, (int *)M->attridx, (double *)M->p1, attrs, g, actor, j, ijx[j], tt_arr, c3_arr);
+				}
+				break;
+			case TERMCODE_TRANSTIES: if (hasadj) {
+				const double *A = ec_counts(g, actor, EC_OTP, stride, &ecdone);
+				for (q = 0; q < nfl; q++) { j = lst ? fl[q] : q + 1; if (!lst && j == actor) continue; 
+					double delta = ijx[j] ? -1.0 : 1.0;
+					double ch = delta * ((A[j] >= 1.0) ? 1.0 : 0.0);
+					long m2, b2;
+					for (m2 = 0; m2 < g->outadj[j].len; m2++) {
+						b2 = g->outadj[j].nb[m2];
+						if (b2 == actor) continue;
+						if (!has_edge(g, actor, b2)) continue;
+						{ double oldb = A[b2];
+						  double newflag = ((oldb + delta) >= 1.0) ? 1.0 : 0.0;
+						  double oldflag = (oldb >= 1.0) ? 1.0 : 0.0;
+						  ch += newflag - oldflag; }
+					}
+					c[j] = ch;
+				}
+				break;
+			}
+				for (q = 0; q < nfl; q++) {
+					j = lst ? fl[q] : q + 1;
+					if (!lst && j == actor) continue;
+					c[j] = saom_eval_change((int)k, (int *)M->termcodes, (int *)M->attridx, (double *)M->p1, attrs, g, actor, j, ijx[j], tt_arr, c3_arr);
+				}
+				break;
+			case TERMCODE_BALANCE: if (hasadj) {
+				const double *A = ec_counts(g, actor, EC_OTP, stride, &ecdone), *O = ec_counts(g, actor, EC_OSP, stride, &ecdone);
+				const double b0 = p1;
+				for (q = 0; q < nfl; q++) { j = lst ? fl[q] : q + 1; if (!lst && j == actor) continue; 
+					double val = ((g->grpn ? (double)g->grpn[actor] : (double)g->n) - 2.0) * b0
+						- (double)g->dout[j]
+						+ 2.0 * O[j]
+						+ 2.0 * A[j]
+						+ (has_edge(g, j, actor) ? 1.0 : 0.0)
+						- 2.0 * ((double)g->dout[actor] - (ijx[j] ? 1.0 : 0.0));
+					c[j] = ijx[j] ? -val : val;
+				}
+				break;
+			}
+				for (q = 0; q < nfl; q++) {
+					j = lst ? fl[q] : q + 1;
+					if (!lst && j == actor) continue;
+					c[j] = saom_eval_change((int)k, (int *)M->termcodes, (int *)M->attridx, (double *)M->p1, attrs, g, actor, j, ijx[j], tt_arr, c3_arr);
+				}
+				break;
+			case TERMCODE_OUTPOP:
+				for (q = 0; q < nfl; q++) { j = lst ? fl[q] : q + 1; if (!lst && j == actor) continue; double d = sqrt((double)g->dout[j]); c[j] = ijx[j] ? -d : d; }
+				break;
+			case TERMCODE_INACTIVITY: {
+				double d = sqrt((double)g->din[actor]);
+				for (q = 0; q < nfl; q++) { j = lst ? fl[q] : q + 1; if (!lst && j == actor) continue; c[j] = ijx[j] ? -d : d; }
+				break;
+			}
+			case TERMCODE_INPOP:
+				for (q = 0; q < nfl; q++) { j = lst ? fl[q] : q + 1; if (!lst && j == actor) continue; double d = (double)g->din[j]; c[j] = ijx[j] ? -d : d + 1.0; }
+				break;
+			case TERMCODE_OUTPOPL:
+				for (q = 0; q < nfl; q++) { j = lst ? fl[q] : q + 1; if (!lst && j == actor) continue; double d = (double)g->dout[j]; c[j] = ijx[j] ? -d : d; }
+				break;
+			case TERMCODE_INACTL: {
+				double d = (double)g->din[actor];
+				for (q = 0; q < nfl; q++) { j = lst ? fl[q] : q + 1; if (!lst && j == actor) continue; c[j] = ijx[j] ? -d : d; }
+				break;
+			}
+			case TERMCODE_OUTACTSQRT: {
+				double d = (double)g->dout[actor];
+				double v1 = -(pow(d, 1.5) - pow(d - 1.0, 1.5)), v0 = (pow(d + 1.0, 1.5) - pow(d, 1.5));
+				for (q = 0; q < nfl; q++) { j = lst ? fl[q] : q + 1; if (!lst && j == actor) continue; c[j] = ijx[j] ? v1 : v0; }
+				break;
+			}
+			case TERMCODE_OUTTRUNC: case TERMCODE_OUTMORE: case TERMCODE_OUTTHRESHOLD: case TERMCODE_OUTINV: case TERMCODE_OUTSQINV: {
+				double dwo1 = (double)g->dout[actor] - 1.0, dwo0 = (double)g->dout[actor] - 0.0;
+				double v1 = -(saom_degfun(tc, dwo1 + 1.0, p1) - saom_degfun(tc, dwo1, p1)), v0 = saom_degfun(tc, dwo0 + 1.0, p1) - saom_degfun(tc, dwo0, p1);
+				for (q = 0; q < nfl; q++) { j = lst ? fl[q] : q + 1; if (!lst && j == actor) continue; c[j] = ijx[j] ? v1 : v0; }
+				break;
+			}
+			case TERMCODE_ABSDIFFX:
+				for (q = 0; q < nfl; q++) { j = lst ? fl[q] : q + 1; if (!lst && j == actor) continue; double v = fabs(a[j] - a[actor]); c[j] = ijx[j] ? -v : v; }
+				break;
+			case TERMCODE_EGOXALTX:
+				for (q = 0; q < nfl; q++) { j = lst ? fl[q] : q + 1; if (!lst && j == actor) continue; double v = a[actor] * a[j]; c[j] = ijx[j] ? -v : v; }
+				break;
+			case TERMCODE_DIFFX: case TERMCODE_HIGHER: case TERMCODE_EGOSQX: case TERMCODE_ALTSQX: case TERMCODE_SAMEXRECIP: case TERMCODE_SIMRECIPX: {
+				const int rc = cov2_isrecip(tc);
+				saom_tl_sscale = 1.0;		/* as saom_change_term() sets it for a code below 1000 */
+				for (q = 0; q < nfl; q++) { j = lst ? fl[q] : q + 1; if (!lst && j == actor) continue; double v = cov2_val(tc, a[actor], a[j], p1); if (rc && !has_edge(g, j, actor)) v = 0.0; c[j] = ijx[j] ? -v : v; }
+				break;
+			}
+			case TERMCODE_DYADCOV: case TERMCODE_DYADCOVRECIP: {
+				const double *row = attrs[M->attridx[k] - 1 + (actor - 1)];
+				const int rc = (tc == TERMCODE_DYADCOVRECIP);
+				for (q = 0; q < nfl; q++) { j = lst ? fl[q] : q + 1; if (!lst && j == actor) continue; double d; if (rc && !has_edge(g, j, actor)) d = 0.0; else { d = row[j]; d = ijx[j] ? -d : d; } c[j] = d; }
+				break;
+			}
+			case TERMCODE_ISOLATENET:
+				for (q = 0; q < nfl; q++) { j = lst ? fl[q] : q + 1; if (!lst && j == actor) continue; 
+					double cur_isolate, new_isolate;
+					if (g->din[actor] != 0) { c[j] = 0.0; continue; }
+					cur_isolate = (g->dout[actor] == 0) ? 1.0 : 0.0;
+					new_isolate = ijx[j] ? (((g->dout[actor] - 1) == 0) ? 1.0 : 0.0) : 0.0;
+					c[j] = new_isolate - cur_isolate;
+				}
+				break;
+			case TERMCODE_ANTIISO: case TERMCODE_ISOLATEPOP:
+				for (q = 0; q < nfl; q++) { j = lst ? fl[q] : q + 1; if (!lst && j == actor) continue; long d = g->din[j]; int cond = ijx[j] ? (d <= 1) : (d == 0); c[j] = (cond && g->dout[j] <= 0) ? (ijx[j] ? -1.0 : 1.0) : 0.0; }
 				break;
 			case TERMCODE_SIMCOV:
 				for (q = 0; q < nfl; q++) { j = lst ? fl[q] : q + 1; double d = 1.0 - fabs(a[actor] - a[j]) - p1; c[j] = ijx[j] ? -d : d; }
@@ -4713,13 +4954,21 @@ SAOM_FORCEINLINE double eval_core(const model_t *M, const simparams_t *P, graph_
 		prof_term_n[k] += 1.0;
 #endif
 	}
+	/* u[j] = sum over k of theta[k] * chg, accumulated in term order (term-major, so the inner loop runs over contiguous memory) */
+	{
+		const double uact = u[actor];		/* the actor's own entry is not an alternative: keep it as it was */
+		for (q = 0; q < nfl; q++) { j = lst ? fl[q] : q + 1; u[j] = 0.0; }
+		for (k = 0; k < M->nterms; k++) {
+			const double th = P->theta[k], *c = chg + k * stride;
+			if (lst) for (q = 0; q < nfl; q++) { j = fl[q]; u[j] += th * c[j]; }
+			else for (j = 1; j <= nfl; j++) u[j] += th * c[j];
+		}
+		if (!lst) u[actor] = uact;
+	}
 	for (q = 0; q < nfl; q++) {
-		double uj = 0.0;
 		j = lst ? fl[q] : q + 1;
 		if (!lst && j == actor) continue;
-		for (k = 0; k < M->nterms; k++) uj += P->theta[k] * chg[k * stride + j];
-		u[j] = uj;
-		if (uj > maxu) maxu = uj;
+		if (u[j] > maxu) maxu = u[j];
 	}
 	return maxu;
 }
@@ -5083,6 +5332,7 @@ static int simulate_period(const model_t *M, const period_t *PD, const simparams
 	{
 		double *u = (double *)malloc((size_t)(n + 1) * sizeof(double));
 		double *ev = (double *)malloc((size_t)(n + 1) * sizeof(double));
+		double *evp = (double *)malloc((size_t)(n + 1) * sizeof(double));	/* ev[j] / denom, once per ministep for the score (the same quotient as before) */
 		double *tt_arr = M->need_transtrip ? (double *)calloc((size_t)(n + 1), sizeof(double)) : NULL;
 		double *c3_arr = M->need_cycle3 ? (double *)calloc((size_t)(n + 1), sizeof(double)) : NULL;
 		double *chg = (double *)malloc((size_t)(n + 1) * (size_t)(M->nterms > 0 ? M->nterms : 1) * sizeof(double));
@@ -5470,13 +5720,18 @@ static int simulate_period(const model_t *M, const period_t *PD, const simparams
 						}
 					}
 					if (P->want_score) {
+						for (qa = 0; qa < nalt; qa++) {
+							j = alt ? alt[qa] : qa + 1;
+							if (!alt && j == actor) continue;
+							evp[j] = ev[j] / denom;
+						}
 						for (k = 0; k < M->nterms; k++) {
 							double ebar_k = 0.0, chosen_k;
 							const double *c = chg + k * stride;
 							for (qa = 0; qa < nalt; qa++) {
 								j = alt ? alt[qa] : qa + 1;
 								if (!alt && j == actor) continue;
-								ebar_k += (ev[j] / denom) * c[j];
+								ebar_k += evp[j] * c[j];
 							}
 							chosen_k = (choice != 0) ? c[choice] : 0.0;
 							score[k] += chosen_k - ebar_k;
@@ -5664,7 +5919,7 @@ static int simulate_period(const model_t *M, const period_t *PD, const simparams
 			}
 			ht_free(&hstart);
 		}
-		free(u); free(ev); free(tt_arr); free(c3_arr); free(chg); free(ijx);
+		free(u); free(ev); free(evp); free(tt_arr); free(c3_arr); free(chg); free(ijx);
 	}
 	if (presloc) free(presloc);
 	if (sfl && M->sov_n > 0) {
