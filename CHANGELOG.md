@@ -3,7 +3,7 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.5.2] - 2026-11-08
 
 Faster estimation and goodness of fit. Every estimate, standard error and goodness-of-fit result is identical to 1.5.1 to the last digit.
 
