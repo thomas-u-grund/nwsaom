@@ -65,8 +65,19 @@ The core must be version 3.6.0 or later (the listings of this manual were checke
 
 \paragraph{Versions.} \texttt{nwsaom version} reports the installed release of \nwsaom{}, the version of the \texttt{nwcommands} core, the native plugin in use, the version of RSiena that the results were compared with and the license. \texttt{nwversion} lists the core and all installed model packages. \texttt{net install nwsaom} installs the state of the main branch. A specific release is installed from its tag, for example
 \begin{lstlisting}
-. net install nwsaom, from(https://raw.githubusercontent.com/thomas-u-grund/nwsaom/v1.2.0/) replace
+. net install nwsaom, from(https://raw.githubusercontent.com/thomas-u-grund/nwsaom/v1.5.1/) replace
 \end{lstlisting}
+
+\paragraph{What changed in the 1.5 series.} The points below are the changes since the previous archived manual (labelled 1.4). Results of models that were possible before are unchanged, except for the count of groups in \texttt{nwsaom meta} described below.
+\begin{itemize}[nosep]
+  \item \emph{\opt{uncentered(varlist)}:} raw values for the listed covariates only, RSiena's \texttt{coCovar(..., centered = FALSE)} for single covariates (Chapter~\ref{ch:options}); \opt{nocenter} still applies to all covariates.
+  \item \emph{\opt{groups()} with \opt{netbeh()}:} network effects of the dependent behavior in a joint model of several groups (Section~\ref{sec:groups-limits}).
+  \item \emph{Large joint models:} models with \opt{groups()}, about 800 or more actors and a per-actor behavior covariate such as \opt{behfrom()} no longer stop with ``too many options'' (needs the plugin of 1.5.0 or later), and such models start in seconds instead of minutes.
+  \item \emph{\texttt{nwsaom meta}:} an effect held fixed with \opt{fix()} in a group (standard error 0) is no longer counted for that group, as in \texttt{siena08}; before, it raised $n$ and the degrees of freedom of the tests of that effect (Section~\ref{sec:meta}).
+  \item \emph{Rebuilding the Mata libraries} with the Stata that runs, \texttt{nwinstall, buildmata(nwsaom)} (nwcommands 3.14 or later; Section~\ref{sec:buildmata}).
+  \item \emph{Data in memory} (1.5.1): a model that names no variable of the data no longer extends or re-sorts the data in memory.
+  \item \emph{Output} (1.4.1 to 1.4.3): \texttt{nwsaom describe}, \texttt{estat gof}, \texttt{estat score}, \texttt{estat timetest}, \texttt{estat importance}, \texttt{estat simulate} and \texttt{nwsaom meta} print Stata-style tables; the numbers and the \texttt{r()} results are unchanged.
+\end{itemize}
 
 \paragraph{What changed in the 1.2 series.} This manual describes the behavior of version 1.2; the points below are the changes since the previous archived manual (labelled 1.1), in case you re-run old analyses. Results of models that were possible before are unchanged.
 \begin{itemize}[nosep]
@@ -88,7 +99,7 @@ The core must be version 3.6.0 or later (the listings of this manual were checke
 
 \paragraph{License.} \nwsaom{} is free software under the GNU General Public License, version~3. It is derived from RSiena (Ripley, Snijders, Boda, V\"or\"os and others; GPL-2 or GPL-3) and, for the Bayesian estimator, from the algorithm of the multiSiena package (Snijders, Koskinen and Ripley; GPL-3). The source code is public; the file \texttt{NOTICE.md} of the repository lists the sources and the version of RSiena that each part was compared with.
 
-\paragraph{Software.} \nwsaom{} needs Stata~17 or later and was tested with Stata~17 and Stata~18 (Stata/BE is enough); older versions of Stata have not been tested. The Mata libraries are built with Stata~17, the oldest tested version, because a library built by a newer Stata is ignored by older ones. The listings of this manual were produced with Stata/BE~18. The edition of Stata determines how large a network can be when it is passed as a matrix (Section~\ref{sec:limits}).
+\paragraph{Software.} \nwsaom{} needs Stata~17 or later and was tested with Stata~17, 18 and~19 (Stata/BE is enough); older versions of Stata have not been tested. The Mata libraries are built with Stata~17, the oldest tested version, because a library built by a newer Stata is ignored by older ones. The listings of this manual were produced with Stata/BE~18. The edition of Stata determines how large a network can be when it is passed as a matrix (Section~\ref{sec:limits}).
 
 \paragraph{The native plugin.} The simulator is the compiled plugin \texttt{saom\_sim}. The repository contains builds for macOS (\opt{saom\_sim\_macos.plugin}), for Linux (\opt{saom\_sim\_unix.plugin}) and for Windows (\opt{saom\_sim\_windows.plugin}). The macOS build is compiled on the development machine; the Linux and Windows builds are produced by continuous integration and can be older than the \texttt{.ado} files. A plugin that is older than a model needs is detected (the plugin reports its version), and the model is then either fitted by the slower Mata simulator or, for the effects that exist only in the plugin, refused with an error message. Whenever a fit runs on the Mata simulator, \nwsaom{} prints one warning line before the estimation starts and says why (Section~\ref{sec:fallbackwarn}); you can also look at \texttt{e(engine)} afterwards.
 

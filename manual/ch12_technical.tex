@@ -30,6 +30,14 @@ If the plugin of your platform is missing, older than the \texttt{.ado} files, o
 \end{lstlisting}
 The command copies the source from the repository, compiles it with the compiler of your computer, and installs the plugin next to the one that \texttt{net install} put into the PLUS directory; an existing file is kept with the extension \texttt{.prev}. You need a C compiler and \texttt{make} (on macOS the command line tools of Xcode, \texttt{xcode-select --install}; on Linux \texttt{gcc} and \texttt{make}). Restart Stata afterwards, because a plugin that is already loaded is not replaced in a running session. The plugin depends on the operating system and the processor, not on the version or the flavour of Stata (BE, SE, MP): a plugin built on your computer works in every Stata installed there. The routine was tested on macOS; on Windows it stops with a message, and the build note that comes with the source gives the command for the Visual Studio command line. \texttt{buildfrom()} reads the source from a local copy of the repository, and \texttt{release()} from a tagged release.
 
+\subsection{Rebuilding the Mata libraries}\label{sec:buildmata}
+
+The Mata libraries \texttt{lnwsaom1.mlib} and \texttt{lnwsaom2.mlib} are built with Stata~17. A library built by an older Stata loads in every later Stata; one built by a newer Stata is ignored by an older one (r(3499), ``too new to be run by this version of Stata''). If the library does not load in your Stata, build it with that Stata (nwcommands 3.14 or later):
+\begin{lstlisting}
+. nwinstall, buildmata(nwsaom)
+\end{lstlisting}
+The command fetches the Mata source from the repository, compiles it, installs the library and keeps the old file with the extension \texttt{.prev}. The library of \nwsaom{} is compiled against the core library, so if the core library does not load either, use \texttt{nwinstall, buildmata(all)}, which rebuilds the core first and then the installed model packages. The build clears the data and the Mata objects in memory, so save your data first, and restart Stata afterwards.
+
 \subsection{Plugin versions}
 
 The plugin and the Mata layer communicate through a versioned interface. The plugin reports its version, and the Mata layer checks it before it uses a feature that needs a newer plugin. New effects, and new ways of combining existing ones, make the plugin newer.

@@ -12,7 +12,7 @@ nwsaom, waves(netlist)
         [ behavior(...) and its effects ]
         [ composition change and missing data options ]
         [ groups(varname) gwaves(spec) ]
-        [ ratecov(varlist) ratecovcoef(numlist) nocenter ]
+        [ ratecov(varlist) ratecovcoef(numlist) nocenter uncentered(varlist) ]
         [ symmetric symtype(string) ]
         [ unconditional rate0(numlist) theta0(numlist) k0(#) k3(#) firstg(#) seed(#) cores(#) ]
 
@@ -65,6 +65,7 @@ Covariates are read from the current dataset by row. The options below take a va
 \opt{dyadcov(matnames)}, \opt{dyadcovrecip(matnames)} & Dyadic covariate (RSiena's \texttt{X} and \texttt{XRecip}). Each name is a Stata $n\times n$ matrix in the node order of the waves; it is centred by the mean of its non-missing off-diagonal cells (not with \opt{nocenter}), missing cells count as 0 after centring. One coefficient \texttt{dyadcov\_}\emph{name} per matrix. Not with \opt{interact()}. \\
 \opt{tvdyadcov(stem \ldots)}, \opt{tvdyadcovrecip(stem \ldots)} & Changing dyadic covariates: matrices \emph{stem}1 \ldots{} \emph{stem}$(W-1)$, one per period. \\
 \opt{nocenter} & Use the raw values of the covariates of \opt{egox()}, \opt{altx()}, \opt{nodecov()} and \opt{ratecov()}. By default they are centred by their means, as RSiena's \opt{coCovar(centered = TRUE)}; missing values are set to the mean. The means are returned in \texttt{e(covmeans)}. \opt{samex()} does not depend on centring; \opt{simx()} is centred by its similarity mean either way. \\
+\opt{uncentered(varlist)} & Use the raw values of the listed covariates of \opt{egox()}, \opt{altx()}, \opt{samex()}, \opt{nodecov()} and related effects, and centre the others as usual: RSiena's \opt{coCovar(..., centered = FALSE)} for single covariates. Centring changes only the outdegree parameter (by the covariate's coefficient times its mean), so this option reproduces a script that sets \texttt{centered = FALSE} for one covariate, such as the log of the group size in RSiena's multi-group examples. \\
 \bottomrule
 \end{longtable}
 Missing covariate values: for \opt{absdiffx()}, \opt{egoxaltx()}, \opt{altx()}, \opt{egox()}, \opt{samex()} and \opt{simx()} a missing value is imputed with the mean when actors decide, but the statistic skips the ties whose relevant actor has a missing value, as in RSiena.
@@ -197,7 +198,7 @@ Two networks on the same actors evolve together (RSiena's two dependent network 
   \item[\texttt{nwsaom bayes}] Bayesian estimation after a fit; Section~\ref{sec:bayes}.
   \item[\texttt{nwsaom describe}] Description of the waves before a fit; Section~\ref{sec:describe}.
   \item[\texttt{nwsaom meta}] Combines the same model fitted to several networks, the counterpart of RSiena's \texttt{siena08}; Section~\ref{sec:meta} and \texttt{help nwsaom\_meta}. The joint estimation of the groups is the option \opt{groups()}.
-  \item[\texttt{nwsaom version}] Displays the installed release of \nwsaom{}, the version of the \texttt{nwcommands} core, the native plugin in use, the version of RSiena that the results were compared with and the license. It returns \texttt{r(version)}, \texttt{r(date)}, \texttt{r(core)} and \texttt{r(license)}; after estimation by the method of moments, \texttt{e(version)} holds the release that produced the results. Quote it when reporting an analysis. \texttt{nwversion} lists the core and all installed model packages. A specific release is installed from its tag: \opt{net install nwsaom, from(}\url{https://raw.githubusercontent.com/thomas-u-grund/nwsaom/v1.0.1/}\texttt{) replace}.
+  \item[\texttt{nwsaom version}] Displays the installed release of \nwsaom{}, the version of the \texttt{nwcommands} core, the native plugin in use, the version of RSiena that the results were compared with and the license. It returns \texttt{r(version)}, \texttt{r(date)}, \texttt{r(core)} and \texttt{r(license)}; after estimation by the method of moments, \texttt{e(version)} holds the release that produced the results. Quote it when reporting an analysis. \texttt{nwversion} lists the core and all installed model packages. A specific release is installed from its tag: \opt{net install nwsaom, from(}\url{https://raw.githubusercontent.com/thomas-u-grund/nwsaom/v1.5.1/}\texttt{) replace}.
 \end{description}
 
 \section{Combinations that are not available}\label{sec:combinations}
