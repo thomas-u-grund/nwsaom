@@ -3045,6 +3045,7 @@ program nwsaom, eclass
 		error 198
 	}
 	mata: __nwsaom_cores = `cores'
+	scalar __nwsaom_ncores = `cores'
 	// conditional estimation (RSiena's default whenever there is a single
 	// dependent network - its initializeFRAN(): cconditional = !maxlike &
 	// one dependent variable, and not with composition change): network-

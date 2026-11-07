@@ -5,9 +5,14 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-Documentation only. No change to the compiled plugin, the Mata libraries or any number.
+Faster estimation and goodness of fit. Every estimate, standard error and goodness-of-fit result is identical to 1.5.1 to the last digit.
 
 ### Changed
+- **Faster fits with closure effects.** The compiled plugin computes the two-path counts of the ego with all other actors in one pass, and the kernel of the geometrically weighted effects from a table, instead of one count and one `exp()`/`pow()` per alternative. Affected: `gwesp()` and its variants, `gwdspff()`/`gwdspfb()`, `transrectrip`, `transmedtrip`, `transties`, `balance`; the degree and covariate effects without a fast path before (`outpopularity`, `inactivity`, `inpop`, `outactsqrt`, `outtrunc()` ..., `absdiffx()`, `egoxaltx()`, `diffx()` ..., `dyadcov()`) skip the per-alternative dispatch. Fits are 2 to 3.5 times faster with these effects (RSiena benchmark of the article: R1 3.2 to 1.3 seconds, R4 with 200 actors 56 to 16 seconds), with identical numbers.
+- Less overhead per Robbins-Monro step: the number of threads was looked up with `findexternal()` on every call of the plugin, which slows down with the number of Mata globals (about 0.4 ms per step after a fit with 200 actors, a tenth of such a fit); it is now read from a Stata scalar.
+- **Faster `estat gof`.** The geodesic distribution is computed with matrix products instead of a breadth-first search in interpreted Mata (the same counts), and the simulation loop runs in one Mata function instead of an ado-file loop (the same simulations). `estat gof` after a fit with 200 actors takes a quarter of the time; results are identical.
+
+### Changed (documentation)
 - Tested with Stata 17, 18 and 19 (StataNow 19.5): the quick test suite and the examples of the article give the same results in all three. README, manual and website say so.
 - The manual describes the series 1.5 (`uncentered()`, `groups()` with `netbeh()`, large joint models, `nwsaom meta` with `fix()`, `nwinstall, buildmata()`).
 

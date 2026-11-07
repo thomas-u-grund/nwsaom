@@ -15919,6 +15919,11 @@ string scalar SaomSendTail(string scalar s)
    =================================================================== */
 real scalar SaomCores(){
 	pointer(real scalar) scalar p
+	real matrix v
+	// 1.5.2: read from the Stata scalar __nwsaom_ncores (set with the external): findexternal() slows down with the
+	// number of Mata globals (0.4 ms after a fit with 200 actors), and this runs once per Robbins-Monro step
+	v = st_numscalar("__nwsaom_ncores")
+	if (rows(v) == 1 & cols(v) == 1) if (v < .) return(v > 0 ? v : 0)
 	p = findexternal("__nwsaom_cores")
 	if (p == NULL) return(0)
 	if (*p == .) return(0)
