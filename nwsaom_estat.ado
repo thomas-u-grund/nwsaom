@@ -478,7 +478,22 @@ program define nwsaom_estat_gof, rclass
 		local __gof_behoverallmean = __nwsaom_gof_behmean
 		mata: mata drop __nwsaom_gof_allbehvals
 	}
-	forvalues __s = 1/`nsim' {
+	// 1.5.2: without the triad census the simulation loop runs in one Mata function (saom_gof_simloop(), the same calls
+	// in the same order, so the same random numbers and results; the triad census needs Stata commands per network)
+	local __gof_fast = !strpos(" `stats' ", " triad ")
+	if `__gof_fast' {
+		local __gof_rl ""
+		local __gof_rbl ""
+		forvalues __pd = 1/`nperiods' {
+			local __gof_rl "`__gof_rl'`=cond(`__pd'>1, ",", "")'`__gof_rate`__pd''"
+			if `__gof_coev' local __gof_rbl "`__gof_rbl'`=cond(`__pd'>1, ",", "")'`__gof_ratebeh`__pd''"
+		}
+		if !`__gof_coev' local __gof_rbl "J(1,0,0)"
+		local __gof_pn = cond(`__gof_coev', "`__nwsaom_gof_pnet'", "0")
+		local __gof_bm = cond(`__gof_coev', "`__gof_behoverallmean'", "0")
+		mata: saom_gof_simloop(tokens("`stats'"), `nsim', `nperiods', "`__gof_gname'", `__gof_coev', `__gof_join', st_matrix("`bmat'"), `__gof_pn', (`__gof_rl'), (`__gof_rbl'), `__gof_symtype', `grp', ("`e(present)'" != ""), `maxdeg', `maxdist', `__gof_bm')
+	}
+	else forvalues __s = 1/`nsim' {
 		foreach __gof_s of local stats {
 			mata: __nwsaom_gof_row_`__gof_s' = J(1, `__gof_k`__gof_s'', 0)
 		}
@@ -705,6 +720,7 @@ end
 capture mata: mata drop saom_gof_degdist()
 capture mata: mata drop saom_gof_indegdist()
 capture mata: mata drop saom_gof_geodist()
+capture mata: mata drop saom_gof_simloop()
 capture mata: mata drop saom_gof_mhdtest()
 mata:
 // OUT-degree distribution (rowsum of the directed adjacency matrix - RSiena's
@@ -750,39 +766,106 @@ real rowvector saom_gof_indegdist(real matrix M, real scalar maxdeg) {
 // i!=j at that exact distance; counts[maxdist+1] = unreached pairs ("NR") -
 // RSiena's own GeodesicDistribution().
 real rowvector saom_gof_geodist(real matrix M, real scalar maxdist) {
-	real scalar n, s, i, j, d, npairs
-	real colvector dist, frontier, newfrontier
+	// 1.5.2: all sources at once, one matrix product per distance (the same counts as a breadth-first search from
+	// every node): F holds the pairs (s, j) first reached at distance d, R the pairs reached so far
+	real scalar n, d, npairs, nreach
+	real matrix A, F, R
 	real rowvector counts
 
 	n = rows(M)
 	counts = J(1, maxdist+1, 0)
-	for (s=1; s<=n; s++) {
-		dist = J(n,1,.)
-		dist[s] = 0
-		frontier = s
-		d = 0
-		while (length(frontier) > 0 & d < maxdist) {
-			d++
-			newfrontier = J(0,1,0)
-			for (i=1; i<=length(frontier); i++) {
-				for (j=1; j<=n; j++) {
-					if (M[frontier[i],j] & dist[j]==.) {
-						dist[j] = d
-						newfrontier = newfrontier \ j
-					}
-				}
-			}
-			frontier = newfrontier
-		}
-		for (j=1; j<=n; j++) {
-			if (j==s) continue
-			if (dist[j]==.) counts[maxdist+1] = counts[maxdist+1] + 1
-			else counts[dist[j]] = counts[dist[j]] + 1
-		}
+	A = (M :!= 0)
+	_diag(A, 0)
+	R = I(n)
+	F = I(n)
+	nreach = 0
+	for (d=1; d<=maxdist; d++) {
+		F = ((F * A) :> 0) :& (!R)
+		counts[d] = sum(F)
+		if (counts[d] == 0) break
+		nreach = nreach + counts[d]
+		R = R :| F
 	}
 	npairs = n*(n-1)
+	counts[maxdist+1] = npairs - nreach
 	if (npairs > 0) counts = counts / npairs
 	return(counts)
+}
+
+// 1.5.2: the simulation loop of estat gof (without triad) in one function - the statements of the ado loop it
+// replaces, in the same order: per simulation and period a copy of the period's start graph, the structural set of
+// the period, one simulation (co-evolution or network), then the auxiliary statistics of the end network
+void saom_gof_simloop(string rowvector stats, real scalar nsim, real scalar nper, string scalar gname,
+	real scalar coev, real scalar join, real rowvector theta, real scalar pnet, real rowvector rates,
+	real rowvector ratesbeh, real scalar symtype, real scalar grp, real scalar haspres,
+	real scalar maxdeg, real scalar maxdist, real scalar behmean) {
+
+	real scalar s, pd, q, nst, eng, minv, maxv
+	real rowvector v
+	real matrix D, rcattr, rccoef
+	pointer(real rowvector) rowvector acc
+	pointer(real matrix) rowvector sim
+	pointer(real matrix) matrix simP
+	pointer(class SaomModel scalar) scalar pM
+	pointer(class SaomGraph scalar) rowvector pG
+	pointer(class SaomBehaviorModel scalar) scalar pMb
+	pointer(pointer(real colvector) rowvector) scalar pBw
+	class SaomGraph scalar Gw
+	class SaomBehavior scalar Bw
+
+	nst = cols(stats)
+	pM = findexternal("__nwsaom_last_M")
+	sim = J(1, nst, NULL)
+	simP = J(nper, nst, NULL)
+	for (q=1; q<=nst; q++) {
+		sim[q] = findexternal("__nwsaom_gof_sim_" + stats[q])
+		if (!join) for (pd=1; pd<=nper; pd++) simP[pd, q] = findexternal("__nwsaom_gof_simP" + strofreal(pd) + "_" + stats[q])
+	}
+	if (coev) {
+		pMb = findexternal("__nwsaom_last_Mbeh")
+		pBw = findexternal("__nwsaom_last_Behwaves")
+		minv = *findexternal("__nwsaom_beh_minval")
+		maxv = *findexternal("__nwsaom_beh_maxval")
+	}
+	else {
+		rcattr = *findexternal("__nwsaom_gof_rcattr")
+		rccoef = *findexternal("__nwsaom_gof_rccoef")
+	}
+	pG = J(1, nper, NULL)		// the start graphs, looked up once (findexternal() is slow with many Mata globals)
+	for (pd=1; pd<=nper; pd++) pG[pd] = findexternal(gname + strofreal(pd))
+	acc = J(1, nst, NULL)
+	for (s=1; s<=nsim; s++) {
+		for (q=1; q<=nst; q++) acc[q] = &(J(1, cols(*sim[q]), 0))
+		for (pd=1; pd<=nper; pd++) {
+			Gw = SaomGraph()
+			SaomCopyGraph(*pG[pd], Gw)
+			SaomStructPeriodSet(pd)
+			if (coev) {
+				Bw = SaomBehavior()
+				Bw.init(*(*pBw)[pd], minv, maxv, behmean, (*pMb).simMean)
+				eng = SaomGofSimCoev(Gw, *pM, theta[1..pnet], Bw, *pMb, theta[(pnet+1)..cols(theta)], rates[pd], ratesbeh[pd])
+				for (q=1; q<=nst; q++) if (stats[q] == "behavior") {
+					v = saom_gof_behdist(Bw.values, minv, maxv)
+					*acc[q] = *acc[q] + v
+					if (!join) (*simP[pd, q])[s, .] = v
+				}
+			}
+			else {
+				if (grp > 0 & haspres) SaomGroupsPresSet(grp, pd)
+				eng = SaomGofSimNet(Gw, *pM, theta, rates[pd], symtype, rcattr, rccoef)
+			}
+			D = Gw.to_dense()
+			for (q=1; q<=nst; q++) {
+				if (stats[q] == "behavior") continue
+				if (stats[q] == "outdegree") v = saom_gof_degdist(D, maxdeg)
+				else if (stats[q] == "indegree") v = saom_gof_indegdist(D, maxdeg)
+				else v = saom_gof_geodist(D, maxdist)
+				*acc[q] = *acc[q] + v
+				if (!join) (*simP[pd, q])[s, .] = v
+			}
+		}
+		for (q=1; q<=nst; q++) (*sim[q])[s, .] = *acc[q]
+	}
 }
 
 // Behavior-value distribution (harmonisation unit 26, co-evolution) -
