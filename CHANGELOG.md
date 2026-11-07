@@ -3,6 +3,17 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+Documentation only. No change to the compiled plugin, the Mata libraries or any number.
+
+### Changed
+- Tested with Stata 17, 18 and 19 (StataNow 19.5): the quick test suite and the examples of the article give the same results in all three. README, manual and website say so.
+- The manual describes the series 1.5 (`uncentered()`, `groups()` with `netbeh()`, large joint models, `nwsaom meta` with `fix()`, `nwinstall, buildmata()`).
+
+### Fixed
+- The help file listed `uncentered(varlist)` twice.
+
 ## [1.5.1] - 2026-11-04
 
 ### Fixed

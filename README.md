@@ -28,7 +28,7 @@ holds the package version in the stored results. Release history: `CHANGELOG.md`
 
 ## Requirements
 
-* Stata 17 or later. Tested with Stata 17 and Stata 18 (Stata/BE is enough). The Mata libraries are built with Stata 17, the oldest tested version, because a library built by a newer Stata is ignored by older ones; Stata 16 and older have not been tested and are not expected to work.
+* Stata 17 or later. Tested with Stata 17, 18 and 19 (Stata/BE is enough). The Mata libraries are built with Stata 17, the oldest tested version, because a library built by a newer Stata is ignored by older ones; Stata 16 and older have not been tested and are not expected to work.
 * The core nwcommands package (see above), including its Mata library `lnwcommands.mlib`.
 * Platform plugins are shipped for macOS, Linux and Windows.
 
