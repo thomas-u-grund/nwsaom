@@ -3561,7 +3561,15 @@ program nwsaom, eclass
 		}
 		matrix colnames `tconv' = `__ns_tconvnames'
 		matrix rownames `tconv' = tconv
-		matrix `ratetab' = `ratesnet' \ `ratesnetse' \ `ratesbeh' \ `ratesbehse'
+		// the displayed table: each rate row followed by its standard errors, labelled se as in the other models
+		// (the stored e(rates_beh_se) keeps the behavior names as row names)
+		matrix `ratetab' = `ratesnet' \ `ratesnetse'
+		local __ns_tabrows "network_rate se"
+		forvalues __b = 1/`__ns_nbehv' {
+			matrix `ratetab' = `ratetab' \ `ratesbeh'[`__b', 1...] \ `ratesbehse'[`__b', 1...]
+			local __ns_tabrows "`__ns_tabrows' rate_`__ns_mbname`__b'' se"
+		}
+		matrix rownames `ratetab' = `__ns_tabrows'
 		ereturn local waves "`__ns_wavelist'"
 		ereturn local behavior "`behavior'"
 		local __ns_allbeh ""
