@@ -3,6 +3,11 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- Co-evolution with several behaviors: in the rate table of the output, the rows of standard errors of the behavior rates were labelled with the names of the rates (for example `rate_alcohol` twice), so that they looked like a second set of rates. Each rate row is now followed by its `se` row, as in the other models. `e(rates_beh_se)` is unchanged.
+
 ## [1.5.4] - 2026-11-08
 
 ### Changed
