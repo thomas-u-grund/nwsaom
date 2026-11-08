@@ -11,7 +11,7 @@ All examples use the Glasgow data of Chapter~\ref{ch:coevolution} (\texttt{nwweb
 \[
   \lambda_i = \lambda \exp\Big(\sum_k b_k\,x_k[i]\Big),
 \]
-with one coefficient $b_k$ per variable (RSiena's \texttt{RateX} effects). A positive coefficient means that actors with higher covariate values get more opportunities to act. The coefficient is estimated jointly with all other parameters by the same Robbins--Monro procedure. By default the covariates are centred by their means (RSiena's \opt{coCovar(centered = TRUE)}); \opt{nocenter} uses raw values, and the means are shown below the table and stored in \texttt{e(covmeans)}.
+with one coefficient $b_k$ per variable (RSiena's \texttt{RateX} effects). A positive coefficient means that actors with higher covariate values get more opportunities to act. The coefficient is estimated jointly with all other parameters by the same Robbins--Monro procedure. By default the covariates are centred by their means (RSiena's \opt{coCovar(centered = TRUE)}); \opt{nocenter} uses raw values, and the means are shown below the table with \opt{detail} and stored in \texttt{e(covmeans)}.
 
 \begin{lstlisting}
 nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip ///
@@ -19,13 +19,12 @@ nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip ///
 \end{lstlisting}
 \begin{lstlisting}
 SAOM (Method of Moments, conditional), waves: glasgow1 glasgow2 glasgow3
-   outdegree |  -2.673144   .1092592   -24.47   0.000
- reciprocity |   2.456564   .1741169    14.11   0.000
-   transtrip |   .6110999   .0662107     9.23   0.000
-        rate |    6.2097     5.2876
-Covariate-rate coefficient (alcohol1):    0.3915 (se 0.1182)
-Covariates centred by their means: alcohol1  2.880
-Overall maximum convergence ratio: 0.074 (criterion: below 0.25; met)
+   outdegree |  -2.667728   .1334985   -19.98   0.000
+ reciprocity |   2.450087   .1907086    12.85   0.000
+   transtrip |   .6133418   .0731855     8.38   0.000
+        rate |    6.2694     5.2364
+Covariate-rate coefficient (alcohol1):    0.3867 (se 0.1095)
+Overall maximum convergence ratio: 0.129 (criterion: below 0.25; met)
 \end{lstlisting}
 Pupils who drink more get significantly more opportunities to revise their friendships ($\exp(0.39)\approx1.5$ per category). The coefficients are returned in the 1$\times$K matrix \texttt{e(ratecoefs)} (columns named by the variables), with \texttt{e(ratecoefs\_se)}, \opt{e(ratecoefs\_tratio)} and \texttt{e(ratecoefs\_fixed)}; with one variable the scalars \texttt{e(ratecoef)}, \texttt{e(ratecoef\_se)}, \texttt{e(ratecoef\_tratio)} and \texttt{e(ratecoef\_fixed)} exist as well.
 
@@ -47,10 +46,10 @@ A ratecov effect can be combined with \opt{symmetric}. In a non-directed network
 nwsaom, waves(sg1 sg2 sg3) outdegree gwesp(0.69) ratecov(smoke1) seed(1) k3(300)
 \end{lstlisting}
 \begin{lstlisting}
-   outdegree |  -2.232523   .1623717   -13.75   0.000
-  gwesp_0.69 |   1.604636   .1818313     8.82   0.000
-        rate |    2.3363     1.9205
-Covariate-rate coefficient (smoke1):    0.5906 (se 0.2126)
+   outdegree |  -2.239343   .1400216   -15.99   0.000
+  gwesp_0.69 |   1.613057   .1654806     9.75   0.000
+        rate |    2.3533     1.8719
+Covariate-rate coefficient (smoke1):    0.5888 (se 0.1651)
 \end{lstlisting}
 For the symmetrised glasgow waves, agreement with RSiena holds for \texttt{joint} (RateX 0.153 against 0.151, density $-1.316$ against $-1.312$, rates 0.307/0.264 against 0.305/0.263) and, for all three pairwise types, agreement within 0.1 standard errors.
 
@@ -78,14 +77,16 @@ nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip outrat
     seed(1) k3(300)
 \end{lstlisting}
 \begin{lstlisting}
-   outdegree |  -2.524311   .1519365   -16.61   0.000
- reciprocity |   2.393603   .2012056    11.90   0.000
-   transtrip |   .5707772   .1006059     5.67   0.000
-        rate |    3.8587     3.0975
-Covariate-rate coefficient (outrate):    0.1971 (se 0.1110)
-Overall maximum convergence ratio: 0.206 (criterion: below 0.25; met)
+   outdegree |  -2.530166    .146247   -17.30   0.000
+ reciprocity |   2.414198   .2010697    12.01   0.000
+   transtrip |   .5727413   .1004406     5.70   0.000
+        rate |    3.6811     3.0169
+Covariate-rate coefficient (outrate):    0.2127 (se 0.1023)
+Overall maximum convergence ratio: 0.151 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for transtrip (0.134)
+Convergence is good only if both criteria are met. Refit starting from these estimates with theta0(); see nwsaom.
 \end{lstlisting}
-Pupils with more friends are slightly faster, but the effect is not significant ($t=1.8$). A trial with two structural rate effects at once (\opt{inrateinv} and \opt{outratelog}) stopped with ``a simulated period did not reach the observed distance within 1000000 ministeps'' (return code 498); structural rate effects are strongly dependent and one at a time is the safe starting point.
+This fit has not converged by the two criteria (the $t$-ratio of \texttt{transtrip} is 0.134); before it is reported it would be restarted from its estimates with \opt{theta0()}, as Chapter~\ref{ch:estimation} explains. Pupils with more friends are slightly faster; the effect is just significant at the 5\% level ($t=2.1$). A trial with two structural rate effects at once (\opt{inrateinv} and \opt{outratelog}) stopped with ``a simulated period did not reach the observed distance within 1000000 ministeps'' (return code 498); structural rate effects are strongly dependent and one at a time is the safe starting point.
 
 Validation (s50, conditional estimation, two \texttt{siena07} seeds): all nine effects agree, for example \texttt{outRate} rates 2.81/2.15 against 2.79/2.10 and coefficient 0.297 against 0.300, \texttt{inRate} 0.370 against 0.379/0.377, \texttt{outRateInv} $-1.096$ against $-1.12/-1.14$.
 
@@ -94,14 +95,14 @@ Validation (s50, conditional estimation, two \texttt{siena07} seeds): all nine e
 The structural rate effects \opt{outrate}, \opt{outrateinv} and \opt{outratelog} are also available for non-directed and two-mode networks, where they are the only degree versions, as in RSiena. In a two-mode network \opt{ratecov()} is available as well, with constant covariates, with changing covariates (the stems declared in \opt{tvcov()} are written inside \opt{ratecov()}) and with the behavior of the actors as the covariate (this needs \opt{behavior()} and \opt{waves()}). The simulated $40\times20$ data of Section~\ref{sec:twomode}:
 \begin{lstlisting}
 . nwsaom, waves(tm1 tm2 tm3) outdegree cycle4 ratecov(age) outrate seed(1) k0(100) k3(1000)
-   outdegree |  -.9821048   .1289259    -7.62   0.000    -1.234795   -.7294147
-      cycle4 |   .0821058   .0346814     2.37   0.018     .0141315    .1500801
+   outdegree |  -.9831879    .140031    -7.02   0.000    -1.257644   -.7087321
+      cycle4 |   .0823168   .0345298     2.38   0.017     .0146396    .1499941
 Rate parameters (estimated, one per inter-wave period):
-        rate |    3.0268     3.2638 
-          se |    0.4424     0.4402 
-Covariate-rate coefficient (age):    0.1887 (se 0.1027)
-Covariate-rate coefficient (outrate):   -0.1548 (se 0.1098)
-Overall maximum convergence ratio: 0.103 (criterion: below 0.25; met)
+        rate |    3.0559     3.3033 
+          se |    0.4330     0.4677 
+Covariate-rate coefficient (age):    0.1933 (se 0.1069)
+Covariate-rate coefficient (outrate):   -0.1589 (se 0.1262)
+Overall maximum convergence ratio: 0.098 (criterion: below 0.25; met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 \end{lstlisting}
 The effects \texttt{inRateInv} and \texttt{inRateLog} do not exist for two-mode networks (\texttt{siena07} stops, because the receivers of the ties are not the actors), and the pairwise non-directed model types are refused with rate effects and a behavior (\texttt{siena07} fails there).
@@ -114,13 +115,13 @@ In a co-evolution model the rate of the behavior can depend on actor characteris
 Rate parameters (estimated, one per inter-wave period):
              |   period1    period2
 -------------+---------------------
-network_rate |    6.4756     5.2785
-          se |    1.1609     0.8483
-behavior_r~e |    1.1722     1.1098
-          se |    1.2612     0.9582
-Rate effect of the behavior (alcohol1):    0.4314 (se 0.2642)
-Rate effect of the behavior (outrate):    0.3316 (se 0.2901)
-Overall maximum convergence ratio: 0.186 (criterion: below 0.25; met)
+network_rate |    6.5652     5.2635
+          se |    1.4285     0.8406
+behavior_r~e |    1.2247     1.1536
+          se |    1.4900     1.3389
+Rate effect of the behavior (alcohol1):    0.4168 (se 0.2876)
+Rate effect of the behavior (outrate):    0.3223 (se 0.3767)
+Overall maximum convergence ratio: 0.208 (criterion: below 0.25; met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 \end{lstlisting}
 The coefficients are returned in \texttt{e(behratecoefs)}, \texttt{e(behratecoefs\_se)} and \opt{e(behratecoefs\_tratio)}, the observed statistics in \texttt{e(rc\_target)}. The options cannot be combined with \opt{present()}, \opt{joinat()}, \opt{missnet()}, \opt{missbeh()}, several behaviors, the structural rate effects of the network, a two-mode network or the pairwise non-directed model types, and no \texttt{estat} command is available afterwards. They need the native plugin. \texttt{RateX} of a continuous behavior is not planned, and \texttt{susceptAvCovar} and \texttt{infectCovar} with the behavior itself as the covariate do not exist in RSiena.
@@ -165,13 +166,15 @@ nwsaom, waves(cc1 cc2 cc3) outdegree reciprocity transtrip present(p1 p2 p3) ///
 \end{lstlisting}
 \begin{lstlisting}
 SAOM (Method of Moments, unconditional), waves: cc1 cc2 cc3
-   outdegree |    -2.6153   .1360758   -19.22   0.000
- reciprocity |   2.520413   .2129212    11.84   0.000
-   transtrip |   .5735564    .094382     6.08   0.000
-        rate |    8.9589     4.9796
-Overall maximum convergence ratio: 0.240 (criterion: below 0.25; met)
+   outdegree |   -2.65185   .1311795   -20.22   0.000
+ reciprocity |   2.557583   .2301005    11.12   0.000
+   transtrip |   .5803097   .1036101     5.60   0.000
+        rate |    9.1350     4.2694
+Overall maximum convergence ratio: 0.159 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for outdegree (0.120) reciprocity (0.126) transtrip (0.138)
+Convergence is good only if both criteria are met. Refit starting from these estimates with theta0(); see nwsaom.
 \end{lstlisting}
-Rates are unconditional here and therefore not on the scale of the conditional rates of the earlier examples.
+This fit has not converged by the two criteria (all three $t$-ratios are above 0.1); before it is reported it would be restarted from its estimates with \opt{theta0()}, as Chapter~\ref{ch:estimation} explains. Rates are unconditional here and therefore not on the scale of the conditional rates of the earlier examples.
 
 \paragraph{How to prepare the data.} \nwsaom{} does not derive the data of absent actors for you. The ties an absent actor has in the data are used as given and counted in the distance, so code them 0 for the waves in which the actor is absent, as in the example above, where the leavers' ties are coded 0 at the wave they have left. Code consistently: an absent actor's row and column that look like activity the actor can never explain are a real, avoidable way to trigger the \texttt{thetaBound} error. An absent actor stays among the possible alters of an active actor, as in RSiena.
 
@@ -195,13 +198,15 @@ nwsaom, waves(cc1 cc2 cc3) outdegree reciprocity transtrip joinat(jn) leaveat(lv
 \end{lstlisting}
 \begin{lstlisting}
 SAOM (Method of Moments, unconditional), waves: cc1 cc2 cc3
-   outdegree |  -2.676591   .1317424   -20.32   0.000
- reciprocity |   2.550914   .2125371    12.00   0.000
-   transtrip |   .5951937   .0917836     6.48   0.000
-        rate |    8.2655     5.6119
-Overall maximum convergence ratio: 0.239 (criterion: below 0.25; met)
+   outdegree |  -2.666646   .1244786   -21.42   0.000
+ reciprocity |   2.540217   .2121802    11.97   0.000
+   transtrip |   .5889974   .0746351     7.89   0.000
+        rate |    8.3560     5.6453
+Overall maximum convergence ratio: 0.232 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for outdegree (0.129) reciprocity (0.170) transtrip (0.175)
+Convergence is good only if both criteria are met. Refit starting from these estimates with theta0(); see nwsaom.
 \end{lstlisting}
-(Pupils 1--5 join in the middle of period 1, pupils 46--50 leave in the middle of period 2; their ties in the data are coded 0 for the waves they are absent. Note that actor 1--5 are marked absent at wave 1 and present at wave 2, so \opt{joinat(1.5)} is consistent.) \opt{present()} is the special case of whole-period presence.
+This fit has not converged by the two criteria (all three $t$-ratios are above 0.1); before it is reported it would be restarted from its estimates with \opt{theta0()}, as Chapter~\ref{ch:estimation} explains. (Pupils 1--5 join in the middle of period 1, pupils 46--50 leave in the middle of period 2; their ties in the data are coded 0 for the waves they are absent. Note that actor 1--5 are marked absent at wave 1 and present at wave 2, so \opt{joinat(1.5)} is consistent.) \opt{present()} is the special case of whole-period presence.
 
 \paragraph{Validation.} Five single-event scenarios at fixed parameters give the same deviations from the targets as \texttt{siena07}; on s50 with 10 joiners/leavers the estimates (density, reciprocity, transitive triplets, both rates, and a rate covariate) lie within noise of RSiena over three seeds. With one or several co-evolving behaviors (via \opt{joinat()}) the rates and shape effects agree with \texttt{siena07} as well (network rates 6.46/5.10 against 6.48/5.10, alcohol rates 0.99/1.32 against 0.98/1.32, smoking rates 2.85/2.47 against 2.88/2.49).
 

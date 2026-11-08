@@ -25,10 +25,10 @@ nwsaom, waves(sg1 sg2 sg3) outdegree gwesp(0.69) nodematch(smoke1) seed(1) k3(30
 \begin{lstlisting}
 SAOM (Method of Moments, conditional), waves: sg1 sg2 sg3
 Actors: 50                             Periods: 2
-       outdegree |    -2.3699   .1798485   -13.18   0.000
-nodematch_smoke1 |   .2077777   .1840164     1.13   0.259
-      gwesp_0.69 |   1.615427   .1604325    10.07   0.000
-        rate     |    2.4432     2.0675
+       outdegree |  -2.358639   .1837347   -12.84   0.000
+nodematch_smoke1 |   .2021306   .1783414     1.13   0.257
+      gwesp_0.69 |   1.607131   .1672707     9.61   0.000
+        rate     |    2.4764     2.0350
 \end{lstlisting}
 No \opt{symmetric} was needed. The engine is native (\texttt{e(engine)} is \texttt{native}); symmetric models require 100\% native term coverage.
 
@@ -56,17 +56,17 @@ Before 2026-10-01 the default was \texttt{joint} and types 2 and 3 did not exist
 \toprule
 \opt{symtype()} & outdegree & nodematch(smoke1) & rate, period 1 & rate, period 2 \\
 \midrule
-forcing & $-1.556$ & 0.234 & 2.011 & 1.774 \\
-confirmation & $-0.875$ & 0.152 & 4.112 & 3.536 \\
-force & $-2.899$ & 0.395 & 0.321 & 0.270 \\
-agree & $-1.325$ & 0.266 & 0.364 & 0.315 \\
-joint & $-1.458$ & 0.209 & 0.320 & 0.274 \\
+forcing & $-1.561$ & 0.234 & 1.998 & 1.748 \\
+confirmation & $-0.883$ & 0.165 & 4.136 & 3.600 \\
+force & $-2.894$ & 0.390 & 0.320 & 0.275 \\
+agree & $-1.307$ & 0.243 & 0.366 & 0.314 \\
+joint & $-1.450$ & 0.199 & 0.320 & 0.273 \\
 \bottomrule
 \end{tabular}
 \end{center}
 The coefficients are not comparable across model types, because a different mechanism generates the same data. The substantive conclusion about \texttt{nodematch} should be checked under more than one type when the choice is not obvious from theory.
 
-\paragraph{Scale of the rate.} For \texttt{forcing} and \texttt{confirmation} the rate is the per-actor rate, as in the directed model. For the three pairwise types, RSiena gives each actor the basic rate $\lambda$ and each pair the rate $\lambda^2$, while \nwsaom{} simulates a pairwise ministep as an actor with opportunity rate $\rho$ picking an alter among the other $n-1$ actors. The processes are identical with $\lambda^2 = \rho/(n-1)$, and \texttt{e(rate)} is reported on RSiena's scale (\texttt{e(rate\_actor)} keeps $\rho$). In unconditional estimation \texttt{e(rate)} $=\lambda=\sqrt{\rho/(n-1)}$; in conditional estimation it is the mean time to reach the observed distance at basic rate 1, which is on the scale of $\lambda^2$ (on these data 0.30 and 0.55 for \texttt{joint}; $0.55^2 = 0.30$). \opt{rate0()} is on RSiena's scale too. RSiena's default start for the rate of the pairwise types is on the per-actor scale (5.6 on the Glasgow data) and, from it, unconditional estimation often fails; the references in the help file start at 0.5, so give \opt{rate0(0.5)} if an unconditional pairwise fit stops with ``Unlikely to terminate''.
+\paragraph{Scale of the rate.} For \texttt{forcing} and \texttt{confirmation} the rate is the per-actor rate, as in the directed model. For the three pairwise types, RSiena gives each actor the basic rate $\lambda$ and each pair the rate $\lambda^2$, while \nwsaom{} simulates a pairwise ministep as an actor with opportunity rate $\rho$ picking an alter among the other $n-1$ actors. The processes are identical with $\lambda^2 = \rho/(n-1)$, and \texttt{e(rate)} is reported on RSiena's scale (\texttt{e(rate\_actor)} keeps $\rho$). In unconditional estimation \texttt{e(rate)} $=\lambda=\sqrt{\rho/(n-1)}$; in conditional estimation it is the mean time to reach the observed distance at basic rate 1, which is on the scale of $\lambda^2$ (on these data 0.32 and 0.57 for \texttt{joint}; $0.57^2 = 0.32$). \opt{rate0()} is on RSiena's scale too. RSiena's default start for the rate of the pairwise types is on the per-actor scale (5.6 on the Glasgow data) and, from it, unconditional estimation often fails; the references in the help file start at 0.5, so give \opt{rate0(0.5)} if an unconditional pairwise fit stops with ``Unlikely to terminate''.
 
 \subsection{Effects in a non-directed network}
 
@@ -80,12 +80,12 @@ nwsaom, waves(sg1 sg2 sg3) outdegree behavior(alcohol1 alcohol2 alcohol3) ///
     linear avalt symtype(joint) seed(1) k3(300)
 \end{lstlisting}
 \begin{lstlisting}
-   outdegree |  -1.324586   .0702653   -18.85   0.000
-  beh_linear |   .3497927   .1313378     2.66   0.008
-   beh_avalt |    .257606   .2158045     1.19   0.233
-network_rate |    0.5698     0.5263
+   outdegree |  -1.327199   .0831625   -15.96   0.000
+  beh_linear |   .3430058   .1375989     2.49   0.013
+   beh_avalt |   .2599666   .2286222     1.14   0.255
+network_rate |    0.5688     0.5253
 \end{lstlisting}
-(maximum convergence ratio 0.231).
+(maximum convergence ratio 0.165).
 
 \subsection{Validation}
 
@@ -154,11 +154,11 @@ nwsaom, waves(tm1 tm2 tm3) outdegree cycle4 nodeocov(age) nodeicov(size) seed(1)
 (two-mode network: 40 actors (mode 2) choose among 20 events)
 SAOM (Method of Moments, conditional), waves: tm1 tm2 tm3
 Two-mode network: 40 actors choose among 20 events
-    outdegree |  -.8976565   .1427513    -6.29   0.000
-nodeicov_size |  -.1302557   .0766979    -1.70   0.089
- nodeocov_age |   .0166527   .0868483     0.19   0.848
-       cycle4 |    .054978   .0357529     1.54   0.124
-        rate  |    2.0851     2.0837
+    outdegree |  -.8967505   .1182357    -7.58   0.000
+nodeicov_size |  -.1309193   .0747607    -1.75   0.080
+ nodeocov_age |   .0138817   .0908917     0.15   0.879
+       cycle4 |   .0549947   .0336124     1.64   0.102
+        rate  |    2.0916     2.0732
 \end{lstlisting}
 \texttt{e(twomode)} is 1, and \texttt{e(n\_actors)} and \texttt{e(n\_events)} give the mode sizes (40 and 20). The header line ``Actors: 60'' counts all nodes. With \opt{actormode(1)} the roles swap (20 actors choose among 40 events). In this implementation the network is embedded in a directed one-mode graph on all nodes in which only actor-to-event dyads are free (all others are structural zeros), so the one-mode sampler, plugin and statistics are used unchanged, and the rate is a per-actor rate. Several waves (\opt{waves()}) are supported.
 
@@ -205,6 +205,7 @@ nwsaom, waves(tm1 tm2 tm3) outdegree behavior(z1 z2 z3) linear behegox seed(1) k
 network_rate |    2.0487     2.0639
 behavior_rate|    0.3717     0.7549
 \end{lstlisting}
+(This listing comes from an earlier version of \nwsaom{} and was not rerun for this edition, because the code that builds its data is not shown; the numbers of a run with the current version differ within simulation error.)
 \textbf{Gotcha:} the behavior variable must have non-missing values on the event rows (set them to 0 as above). The same model with Stata missing values (\texttt{.}) on the event rows stopped with the \texttt{thetaBound} divergence error (return code 498), whereas filling the rows with 0 converged.
 
 \subsection{Further options in a two-mode network}
@@ -295,22 +296,22 @@ nwsaom multinet, net1(glasgow1 glasgow2 glasgow3) net2(advice1 advice2 advice3) 
 \end{lstlisting}
 \begin{lstlisting}
 Several co-evolving networks (Method of Moments), 3 waves, 50 actors
-            net1_outdegree |  -2.622782   .1268573   -20.68   0.000
-          net1_reciprocity |   2.541702   .2538241    10.01   0.000
-            net1_transtrip |   .6400947   .0984247     6.50   0.000
-        net1_egox_alcohol1 |   .0086436   .0780513     0.11   0.912
-             net1_x_crprod |  -.5927435   .5034914    -1.18   0.239
-net1_xc_covnetnet_alcohol1 |   .2379455   .4817869     0.49   0.621
-            net2_outdegree |  -1.875265   .1148025   -16.33   0.000
-          net2_reciprocity |   1.045423   .3028072     3.45   0.001
-               net2_x_from |   .2092609   .3261697     0.64   0.521
+            net1_outdegree |  -2.615272   .1180239   -22.16   0.000
+          net1_reciprocity |   2.524563   .2301626    10.97   0.000
+            net1_transtrip |   .6382761   .0973272     6.56   0.000
+        net1_egox_alcohol1 |   .0074951   .0746293     0.10   0.920
+             net1_x_crprod |   -.573532   .3979841    -1.44   0.150
+net1_xc_covnetnet_alcohol1 |   .2316152   .4222422     0.55   0.583
+            net2_outdegree |  -1.876933   .1193721   -15.72   0.000
+          net2_reciprocity |   1.049762   .2890008     3.63   0.000
+               net2_x_from |   .1985325    .318445     0.62   0.533
 Rates (estimated):
            period1  period2
-rate_net1    5.632    4.711
-rate_net2    1.754    1.749
-Overall maximum convergence ratio: 0.242 (criterion: below 0.25; met)
+rate_net1    5.703    4.761
+rate_net2    1.729    1.739
+Overall maximum convergence ratio: 0.341 (criterion: below 0.25; not met)
 \end{lstlisting}
-Coefficients are named \texttt{net1\_}/\texttt{net2\_} plus the effect; cross effects add \texttt{x\_} (\texttt{net1\_x\_crprod}) or, with a covariate, \texttt{xc\_}\emph{effect}\texttt{\_}\emph{var}. \texttt{e(rates)} has four rows (rate and standard error for each network). On these artificial data \texttt{crprod} is not significant, as expected, and because the advice network is a thinned copy of the friendship network a model with \texttt{crprod} in \emph{both} directions diverged (return code 498) in a trial run: when one network is nearly a subset of the other, the cross effects are close to unidentified.
+This fit has not converged by the two criteria (the overall ratio is 0.341); before it is reported it would be restarted from its estimates with \opt{theta0()}, as Chapter~\ref{ch:estimation} explains. Coefficients are named \texttt{net1\_}/\texttt{net2\_} plus the effect; cross effects add \texttt{x\_} (\texttt{net1\_x\_crprod}) or, with a covariate, \texttt{xc\_}\emph{effect}\texttt{\_}\emph{var}. \texttt{e(rates)} has four rows (rate and standard error for each network). On these artificial data \texttt{crprod} is not significant, as expected, and because the advice network is a thinned copy of the friendship network a model with \texttt{crprod} in \emph{both} directions diverged (return code 498) in a trial run: when one network is nearly a subset of the other, the cross effects are close to unidentified.
 
 \subsection{Non-directed members}
 
@@ -320,14 +321,14 @@ nwsaom multinet, net1(sg1 sg2 sg3) net2(advice1 advice2 advice3) sym1 ///
     cross1(crprod from) seed(1) k3(300)
 \end{lstlisting}
 \begin{lstlisting}
-  net1_outdegree |  -1.559588   .1396636   -11.17   0.000
-   net1_x_crprod |   .1204944   .4822659     0.25   0.803
-     net1_x_from |   .7790062    .278174     2.80   0.005
-  net2_outdegree |  -1.841514   .0969473   -19.00   0.000
-net2_reciprocity |   1.103243   .2721599     4.05   0.000
-Overall maximum convergence ratio: 0.261 (criterion: below 0.25; not met)
+  net1_outdegree |  -1.561466   .1349579   -11.57   0.000
+   net1_x_crprod |   .1239251   .4684387     0.26   0.791
+     net1_x_from |   .7701941   .2699889     2.85   0.004
+  net2_outdegree |  -1.843321   .0950933   -19.38   0.000
+net2_reciprocity |   1.120022   .2648287     4.23   0.000
+Overall maximum convergence ratio: 0.284 (criterion: below 0.25; not met)
 \end{lstlisting}
-Twenty cross effects were validated against \texttt{siena07} for a non-directed first network with a directed second one (for example \opt{crprod from fromany to closure clxwx mixedinxw joutmix outpopintn outactintn avdegintn doubleoutact sharedto inpopoutw}).
+This fit has not converged by the two criteria (the overall ratio is 0.284); before it is reported it would be restarted from its estimates with \opt{theta0()}, as Chapter~\ref{ch:estimation} explains. Twenty cross effects were validated against \texttt{siena07} for a non-directed first network with a directed second one (for example \opt{crprod from fromany to closure clxwx mixedinxw joutmix outpopintn outactintn avdegintn doubleoutact sharedto inpopoutw}).
 
 \paragraph{Earlier subcommand.} The older \texttt{nwsaom multiplex} (two directed networks, exactly two waves each, \texttt{outdegree}, \texttt{reciprocity} and the cross effect \texttt{crprod}/\texttt{crprodb} only) still exists but is deprecated and prints a note; use \texttt{nwsaom multinet}, which generalises it and will replace it.
 
@@ -363,20 +364,24 @@ rate_net2    1.940    1.965
   se_net2    0.269    0.245
 Overall maximum convergence ratio: 0.098
 \end{lstlisting}
+(This listing comes from an earlier version of \nwsaom{} and was not rerun for this edition, because the code that builds its data is not shown; the numbers of a run with the current version differ within simulation error.)
 Nothing in the cross effect \texttt{to} (actors who are tied to the same friends choose the same events) is expected in these artificial data, and the estimate is not significant.
 
 \subsection{Starting values, fixed effects and tests}
 \opt{theta0()} gives the starting values of all effects in the order of the coefficient table (\texttt{net1\_*}, then \texttt{net2\_*}, then the behavior effects), and \opt{fix()} holds the named effects (the coefficient names, or \texttt{\_all}) at those values, as in a single-network fit. After a multinet fit \texttt{estat score} and \texttt{estat timetest} are available (Chapter~\ref{ch:tools}); a fixed cross effect is shown as omitted:
 \begin{lstlisting}
 . nwsaom multinet, net1(glasgow1 glasgow2 glasgow3) net2(advice1 advice2 advice3) eff1(outdegree reciprocity transtrip) eff2(outdegree reciprocity) cross1(crprod) cross2(from) theta0(-2.6 2.5 0.6 0 -1.9 1 0) fix(net1_x_crprod) seed(1) k3(300)
-  net1_outdegree |  -2.644274   .1271252   -20.80   0.000
-net1_reciprocity |   2.422096   .2253901    10.75   0.000
-  net1_transtrip |   .6082176   .0838987     7.25   0.000
+  net1_outdegree |  -2.644865   .1151705   -22.96   0.000
+net1_reciprocity |    2.41315   .1910847    12.63   0.000
+  net1_transtrip |   .6087724   .0837007     7.27   0.000
    net1_x_crprod |          0  (omitted)
-  net2_outdegree |  -1.878221   .1111325   -16.90   0.000
-net2_reciprocity |   1.035088   .3244554     3.19   0.001
-     net2_x_from |   .2141975   .2865838     0.75   0.455
+  net2_outdegree |  -1.879335    .117141   -16.04   0.000
+net2_reciprocity |    1.04886   .2888188     3.63   0.000
+     net2_x_from |   .2055701    .346817     0.59   0.553
+(output omitted)
+Overall maximum convergence ratio: 0.255 (criterion: below 0.25; not met)
 \end{lstlisting}
+This fit has not converged by the overall criterion (the ratio is 0.255); before it is reported it would be restarted from its estimates with \opt{theta0()}, keeping \opt{fix()}, as Chapter~\ref{ch:estimation} explains.
 \texttt{estat gof}, \texttt{estat importance} and \texttt{estat simulate} are not available after a multinet fit.
 
 \subsection{Validation}
@@ -403,6 +408,7 @@ rate_net2    1.893    2.139
  rate_beh    2.782    2.645
 Overall maximum convergence ratio: 0.209
 \end{lstlisting}
+(This listing comes from an earlier version of \nwsaom{} and was not rerun for this edition, because the code that builds its data is not shown; the numbers of a run with the current version differ within simulation error.)
 (\texttt{nb1 nb2 nb3} is a second, randomly generated network in this example.) The behavior can also be a covariate of the network effects, with \texttt{behsim}, \texttt{behegox}, \texttt{behaltx} and \texttt{behegoplusalt} in \opt{eff1()}/\opt{eff2()}, and of the cross-network effects, written \emph{effect}\texttt{:behavior} in \opt{cross1()}/\opt{cross2()}; any of the covariate cross-network effects listed above works this way, for example \opt{cross1(samewwclosure:behavior covnetnet:behavior)}. In the plugin the behavior statistics are the end behavior on the \emph{starting} network of the period, as in RSiena.
 
 All of these were compared with \texttt{siena07}: the observed statistics are equal (RSiena counts a reciprocated dyad twice and centres the linear and quadratic statistics of a behavior, which changes the targets but not the estimates), and the coefficients and rates agree within simulation noise (at most 0.06 standard errors in the main models), for shape and \texttt{avalt} effects of either network, \texttt{behsim}, \texttt{behegox}, \texttt{behaltx}, and all 34 covariate cross-network effects with the behavior as covariate.

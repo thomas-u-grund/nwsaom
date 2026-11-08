@@ -24,7 +24,7 @@ forvalues i = 1/5 {
 nwsaom, wave1(glasgow1) wave2(glasgow2) outdegree reciprocity transtrip ///
     missnet(m1 m2) seed(1)
 \end{lstlisting}
-(This example was run with the development build; it converged, with an overall convergence ratio of 0.119.) Because the missing indicators are Stata matrices, they are limited by Stata's matrix size: 800$\times$800 in Stata/BE, 11,000$\times$11,000 in Stata/SE.
+(With \nwsaom{} 1.5.4 this example converged, with an overall convergence ratio of 0.091.) Because the missing indicators are Stata matrices, they are limited by Stata's matrix size: 800$\times$800 in Stata/BE, 11,000$\times$11,000 in Stata/SE.
 
 \paragraph{How missing values are handled.} \nwsaom{} follows RSiena's two steps.
 \begin{enumerate}

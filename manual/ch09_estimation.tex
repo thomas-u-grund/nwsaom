@@ -70,23 +70,23 @@ After the coefficient table, \nwsaom{} prints the rate table and the convergence
 \end{itemize}
 If either condition fails, run the model again from the estimates as shown above. If after one or two restarts the overall ratio stays near 0.25 while the estimates hardly change from one restart to the next, the remaining excess is mostly noise in the phase-3 estimate of the ratio: restart once more with a longer phase 3, for example \opt{k3(3000)}, rather than restarting again and again with the default length. The $t$-ratios of the coefficients in \texttt{e(b)} are in \texttt{e(tratio)}; all of them, with the rates, are in \texttt{e(tconv)}.
 
-A real run on the Glasgow data (RSiena's \texttt{s50}, three waves) illustrates the output. Two $t$-ratios are slightly above 0.1 in absolute value, while the overall ratio of 0.142 is below 0.25 (the two criteria are separate, and the detail listing is shown):
+A real run on the Glasgow data (RSiena's \texttt{s50}, three waves) illustrates the output. All three $t$-ratios are below 0.1 in absolute value, and the overall ratio of 0.123 is below 0.25 (the two criteria are separate, and the detail listing is shown):
 \begin{lstlisting}
-. nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip seed(1)
+. nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip seed(1) detail
 SAOM (Method of Moments, conditional), waves: glasgow1 glasgow2 glasgow3
 Actors: 50                             Periods: 2
-   outdegree |  -2.687867   .1214406   -22.13   0.000
- reciprocity |   2.457453   .2035477    12.07   0.000
-   transtrip |   .6202674   .0789534     7.86   0.000
+   outdegree |  -2.675306   .1130571   -23.66   0.000
+ reciprocity |   2.453519   .1841138    13.33   0.000
+   transtrip |   .6151182    .075624     8.13   0.000
 Rate parameters (estimated, one per inter-wave period):
-        rate |    6.5292     5.2435
-          se |    1.0759     0.9023
+        rate |    6.4432     5.2473
+          se |    1.0683     0.8841
 Convergence t-ratios (criterion: every |t| below 0.1; the overall maximum ratio below 0.25 is a separate criterion):
-  outdegree                 -0.139      reciprocity               -0.130
-  transtrip                 -0.096
-Overall maximum convergence ratio:  0.142
+  outdegree                 -0.005      reciprocity               -0.031
+  transtrip                 -0.076
+Overall maximum convergence ratio:  0.123
 \end{lstlisting}
-(Columns trimmed. The digits depend on the seed.) By the two criteria above the overall ratio is met but the $t$-ratio criterion is not (two parameters); without \texttt{detail}, \nwsaom{} prints one line per criterion and names those parameters. Restarting from these estimates is the next step.
+(Columns trimmed. The digits depend on the seed.) By the two criteria above this fit has converged. Without \texttt{detail}, \nwsaom{} prints one line per criterion and names the parameters whose $t$-ratio is too large; when a criterion is not met, restarting from the estimates is the next step.
 
 \section{Errors, divergence and what to do}
 \nwsaom{} stops loudly rather than return numbers it cannot support. The return codes below are those the code sets.
@@ -161,10 +161,10 @@ Goodness of fit: Mahalanobis distance test, 30 simulations at the estimates (2 p
 
            statistic |   Mahalanobis  P-value      Fit
 ---------------------+--------------------------------
-           Outdegree |        20.498    0.000 rejected
-            Indegree |        21.567    0.000 rejected
-            Geodesic |        34.322    0.000 rejected
----------------------+--------------------------------
+           Outdegree |        23.919    0.067       ok
+            Indegree |        14.906    0.133       ok
+            Geodesic |        23.311    0.000 rejected
+------------------------------------------------------
 Fit is rejected when P < 0.05 (one-tailed test).
 \end{lstlisting}
 This three-effect model on the Glasgow data is deliberately minimal; the output shows how a poorly fitting specification is reported, and that it is a reason to extend the model, not a failure of the command. \opt{nsim()} defaults to 50 (minimum 5); \texttt{nsim(30)} was used here only to be quick.
@@ -196,18 +196,18 @@ Maximum likelihood estimates (Robbins-Monro on the score of the augmented data)
 ------------------------------------------------------------------------------
 glasgow1_t~2 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
 -------------+----------------------------------------------------------------
-   outdegree |  -2.504279   .1334947   -18.76   0.000    -2.765924   -2.242634
- reciprocity |   1.962156   .2303885     8.52   0.000     1.510603    2.413709
-   transtrip |   .6749363   .0950854     7.10   0.000     .4885723    .8613002
+   outdegree |  -2.508867   .1283755   -19.54   0.000    -2.760478   -2.257256
+ reciprocity |   1.954275   .2177942     8.97   0.000     1.527406    2.381143
+   transtrip |   .6850565   .0905747     7.56   0.000     .5075335    .8625796
 ------------------------------------------------------------------------------
 Rate parameters (one per inter-wave period):
        period1
- rate   6.5482
-   se   0.9585
-tconv  -0.1597
-Overall maximum t-ratio of the scores: 0.160 (acceptable)
+ rate   6.4168
+   se   0.9363
+tconv  -0.0593
+Overall maximum t-ratio of the scores: 0.096 (good; below 0.1)
 \end{lstlisting}
-The method-of-moments fit of the same model, which is printed first and used as the starting point, has $-2.53$, $2.15$ and $0.59$. With the default controls this example takes about one minute and ends with a largest $t$-ratio of 0.52, which the output flags as poor; the longer phases above (about two minutes) bring it below 0.1, and the output tells you to run longer when this happens. Estimates from different seeds differ by simulation noise. Against \texttt{siena07} with \texttt{maxlike = TRUE} the estimates of this model are $-2.65$, $2.22$ to $2.24$ and $0.69$ to $0.70$ in \nwsaom{} (several runs) and $-2.66$ and $-2.63$, $2.22$ and $2.19$, $0.71$ and $0.70$ in two runs of RSiena. With a co-evolving behavior the estimates are within 0.1 standard errors of RSiena's.
+The method-of-moments fit of the same model, which is printed first and used as the starting point, has $-2.53$, $2.15$ and $0.59$. With the default controls this example takes about half a minute on an Apple M5 Pro and ends with a largest $t$-ratio of 0.22, which the output flags as acceptable; the longer phases above (a little over a minute) bring it below 0.1, and the output tells you to run longer when this happens. Estimates from different seeds differ by simulation noise. Against \texttt{siena07} with \texttt{maxlike = TRUE} the estimates of this model are $-2.65$, $2.22$ to $2.24$ and $0.69$ to $0.70$ in \nwsaom{} (several runs) and $-2.66$ and $-2.63$, $2.22$ and $2.19$, $0.71$ and $0.70$ in two runs of RSiena. With a co-evolving behavior the estimates are within 0.1 standard errors of RSiena's.
 
 \section{Bayesian estimation: \texttt{nwsaom bayes}}\label{sec:bayes}
 \texttt{nwsaom bayes} samples the posterior distribution of the model that was just fitted, by data augmentation. It is run \emph{after} an \nwsaom{} fit for a directed one-mode network, with or without one co-evolving behavior, and takes the network waves, the effects and the covariates from that fit. The estimates of the fit are the starting values and its covariance matrix is the proposal distribution of the effects. The algorithm and the names of its controls follow \texttt{multi\_siena} (\texttt{sienaBayes}) of the R package multiSiena (Snijders, Koskinen and Ripley) for one group. One batch consists of
@@ -218,20 +218,21 @@ The method-of-moments fit of the same model, which is printed first and used as 
 \end{enumerate}
 The proposal scale factors are tuned in rounds of \opt{nimprovemh()} batches before and after the warming phase, as in \texttt{improveMH} of multiSiena, towards the acceptance probability \opt{targetmh()} (0.25). The schedule is: pre-warming (\opt{nprewarm()}, default 50), tuning, warming (\opt{nwarm()}, 50), tuning and the main run (\opt{nmain()}, 250 iterations, one draw saved per iteration with \opt{nrunmh()} (20) batches in between). \opt{mult()} (5) sets the number of Metropolis--Hastings steps on the sequences as a multiple of the observed number of tie changes. The priors are set with \opt{priormeaneta()} and \opt{priorsigeta()} (the effects) and \opt{ratepriormean()} and \opt{ratepriorsd()} (the rates); \opt{gibbsrates} draws the rates from their gamma full conditional instead.
 
-The following example uses a short run to keep the time low (50 seconds); the draws are strongly autocorrelated, as the effective sample sizes (ESS) show.
+The following example uses a short run to keep the time low (about 25 seconds on an Apple M5 Pro, together with the fit); the draws are strongly autocorrelated, as the effective sample sizes (ESS) show.
 \begin{lstlisting}
 . nwsaom, wave1(glasgow1) wave2(glasgow2) outdegree reciprocity transtrip k3(500) seed(1)
 . nwsaom bayes, nprewarm(20) nwarm(20) nmain(100) nimprovemh(40) seed(1)
 Bayesian SAOM (data augmentation)                Number of actors  =       50
 Waves: glasgow1 glasgow2                         Saved draws       =      100
-Pre-warm 20, warm 20, main 100 x 20              Mean chain length =    303.8
+Pre-warm 20, warm 20, main 100 x 20              Mean chain length =    306.2
+Acceptance: effects 0.497, rates 0.246; chain steps: diagonal 0.751, permute 0.755, insert-permute 0.410, delete-permute 0.370
 -----------------------------------------------------------------------------
       Effect |Post. mean  Post. sd[95% interval]             Median      ESS
 -------------+---------------------------------------------------------------
-   outdegree |   -2.5449    0.1485   -2.8234   -2.2776   -2.5478       66
- reciprocity |    1.9911    0.2224    1.6226    2.4580    1.9759       54
-   transtrip |    0.6920    0.0975    0.4830    0.8614    0.6918       75
-rate_period1 |    6.1214    0.5872    5.0219    7.3055    6.0462       71
+   outdegree |   -2.5229    0.1446   -2.7498   -2.2554   -2.5264       46
+ reciprocity |    2.0143    0.2430    1.5666    2.4366    2.0243       36
+   transtrip |    0.6618    0.0988    0.4623    0.8475    0.6545       77
+rate_period1 |    6.0569    0.6129    4.9734    7.2384    6.0627       65
 -----------------------------------------------------------------------------
 \end{lstlisting}
 The result replaces the estimates of the fit (\texttt{estimates store} first to keep them): \texttt{e(b)} and \texttt{e(V)} are the posterior means and covariance matrix, \texttt{e(rates)} the posterior mean and standard deviation of the rates, \texttt{e(interval)} the interval limits and median, \texttt{e(ess)} the effective sample sizes, and \texttt{e(post\_frame)} the name of the frame that holds the draws (one row per main iteration). The acceptance rates of all steps are in \texttt{e(accept\_effects)}, \texttt{e(accept\_rates)} and the \texttt{e(accept\_}\emph{step}\texttt{)} results, the tuned scale factors in \texttt{e(scale\_effects)}.
