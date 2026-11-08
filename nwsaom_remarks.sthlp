@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.5.3  08nov2026 author: Thomas Grund}{...}
+{* *! version 1.5.4  08nov2026 author: Thomas Grund}{...}
 
 {title:Title}
 
@@ -403,7 +403,7 @@ endowment statistic, and the creation statistic is minus the endowment statistic
 linear -d_i; quadratic c_i^2 - (c_i + d_i)^2; avAlt (c_i sum_j c_j - (c_i + d_i) sum_j (c_j + d_j))
 /outdeg_i over the alters j of i; avSim (sum_j |c_j - c_i| - sum_j |c_j + d_j - c_i - d_i|)/n_i over
 the alters with a value, all on the period's starting network. As in RSiena, an effect whose
-phase-1 derivative stays non-positive after a longer phase 1 is fixed at its starting value with a
+phase-1 derivative stays non-positive after a longer phase 1 and a phase 1 with finite differences is fixed at its starting value with a
 note (RSiena fixes the avSim endowment/creation pair on glasgow; so does {cmd:nwsaom}). Validated
 against RSiena on the glasgow alcohol co-evolution (unconditional, 5 seeds): linear, quadratic
 endowment/creation and avAlt within 0.03 standard errors; linear, quadratic and avAlt
@@ -1063,7 +1063,9 @@ Coefficients are estimated by the Method of Moments via Robbins-Monro stochastic
 RSiena's default algorithm and phase structure: Phase 1 estimates the Jacobian
 (sensitivity of each expected statistic to each parameter) via {opt k0()} independent simulated
 replicates at the starting values (by default, as RSiena, max(50, 7 + 3{it:p}) for {it:p} estimated
-parameters) and ends with RSiena's partial quasi-Newton step; Phase 2
+parameters; as in RSiena, Phase 1 is doubled, up to at least 200 simulations, while an estimated
+derivative of a statistic with respect to its own parameter is not positive, and is then run with finite
+differences, with common random numbers) and ends with RSiena's partial quasi-Newton step; Phase 2
 performs the Robbins-Monro update across RSiena's default of 4 diminishing-gain subphases
 ({cmd:nsub=4}, {cmd:firstg} default 0.2, {cmd:reduceg=0.5}, {cmd:diagonalize=0.2}, RSiena's per-subphase
 minimum/maximum iteration schedule, and RSiena's repetition of a subphase whose steps oscillate), with
@@ -1073,7 +1075,8 @@ standard errors (e(V), RSiena's sandwich formula), the convergence t-ratios {cmd
 deviation / its standard deviation, one per parameter including the rates) and RSiena's overall
 maximum convergence ratio {cmd:e(tconv_max)}. As in RSiena, a fit is considered converged when
 every |t| is below 0.1 and the overall ratio below 0.25; otherwise, run the model again from the
-estimates ({opt theta0()} and {opt rate0()}, see the examples in {help nwsaom}). Below the coefficient
+estimates ({opt theta0()} and {opt rate0()}, see the examples in {help nwsaom}). If after one or two restarts the overall ratio stays
+near 0.25 while the estimates hardly change, restart once more with a longer phase 3, for example {opt k3(3000)}. Below the coefficient
 table, every fit prints the two criteria on separate lines, each with the statement "met" or "not met": the overall ratio (criterion: below 0.25)
 and the individual t-ratios (criterion: every |t| below 0.1, with the parameters that fail named); the
 {opt detail} option lists the t-ratios of all parameters, rates included, and {cmd:e(tratio)}
@@ -1146,4 +1149,4 @@ The same estimates are available as {cmd:nwsaom_ml} after an {cmd:nwsaom} fit. T
     {help nwsaom}, {help nwsaom_estat}, {help nwergm}
 
 {hline}
-{pstd}{it:nwsaom version 1.5.3, 8 November 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.5.4, 8 November 2026}{p_end}{* nwversion}

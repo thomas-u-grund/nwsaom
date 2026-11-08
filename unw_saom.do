@@ -8834,6 +8834,81 @@ real rowvector SaomDolbyCoef(real matrix Zdev, real matrix Zsco) {
 	return(b)
 }
 
+/* One simulation at `par' for SaomPhase1FD(): deviations only, 1 x ptot. coev = 0: the SaomRMCore() callback
+   `simfn'; coev = 1: SaomCoevSimMany() with the models M and Mbeh. */
+void _SaomFDSim(real scalar coev, transmorphic C, pointer(function) scalar simfn, transmorphic M, transmorphic Mbeh,
+	real rowvector par, real matrix Z) {
+	real matrix S
+	if (coev) SaomCoevSimMany(C, M, Mbeh, par, 1, 0, Z, S)
+	else (*simfn)(C, par, 1, 0, Z, S)
+}
+
+/* SaomPhase1FD(): RSiena's phase 1 with finite differences (phase1.1, phase1.2 and FiniteDifferences in
+   R/phase1.r). RSiena runs it when the score-function estimate of the derivative matrix still has a
+   non-positive diagonal element for a free parameter after phase 1 has been doubled up to at least 200
+   simulations (CalculateDerivative). Each of the K iterations simulates once at `par' and once at
+   par + eps[i] * e_i for each free parameter i, all with the same random numbers (RSiena reuses the stored
+   seed, fromFiniteDiff = TRUE; here Stata's RNG state is restored, from which the simulation draws its seed).
+   The derivative D[j,i] (statistic j, parameter i, as SaomJacobianPerPeriod()) is the mean of the difference
+   quotients. eps is RSiena's epsilon: min(0.1, scale) = 0.1 for an effect, 0.1 * theta for a rate. After the
+   first 10 iterations, a free coordinate whose own statistic changed (by more than 1e-6) in fewer than 5 of
+   them gets a larger epsilon (times 10, or sqrt(10) with 3 to 4 changes; times 3 or 2 for a rate; kept
+   between 0.01 and 10) and phase 1 starts again, at most 4 times; the 5th time it goes on with the new
+   epsilon, as RSiena does. Zdev returns the K deviations at `par'. */
+real matrix SaomPhase1FD(real scalar coev, transmorphic C, pointer(function) scalar simfn, transmorphic M,
+	transmorphic Mbeh, real rowvector par, real scalar K, real rowvector israte, real rowvector fixed,
+	real matrix Zdev, real scalar trace) {
+	real matrix D, Zb, Zi
+	real rowvector eps, npos, parI
+	real scalar ptot, k, i, rep, again
+	string scalar st0, st1
+
+	ptot = cols(par)
+	eps = J(1, ptot, 0.1)
+	for (i=1; i<=ptot; i++) if (israte[i]) eps[i] = 0.1 * par[i]
+	rep = 0
+	while (1) {
+		D = J(ptot, ptot, 0)
+		Zdev = J(K, ptot, 0)
+		npos = J(1, ptot, 0)
+		again = 0
+		for (k=1; k<=K; k++) {
+			st0 = rngstate()
+			_SaomFDSim(coev, C, simfn, M, Mbeh, par, Zb)
+			st1 = rngstate()
+			Zdev[k,.] = Zb[1,.]
+			for (i=1; i<=ptot; i++) {
+				if (fixed[i]) continue
+				parI = par
+				parI[i] = par[i] + eps[i]
+				rngstate(st0)
+				_SaomFDSim(coev, C, simfn, M, Mbeh, parI, Zi)
+				if (k <= 10 & abs(Zi[1,i] - Zb[1,i]) > 1e-6) npos[i] = npos[i] + 1
+				D[.,i] = D[.,i] + (Zi[1,.] - Zb[1,.])' / eps[i]
+			}
+			rngstate(st1)
+			if (k == 10) {
+				for (i=1; i<=ptot; i++) {
+					if (fixed[i] | npos[i] >= 5) continue
+					if (npos[i] <= 2) eps[i] = (israte[i] ? 3 : 10) * eps[i]
+					else eps[i] = (israte[i] ? 2 : sqrt(10)) * eps[i]
+					eps[i] = max((min((eps[i], 10)), 0.01))
+					again = 1
+				}
+				if (trace & again) {
+					printf("TRACE phase 1, finite differences: epsilon enlarged (%f)\n", rep + 1)
+					eps
+				}
+				if (again & rep < 4) break
+				again = 0
+			}
+		}
+		if (!again) break
+		rep++
+	}
+	return(D / K)
+}
+
 /* SaomRMCore() callback: K replicates at `par' */
 void SaomNetSimManyCB(struct SaomNetCtx scalar C, real rowvector par, real scalar K,
 	real scalar want_score, real matrix Z, real matrix S, | real matrix Zp, real matrix Sp) {
@@ -8897,34 +8972,12 @@ struct SaomNetFit scalar SaomRMCore(transmorphic C, pointer(function) scalar sim
 	real scalar ptot, k, nsub, subphase, gain, reduceg, n2min0, maxRatio, thavn, nit, maxacor, minacor, reprun
 	real scalar nfree
 	real rowvector fx, dolby
-	real scalar attempt, diverged, kp1, trace
+	real scalar attempt, diverged, kp1, trace, findiff
 	real rowvector n2minimum, n2maximum
 
 	ptot = cols(par0)
 	trace = (strtoreal(st_global("NWSAOM_TRACE")) == 1)
 
-	// --- Phase 1: Jacobian by the score-function method. As RSiena (phase1.r): if the diagonal of the
-	// derivative matrix has a non-positive element and phase 1 has fewer than 200 replicates, a new phase 1
-	// of twice the length is run before anything is fixed (the later last-resort fixing is below).
-	// phase-1 length: k0(), or RSiena's default max(50, 7 + 3 * #parameters) (robmon.r, with dolby)
-	kp1 = (K0 > 0 ? K0 : max((50, 7 + 3 * ptot)))
-	while (1) {
-		(*simfn)(C, par0, kp1, 1, Zdev, Zsco, Zp1, Sp1)
-		Dhat = SaomJacobianPerPeriod(Zp1, Sp1, cols(Zp1) / ptot, ptot)
-		if (kp1 < 200 & any(diagonal(Dhat) :<= 0)) {
-			kp1 = kp1 * 2
-			continue
-		}
-		break
-	}
-	if (strtoreal(st_global("NWSAOM_TRACE")) == 1) {
-		printf("TRACE phase 1: replicates %f, diag(Dhat) =", kp1)
-		diagonal(Dhat)'
-		printf("TRACE mean(Zdev) =")
-		mean(Zdev)
-	}
-	rmfixedDec = J(1, ptot, 0)
-	DhatDec = Dhat
 	// user-fixed parameters (the fix() option, RSiena's fix = TRUE): kept at their starting values, never updated,
 	// no standard error; the decoupled derivative matrix is used from the start
 	userfix = J(1, ptot, 0)
@@ -8932,6 +8985,37 @@ struct SaomNetFit scalar SaomRMCore(transmorphic C, pointer(function) scalar sim
 		fm = *findexternal("__nwsaom_fixmask")
 		if (cols(fm) <= ptot) userfix[1..cols(fm)] = fm
 	}
+
+	// --- Phase 1: Jacobian by the score-function method. As RSiena (CalculateDerivative in phase1.r): if the
+	// diagonal of the derivative matrix has a non-positive element for a free parameter, a new phase 1 of twice
+	// the length is run while phase 1 has fewer than 200 replicates, and then a phase 1 of the same length with
+	// finite differences (SaomPhase1FD(); without the Dolby correction, as in RSiena, where it needs scores).
+	// A parameter whose diagonal element is still not positive after that is fixed (below).
+	// phase-1 length: k0(), or RSiena's default max(50, 7 + 3 * #parameters) (robmon.r, with dolby)
+	kp1 = (K0 > 0 ? K0 : max((50, 7 + 3 * ptot)))
+	findiff = 0
+	while (1) {
+		(*simfn)(C, par0, kp1, 1, Zdev, Zsco, Zp1, Sp1)
+		Dhat = SaomJacobianPerPeriod(Zp1, Sp1, cols(Zp1) / ptot, ptot)
+		if (any(select(diagonal(Dhat)', !userfix) :<= 0)) {
+			if (kp1 < 200) {
+				kp1 = kp1 * 2
+				continue
+			}
+			findiff = 1
+			printf("{txt}note: the derivative estimate of phase 1 had a non-positive diagonal element after %f simulations; phase 1 was run again with finite differences, as RSiena does.\n", kp1)
+			Dhat = SaomPhase1FD(0, C, simfn, ., ., par0, kp1, israte, userfix, Zdev, trace)
+		}
+		break
+	}
+	if (trace) {
+		printf("TRACE phase 1: replicates %f%s, diag(Dhat) =", kp1, (findiff ? " (finite differences)" : ""))
+		diagonal(Dhat)'
+		printf("TRACE mean(Zdev) =")
+		mean(Zdev)
+	}
+	rmfixedDec = J(1, ptot, 0)
+	DhatDec = Dhat
 	for (k=1; k<=ptot; k++) {
 		if (Dhat[k,k] <= 0 | userfix[k]) {
 			rmfixedDec[k] = 1
@@ -8944,8 +9028,9 @@ struct SaomNetFit scalar SaomRMCore(transmorphic C, pointer(function) scalar sim
 	DinvDec = luinv(0.8 * DhatDec + 0.2 * diag(diagonal(DhatDec)))
 	msf = variance(Zdev)
 	// RSiena's Dolby option (dolby = TRUE, phase1.2): in phase 2 each statistic is corrected by its regression on
-	// its own score, with the coefficients estimated from the phase-1 simulations
-	dolby = SaomDolbyCoef(Zdev, Zsco)
+	// its own score, with the coefficients estimated from the phase-1 simulations (none after a phase 1 with
+	// finite differences, which has no scores)
+	dolby = (findiff ? J(1, ptot, 0) : SaomDolbyCoef(Zdev, Zsco))
 
 	// quasi-Newton step after phase 1 (RSiena's phase1.2): half of firstg
 	// times the full step, scaled down so that no parameter moves by more
@@ -13256,8 +13341,8 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 	real scalar nfree
 	real rowvector fx, dolby
 	real rowvector n2minimum, n2maximum
-	real scalar kp1
-	real rowvector coevfixed, userfixc, fmc
+	real scalar kp1, findiff
+	real rowvector coevfixed, userfixc, fmc, israteC
 	real colvector allbehvals, missBehZero
 
 	nwaves = cols(Gwaves)
@@ -13463,34 +13548,40 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 	for (attempt=1; attempt<=2; attempt++) {
 	theta0 = theta0start
 
-	// --- Phase 1: Jacobian by the score-function method. As RSiena
-	// (phase1.r): a non-positive diagonal element of an effect's
-	// derivative first doubles the length of phase 1 (while it is below
-	// 200 simulations), then fixes that effect at its starting value
-	// (RSiena tries finite differences in between; not done here).
-	// phase-1 length: k0(), or RSiena's default max(50, 7 + 3 * #parameters) (robmon.r, with dolby)
-	kp1 = (K0 > 0 ? K0 : max((50, 7 + 3 * ptot)))
-	SaomCoevSimMany(C, M, Mbeh, theta0, kp1, 1, Zdev, Zsco, Zp1, Sp1)
-	Dhat = SaomJacobianPerPeriod(Zp1, Sp1, cols(Zp1) / ptot, ptot)
-	while (any(diagonal(Dhat)[1..p] :<= 0) & kp1 < 200) {
-		kp1 = 2 * kp1
-		SaomCoevSimMany(C, M, Mbeh, theta0, kp1, 1, Zdev, Zsco, Zp1, Sp1)
-		Dhat = SaomJacobianPerPeriod(Zp1, Sp1, cols(Zp1) / ptot, ptot)
-	}
-	// in place of RSiena's finite-difference phase 1: one more, longer
-	// score-function phase 1 before anything is fixed
-	if (any(diagonal(Dhat)[1..p] :<= 0)) {
-		kp1 = max((2 * kp1, 400))
-		SaomCoevSimMany(C, M, Mbeh, theta0, kp1, 1, Zdev, Zsco, Zp1, Sp1)
-		Dhat = SaomJacobianPerPeriod(Zp1, Sp1, cols(Zp1) / ptot, ptot)
-	}
 	coevfixed = J(1, ptot, 0)
 	userfixc = J(1, ptot, 0)
 	if (findexternal("__nwsaom_fixmask") != NULL) {
 		fmc = *findexternal("__nwsaom_fixmask")
 		if (cols(fmc) <= ptot) userfixc[1..cols(fmc)] = fmc
 	}
-	for (k=1; k<=p; k++) {
+	// fix() applies to the effects here (the rates are estimated)
+	if (ptot > p) userfixc[(p+1)..ptot] = J(1, ptot - p, 0)
+	israteC = J(1, ptot, 0)
+	israteC[(p+1)..(p+2*P)] = J(1, 2*P, 1)
+
+	// --- Phase 1: Jacobian by the score-function method. As RSiena (CalculateDerivative in phase1.r): a
+	// non-positive diagonal element of the derivative for a free parameter doubles the length of phase 1 while
+	// it is below 200 simulations; then phase 1 is run with finite differences, at the same length
+	// (SaomPhase1FD(); without the Dolby correction, which needs scores). A parameter whose diagonal element is
+	// still not positive is then fixed at its starting value (below).
+	// phase-1 length: k0(), or RSiena's default max(50, 7 + 3 * #parameters) (robmon.r, with dolby)
+	kp1 = (K0 > 0 ? K0 : max((50, 7 + 3 * ptot)))
+	findiff = 0
+	while (1) {
+		SaomCoevSimMany(C, M, Mbeh, theta0, kp1, 1, Zdev, Zsco, Zp1, Sp1)
+		Dhat = SaomJacobianPerPeriod(Zp1, Sp1, cols(Zp1) / ptot, ptot)
+		if (any(select(diagonal(Dhat)', !userfixc) :<= 0)) {
+			if (kp1 < 200) {
+				kp1 = 2 * kp1
+				continue
+			}
+			findiff = 1
+			printf("{txt}note: the derivative estimate of phase 1 had a non-positive diagonal element after %f simulations; phase 1 was run again with finite differences, as RSiena does.\n", kp1)
+			Dhat = SaomPhase1FD(1, C, NULL, M, Mbeh, theta0, kp1, israteC, userfixc, Zdev, (strtoreal(st_global("NWSAOM_TRACE")) == 1))
+		}
+		break
+	}
+	for (k=1; k<=ptot; k++) {
 		if (Dhat[k,k] <= 0 | userfixc[k]) {
 			coevfixed[k] = 1
 			Dhat[k,.] = J(1, ptot, 0)
@@ -13504,8 +13595,9 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 	Dinv = luinv(temp)
 
 	msf = variance(Zdev)
-	// RSiena's Dolby option: phase-2 statistics corrected by their regression on their own scores (phase1.2)
-	dolby = SaomDolbyCoef(Zdev, Zsco)
+	// RSiena's Dolby option: phase-2 statistics corrected by their regression on their own scores (phase1.2);
+	// none after a phase 1 with finite differences
+	dolby = (findiff ? J(1, ptot, 0) : SaomDolbyCoef(Zdev, Zsco))
 	// the truncation uses the free parameters only (RSiena: sf.invcov over !fixed)
 	nfree = sum(!coevfixed)
 	if (nfree > 0) {

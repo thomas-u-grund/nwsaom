@@ -3,6 +3,12 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.5.4] - 2026-11-08
+
+### Changed
+- **Phase 1 with finite differences, as in RSiena.** When the score-function estimate of the derivative matrix still has a non-positive diagonal element for a free parameter after Phase 1 has been doubled up to at least 200 simulations, Phase 1 is run again with finite differences at the same length (RSiena's `CalculateDerivative` and `FiniteDifferences`): each simulation at the current values is repeated with each free parameter increased by a small step (0.1, or a tenth of a rate), with the same random numbers, and the step is enlarged, restarting Phase 1 at most four times, when it changes a statistic in fewer than 5 of the first 10 simulations. Only a parameter whose derivative is still not positive is then kept at its starting value. Before, the co-evolution estimator ran one longer score-function Phase 1 (at least 400 simulations) instead, and the network estimators none. The output says when this happens. Fits that do not need it are unchanged, to the last digit.
+- The check that doubles Phase 1 ignores parameters fixed with `fix()`, and in co-evolution models includes the rate parameters, as in RSiena.
+
 ## [1.5.3] - 2026-11-08
 
 The estimation algorithm now follows RSiena's defaults in every respect that a comparison with the source of RSiena 1.6.14 found to differ. The model, the statistics and the estimates are the same; the steps of the Robbins-Monro algorithm that lead to them are now RSiena's.

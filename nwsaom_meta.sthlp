@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.5.3  08nov2026 author: Thomas Grund}{...}
+{* *! version 1.5.4  08nov2026 author: Thomas Grund}{...}
 {vieweralsosee "nwsaom" "help nwsaom"}{...}
 {vieweralsosee "nwsaom_estat" "help nwsaom_estat"}{...}
 {title:Title}
@@ -80,4 +80,4 @@ heterogeneity test Q (a small p value means that the groups differ more than the
 {pstd}Snijders, T.A.B. and Baerveldt, C. (2003). A multilevel network study of the effects of delinquent behavior on friendship evolution. {it:Journal of Mathematical Sociology} 27: 123-151.{p_end}
 
 {hline}
-{pstd}{it:nwsaom version 1.5.3, 8 November 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.5.4, 8 November 2026}{p_end}{* nwversion}
