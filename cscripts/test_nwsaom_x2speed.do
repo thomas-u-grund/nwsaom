@@ -1,7 +1,7 @@
 * The speed-up of the plug-in for two-mode networks (the free alternatives of an actor as a list, the degree effects evaluated
 * directly) and of the Mata glue around the plug-in must not change a single number: estimates and standard errors of
-* fixed-seed fits are compared with the values the released 1.1.0 gave (fixtures below, 15 significant digits; they are
-* identical to the last digit). Two-mode network (unconditional, conditional) and a one-mode network with the degree
+* fixed-seed fits are compared with stored values (fixtures below, 15 significant digits), recorded with 1.5.3, whose
+* Robbins-Monro steps follow RSiena's defaults (Dolby, repeated subphases); before, the values of the released 1.1.0. Two-mode network (unconditional, conditional) and a one-mode network with the degree
 * effects. Run with the environment variable X2REC=1 to print new fixtures instead of comparing.
 cscript
 set linesize 255
@@ -42,10 +42,10 @@ local m2 "waves(tm1 tm2 tm3) outdegree indegpopularity outactivity cycle4 outiso
 local m3 "waves(tm1 tm2 tm3) outdegree indegpopularity cycle4 unconditional cores(1) seed(3)"
 local m4 "waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity indegpopularity outactivity antiiniso2 unconditional cores(1) seed(5)"
 * FIXTURES-BEGIN
-local fx1 "-2.02465536640714 .959663031868016 .456534102895446 .309021763947677 .109962049985246 .0738901394833299 -.965288890580595 2.06928399146866 12.9844664172684 43199.1874502904 -.0197281468332084 .0627248551489741"
-local fx2 "-2.04823394942757 10.3995457638976 .456067834745379 2.76962046143159 .11150064088042 .520876479373792 -1.04337466791496 13.8535672715594 10.8568707555339 13672.3365140804 -.0147265536738992 .0972384771264962"
-local fx3 "-.450869851792011 .570025346296044 .0596531484972036 .262093123938971 .0641748267808878 .0551365160570515"
-local fx4 "-2.98694702740399 .4640676991308 2.83152915533213 .181232814622801 .322744250183852 .219206035459956 -.00135262179016569 .0375322281987432 .274919183954358 .289703792718974"
+local fx1 "-2.01756129881298 .91349588868761 .460354240521661 .302684666716951 .108002019373256 .0732461751529714 -.962355227167434 2.11458628490437 16.6388084034393 1883961.74509561 -.0212337325244638 .0624284022094269"
+local fx2 "-2.04978932770068 .894021258487798 .456986573541664 .305699244129828 .113173460487188 .0717215814832138 -1.0704890118692 2.02510648370383 11.8529677428573 14498.168578071 -.0174491119617513 .060778837915052"
+local fx3 "-.412403825485096 .57853081240611 .0487805344908802 .277040303639602 .0629195577126237 .0557877299217926"
+local fx4 "-3.00742185467161 .48694205497932 2.83300098130886 .183039747842102 .330853147006269 .229248939541908 -.00086169914193074 .0365861307282126 .288897053366144 .31235022158731"
 * FIXTURES-END
 tempname B V
 forvalues i = 1/4 {
@@ -70,6 +70,6 @@ forvalues i = 1/4 {
 			local have : word `j' of `s'
 			assert reldif(`have', `want') < 1e-12
 		}
-		di as result "PASS: fit `i' reproduces the 1.1.0 numbers"
+		di as result "PASS: fit `i' reproduces the stored numbers"
 	}
 }

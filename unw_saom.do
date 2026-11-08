@@ -8811,6 +8811,29 @@ real scalar SaomActiveRate(struct SaomNetCtx scalar C, real rowvector par, real 
 	return(active)
 }
 
+/* SaomDolbyCoef(): RSiena's Dolby option (dolby = TRUE, the default; phase1.2 in R/phase1.r). For each
+   statistic, the coefficient of its regression on its own score over the phase-1 simulations,
+   cov(Zdev[.,k], Zsco[.,k]) / var(Zsco[.,k]); 0 where either has no variation. Phase 2 subtracts
+   coefficient times score from each simulated deviation, which removes noise without changing its mean
+   (a score has expectation 0). */
+real rowvector SaomDolbyCoef(real matrix Zdev, real matrix Zsco) {
+	real rowvector b
+	real scalar k, vs, vz
+	real matrix V
+	b = J(1, cols(Zdev), 0)
+	if (rows(Zdev) < 2 | cols(Zsco) != cols(Zdev)) return(b)
+	for (k=1; k<=cols(Zdev); k++) {
+		V = variance((Zdev[., k], Zsco[., k]))
+		vz = V[1,1]
+		vs = V[2,2]
+		if (vs > 0 & vz > 0 & vs < . & vz < .) {
+			b[k] = V[2,1] / vs
+			if (b[k] >= .) b[k] = 0
+		}
+	}
+	return(b)
+}
+
 /* SaomRMCore() callback: K replicates at `par' */
 void SaomNetSimManyCB(struct SaomNetCtx scalar C, real rowvector par, real scalar K,
 	real scalar want_score, real matrix Z, real matrix S, | real matrix Zp, real matrix Sp) {
@@ -8871,7 +8894,9 @@ struct SaomNetFit scalar SaomRMCore(transmorphic C, pointer(function) scalar sim
 	real matrix Zdev, Zsco, Dhat, DhatDec, Dinv, DinvOrig, DinvDec, msf, sfinvcov, Z1, S1, Z3, S3, Sc3, Dhat3, Zp1, Sp1, Zp3, Sp3
 	real rowvector par, par1, dev, prevdev, prod0, prod1, ac, stdcap, thav, fchange, changestep, thprev, m3
 	real rowvector rmfixed, rmfixedDec, userfix, fm
-	real scalar ptot, k, nsub, subphase, gain, reduceg, n2min0, maxRatio, thavn, nit, maxacor
+	real scalar ptot, k, nsub, subphase, gain, reduceg, n2min0, maxRatio, thavn, nit, maxacor, minacor, reprun
+	real scalar nfree
+	real rowvector fx, dolby
 	real scalar attempt, diverged, kp1, trace
 	real rowvector n2minimum, n2maximum
 
@@ -8881,7 +8906,8 @@ struct SaomNetFit scalar SaomRMCore(transmorphic C, pointer(function) scalar sim
 	// --- Phase 1: Jacobian by the score-function method. As RSiena (phase1.r): if the diagonal of the
 	// derivative matrix has a non-positive element and phase 1 has fewer than 200 replicates, a new phase 1
 	// of twice the length is run before anything is fixed (the later last-resort fixing is below).
-	kp1 = K0
+	// phase-1 length: k0(), or RSiena's default max(50, 7 + 3 * #parameters) (robmon.r, with dolby)
+	kp1 = (K0 > 0 ? K0 : max((50, 7 + 3 * ptot)))
 	while (1) {
 		(*simfn)(C, par0, kp1, 1, Zdev, Zsco, Zp1, Sp1)
 		Dhat = SaomJacobianPerPeriod(Zp1, Sp1, cols(Zp1) / ptot, ptot)
@@ -8917,7 +8943,9 @@ struct SaomNetFit scalar SaomRMCore(transmorphic C, pointer(function) scalar sim
 	DinvOrig = luinv(0.8 * Dhat + 0.2 * diag(diagonal(Dhat)))		// not symmetric: luinv, not invsym
 	DinvDec = luinv(0.8 * DhatDec + 0.2 * diag(diagonal(DhatDec)))
 	msf = variance(Zdev)
-	sfinvcov = invsym(msf + 0.0001 * I(ptot))
+	// RSiena's Dolby option (dolby = TRUE, phase1.2): in phase 2 each statistic is corrected by its regression on
+	// its own score, with the coefficients estimated from the phase-1 simulations
+	dolby = SaomDolbyCoef(Zdev, Zsco)
 
 	// quasi-Newton step after phase 1 (RSiena's phase1.2): half of firstg
 	// times the full step, scaled down so that no parameter moves by more
@@ -8963,6 +8991,12 @@ struct SaomNetFit scalar SaomRMCore(transmorphic C, pointer(function) scalar sim
 			stdcap[k] = 1 / sqrt(max((Dinv[k,.] * msf * Dinv[k,.]', 0)))
 			if (stdcap[k] > 1) stdcap[k] = 1
 		}
+		// the truncation uses the free parameters only (RSiena: sf.invcov over !fixed)
+		nfree = sum(!rmfixed)
+		if (nfree > 0) {
+			fx = selectindex(!rmfixed)
+			sfinvcov = invsym(msf[fx, fx] + 0.0001 * I(nfree))
+		}
 
 		par = par1
 		for (k=1; k<=ptot; k++) if (rmfixed[k]) par[k] = par0[k]
@@ -8970,6 +9004,13 @@ struct SaomNetFit scalar SaomRMCore(transmorphic C, pointer(function) scalar sim
 		gain = firstg
 		diverged = 0
 		for (subphase=1; subphase<=nsub; subphase++) {
+			// RSiena's proc2subphase: a subphase whose deviations oscillate
+			// (an autocorrelation below -0.8 after 50 iterations) ends early
+			// and is run again from the current values, with the same gain,
+			// up to maxrepeatsubphase = 4 runs in all
+			reprun = 0
+			while (1) {
+			reprun = reprun + 1
 			thav = par
 			thavn = 1
 			prod0 = J(1, ptot, 0)
@@ -8977,10 +9018,11 @@ struct SaomNetFit scalar SaomRMCore(transmorphic C, pointer(function) scalar sim
 			prevdev = J(1, ptot, 0)
 			nit = 0
 			maxacor = 1
+			minacor = 1
 			while (1) {
 				nit = nit + 1
-				(*simfn)(C, par, 1, 0, Z1, S1)
-				dev = Z1[1,.]
+				(*simfn)(C, par, 1, 1, Z1, S1)
+				dev = Z1[1,.] - dolby :* S1[1,.]
 
 				// autocorrelation on the raw deviation, odd/even pairs (phase2.r)
 				if (mod(nit,2) == 1) prevdev = dev
@@ -8989,16 +9031,17 @@ struct SaomNetFit scalar SaomRMCore(transmorphic C, pointer(function) scalar sim
 					prod1 = prod1 + dev:*prevdev
 				}
 				// Mahalanobis truncation
-				maxRatio = sqrt((dev * sfinvcov * dev') / ptot)
+				maxRatio = (nfree > 0 ? sqrt((dev[fx] * sfinvcov * dev[fx]') / nfree) : 1)
 				if (maxRatio > 5 & maxRatio > 0) dev = 5 * dev / maxRatio
 				// double averaging: the step uses the cumulative deviation
 				if (nit == 1) changestep = dev
 				else changestep = changestep + dev
 				fchange = gain * ((changestep * Dinv') :* stdcap) :* (1 :- rmfixed)
 
+				// positivity of the rates (RSiena's posj): a step that would take a rate below 0 goes to half of its average
+				for (k=1; k<=ptot; k++) if (israte[k] & fchange[k] > thav[k] / thavn) fchange[k] = 0.5 * thav[k] / thavn
 				thprev = par
 				par = (thav / thavn) - fchange
-				for (k=1; k<=ptot; k++) if (israte[k] & par[k] < 0.5*thprev[k]) par[k] = 0.5*thprev[k]
 				thav = thav + par
 				thavn = thavn + 1
 				if (trace) if (nit <= 3 | mod(nit, 25) == 0) {
@@ -9015,10 +9058,20 @@ struct SaomNetFit scalar SaomRMCore(transmorphic C, pointer(function) scalar sim
 				if (nit >= 2) {
 					ac = J(1, ptot, -1)
 					for (k=1; k<=ptot; k++) if (prod0[k] > 1e-12) ac[k] = prod1[k] / prod0[k]
-					maxacor = max(ac)
+					// as RSiena, over the free parameters only
+					maxacor = -99
+					for (k=1; k<=ptot; k++) if (!rmfixed[k] & ac[k] > maxacor) maxacor = ac[k]
+					// the smallest autocorrelation of the free parameters, as RSiena's minacor (values of -1, no variation, left out)
+					minacor = 1
+					for (k=1; k<=ptot; k++) if (!rmfixed[k] & ac[k] > -1 & ac[k] < minacor) minacor = ac[k]
 				}
 				if (nit >= n2maximum[subphase]) break
 				if (nit >= n2minimum[subphase] & maxacor < 1e-10) break
+				if (nit >= 50 & minacor < -0.8 & reprun < 4) break
+			}
+			if (diverged) break
+			if (nit >= n2maximum[subphase] | maxacor < 1e-10 | reprun >= 4) break
+			if (trace) printf("TRACE sub %f repeated after it %f (autocorrelation %5.3f)\n", subphase, nit, minacor)
 			}
 			if (diverged) break
 			par = thav / thavn
@@ -13199,7 +13252,9 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 	real rowvector theta0start
 	real rowvector behwin
 	real scalar pd, k, nwaves, P, p, ptot, n, hasbehsim
-	real scalar nsub, subphase, gain, reduceg, n2min0, maxRatio, thavn, nit, maxacor
+	real scalar nsub, subphase, gain, reduceg, n2min0, maxRatio, thavn, nit, maxacor, minacor, reprun
+	real scalar nfree
+	real rowvector fx, dolby
 	real rowvector n2minimum, n2maximum
 	real scalar kp1
 	real rowvector coevfixed, userfixc, fmc
@@ -13413,7 +13468,8 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 	// derivative first doubles the length of phase 1 (while it is below
 	// 200 simulations), then fixes that effect at its starting value
 	// (RSiena tries finite differences in between; not done here).
-	kp1 = K0
+	// phase-1 length: k0(), or RSiena's default max(50, 7 + 3 * #parameters) (robmon.r, with dolby)
+	kp1 = (K0 > 0 ? K0 : max((50, 7 + 3 * ptot)))
 	SaomCoevSimMany(C, M, Mbeh, theta0, kp1, 1, Zdev, Zsco, Zp1, Sp1)
 	Dhat = SaomJacobianPerPeriod(Zp1, Sp1, cols(Zp1) / ptot, ptot)
 	while (any(diagonal(Dhat)[1..p] :<= 0) & kp1 < 200) {
@@ -13448,7 +13504,14 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 	Dinv = luinv(temp)
 
 	msf = variance(Zdev)
-	sfinvcov = invsym(msf + 0.0001 * I(ptot))
+	// RSiena's Dolby option: phase-2 statistics corrected by their regression on their own scores (phase1.2)
+	dolby = SaomDolbyCoef(Zdev, Zsco)
+	// the truncation uses the free parameters only (RSiena: sf.invcov over !fixed)
+	nfree = sum(!coevfixed)
+	if (nfree > 0) {
+		fx = selectindex(!coevfixed)
+		sfinvcov = invsym(msf[fx, fx] + 0.0001 * I(nfree))
+	}
 	stdcap = J(1, ptot, 1)
 	for (k=1; k<=ptot; k++) {
 		stdcap[k] = 1 / sqrt(max((Dinv[k,.] * msf * Dinv[k,.]', 0)))
@@ -13494,6 +13557,12 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 	gain = firstg
 	theta = theta0
 	for (subphase=1; subphase<=nsub; subphase++) {
+		// RSiena's proc2subphase: a subphase whose deviations oscillate (an
+		// autocorrelation below -0.8 after 50 iterations) ends early and is run
+		// again from the current values, with the same gain, up to 4 runs in all
+		reprun = 0
+		while (1) {
+		reprun = reprun + 1
 		thav = theta
 		thavn = 1
 		prod0 = J(1, ptot, 0)
@@ -13501,11 +13570,14 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 		prevdev = J(1, ptot, 0)
 		nit = 0
 		maxacor = 1
+		minacor = 1
+		behwin = J(1, P, 0)
+		nshort = 0
 
 		while (1) {
 			nit = nit + 1
-			SaomCoevSimMany(C, M, Mbeh, theta, 1, 0, Z1, S1)
-			dev = Z1[1,.]
+			SaomCoevSimMany(C, M, Mbeh, theta, 1, 1, Z1, S1)
+			dev = Z1[1,.] - dolby :* S1[1,.]
 			if (attempt == 1 & behtarget > 0 & subphase == 1) {
 				behwin = behwin + Z1[1,(p+P+1)..(p+2*P)]
 				if (mod(nit, 25) == 0) {
@@ -13525,17 +13597,17 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 				prod1 = prod1 + dev:*prevdev
 			}
 
-			maxRatio = sqrt((dev * sfinvcov * dev') / ptot)
+			maxRatio = (nfree > 0 ? sqrt((dev[fx] * sfinvcov * dev[fx]') / nfree) : 1)
 			if (maxRatio > 5 & maxRatio > 0) dev = 5 * dev / maxRatio
 
 			if (nit == 1) changestep = dev
 			else changestep = changestep + dev
 			fchange = gain * ((changestep * Dinv') :* stdcap) :* (1 :- coevfixed)
 
+			// positivity of the rates (RSiena's posj): a step that would take a rate below 0 goes to half of its average
+			for (k=p+1; k<=p+2*P; k++) if (fchange[k] > thav[k] / thavn) fchange[k] = 0.5 * thav[k] / thavn
 			thprev = theta
 			theta = (thav / thavn) - fchange
-			// rates stay positive: never more than halve one in a step
-			for (k=p+1; k<=p+2*P; k++) if (theta[k] < 0.5*thprev[k]) theta[k] = 0.5*thprev[k]
 			thav = thav + theta
 			thavn = thavn + 1
 			// RSiena's check covers every free parameter of theta, the rates and the rate-effect coefficients included (a behavior rate
@@ -13547,11 +13619,20 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 				for (k=1; k<=ptot; k++) {
 					if (prod0[k] > 1e-12) ac[k] = prod1[k] / prod0[k]
 				}
-				maxacor = max(ac)
+				// as RSiena, over the free parameters only
+				maxacor = -99
+				for (k=1; k<=ptot; k++) if (!coevfixed[k] & ac[k] > maxacor) maxacor = ac[k]
+				minacor = 1
+				for (k=1; k<=ptot; k++) if (!coevfixed[k] & ac[k] > -1 & ac[k] < minacor) minacor = ac[k]
 			}
 
 			if (nit >= n2maximum[subphase]) break
 			if (nit >= n2minimum[subphase] & maxacor < 1e-10) break
+			if (nit >= 50 & minacor < -0.8 & reprun < 4) break
+		}
+
+		if (restart) break
+		if (nit >= n2maximum[subphase] | maxacor < 1e-10 | reprun >= 4) break
 		}
 
 		if (restart) break

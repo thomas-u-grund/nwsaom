@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.5.2  08nov2026 author: Thomas Grund}{...}
+{* *! version 1.5.3  08nov2026 author: Thomas Grund}{...}
 
 {title:Title}
 
@@ -361,7 +361,7 @@ endowment 0.11 against 0.09 and creation 0.64 against 0.66 (standard errors 0.55
 {pstd}
 {opt transtrip}, {opt cycle3}, {opt transmedtrip} and {opt transrectrip} split the same way; on s501-s503 the
 targets are identical to RSiena's (-74/94, -17.3/31, -74/93, -41/61) and the estimates agree. The split of a
-sparse effect such as {opt transrectrip} can need a longer first phase: with the default {opt k0(50)} two of ten
+sparse effect such as {opt transrectrip} can need a longer first phase: with the default length (50 simulations for this model) two of ten
 seeds stopped (a divergence error, or a parameter kept at its starting value because its estimated derivative
 was not positive), while {opt k0(200)} gave RSiena's values. Since 2026-10-22 a non-positive derivative
 estimate first lengthens phase 1 (up to 200 replicates, RSiena's rule in phase1.r) before the parameter is fixed;
@@ -1062,10 +1062,13 @@ co-evolution model 18 s.
 Coefficients are estimated by the Method of Moments via Robbins-Monro stochastic approximation,
 RSiena's default algorithm and phase structure: Phase 1 estimates the Jacobian
 (sensitivity of each expected statistic to each parameter) via {opt k0()} independent simulated
-replicates at the starting values and ends with RSiena's partial quasi-Newton step; Phase 2
+replicates at the starting values (by default, as RSiena, max(50, 7 + 3{it:p}) for {it:p} estimated
+parameters) and ends with RSiena's partial quasi-Newton step; Phase 2
 performs the Robbins-Monro update across RSiena's default of 4 diminishing-gain subphases
-({cmd:nsub=4}, {cmd:firstg} default 0.2, {cmd:reduceg=0.5}, RSiena's per-subphase minimum/maximum
-iteration schedule); Phase 3 runs {opt k3()} further replicates at the estimates to compute the
+({cmd:nsub=4}, {cmd:firstg} default 0.2, {cmd:reduceg=0.5}, {cmd:diagonalize=0.2}, RSiena's per-subphase
+minimum/maximum iteration schedule, and RSiena's repetition of a subphase whose steps oscillate), with
+each simulated statistic corrected by its regression on its own score as RSiena's default {cmd:dolby}
+option does; Phase 3 runs {opt k3()} further replicates at the estimates to compute the
 standard errors (e(V), RSiena's sandwich formula), the convergence t-ratios {cmd:e(tconv)} (mean
 deviation / its standard deviation, one per parameter including the rates) and RSiena's overall
 maximum convergence ratio {cmd:e(tconv_max)}. As in RSiena, a fit is considered converged when
@@ -1143,4 +1146,4 @@ The same estimates are available as {cmd:nwsaom_ml} after an {cmd:nwsaom} fit. T
     {help nwsaom}, {help nwsaom_estat}, {help nwergm}
 
 {hline}
-{pstd}{it:nwsaom version 1.5.2, 8 November 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.5.3, 8 November 2026}{p_end}{* nwversion}

@@ -3,6 +3,21 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.5.3] - 2026-11-08
+
+The estimation algorithm now follows RSiena's defaults in every respect that a comparison with the source of RSiena 1.6.14 found to differ. The model, the statistics and the estimates are the same; the steps of the Robbins-Monro algorithm that lead to them are now RSiena's.
+
+### Results that change (read before you re-run old analyses)
+Estimates and standard errors of the method of moments change within simulation error: the same seed gives a different, equally valid path to the same estimates. On the four examples of the article, five seeds each, the largest difference between the means of `nwsaom` and RSiena is 0.073 of RSiena's standard error (1.5.2: 0.077). `nwsaom multinet` and `nwsaom multiplex` now run 1,000 Phase 3 simulations by default instead of 200, so their standard errors and convergence statistics are more precise and their fits take longer. Maximum likelihood and the Bayesian estimator are unchanged. Fits take longer, because Phase 2 now computes the scores and repeats oscillating subphases, as RSiena does: on three models of the article's benchmark, 10 percent (2 parameters), 17 percent (3) and 29 percent (10) on one thread.
+
+### Changed
+- **Noise reduction in Phase 2 (RSiena's `dolby = TRUE`, its default).** Each simulated statistic is corrected by its regression on its own score, with the coefficients estimated from the Phase 1 simulations. The correction has expectation zero, so it removes noise from the Robbins-Monro steps without changing what is estimated. Phase 2 now computes the scores of each simulation, as RSiena does.
+- **A Phase 2 subphase whose steps oscillate is run again** (RSiena's `proc2subphase`): when, after at least 50 iterations, the autocorrelation of a free parameter's deviations falls below -0.8, the subphase ends and starts again from the current values with the same gain, at most four times.
+- **Phase 1 grows with the model.** The default number of Phase 1 simulations is RSiena's max(50, 7 + 3p), with p the number of estimated parameters; it was 50 for every model. `k0()` still sets it.
+- **Rates stay positive as in RSiena:** a step that would take a rate below zero sets it to half of its running average. Before, any step that more than halved a rate was cut back.
+- Parameters fixed with `fix()`, or kept at their starting values because their derivative is not positive, no longer enter the autocorrelation criterion that ends a subphase, nor the truncation of large steps, as in RSiena.
+- `nwsaom multinet` and `nwsaom multiplex`: defaults `k0()` as above and `k3(1000)`, as in RSiena (before 30 and 200).
+
 ## [1.5.2] - 2026-11-08
 
 Faster estimation and goodness of fit. The computations are the same as in 1.5.1: compiled from the same source on the same machine, the new plugin gives every estimate, standard error and goodness-of-fit result of 1.5.1 to the last digit. The macOS plugin of the release is built on a newer build machine (see Build), whose compiler changes the last digits: relative differences below 1e-11, far below anything displayed.

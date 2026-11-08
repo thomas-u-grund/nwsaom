@@ -1,4 +1,4 @@
-*! version 1.5.2  08nov2026 nwsaom multiplex (split out of nwsaom.ado: the programs of one ado-file all count towards Stata's 1000 KB adosize while loaded)
+*! version 1.5.3  08nov2026 nwsaom multiplex (split out of nwsaom.ado: the programs of one ado-file all count towards Stata's 1000 KB adosize while loaded)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -48,7 +48,7 @@ program define nwsaom_multiplex, eclass
 	version 14
 	_nwsaom_libcheck
 	syntax , NETAWAVE1(string) NETAWAVE2(string) NETBWAVE1(string) NETBWAVE2(string) ///
-		[ THETA01(string) THETA02(string) K0(integer 30) K3(integer 200) FIRSTG(real 0.2) seed(integer -1) CRPROD CRPRODB DETail ]
+		[ THETA01(string) THETA02(string) K0(integer 0) K3(integer 1000) FIRSTG(real 0.2) seed(integer -1) CRPROD CRPRODB DETail ]
 
 	di as text "note: {bf:nwsaom multiplex} is deprecated; use {bf:nwsaom multinet} (net1() net2() ...), which includes everything multiplex does."
 	// the estimates of multiplex and multinet agree (same model, same engine); forward unless start values are given
@@ -66,7 +66,7 @@ program define nwsaom_multiplex, eclass
 		ereturn scalar rate1_se = `__r'[3, 1]
 		ereturn scalar rate2_se = `__r'[4, 1]
 		ereturn local cmd "nwsaom_multiplex"
-		ereturn local version "1.5.2"
+		ereturn local version "1.5.3"
 		exit
 	}
 	if `seed' != -1 set seed `seed'
@@ -150,7 +150,7 @@ program define nwsaom_multiplex, eclass
 	matrix rownames __nwsaom_mp_rate1_tconv = tconv
 	ereturn matrix tconv = __nwsaom_mp_rate1_tconv
 	ereturn local cmd "nwsaom_multiplex"
-	ereturn local version "1.5.2"
+	ereturn local version "1.5.3"
 	_nwsaom_postengine
 
 	di as text "{hline}"

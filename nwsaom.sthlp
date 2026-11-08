@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.5.2  08nov2026 author: Thomas Grund}{...}
+{* *! version 1.5.3  08nov2026 author: Thomas Grund}{...}
 {marker topic}
 {helpb nwtopical##analysis_statmodels:[NW-2.6.6] Statistical Estimation of Networks}
 
@@ -418,7 +418,7 @@ fits on RSiena's scale, as e(rate). Not used under conditional estimation, where
 {synopt:{opt theta0(numlist)}}Starting values for the eval-parameter vector, one per requested effect IN THE ORDER LISTED IN THE ERROR MESSAGE if
 omitted or mis-sized (outdegree first, then every other effect in the order its own option appears above); default all zero, except that a
 network-only model starts {opt outdegree} at RSiena's data-derived starting value{p_end}
-{synopt:{opt k0(int)}}Phase-1 replicate count (Jacobian estimation via the score-function derivative estimator); default 50{p_end}
+{synopt:{opt k0(int)}}Phase-1 replicate count (Jacobian estimation via the score-function derivative estimator); default, as RSiena, max(50, 7 + 3{it:p}), where {it:p} is the number of estimated parameters{p_end}
 {synopt:{opt k3(int)}}Phase-3 replicate count (convergence diagnostics and the covariance matrix e(V)); default 1,000{p_end}
 {synopt:{opt ml}}estimate by maximum likelihood (Robbins-Monro on the likelihood of the augmented data) instead of the method of moments; see {help nwsaom_remarks##ml:Maximum likelihood}{p_end}
 {synopt:{opt mloptions(string)}}controls of the maximum likelihood estimator: {opt n1(#)}, {opt nsub(#)}, {opt nstart2(#)}, {opt n3(#)}, {opt mult(#)}, {opt gain(#)}, {opt seed(#)}{p_end}
@@ -449,8 +449,8 @@ parameter whose t-ratio is 0.1 or more in absolute value; the full information i
 {syntab:Estimation}
 {synopt:{opt theta01(numlist)}}starting values for network A's effects, in the order {bf:outdegree}, {bf:reciprocity}, {bf:crprod}; default 0{p_end}
 {synopt:{opt theta02(numlist)}}starting values for network B's effects, in the order {bf:outdegree}, {bf:reciprocity}, {bf:crprodb}; default 0{p_end}
-{synopt:{opt k0(#)}}Phase 1 simulations; default 30{p_end}
-{synopt:{opt k3(#)}}Phase 3 simulations; default 200{p_end}
+{synopt:{opt k0(#)}}Phase 1 simulations; default, as RSiena, max(50, 7 + 3{it:p}){p_end}
+{synopt:{opt k3(#)}}Phase 3 simulations; default 1,000{p_end}
 {synopt:{opt firstg(#)}}initial Robbins-Monro gain; default 0.2{p_end}
 {synopt:{opt seed(#)}}random-number seed{p_end}
 {synopt:{opt detail}}list the convergence t-ratio of every parameter{p_end}
@@ -927,4 +927,4 @@ It is not affiliated with or endorsed by the RSiena project.
 	{help nwergm}, {help nwset}, {help nwrandom}
 
 {hline}
-{pstd}{it:nwsaom version 1.5.2, 8 November 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.5.3, 8 November 2026}{p_end}{* nwversion}
