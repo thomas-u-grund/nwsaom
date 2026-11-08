@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.5.4  08nov2026 author: Thomas Grund}{...}
+{* *! version 1.5.5  08nov2026 author: Thomas Grund}{...}
 
 {title:Title}
 
@@ -347,4 +347,4 @@ Duxbury, S.W., Zhao, X. {cmd:netmediate}: Micro-Macro Analysis for Social Networ
 	{help nwsaom}
 
 {hline}
-{pstd}{it:nwsaom version 1.5.4, 8 November 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.5.5, 8 November 2026}{p_end}{* nwversion}

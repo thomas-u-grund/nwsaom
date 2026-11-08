@@ -3,10 +3,13 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.5.5] - 2026-11-08
 
 ### Fixed
 - Co-evolution with several behaviors: in the rate table of the output, the rows of standard errors of the behavior rates were labelled with the names of the rates (for example `rate_alcohol` twice), so that they looked like a second set of rates. Each rate row is now followed by its `se` row, as in the other models. `e(rates_beh_se)` is unchanged.
+
+### Documentation
+- The manual's output listings were rerun with this version, and the text that quotes them was updated; fits that miss a convergence criterion now show it, with the advice to restart. Algorithm and estimates are unchanged from 1.5.4.
 
 ## [1.5.4] - 2026-11-08
 
