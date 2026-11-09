@@ -1,0 +1,376 @@
+
+. nwsaom version
+nwsaom version 1.5.8, 09nov2026
+  core package nwcommands : installed (development copy, no distribution date)
+  native plugin           : <nwsaom>/lib/plugins/macos/saom_sim_macos.plugin (plugin build 154)
+  compared with           : R RSiena 1.6.14
+  license                 : GNU GPL-3
+
+. nwsaom describe, waves(glasgow1 glasgow2 glasgow3)
+
+Network data: 3 waves, 50 actors, directed
+-----------------------------------------------------
+        Wave |     ties     density   avg. degree
+-------------+---------------------------------------
+           1 |      113      0.0461         2.260
+           2 |      116      0.0473         2.320
+           3 |      122      0.0498         2.440
+-----------------------------------------------------
+
+----------------------------------------------------------------------
+      Period |    kept   created  dissolved   Jaccard   Hamming
+-------------+--------------------------------------------------------
+        1->2 |      57        59         56     0.331       115
+        2->3 |      66        56         50     0.384       106
+----------------------------------------------------------------------
+
+. nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip k0(5
+> 0) k3(1000) seed(12345)
+
+SAOM (Method of Moments, conditional), waves: glasgow1 glasgow2 glasgow3
+Actors: 50                             Periods: 2
+
+------------------------------------------------------------------------------
+glasgow1_t~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   outdegree |  -2.682831   .1139084   -23.55   0.000    -2.906088   -2.459575
+ reciprocity |   2.471578   .1948393    12.69   0.000     2.089699    2.853456
+   transtrip |   .6214455   .0745505     8.34   0.000     .4753293    .7675617
+------------------------------------------------------------------------------
+Rate parameters (estimated, one per inter-wave period):
+
+-----------------------------------
+             |   period1    period2 
+-------------+---------------------
+        rate |    6.3793     5.2337 
+          se |    1.0925     0.9001 
+-----------------------------------
+Overall maximum convergence ratio: 0.075 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): met
+
+. estat timetest
+
+Test of time heterogeneity (score-type test)
+H0: the parameter of each effect is the same in all periods
+
+-------------------------------------------
+      Effect |      chi2    df  Prob > chi2
+-------------+-----------------------------
+   outdegree |     0.102     1       0.7489
+ reciprocity |     1.095     1       0.2953
+   transtrip |     0.465     1       0.4953
+-------------+-----------------------------
+       Joint |     4.170     3       0.2437
+-------------------------------------------
+
+Period-specific deviations (one-step estimates) and separate tests
+---------------------------------------------------------
+      Effect |  Period   Deviation      chi2  Prob > chi2
+-------------+-------------------------------------------
+   outdegree |       2     -0.3452     0.102       0.7489
+ reciprocity |       2      0.7343     1.095       0.2953
+   transtrip |       2      0.0543     0.465       0.4953
+---------------------------------------------------------
+
+. nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip cycl
+> e3 k0(50) k3(1000) seed(12345)
+
+SAOM (Method of Moments, conditional), waves: glasgow1 glasgow2 glasgow3
+Actors: 50                             Periods: 2
+
+------------------------------------------------------------------------------
+glasgow1_t~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   outdegree |  -2.688978     .11436   -23.51   0.000     -2.91312   -2.464837
+ reciprocity |   2.473373   .2154942    11.48   0.000     2.051012    2.895734
+   transtrip |   .6694555   .1444522     4.63   0.000     .3863344    .9525765
+      cycle3 |  -.0931153   .2875579    -0.32   0.746    -.6567184    .4704878
+------------------------------------------------------------------------------
+Rate parameters (estimated, one per inter-wave period):
+
+-----------------------------------
+             |   period1    period2 
+-------------+---------------------
+        rate |    6.3770     5.2336 
+          se |    1.0909     0.9018 
+-----------------------------------
+Overall maximum convergence ratio: 0.101 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): met
+
+. estat importance
+
+Relative importance of effects
+Expected over the actors at the start of each period
+--------------------------------------------------------------------------
+      Effect | Estimate  Std. err.    Sigma  Semi-std.     RI p1     RI p2
+-------------+------------------------------------------------------------
+   outdegree |  -2.6890     0.1144   0.4384    -1.1788    0.4343    0.5050
+ reciprocity |   2.4734     0.2155   0.2140     0.5293    0.3787    0.3105
+   transtrip |   0.6695     0.1445   0.6514     0.4361    0.1739    0.1723
+      cycle3 |  -0.0931     0.2876   0.3374    -0.0314    0.0132    0.0122
+-------------+------------------------------------------------------------
+   Certainty |                                            0.2652    0.3506
+--------------------------------------------------------------------------
+RI: share of the effect in the actors' choices. Semi-std.: estimate x sigma.
+Certainty: RSiena's R_H, the expected certainty of the choices.
+
+. nwsaom, waves(glasgow1 glasgow2) outdegree reciprocity transtrip cycle3 theta0
+> (-2.3 2 0 0) fix(transtrip cycle3) k0(100) k3(1000) seed(1)
+
+SAOM (Method of Moments, conditional), waves: glasgow1 glasgow2
+Actors: 50                             Periods: 1
+
+------------------------------------------------------------------------------
+glasgow1_t~2 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   outdegree |  -2.248445   .1256837   -17.89   0.000    -2.494781    -2.00211
+ reciprocity |   2.472199   .2362977    10.46   0.000     2.009064    2.935334
+   transtrip |          0  (omitted)
+      cycle3 |          0  (omitted)
+------------------------------------------------------------------------------
+Rate parameters (estimated, one per inter-wave period):
+
+------------------------
+             |   period1 
+-------------+----------
+        rate |    5.5335 
+          se |    0.8810 
+------------------------
+Overall maximum convergence ratio: 0.061 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for t
+> ranstrip (-6.979) cycle3 (-6.486)
+Convergence is good only if both criteria are met. Refit starting from these est
+> imates with theta0(); see nwsaom.
+
+. estat score
+
+Score-type test of fixed effects
+H0: each effect below equals its fixed value
+
+-----------------------------------------------------------------
+      Effect |  Fixed at      chi2   df  Prob > chi2  One-sided z
+-------------+---------------------------------------------------
+   transtrip |    0.0000    81.920    1       0.0000        9.051
+      cycle3 |    0.0000    67.902    1       0.0000        8.240
+-------------+---------------------------------------------------
+       Joint |              82.061    2       0.0000
+-----------------------------------------------------------------
+
+One-step estimates (restricted estimates plus the one-step correction)
+--------------------------
+      Effect |    Estimate
+-------------+------------
+   outdegree |     -2.6717
+ reciprocity |      2.0383
+   transtrip |      1.3303
+      cycle3 |      0.2607
+--------------------------
+
+. nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip ml s
+> eed(1)
+
+SAOM (Method of Moments, conditional), waves: glasgow1 glasgow2 glasgow3
+Actors: 50                             Periods: 2
+
+------------------------------------------------------------------------------
+glasgow1_t~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   outdegree |  -2.675306   .1130571   -23.66   0.000    -2.896894   -2.453718
+ reciprocity |   2.453519   .1841138    13.33   0.000     2.092662    2.814375
+   transtrip |   .6151182    .075624     8.13   0.000     .4668978    .7633385
+------------------------------------------------------------------------------
+Rate parameters (estimated, one per inter-wave period):
+
+-----------------------------------
+             |   period1    period2 
+-------------+---------------------
+        rate |    6.4432     5.2473 
+          se |    1.0683     0.8841 
+-----------------------------------
+Overall maximum convergence ratio: 0.123 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): met
+Maximum likelihood (iterations: phase 1 50, phase 2 4 x 100, phase 3 1000) ...
+
+Maximum likelihood estimates (Robbins-Monro on the score of the augmented data)
+------------------------------------------------------------------------------
+glasgow1_t~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   outdegree |  -2.644514   .1034917   -25.55   0.000    -2.847354   -2.441674
+ reciprocity |   2.220063   .1667722    13.31   0.000     1.893195     2.54693
+   transtrip |   .6942384   .0633412    10.96   0.000     .5700919    .8183848
+------------------------------------------------------------------------------
+Rate parameters (one per inter-wave period):
+
+-----------------------------------
+             |   period1    period2 
+-------------+---------------------
+        rate |    6.3079     5.2549 
+          se |    0.8436     0.9311 
+       tconv |   -0.0008    -0.0352 
+-----------------------------------
+Overall maximum t-ratio of the scores: 0.104 (acceptable)
+
+. nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip ml s
+> eed(2)
+
+SAOM (Method of Moments, conditional), waves: glasgow1 glasgow2 glasgow3
+Actors: 50                             Periods: 2
+
+------------------------------------------------------------------------------
+glasgow1_t~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   outdegree |  -2.684083   .1129175   -23.77   0.000    -2.905397   -2.462769
+ reciprocity |   2.455681   .1910211    12.86   0.000     2.081287    2.830075
+   transtrip |   .6268057   .0732808     8.55   0.000     .4831779    .7704335
+------------------------------------------------------------------------------
+Rate parameters (estimated, one per inter-wave period):
+
+-----------------------------------
+             |   period1    period2 
+-------------+---------------------
+        rate |    6.4843     5.1899 
+          se |    1.1076     0.9010 
+-----------------------------------
+Overall maximum convergence ratio: 0.041 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): met
+Maximum likelihood (iterations: phase 1 50, phase 2 4 x 100, phase 3 1000) ...
+
+Maximum likelihood estimates (Robbins-Monro on the score of the augmented data)
+------------------------------------------------------------------------------
+glasgow1_t~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   outdegree |  -2.628601   .1103673   -23.82   0.000    -2.844917   -2.412285
+ reciprocity |   2.229024   .1740247    12.81   0.000     1.887942    2.570106
+   transtrip |   .6832671   .0691283     9.88   0.000     .5477781    .8187561
+------------------------------------------------------------------------------
+Rate parameters (one per inter-wave period):
+
+-----------------------------------
+             |   period1    period2 
+-------------+---------------------
+        rate |    6.4691     5.2353 
+          se |    1.0051     0.6849 
+       tconv |   -0.1207    -0.0909 
+-----------------------------------
+Overall maximum t-ratio of the scores: 0.188 (acceptable)
+
+. nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip k0(5
+> 0) k3(1000) seed(12345)
+
+SAOM (Method of Moments, conditional), waves: glasgow1 glasgow2 glasgow3
+Actors: 50                             Periods: 2
+
+------------------------------------------------------------------------------
+glasgow1_t~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   outdegree |  -2.682831   .1139084   -23.55   0.000    -2.906088   -2.459575
+ reciprocity |   2.471578   .1948393    12.69   0.000     2.089699    2.853456
+   transtrip |   .6214455   .0745505     8.34   0.000     .4753293    .7675617
+------------------------------------------------------------------------------
+Rate parameters (estimated, one per inter-wave period):
+
+-----------------------------------
+             |   period1    period2 
+-------------+---------------------
+        rate |    6.3793     5.2337 
+          se |    1.0925     0.9001 
+-----------------------------------
+Overall maximum convergence ratio: 0.075 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): met
+
+. timer clear 9
+
+. timer on 9
+
+. nwsaom bayes, seed(1)
+Sampling: 50 pre-warming + 50 warming + 250 main iterations of 20 batches ...
+
+Bayesian SAOM (data augmentation)                Number of actors  =       50
+Waves: glasgow1 glasgow2 glasgow3                Saved draws       =      250
+Pre-warm 50, warm 50, main 250 x 20              Mean chain length =    579.8
+Acceptance rates: effects 0.500, rates 0.240
+Chain steps accepted: diagonal 0.729, permute 0.710
+                      insert-permute 0.383, delete-permute 0.343
+-----------------------------------------------------------------------------
+      Effect |       Mean  Std. dev.    [95% cred. interval]     Median   ESS
+-------------+---------------------------------------------------------------
+   outdegree |    -2.6705     0.1076     -2.9001     -2.4863    -2.6634   155
+ reciprocity |     2.2545     0.1846      1.9156      2.6427     2.2463   127
+   transtrip |     0.7069     0.0724      0.5607      0.8593     0.7033   107
+rate_period1 |     6.3653     0.7000      5.1673      7.7659     6.2724    82
+rate_period2 |     5.3125     0.6046      4.2287      6.6688     5.2812    92
+-----------------------------------------------------------------------------
+Draws (one per main iteration) are in frame nwsaom_bayes_draws:
+  b1..b3 (effects), rate1..rate2, nchain, loglik.
+Priors are flat unless priormean(), priorsd() or priorrate() are given.
+
+. timer off 9
+
+. timer list 9
+   9:    155.74 /        1 =     155.7440
+
+. nwsaom simulate, waves(glasgow1 glasgow2) outdegree reciprocity transtrip thet
+> a(-2.3 2 0.5) rates(5) nsim(4) seed(7) generate(g)
+Simulation from the fitted model: 4 replication(s) of 1 period(s)
+
+------------------------------------
+    Statistic |       Sim       Obs
+--------------+---------------------
+Period 1      |
+         Ties |     124.2       116
+       Mutual |      33.5        35
+   Transitive |      69.0        88
+------------------------------------
+Sim is the mean over the replications; Obs is the observed end wave.
+
+. forvalues s = 1/4 {
+  2.         quietly nwsaom, waves(glasgow1 g_`s'_p1) outdegree reciprocity tran
+> strip k3(500) seed(`s')
+  3.         estimates store grp`s'
+  4. }
+
+. nwsaom meta grp1 grp2 grp3 grp4
+
+Meta-analysis of 4 fits
+Estimates with a standard error of 10 or more are excluded;
+tests of the means use a t distribution with n-1 d.f.
+
+IWLS estimates (Snijders and Baerveldt 2003)
+-------------------------------------------------------------------------------
+      Effect |   n      Mean  Std. err.       t   P>|t|      SD       Q     P>Q
+-------------+-----------------------------------------------------------------
+   outdegree |   4   -2.2509     0.0579  -38.87   0.000  0.1158    2.59   0.460
+ reciprocity |   4    1.8694     0.0737   25.37   0.000  0.1473    1.18   0.759
+   transtrip |   4    0.4758     0.0114   41.81   0.000  0.0228    0.14   0.987
+-------------------------------------------------------------------------------
+
+Maximum likelihood under normality: mean of the parameter
+----------------------------------------------------------
+      Effect |      Mean  Std. err.   [95% conf. interval]
+-------------+--------------------------------------------
+   outdegree |   -2.2509     0.0619      -2.3997   -2.1215
+ reciprocity |    1.8694     0.1173       1.6360    2.1042
+   transtrip |    0.4758     0.0531       0.3717    0.5802
+----------------------------------------------------------
+
+Maximum likelihood under normality: standard deviation between groups
+------------------------------------------------
+      Effect |        SD    [95% conf. interval]
+-------------+----------------------------------
+   outdegree |    0.0000        0.0000    0.2294
+ reciprocity |    0.0001        0.0000    0.3478
+   transtrip |    0.0001        0.0000    0.1383
+------------------------------------------------
+
+Fisher's combination of one-sided tests (chi-squared, 2n d.f.)
+----------------------------------------------------------
+             |           Right-sided            Left-sided
+      Effect |     chi2  Prob > chi2     chi2  Prob > chi2
+-------------+--------------------------------------------
+   outdegree |    0.000        1.000 1355.073        0.000
+ reciprocity |  279.024        0.000    0.000        1.000
+   transtrip |  100.110        0.000    0.000        1.000
+----------------------------------------------------------
+Correlations of estimates and standard errors are in r(meta).
+
+. log close

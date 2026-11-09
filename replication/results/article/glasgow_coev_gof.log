@@ -1,0 +1,19 @@
+
+. estat gof, seed(12345) name(glasgow_coev_gof_plot)
+
+Goodness of fit: Mahalanobis distance test, 50 simulations at the estimates (2 p
+> eriods pooled)
+
+------------------------------------------------------
+           Statistic |   Mahalanobis  P-value      Fit
+---------------------+--------------------------------
+           Outdegree |         7.080    0.440       ok
+            Indegree |        12.434    0.140       ok
+            Geodesic |       215.918    0.000 rejected
+            Behavior |         7.873    0.040 rejected
+------------------------------------------------------
+Fit is rejected when P < 0.05 (one-tailed test).
+Violin plots: glasgow_coev_gof_plot_outdegree glasgow_coev_gof_plot_indegree gla
+> sgow_coev_gof_plot_geodesic glasgow_coev_gof_plot_behavior
+
+. sjlog close, replace

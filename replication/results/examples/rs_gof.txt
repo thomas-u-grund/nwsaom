@@ -1,0 +1,31 @@
+E1 outdegree/indegree/geodesic
+Siena Goodness of Fit ( OutdegreeDistribution ), all periods
+=====
+Monte Carlo Mahalanobis distance test p-value:  0.6 
+-----
+One tailed test used  (i.e. estimated probability of greater distance than observation).
+-----
+Calculated joint MHD = ( 14.7 ) for current model.
+Siena Goodness of Fit ( IndegreeDistribution ), all periods
+=====
+Monte Carlo Mahalanobis distance test p-value:  0.689 
+-----
+One tailed test used  (i.e. estimated probability of greater distance than observation).
+-----
+Calculated joint MHD = ( 9.14 ) for current model.
+Siena Goodness of Fit ( GeodesicDistribution ), all periods
+=====
+Monte Carlo Mahalanobis distance test p-value:  0 
+-----
+One tailed test used  (i.e. estimated probability of greater distance than observation).
+-----
+Calculated joint MHD = ( 58.38 ) for current model.
+E4 behavior
+Siena Goodness of Fit ( BehaviorDistribution ), all periods
+=====
+Monte Carlo Mahalanobis distance test p-value:  0.077 
+**Note: Only 4 statistics are necessary in the auxiliary function.
+-----
+One tailed test used  (i.e. estimated probability of greater distance than observation).
+-----
+Calculated joint MHD = ( 13.28 ) for current model.

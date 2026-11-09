@@ -1,0 +1,18 @@
+  effectNumber effectName          shortName include fix   test  initialValue
+1 15           reciprocity         recip     TRUE    FALSE FALSE          0  
+2 21           transitive triplets transTrip TRUE    FALSE FALSE          0  
+  parm
+1 0   
+2 0   
+ML seed 1 time 167.455 
+     [,1]  [,2]   [,3]  [,4]  [,5]
+est 5.859 4.961 -2.661 2.224 0.713
+se  0.803 1.420  0.139 0.181 0.083
+ML seed 2 time 170.985 
+     [,1]  [,2]   [,3]  [,4]  [,5]
+est 6.099 5.053 -2.632 2.187 0.702
+se  0.907 0.860  0.108 0.193 0.072
+ML seed 3 time 171.746 
+     [,1]  [,2]   [,3]  [,4]  [,5]
+est 6.134 5.247 -2.646 2.220 0.704
+se  1.048 1.309  0.111 0.216 0.108

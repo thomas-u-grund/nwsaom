@@ -1,0 +1,29 @@
+
+. quietly nwsaom, waves(glasgow1 glasgow2) outdegree reciprocity transtrip cycle
+> 3 theta0(-2.3 2 0 0) fix(transtrip cycle3) k0(100) k3(1000) seed(1)
+
+. estat score
+
+Score-type test of fixed effects
+H0: each effect below equals its fixed value
+
+-----------------------------------------------------------------
+      Effect |  Fixed at      chi2   df  Prob > chi2  One-sided z
+-------------+---------------------------------------------------
+   transtrip |    0.0000    81.920    1       0.0000        9.051
+      cycle3 |    0.0000    67.902    1       0.0000        8.240
+-------------+---------------------------------------------------
+       Joint |              82.061    2       0.0000
+-----------------------------------------------------------------
+
+One-step estimates (restricted estimates plus the one-step correction)
+--------------------------
+      Effect |    Estimate
+-------------+------------
+   outdegree |     -2.6717
+ reciprocity |      2.0383
+   transtrip |      1.3303
+      cycle3 |      0.2607
+--------------------------
+
+. sjlog close, replace

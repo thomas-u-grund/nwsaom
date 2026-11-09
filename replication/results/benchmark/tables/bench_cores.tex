@@ -1,0 +1,17 @@
+\begin{table}[htbp]
+\centering
+\caption{\texttt{nwsaom} with 1 to 10 threads (in parentheses, speed-up over one thread) and RSiena with 1, 5 and 10 R processes: median seconds per fit over three seeds. The estimates of \texttt{nwsaom} are identical for every number of threads.}
+\label{tab:cores}
+\footnotesize
+\begin{tabular}{lrrrrrrrr}
+\toprule
+ & & \multicolumn{4}{c}{\texttt{nwsaom}} & \multicolumn{3}{c}{RSiena, processes} \\
+\cmidrule(lr){3-6}\cmidrule(lr){7-9}
+Model & $n$ & \texttt{cores(1)} & \texttt{cores(2)} & \texttt{cores(5)} & \texttt{cores(10)} & 1 & 5 & 10 \\
+\midrule
+R1 & 50 & 1.34 (1.0) & 1.11 (1.2) & 0.96 (1.4) & 0.92 (1.5) & 4.74 & 3.53 & 3.97 \\
+R4 & 200 & 22.0 (1.0) & 18.1 (1.2) & 15.4 (1.4) & 14.7 (1.5) & 89.5 & 34.4 & 29.7 \\
+R5 & 200 & 23.6 (1.0) & 14.0 (1.7) & 11.7 (2.0) & 10.9 (2.2) & 111 & 46.0 & 49.1 \\
+\bottomrule
+\end{tabular}
+\end{table}

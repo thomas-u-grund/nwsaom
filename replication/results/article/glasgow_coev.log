@@ -1,0 +1,31 @@
+
+. nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity behsim behavio
+> r(alcohol1 alcohol2 alcohol3) linear avalt k0(50) k3(2000) seed(12345)
+
+SAOM co-evolution (Method of Moments), waves: glasgow1 glasgow2 glasgow3
+Actors: 50                             Periods: 2
+Behavior: alcohol1 alcohol2 alcohol3
+
+------------------------------------------------------------------------------
+glasgow1_t~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   outdegree |  -2.384162   .1104054   -21.59   0.000    -2.600553   -2.167772
+ reciprocity |   2.768611   .1877528    14.75   0.000     2.400622      3.1366
+      behsim |   1.190873    .488049     2.44   0.015     .2343144    2.147431
+  beh_linear |   .3529297   .1294035     2.73   0.006     .0993036    .6065558
+   beh_avalt |   .2532406   .2030569     1.25   0.212    -.1447437    .6512249
+------------------------------------------------------------------------------
+Rate parameters (estimated, one per inter-wave period):
+
+-----------------------------------
+             |   period1    period2 
+-------------+---------------------
+network_rate |    5.8324     4.5480 
+          se |    0.9548     0.7259 
+behavior_r~e |    1.2297     1.8179 
+          se |    0.3183     0.4727 
+-----------------------------------
+Overall maximum convergence ratio: 0.089 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): met
+
+. sjlog close, replace

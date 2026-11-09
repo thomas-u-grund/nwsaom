@@ -1,0 +1,141 @@
+{
+  "main": {
+    "N1": [
+      "\\texttt{outdegree}, \\texttt{reciprocity}",
+      "50",
+      "2"
+    ],
+    "N2": [
+      "+ \\texttt{gwesp}",
+      "50",
+      "3"
+    ],
+    "N4": [
+      "+ \\texttt{gwesp}, \\texttt{samex()}",
+      "50",
+      "3"
+    ],
+    "N5": [
+      "+ \\texttt{gwesp}, \\texttt{indegpopularity}, \\texttt{outactivity}",
+      "50",
+      "3"
+    ],
+    "N6": [
+      "+ \\texttt{gwesp}, \\texttt{egox()}, \\texttt{altx()}, \\texttt{simx()}",
+      "50",
+      "3"
+    ],
+    "N7": [
+      "N2, unconditional estimation",
+      "50",
+      "3"
+    ],
+    "U1": [
+      "\\texttt{outdegree}, default model (forcing)",
+      "50",
+      "2"
+    ],
+    "U2": [
+      "\\texttt{outdegree}, \\texttt{symtype(joint)}",
+      "50",
+      "2"
+    ],
+    "C1": [
+      "N2 + alcohol: \\texttt{linear}, \\texttt{quadratic}, \\texttt{avalt}",
+      "50",
+      "3"
+    ],
+    "C2": [
+      "N2 + smoking: \\texttt{linear}, \\texttt{quadratic}, \\texttt{avsim}",
+      "50",
+      "3"
+    ],
+    "C3": [
+      "N1 + alcohol: \\texttt{linear}, \\texttt{avalt}",
+      "50",
+      "2"
+    ],
+    "R1": [
+      "full network model (see text)",
+      "50",
+      "3"
+    ],
+    "R2": [
+      "R1 network part + alcohol co-evolution",
+      "50",
+      "3"
+    ],
+    "R3": [
+      "undirected: \\texttt{gwesp}, \\texttt{samex()}, \\texttt{simx()}",
+      "50",
+      "2"
+    ],
+    "R4": [
+      "R1",
+      "200",
+      "3"
+    ],
+    "R5": [
+      "R2",
+      "200",
+      "3"
+    ],
+    "S100": [
+      "N2",
+      "100",
+      "3"
+    ],
+    "S200": [
+      "N2",
+      "200",
+      "3"
+    ],
+    "S500": [
+      "N2",
+      "500",
+      "3"
+    ],
+    "T200": [
+      "C1",
+      "200",
+      "3"
+    ]
+  },
+  "extra": {
+    "X1": [
+      "\\texttt{outdegree}, \\texttt{indegpopularity}, \\texttt{cycle4}",
+      "40$\\times$20",
+      "3"
+    ],
+    "X2": [
+      "\\texttt{outdegree}, \\texttt{indegpopularity}, \\texttt{outactivity}, \\texttt{cycle4}, \\texttt{outiso}, \\texttt{antiiniso2}",
+      "40$\\times$30",
+      "3"
+    ],
+    "X3": [
+      "both: \\texttt{outdegree}, \\texttt{reciprocity}; \\texttt{crprod}",
+      "50",
+      "3"
+    ],
+    "X4": [
+      "X3 without \\texttt{crprod} + smoking: \\texttt{linear}, \\texttt{quadratic}, \\texttt{avalt} (both networks)",
+      "50",
+      "3"
+    ],
+    "X5": [
+      "X4 with \\texttt{avalt} on network 1 only; \\texttt{behegox}, \\texttt{behaltx}, \\texttt{behsim}, \\texttt{samewwclosure:behavior}",
+      "50",
+      "3"
+    ],
+    "X6": [
+      "undirected network 1 (\\texttt{sym1}) + directed network 2; \\texttt{crprod}",
+      "50",
+      "3"
+    ],
+    "X7": [
+      "\\texttt{outdegree}, \\texttt{reciprocity}, \\texttt{gwesp}, \\texttt{samextranstrip()}, \\texttt{altxoutact()}, \\texttt{egoplusaltsqx()}",
+      "50",
+      "3"
+    ]
+  }
+}

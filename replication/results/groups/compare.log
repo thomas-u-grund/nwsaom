@@ -1,0 +1,66 @@
+
+Example 1: four classes, joint model (means of 10 seeds each)
+-------------------------------------------------------------
+   parameter nwsaom RSiena      diff se_nwsaom se_RSiena sd_seeds
+   outdegree -2.246 -2.248  0.002538    0.0821    0.0802  0.00468
+ reciprocity  1.866  1.870 -0.004262    0.1559    0.1530  0.00878
+   transtrip  0.465  0.464  0.000373    0.0547    0.0539  0.00206
+     period1  6.503  6.512 -0.008820    1.0119    1.0066  0.03576
+     period3  5.374  5.384 -0.009400    1.3809    1.1629  0.03790
+     period5  2.297  2.305 -0.007911    0.5354    0.7287  0.02513
+     period7  8.160  8.160  0.000342    2.0084    1.4216  0.05417
+largest |difference| of an effect (not rate): 0.004 
+
+Example 3a: co-evolution of friendship and alcohol use, three groups
+--------------------------------------------------------------------
+     parameter   nwsaom   RSiena      diff se_nwsaom se_RSiena sd_seeds
+     outdegree -2.98089 -2.98188  0.000987     0.268     0.269  0.01166
+   reciprocity  2.93505  2.93583 -0.000780     0.387     0.387  0.01543
+     transtrip  0.65510  0.65735 -0.002251     0.147     0.149  0.00413
+       behegox  0.02810  0.02600  0.002102     0.176     0.174  0.00444
+       behaltx  0.00664  0.00632  0.000315     0.177     0.179  0.00579
+    beh_linear  0.38598  0.38445  0.001531     0.170     0.163  0.00300
+ beh_quadratic -0.27590 -0.27281 -0.003081     0.135     0.131  0.00396
+     beh_avalt  0.52251  0.51243  0.010079     0.388     0.383  0.00925
+       period1  3.56746  3.55160  0.015858     1.333     1.385  0.03787
+       period2  1.91352  1.91518 -0.001663     0.881     0.907  0.02561
+       period4  5.68795  5.69589 -0.007943     1.730     1.660  0.07575
+       period5  2.33445  2.34674 -0.012287     0.679     0.686  0.01606
+       period7  1.12493  1.12634 -0.001417     0.495     0.508  0.01562
+       period8  2.34127  2.35365 -0.012384     1.066     1.095  0.02304
+    behperiod1  1.28909  1.30339 -0.014302     0.633     0.631  0.02384
+    behperiod2  1.43441  1.44208 -0.007667     0.657     0.654  0.01850
+    behperiod4  1.86507  1.86213  0.002937     0.743     0.729  0.02523
+    behperiod5  2.02452  2.01672  0.007805     0.835     0.850  0.02437
+    behperiod7  0.65008  0.65222 -0.002142     0.336     0.332  0.00936
+    behperiod8  1.44249  1.43885  0.003643     0.660     0.675  0.01874
+largest |difference| of an effect (not rate): 0.01 
+
+Example 3b: groups with 3, 2 and 2 waves (RSiena: equivalent object of two-wave groups)
+---------------------------------------------------------------------------------------
+   parameter nwsaom RSiena     diff se_nwsaom se_RSiena sd_seeds
+   outdegree -2.672 -2.677  0.00487     0.263     0.270  0.01347
+ reciprocity  2.611  2.615 -0.00446     0.408     0.411  0.02228
+   transtrip  0.553  0.556 -0.00379     0.136     0.141  0.00634
+     period1  3.145  3.175 -0.02930     1.066     1.025  0.04571
+     period2  1.623  1.631 -0.00798     0.636     0.804  0.02132
+     period4  5.269  5.277 -0.00828     1.372     1.171  0.04969
+     period6  2.006  2.016 -0.00955     0.800     0.892  0.02660
+largest |difference| of an effect (not rate): 0.005 
+
+Example 4: time-heterogeneity tests and score test, three groups (c = chi-squared statistic; means of 10 seeds each)
+------------------------------------------------------------------------------------------
+                                    test nwsaom RSiena      diff
+               joint time test (25 d.f.) 37.539 38.674 -1.135878
+                      outdegree (5 d.f.)  3.193  3.192  0.000539
+                    reciprocity (5 d.f.)  2.974  3.009 -0.035497
+                       altx_alc (5 d.f.) 10.134  9.908  0.225516
+                       egox_alc (5 d.f.)  8.259  8.277 -0.018445
+                      transtrip (5 d.f.) 11.242 11.603 -0.361010
+ period 1 (5 d.f.; RSiena: 'group' test)  2.268  2.288 -0.019567
+ period 2 (5 d.f.; RSiena: 'group' test)  5.557  5.485  0.071995
+ period 3 (5 d.f.; RSiena: 'group' test)  8.848  8.986 -0.137517
+ period 4 (5 d.f.; RSiena: 'group' test)  6.988  6.647  0.341122
+ period 5 (5 d.f.; RSiena: 'group' test) 17.411 18.266 -0.854966
+ period 6 (5 d.f.; RSiena: 'group' test)  4.623  4.464  0.159002
+        score test, altx + egox (2 d.f.)  0.168  0.181 -0.012689

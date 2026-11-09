@@ -1,0 +1,22 @@
+
+. quietly nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transt
+> rip cycle3 k0(50) k3(1000) seed(12345)
+
+. estat importance
+
+Relative importance of effects
+Expected over the actors at the start of each period
+--------------------------------------------------------------------------
+      Effect | Estimate  Std. err.    Sigma  Semi-std.     RI p1     RI p2
+-------------+------------------------------------------------------------
+   outdegree |  -2.6890     0.1144   0.4384    -1.1788    0.4343    0.5050
+ reciprocity |   2.4734     0.2155   0.2140     0.5293    0.3787    0.3105
+   transtrip |   0.6695     0.1445   0.6514     0.4361    0.1739    0.1723
+      cycle3 |  -0.0931     0.2876   0.3374    -0.0314    0.0132    0.0122
+-------------+------------------------------------------------------------
+   Certainty |                                            0.2652    0.3506
+--------------------------------------------------------------------------
+RI: share of the effect in the actors' choices. Semi-std.: estimate x sigma.
+Certainty: RSiena's R_H, the expected certainty of the choices.
+
+. sjlog close, replace

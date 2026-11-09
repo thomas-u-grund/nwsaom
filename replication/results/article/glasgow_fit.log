@@ -1,0 +1,29 @@
+
+. nwwebuse glasgow, nwclear
+
+. nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity cycle3 nodemat
+> ch(smoke1) k0(50) k3(2000) seed(12345)
+
+SAOM (Method of Moments, conditional), waves: glasgow1 glasgow2 glasgow3
+Actors: 50                             Periods: 2
+
+-------------------------------------------------------------------------------
+glasgow1_to~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+--------------+----------------------------------------------------------------
+    outdegree |  -2.806135   .1620405   -17.32   0.000    -3.123729   -2.488542
+  reciprocity |   2.620083   .1870256    14.01   0.000     2.253519    2.986646
+nodematch_s~1 |   .1214596   .1506553     0.81   0.420    -.1738195    .4167387
+       cycle3 |   1.161113   .1459085     7.96   0.000      .875137    1.447088
+-------------------------------------------------------------------------------
+Rate parameters (estimated, one per inter-wave period):
+
+-----------------------------------
+             |   period1    period2 
+-------------+---------------------
+        rate |    6.6140     5.3318 
+          se |    1.1772     0.8996 
+-----------------------------------
+Overall maximum convergence ratio: 0.120 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): met
+
+. sjlog close, replace

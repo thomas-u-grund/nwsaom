@@ -1,0 +1,53 @@
+
+. nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip k0(5
+> 0) k3(200) seed(12345)
+
+SAOM (Method of Moments, conditional), waves: glasgow1 glasgow2 glasgow3
+Actors: 50                             Periods: 2
+
+------------------------------------------------------------------------------
+glasgow1_t~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   outdegree |  -2.682831   .1090026   -24.61   0.000    -2.896472    -2.46919
+ reciprocity |   2.471578   .2064743    11.97   0.000     2.066895     2.87626
+   transtrip |   .6214455   .0701761     8.86   0.000     .4839029     .758988
+------------------------------------------------------------------------------
+Rate parameters (estimated, one per inter-wave period):
+
+-----------------------------------
+             |   period1    period2 
+-------------+---------------------
+        rate |    6.5504     5.2469 
+          se |    1.1470     0.9500 
+-----------------------------------
+Overall maximum convergence ratio: 0.222 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for r
+> eciprocity (0.126) transtrip (0.120)
+Convergence is good only if both criteria are met. Refit starting from these est
+> imates with theta0(); see nwsaom.
+
+. nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip k0(5
+> 0) k3(1000) theta0(-2.683 2.472 0.621) seed(12346)
+
+SAOM (Method of Moments, conditional), waves: glasgow1 glasgow2 glasgow3
+Actors: 50                             Periods: 2
+
+------------------------------------------------------------------------------
+glasgow1_t~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   outdegree |  -2.673817   .1181376   -22.63   0.000    -2.905362   -2.442271
+ reciprocity |   2.455474   .1969401    12.47   0.000     2.069478    2.841469
+   transtrip |    .616723   .0724545     8.51   0.000     .4747147    .7587312
+------------------------------------------------------------------------------
+Rate parameters (estimated, one per inter-wave period):
+
+-----------------------------------
+             |   period1    period2 
+-------------+---------------------
+        rate |    6.4119     5.2439 
+          se |    1.0716     0.8377 
+-----------------------------------
+Overall maximum convergence ratio: 0.084 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): met
+
+. sjlog close, replace

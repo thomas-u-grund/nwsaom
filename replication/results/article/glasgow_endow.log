@@ -1,0 +1,34 @@
+
+. nwsaom, waves(glasgow1 glasgow2) outdegree reciprocity behavior(alcohol1 alcoh
+> ol2) linear quadraticendow quadraticcreation k0(50) k3(1000) seed(12345)
+
+SAOM co-evolution (Method of Moments), waves: glasgow1 glasgow2
+Actors: 50                             Periods: 1
+Behavior: alcohol1 alcohol2
+
+-------------------------------------------------------------------------------
+glasgow1_to~2 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+--------------+----------------------------------------------------------------
+    outdegree |  -2.230546   .1230302   -18.13   0.000    -2.471681   -1.989411
+  reciprocity |   2.440944   .2424068    10.07   0.000     1.965835    2.916052
+   beh_linear |   .4112283   .3248725     1.27   0.206    -.2255102    1.047967
+beh_quadrat~w |   .0843315   .4764377     0.18   0.860    -.8494692    1.018132
+beh_quadrat~n |  -.1962537   .6170926    -0.32   0.750    -1.405733    1.013226
+-------------------------------------------------------------------------------
+Rate parameters (estimated, one per inter-wave period):
+
+------------------------
+             |   period1 
+-------------+----------
+network_rate |    5.4855 
+          se |    0.8234 
+behavior_r~e |    1.2206 
+          se |    0.3590 
+------------------------
+Overall maximum convergence ratio: 0.170 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for r
+> ate_period1 (-0.131)
+Convergence is good only if both criteria are met. Refit starting from these est
+> imates with theta0(); see nwsaom.
+
+. sjlog close, replace

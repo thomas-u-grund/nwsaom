@@ -1,0 +1,29 @@
+
+. quietly nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transt
+> rip k0(50) k3(1000) seed(12345)
+
+. estat timetest
+
+Test of time heterogeneity (score-type test)
+H0: the parameter of each effect is the same in all periods
+
+-------------------------------------------
+      Effect |      chi2    df  Prob > chi2
+-------------+-----------------------------
+   outdegree |     0.102     1       0.7489
+ reciprocity |     1.095     1       0.2953
+   transtrip |     0.465     1       0.4953
+-------------+-----------------------------
+       Joint |     4.170     3       0.2437
+-------------------------------------------
+
+Period-specific deviations (one-step estimates) and separate tests
+---------------------------------------------------------
+      Effect |  Period   Deviation      chi2  Prob > chi2
+-------------+-------------------------------------------
+   outdegree |       2     -0.3452     0.102       0.7489
+ reciprocity |       2      0.7343     1.095       0.2953
+   transtrip |       2      0.0543     0.465       0.4953
+---------------------------------------------------------
+
+. sjlog close, replace

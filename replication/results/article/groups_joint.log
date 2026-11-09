@@ -1,0 +1,82 @@
+
+. 
+. * the stacked data set: one row per actor, the group variable says which class
+. tabulate class
+
+      class |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         45       29.80       29.80
+          2 |         37       24.50       54.30
+          3 |         33       21.85       76.16
+          4 |         36       23.84      100.00
+------------+-----------------------------------
+      Total |        151      100.00
+
+. 
+. * the two wave networks of all classes together
+. nwsaom describe, waves(w1 w2)
+
+Network data: 2 waves, 151 actors, directed
+-----------------------------------------------------
+        Wave |     ties     density   avg. degree
+-------------+---------------------------------------
+           1 |      246      0.0109         1.629
+           2 |      335      0.0148         2.219
+-----------------------------------------------------
+
+----------------------------------------------------------------------
+      Period |    kept   created  dissolved   Jaccard   Hamming
+-------------+--------------------------------------------------------
+        1->2 |     139       196        107     0.314       303
+----------------------------------------------------------------------
+
+. 
+. * ONE model for all classes: the same three effects everywhere, one rate per class
+. nwsaom, waves(w1 w2) groups(class) outdegree reciprocity transtrip seed(5)
+
+SAOM (Method of Moments, conditional), waves: w1 w2
+Actors: 151                            Periods: 4
+Groups: 4 (variable class), actors per group: 45, 37, 33, 36; waves per group: 2, 2, 2, 2
+
+------------------------------------------------------------------------------
+    w1_to_w2 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   outdegree |  -2.246167   .0820687   -27.37   0.000    -2.407018   -2.085315
+ reciprocity |   1.862864   .1569308    11.87   0.000     1.555285    2.170443
+   transtrip |   .4655751   .0541992     8.59   0.000     .3593466    .5718035
+------------------------------------------------------------------------------
+Rate parameters (estimated, one per inter-wave period):
+
+---------------------------------------------------------
+             |   period1    period3    period5    period7 
+-------------+-------------------------------------------
+        rate |    6.4989     5.3821     2.2893     8.2490 
+          se |    0.9714     1.4169     0.5299     2.1306 
+---------------------------------------------------------
+Overall maximum convergence ratio: 0.017 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): met
+
+. 
+. * what the fit stored about the groups
+. display "groups: " e(ngroups) "   actors: " e(N)
+groups: 4   actors: 151
+
+. matrix list e(groupn)
+
+e(groupn)[1,4]
+    c1  c2  c3  c4
+r1  45  37  33  36
+
+. matrix list e(rates_group)
+
+e(rates_group)[1,4]
+    period1  period3  period5  period7
+r1        1        2        3        4
+
+. matrix list e(rates_period)
+
+e(rates_period)[1,4]
+    period1  period3  period5  period7
+r1        1        3        5        7
+
+. log close

@@ -1,0 +1,186 @@
+
+. 
+. * (a) the model with the effects of the alcohol covariate; unconditional estimation (the estat tes
+> ts use the simulated statistics)
+. nwsaom, waves(g1 g2 g3) groups(group) outdegree reciprocity transtrip egox(alc) altx(alc) uncondit
+> ional seed(1)
+
+SAOM (Method of Moments, unconditional), waves: g1 g2 g3
+Actors: 50                             Periods: 6
+Groups: 3 (variable group), actors per group: 15, 20, 15; waves per group: 3, 3, 3
+
+------------------------------------------------------------------------------
+    g1_to_g3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   outdegree |  -2.985791   .2644031   -11.29   0.000    -3.504012   -2.467571
+ reciprocity |   2.939902   .3761378     7.82   0.000     2.202685    3.677118
+    altx_alc |   .0091686   .1354088     0.07   0.946    -.2562278    .2745649
+    egox_alc |  -.0516863   .1365607    -0.38   0.705    -.3193403    .2159676
+   transtrip |   .6547857    .133716     4.90   0.000     .3927072    .9168642
+------------------------------------------------------------------------------
+Rate parameters (estimated, one per inter-wave period):
+
+-------------------------------------------------------------------------------
+             |   period1    period2    period4    period5    period7    period8 
+-------------+-----------------------------------------------------------------
+        rate |    3.6397     1.8375     5.6142     2.3439     1.0972     2.3910 
+          se |    1.4189     1.0283     1.9205     0.6377     0.4475     1.0213 
+-------------------------------------------------------------------------------
+Overall maximum convergence ratio: 0.124 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): met
+
+. 
+. * (b) time heterogeneity: joint test, test per effect, then per group and per period
+. estat timetest, fixrates
+
+Test of time heterogeneity (score-type test)
+H0: the parameter of each effect is the same in all periods
+
+-------------------------------------------
+      Effect |      chi2    df  Prob > chi2
+-------------+-----------------------------
+   outdegree |     3.081     5       0.6875
+ reciprocity |     2.857     5       0.7220
+    altx_alc |    10.791     5       0.0557
+    egox_alc |     8.193     5       0.1459
+   transtrip |    10.335     5       0.0663
+-------------+-----------------------------
+       Joint |    36.338    25       0.0666
+-------------------------------------------
+
+H0: the parameters of the periods of a group are the same as in the other groups
+-------------------------------------------
+       Group |      chi2    df  Prob > chi2
+-------------+-----------------------------
+           1 |     2.512     5       0.7747
+           2 |    14.204    10       0.1639
+           3 |    19.699    10       0.0322
+-------------------------------------------
+
+Test of each period (all effects)
+-------------------------------------------
+      Period |      chi2    df  Prob > chi2
+-------------+-----------------------------
+           1 |     2.512     5       0.7747
+           2 |     6.014     5       0.3049
+           3 |     9.393     5       0.0944
+           4 |     6.753     5       0.2397
+           5 |    16.287     5       0.0061
+           6 |     4.428     5       0.4896
+-------------------------------------------
+
+Period-specific deviations (one-step estimates) and separate tests
+---------------------------------------------------------
+      Effect |  Period   Deviation      chi2  Prob > chi2
+-------------+-------------------------------------------
+   outdegree |       2      0.3635     0.253       0.6151
+   outdegree |       3      1.8492     0.481       0.4879
+   outdegree |       4     -0.6176     1.355       0.2444
+   outdegree |       5     -1.2576     0.156       0.6924
+   outdegree |       6      1.6724     1.730       0.1884
+ reciprocity |       2     -1.1435     0.138       0.7100
+ reciprocity |       3     -2.2154     2.115       0.1458
+ reciprocity |       4      0.5027     0.040       0.8412
+ reciprocity |       5      0.1703     0.779       0.3775
+ reciprocity |       6     -1.1711     0.672       0.4125
+    altx_alc |       2      0.7122     4.756       0.0292
+    altx_alc |       3      0.1672     0.069       0.7929
+    altx_alc |       4     -0.1277     0.753       0.3856
+    altx_alc |       5     -0.4399     5.822       0.0158
+    altx_alc |       6      0.2905     0.070       0.7918
+    egox_alc |       2     -0.1191     2.661       0.1028
+    egox_alc |       3     -0.4459     0.014       0.9064
+    egox_alc |       4     -0.4985     0.674       0.4117
+    egox_alc |       5     -0.5893     5.185       0.0228
+    egox_alc |       6     -0.1623     0.009       0.9225
+   transtrip |       2     -0.0263     2.010       0.1563
+   transtrip |       3     -0.7608     3.342       0.0675
+   transtrip |       4     -0.1186     0.058       0.8102
+   transtrip |       5      1.2466     7.742       0.0054
+   transtrip |       6     -0.5735     0.002       0.9689
+---------------------------------------------------------
+
+. matrix list r(group)
+
+r(group)[3,2]
+           c1         c2
+r1  2.5116894          5
+r2  14.204439         10
+r3  19.698543         10
+
+. matrix list r(period)
+
+r(period)[6,2]
+           c1         c2
+r1  2.5116894          5
+r2  6.0135633          5
+r3  9.3931454          5
+r4   6.752969          5
+r5  16.287441          5
+r6  4.4281169          5
+
+. 
+. * (c) score test: fit the model WITHOUT the two alcohol effects (held fixed at 0) and ask whether 
+> they are needed
+. nwsaom, waves(g1 g2 g3) groups(group) outdegree reciprocity transtrip egox(alc) altx(alc) fix(egox
+> (alc) altx(alc)) unconditional seed(1)
+
+SAOM (Method of Moments, unconditional), waves: g1 g2 g3
+Actors: 50                             Periods: 6
+Groups: 3 (variable group), actors per group: 15, 20, 15; waves per group: 3, 3, 3
+
+------------------------------------------------------------------------------
+    g1_to_g3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   outdegree |  -2.976708   .2602807   -11.44   0.000    -3.486849   -2.466568
+ reciprocity |   2.927963   .3984528     7.35   0.000     2.147009    3.708916
+    altx_alc |          0  (omitted)
+    egox_alc |          0  (omitted)
+   transtrip |   .6544164   .1470695     4.45   0.000     .3661655    .9426673
+------------------------------------------------------------------------------
+Rate parameters (estimated, one per inter-wave period):
+
+-------------------------------------------------------------------------------
+             |   period1    period2    period4    period5    period7    period8 
+-------------+-----------------------------------------------------------------
+        rate |    3.5823     1.8606     5.6963     2.3313     1.1186     2.4132 
+          se |    1.3105     0.8374     1.9571     0.7266     0.4426     1.2191 
+-------------------------------------------------------------------------------
+Overall maximum convergence ratio: 0.109 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for altx_alc (0.140) egox
+> _alc (0.343)
+Convergence is good only if both criteria are met. Refit starting from these estimates with theta0()
+> ; see nwsaom.
+
+. estat score
+
+Score-type test of fixed effects
+H0: each effect below equals its fixed value
+
+-----------------------------------------------------------------
+      Effect |  Fixed at      chi2   df  Prob > chi2  One-sided z
+-------------+---------------------------------------------------
+    altx_alc |    0.0000     0.023    1       0.8782       -0.153
+    egox_alc |    0.0000     0.131    1       0.7178       -0.361
+-------------+---------------------------------------------------
+       Joint |               0.156    2       0.9248
+-----------------------------------------------------------------
+
+One-step estimates (restricted estimates plus the one-step correction)
+--------------------------
+      Effect |    Estimate
+-------------+------------
+   outdegree |     -2.9623
+ reciprocity |      2.9244
+    altx_alc |      0.0114
+    egox_alc |     -0.0532
+   transtrip |      0.6418
+       rate1 |      3.6149
+       rate2 |      1.9008
+       rate3 |      5.7916
+       rate4 |      2.3324
+       rate5 |      1.1042
+       rate6 |      2.3262
+--------------------------
+
+. log close

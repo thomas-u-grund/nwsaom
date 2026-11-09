@@ -1,0 +1,153 @@
+
+. nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity cycle3 nodemat
+> ch(smoke1) k0(50) k3(2000) seed(12345)
+
+SAOM (Method of Moments, conditional), waves: glasgow1 glasgow2 glasgow3
+Actors: 50                             Periods: 2
+
+-------------------------------------------------------------------------------
+glasgow1_to~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+--------------+----------------------------------------------------------------
+    outdegree |  -2.806135   .1620405   -17.32   0.000    -3.123729   -2.488542
+  reciprocity |   2.620083   .1870256    14.01   0.000     2.253519    2.986646
+nodematch_s~1 |   .1214596   .1506553     0.81   0.420    -.1738195    .4167387
+       cycle3 |   1.161113   .1459085     7.96   0.000      .875137    1.447088
+-------------------------------------------------------------------------------
+Rate parameters (estimated, one per inter-wave period):
+
+-----------------------------------
+             |   period1    period2 
+-------------+---------------------
+        rate |    6.6140     5.3318 
+          se |    1.1772     0.8996 
+-----------------------------------
+Overall maximum convergence ratio: 0.120 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): met
+
+. estat gof, nsim(1000) seed(1) name(gofbig)
+
+Goodness of fit: Mahalanobis distance test, 1000 simulations at the estimates (2
+>  periods pooled)
+
+------------------------------------------------------
+           Statistic |   Mahalanobis  P-value      Fit
+---------------------+--------------------------------
+           Outdegree |         7.108    0.535       ok
+            Indegree |         6.862    0.587       ok
+            Geodesic |        40.850    0.001 rejected
+------------------------------------------------------
+Fit is rejected when P < 0.05 (one-tailed test).
+Violin plots: gofbig_outdegree gofbig_indegree gofbig_geodesic
+
+. nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity behsim behavio
+> r(alcohol1 alcohol2 alcohol3) linear avalt k0(50) k3(2000) seed(12345)
+
+SAOM co-evolution (Method of Moments), waves: glasgow1 glasgow2 glasgow3
+Actors: 50                             Periods: 2
+Behavior: alcohol1 alcohol2 alcohol3
+
+------------------------------------------------------------------------------
+glasgow1_t~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   outdegree |  -2.384162   .1104054   -21.59   0.000    -2.600553   -2.167772
+ reciprocity |   2.768611   .1877528    14.75   0.000     2.400622      3.1366
+      behsim |   1.190873    .488049     2.44   0.015     .2343144    2.147431
+  beh_linear |   .3529297   .1294035     2.73   0.006     .0993036    .6065558
+   beh_avalt |   .2532406   .2030569     1.25   0.212    -.1447437    .6512249
+------------------------------------------------------------------------------
+Rate parameters (estimated, one per inter-wave period):
+
+-----------------------------------
+             |   period1    period2 
+-------------+---------------------
+network_rate |    5.8324     4.5480 
+          se |    0.9548     0.7259 
+behavior_r~e |    1.2297     1.8179 
+          se |    0.3183     0.4727 
+-----------------------------------
+Overall maximum convergence ratio: 0.089 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): met
+
+. estat gof, nsim(1000) seed(1) name(gofbig)
+
+Goodness of fit: Mahalanobis distance test, 1000 simulations at the estimates (2
+>  periods pooled)
+
+------------------------------------------------------
+           Statistic |   Mahalanobis  P-value      Fit
+---------------------+--------------------------------
+           Outdegree |         5.139    0.634       ok
+            Indegree |         6.903    0.486       ok
+            Geodesic |       205.913    0.000 rejected
+            Behavior |         9.077    0.061       ok
+------------------------------------------------------
+Fit is rejected when P < 0.05 (one-tailed test).
+Violin plots: gofbig_outdegree gofbig_indegree gofbig_geodesic gofbig_behavior
+
+. * ---- value rules: a wave with a tie value 10, and a wave of shares
+. nwtomata glasgow1, mat(F)
+
+. mata: F1 = F; F1[1,2] = 10; F2 = F * 0.5
+
+. nwset, mat(F1) directed name(val10)
+
+. nwset, mat(F2) directed name(shares)
+
+. capture noisily nwsaom, waves(val10 glasgow2) outdegree reciprocity k3(50)
+
+SAOM (Method of Moments, conditional), waves: val10 glasgow2
+Actors: 50                             Periods: 1
+
+------------------------------------------------------------------------------
+val10_to_g~2 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   outdegree |  -2.228675   .1298791   -17.16   0.000    -2.483233   -1.974117
+ reciprocity |   2.407327   .2131492    11.29   0.000     1.989562    2.825092
+------------------------------------------------------------------------------
+Rate parameters (estimated, one per inter-wave period):
+
+------------------------
+             |   period1 
+-------------+----------
+        rate |    5.3804 
+          se |    0.6841 
+------------------------
+Overall maximum convergence ratio: 0.166 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): met
+
+. capture noisily nwsaom, waves(shares glasgow2) outdegree reciprocity k3(50)
+nwsaom estimates on binary ties only (as RSiena, which stops on tie values other
+>  than 0, 1, 10 and 11); shares is a valued network with the tie value .5 (dyad
+>  1 -> 3). Dichotomize it first (nwdichotomize); nwsaom never turns tie values 
+> into ties silently.
+invalid syntax
+
+. * ---- undirected network over three waves
+. nwsym glasgow1, generate(sym1)
+
+. nwsym glasgow2, generate(sym2)
+
+. nwsym glasgow3, generate(sym3)
+
+. capture noisily nwsaom, waves(sym1 sym2 sym3) outdegree k0(30) k3(200) seed(1)
+
+SAOM (Method of Moments, conditional), waves: sym1 sym2 sym3
+Actors: 50                             Periods: 2
+
+------------------------------------------------------------------------------
+sym1_to_sym3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   outdegree |   -1.40905   .0825955   -17.06   0.000    -1.570934   -1.247165
+------------------------------------------------------------------------------
+Rate parameters (estimated, one per inter-wave period):
+
+-----------------------------------
+             |   period1    period2 
+-------------+---------------------
+        rate |    2.0224     1.7380 
+          se |    0.3064     0.2660 
+-----------------------------------
+Overall maximum convergence ratio: 0.028 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): met
+
+. log close

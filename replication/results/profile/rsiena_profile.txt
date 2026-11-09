@@ -1,0 +1,5 @@
+RSiena 1.6.14, R version 4.6.0 (2026-04-24), 2026-11-08 10:08:35.572234
+
+cold first fit (N1, seed 100): compiled code 29%, R code 71%
+N1: compiled code (.Call) 78% of the sampled time over 10 warm fits, R code 22%; per fit 69% 83% 81% 84% 60% 75% 87% 85% 83% 81%
+N2: compiled code (.Call) 90% of the sampled time over 10 warm fits, R code 10%; per fit 80% 86% 89% 90% 92% 90% 91% 91% 94% 93%
