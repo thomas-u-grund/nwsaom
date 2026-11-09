@@ -128,7 +128,8 @@ triplets, square-root indegree and outdegree popularity, \texttt{samex(smoke1)} 
 co-evolving behavior; R3 is undirected; R4 and R5 repeat R1 and R2 on 200 actors.
 The \benchnextra{} further models cover two-mode networks (X1, X2), several
 networks with and without a behavior and with a non-directed network (X3--X6), and
-newer single-network effects (X7, X8). Each model was fitted with seeds 1--7 in
+newer single-network effects (X7, X8). The effect \texttt{Jout} is not among them: on these data RSiena
+gives it a standard error of 3 to 6, so the data do not identify it. Each model was fitted with seeds 1--7 in
 both programs (seeds 1--5 for fits above one minute, 1--3 for fits above three
 minutes), on one thread (\texttt{stata/07\_bench\_one.do},
 \texttt{R/07\_bench\_one.R}; the tables are built from one row per fit by
@@ -137,14 +138,9 @@ minutes), on one thread (\texttt{stata/07\_bench\_one.do},
 \input{bench/bench_rsiena.tex}
 
 Over all \benchnparams{} parameters the mean estimates over seeds differ by at most
-\benchmaxdiffnext{} RSiena standard errors in all models but one (on average
-\benchmeandiff{}), which is the size of RSiena's own variation between seeds
-(median \benchseedsd{} standard errors, at most \benchseedsdmax{}). In the remaining
-model, \benchmaxdiffmodel{}, the means differ by up to \benchmaxdiff{} standard
-errors: one \nwsaom{} fit met the convergence criterion far along a ridge on which
-two of its effects, \texttt{transTrip1} and \texttt{transRecTrip2}, nearly offset
-each other, and one RSiena fit moved along the same ridge but did not meet the
-criterion. The standard errors, themselves simulation estimates, agree (as medians
+\benchmaxdiff{} RSiena standard errors (on average \benchmeandiff{}), which is the
+size of RSiena's own variation between seeds (median \benchseedsd{} standard errors,
+at most \benchseedsdmax{}). The standard errors, themselves simulation estimates, agree (as medians
 over seeds) within \benchnetsepct\% for the network models; over all models the
 ratio of the two programs' standard errors is between \benchserlo{} and
 \benchserhi{}.
@@ -317,5 +313,5 @@ RSiena's C++ code was not profiled internally, so the split of the remaining fac
 among the design choices above is an inference from the source code. \nwsaom{}'s
 Phase 2 counts are known to within 24 iterations per subphase. The timings come from
 one machine that also ran other jobs; the one-minute load average was recorded
-before every fit, at a median of 2.9 for the \nwsaom{} fits and 2.2 for RSiena's,
+before every fit, at a median of 2.8 for the \nwsaom{} fits and 2.3 for RSiena's,
 on 18 cores with single-threaded fits.
