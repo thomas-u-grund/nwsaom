@@ -67,9 +67,11 @@ open(f"{OUT}/bench_rsiena.tex", "w").write(table(ALLGROUPS, ALLINFO, SPEC,
  "tab:bench", "0.26", note_all))
 
 # ---- per-parameter agreement for main models
-def pairs_for(m, rs_rows, nw_rows):
-    rs_p = [S.params(r) for r in rs_rows if r["status"] == "ok" and r["converged"] == "1"]
-    nw_p = [S.params(r) for r in nw_rows if r["status"] == "ok" and r["converged"] == "1"]
+def pairs_for(m, rs_rows, nw_rows, all_fits=False):
+    # all_fits: also the fits that did not converge (robustness check reported in the text)
+    ok = lambda r: r["status"] == "ok" and (all_fits or r["converged"] == "1")
+    rs_p = [S.params(r) for r in rs_rows if ok(r)]
+    nw_p = [S.params(r) for r in nw_rows if ok(r)]
     if not rs_p or not nw_p: return []
     if m.startswith("X"):
         prs = list({**S.EFF[m], **S.rate_map(m)}.items())
@@ -102,6 +104,8 @@ mac["benchmaxdiff"] = f"{max(abs(p['d']) for p in allp):.2f}"; mac["benchmeandif
 # the largest difference of each model, and the largest and second-largest model (the article names the model with the largest)
 mdiff = sorted(((max(abs(r["d"]) for r in m["rows"]), m["id"]) for m in models if m["rows"]), reverse=True)
 mac["benchmaxdiffmodel"] = mdiff[0][1]
+allp_any = [p for i in ALLINFO for p in pairs_for(i, ALLINFO[i]["impls"].get("RSiena", []), ALLINFO[i]["impls"].get("nwsaom", []), True)]
+mac["benchmaxdiffall"] = f"{max(abs(p['d']) for p in allp_any):.2f}"; mac["benchmeandiffall"] = f"{st.mean(abs(p['d']) for p in allp_any):.2f}"
 mac["benchmaxdiffnext"] = f"{mdiff[1][0]:.2f}"
 mac["benchspmed"] = f"{st.median(sp):.1f}"; mac["benchspmin"] = f"{min(sp):.1f}"; mac["benchspmax"] = f"{max(sp):.1f}"
 mac["benchserlo"] = f"{min(p['se_ratio'] for p in allp):.2f}"; mac["benchserhi"] = f"{max(p['se_ratio'] for p in allp):.2f}"
