@@ -1,6 +1,6 @@
 
 . nwsaom version
-nwsaom version 1.5.8, 09nov2026
+nwsaom version 1.5.10, 09nov2026
   core package nwcommands : installed (development copy, no distribution date)
   native plugin           : <nwsaom>/lib/plugins/macos/saom_sim_macos.plugin (plugin build 154)
   compared with           : R RSiena 1.6.14
@@ -8,21 +8,23 @@ nwsaom version 1.5.8, 09nov2026
 
 . nwsaom describe, waves(glasgow1 glasgow2 glasgow3)
 
-Network data: 3 waves, 50 actors, directed
------------------------------------------------------
-        Wave |     ties     density   avg. degree
--------------+---------------------------------------
-           1 |      113      0.0461         2.260
-           2 |      116      0.0473         2.320
-           3 |      122      0.0498         2.440
------------------------------------------------------
+Network data                        Number of actors  =        50
+Directed                            Number of waves   =         3
 
-----------------------------------------------------------------------
-      Period |    kept   created  dissolved   Jaccard   Hamming
--------------+--------------------------------------------------------
+------------------------------------------------------------------
+        Wave |       Ties     Density   Avg. degree
+-------------+----------------------------------------------------
+           1 |        113      0.0461         2.260
+           2 |        116      0.0473         2.320
+           3 |        122      0.0498         2.440
+------------------------------------------------------------------
+
+------------------------------------------------------------------
+      Period |    Kept   Created  Dissolved   Jaccard   Hamming
+-------------+----------------------------------------------------
         1->2 |      57        59         56     0.331       115
         2->3 |      66        56         50     0.384       106
-----------------------------------------------------------------------
+------------------------------------------------------------------
 
 . nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip k0(5
 > 0) k3(1000) seed(12345)
@@ -39,12 +41,12 @@ glasgow1_t~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
 ------------------------------------------------------------------------------
 Rate parameters (estimated, one per inter-wave period):
 
------------------------------------
+------------------------------------
              |   period1    period2 
--------------+---------------------
+-------------+----------------------
         rate |    6.3793     5.2337 
           se |    1.0925     0.9001 
------------------------------------
+------------------------------------
 Overall maximum convergence ratio: 0.075 (criterion: below 0.25; met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 
@@ -53,15 +55,15 @@ Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 Test of time heterogeneity (score-type test)
 H0: the parameter of each effect is the same in all periods
 
--------------------------------------------
-      Effect |      chi2    df  Prob > chi2
--------------+-----------------------------
-   outdegree |     0.102     1       0.7489
- reciprocity |     1.095     1       0.2953
-   transtrip |     0.465     1       0.4953
--------------+-----------------------------
-       Joint |     4.170     3       0.2437
--------------------------------------------
+---------------------------------------------------------
+      Effect |          chi2        df        Prob > chi2
+-------------+-------------------------------------------
+   outdegree |         0.102         1             0.7489
+ reciprocity |         1.095         1             0.2953
+   transtrip |         0.465         1             0.4953
+-------------+-------------------------------------------
+       Joint |         4.170         3             0.2437
+---------------------------------------------------------
 
 Period-specific deviations (one-step estimates) and separate tests
 ---------------------------------------------------------
@@ -88,12 +90,12 @@ glasgow1_t~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
 ------------------------------------------------------------------------------
 Rate parameters (estimated, one per inter-wave period):
 
------------------------------------
+------------------------------------
              |   period1    period2 
--------------+---------------------
+-------------+----------------------
         rate |    6.3770     5.2336 
           se |    1.0909     0.9018 
------------------------------------
+------------------------------------
 Overall maximum convergence ratio: 0.101 (criterion: below 0.25; met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 
@@ -130,12 +132,12 @@ glasgow1_t~2 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
 ------------------------------------------------------------------------------
 Rate parameters (estimated, one per inter-wave period):
 
-------------------------
+-------------------------
              |   period1 
--------------+----------
+-------------+-----------
         rate |    5.5335 
           se |    0.8810 
-------------------------
+-------------------------
 Overall maximum convergence ratio: 0.061 (criterion: below 0.25; met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for t
 > ranstrip (-6.979) cycle3 (-6.486)
@@ -157,14 +159,14 @@ H0: each effect below equals its fixed value
 -----------------------------------------------------------------
 
 One-step estimates (restricted estimates plus the one-step correction)
---------------------------
+-----------------------------------------------------------------
       Effect |    Estimate
--------------+------------
+-------------+---------------------------------------------------
    outdegree |     -2.6717
  reciprocity |      2.0383
    transtrip |      1.3303
       cycle3 |      0.2607
---------------------------
+-----------------------------------------------------------------
 
 . nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip ml s
 > eed(1)
@@ -181,12 +183,12 @@ glasgow1_t~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
 ------------------------------------------------------------------------------
 Rate parameters (estimated, one per inter-wave period):
 
------------------------------------
+------------------------------------
              |   period1    period2 
--------------+---------------------
+-------------+----------------------
         rate |    6.4432     5.2473 
           se |    1.0683     0.8841 
------------------------------------
+------------------------------------
 Overall maximum convergence ratio: 0.123 (criterion: below 0.25; met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 Maximum likelihood (iterations: phase 1 50, phase 2 4 x 100, phase 3 1000) ...
@@ -201,13 +203,13 @@ glasgow1_t~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
 ------------------------------------------------------------------------------
 Rate parameters (one per inter-wave period):
 
------------------------------------
+------------------------------------
              |   period1    period2 
--------------+---------------------
+-------------+----------------------
         rate |    6.3079     5.2549 
           se |    0.8436     0.9311 
        tconv |   -0.0008    -0.0352 
------------------------------------
+------------------------------------
 Overall maximum t-ratio of the scores: 0.104 (acceptable)
 
 . nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip ml s
@@ -225,12 +227,12 @@ glasgow1_t~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
 ------------------------------------------------------------------------------
 Rate parameters (estimated, one per inter-wave period):
 
------------------------------------
+------------------------------------
              |   period1    period2 
--------------+---------------------
+-------------+----------------------
         rate |    6.4843     5.1899 
           se |    1.1076     0.9010 
------------------------------------
+------------------------------------
 Overall maximum convergence ratio: 0.041 (criterion: below 0.25; met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 Maximum likelihood (iterations: phase 1 50, phase 2 4 x 100, phase 3 1000) ...
@@ -245,13 +247,13 @@ glasgow1_t~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
 ------------------------------------------------------------------------------
 Rate parameters (one per inter-wave period):
 
------------------------------------
+------------------------------------
              |   period1    period2 
--------------+---------------------
+-------------+----------------------
         rate |    6.4691     5.2353 
           se |    1.0051     0.6849 
        tconv |   -0.1207    -0.0909 
------------------------------------
+------------------------------------
 Overall maximum t-ratio of the scores: 0.188 (acceptable)
 
 . nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip k0(5
@@ -269,12 +271,12 @@ glasgow1_t~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
 ------------------------------------------------------------------------------
 Rate parameters (estimated, one per inter-wave period):
 
------------------------------------
+------------------------------------
              |   period1    period2 
--------------+---------------------
+-------------+----------------------
         rate |    6.3793     5.2337 
           se |    1.0925     0.9001 
------------------------------------
+------------------------------------
 Overall maximum convergence ratio: 0.075 (criterion: below 0.25; met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 
@@ -307,19 +309,19 @@ Priors are flat unless priormean(), priorsd() or priorrate() are given.
 . timer off 9
 
 . timer list 9
-   9:    155.74 /        1 =     155.7440
+   9:    149.87 /        1 =     149.8670
 
 . nwsaom simulate, waves(glasgow1 glasgow2) outdegree reciprocity transtrip thet
 > a(-2.3 2 0.5) rates(5) nsim(4) seed(7) generate(g)
 Simulation from the fitted model: 4 replication(s) of 1 period(s)
 
 ------------------------------------
-    Statistic |       Sim       Obs
---------------+---------------------
-Period 1      |
-         Ties |     124.2       116
-       Mutual |      33.5        35
-   Transitive |      69.0        88
+   Statistic |       Sim       Obs
+-------------+----------------------
+Period 1     |
+        Ties |     124.2       116
+      Mutual |      33.5        35
+  Transitive |      69.0        88
 ------------------------------------
 Sim is the mean over the replications; Obs is the observed end wave.
 
@@ -331,46 +333,47 @@ Sim is the mean over the replications; Obs is the observed end wave.
 
 . nwsaom meta grp1 grp2 grp3 grp4
 
-Meta-analysis of 4 fits
+Meta-analysis of separate fits                  Number of fits    =         4
+
 Estimates with a standard error of 10 or more are excluded;
-tests of the means use a t distribution with n-1 d.f.
+tests of the means use a t distribution with N-1 d.f.
 
 IWLS estimates (Snijders and Baerveldt 2003)
--------------------------------------------------------------------------------
-      Effect |   n      Mean  Std. err.       t   P>|t|      SD       Q     P>Q
--------------+-----------------------------------------------------------------
-   outdegree |   4   -2.2509     0.0579  -38.87   0.000  0.1158    2.59   0.460
- reciprocity |   4    1.8694     0.0737   25.37   0.000  0.1473    1.18   0.759
-   transtrip |   4    0.4758     0.0114   41.81   0.000  0.0228    0.14   0.987
--------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+      Effect |  N      Mean Std. err.        t   P>|t|      SD       Q     P>Q
+-------------+----------------------------------------------------------------
+   outdegree |  4   -2.2509    0.0579   -38.87   0.000  0.1158    2.59   0.460
+ reciprocity |  4    1.8694    0.0737    25.37   0.000  0.1473    1.18   0.759
+   transtrip |  4    0.4758    0.0114    41.81   0.000  0.0228    0.14   0.987
+------------------------------------------------------------------------------
 
 Maximum likelihood under normality: mean of the parameter
-----------------------------------------------------------
-      Effect |      Mean  Std. err.   [95% conf. interval]
--------------+--------------------------------------------
-   outdegree |   -2.2509     0.0619      -2.3997   -2.1215
- reciprocity |    1.8694     0.1173       1.6360    2.1042
-   transtrip |    0.4758     0.0531       0.3717    0.5802
-----------------------------------------------------------
+------------------------------------------------------------------------------
+      Effect |           Mean      Std. err.              [95% conf. interval]
+-------------+----------------------------------------------------------------
+   outdegree |        -2.2509         0.0619          -2.3997          -2.1215
+ reciprocity |         1.8694         0.1173           1.6360           2.1042
+   transtrip |         0.4758         0.0531           0.3717           0.5802
+------------------------------------------------------------------------------
 
 Maximum likelihood under normality: standard deviation between groups
-------------------------------------------------
-      Effect |        SD    [95% conf. interval]
--------------+----------------------------------
-   outdegree |    0.0000        0.0000    0.2294
- reciprocity |    0.0001        0.0000    0.3478
-   transtrip |    0.0001        0.0000    0.1383
-------------------------------------------------
+------------------------------------------------------------------------------
+      Effect |             SD              [95% conf. interval]
+-------------+----------------------------------------------------------------
+   outdegree |         0.0000           0.0000           0.2294
+ reciprocity |         0.0001           0.0000           0.3478
+   transtrip |         0.0001           0.0000           0.1383
+------------------------------------------------------------------------------
 
-Fisher's combination of one-sided tests (chi-squared, 2n d.f.)
-----------------------------------------------------------
-             |           Right-sided            Left-sided
-      Effect |     chi2  Prob > chi2     chi2  Prob > chi2
--------------+--------------------------------------------
-   outdegree |    0.000        1.000 1355.073        0.000
- reciprocity |  279.024        0.000    0.000        1.000
-   transtrip |  100.110        0.000    0.000        1.000
-----------------------------------------------------------
+Fisher's combination of one-sided tests (chi-squared, 2N d.f.)
+------------------------------------------------------------------------------
+             |                     Right-sided                      Left-sided
+      Effect |            chi2     Prob > chi2            chi2     Prob > chi2
+-------------+----------------------------------------------------------------
+   outdegree |           0.000           1.000        1355.073           0.000
+ reciprocity |         279.024           0.000           0.000           1.000
+   transtrip |         100.110           0.000           0.000           1.000
+------------------------------------------------------------------------------
 Correlations of estimates and standard errors are in r(meta).
 
 . log close

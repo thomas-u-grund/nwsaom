@@ -15,12 +15,12 @@ nodematch_s~1 |   .1214596   .1506553     0.81   0.420    -.1738195    .4167387
 -------------------------------------------------------------------------------
 Rate parameters (estimated, one per inter-wave period):
 
------------------------------------
+------------------------------------
              |   period1    period2 
--------------+---------------------
+-------------+----------------------
         rate |    6.6140     5.3318 
           se |    1.1772     0.8996 
------------------------------------
+------------------------------------
 Overall maximum convergence ratio: 0.120 (criterion: below 0.25; met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 
@@ -57,14 +57,14 @@ glasgow1_t~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
 ------------------------------------------------------------------------------
 Rate parameters (estimated, one per inter-wave period):
 
------------------------------------
+------------------------------------
              |   period1    period2 
--------------+---------------------
+-------------+----------------------
 network_rate |    5.8324     4.5480 
           se |    0.9548     0.7259 
 behavior_r~e |    1.2297     1.8179 
           se |    0.3183     0.4727 
------------------------------------
+------------------------------------
 Overall maximum convergence ratio: 0.089 (criterion: below 0.25; met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 
@@ -106,12 +106,12 @@ val10_to_g~2 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
 ------------------------------------------------------------------------------
 Rate parameters (estimated, one per inter-wave period):
 
-------------------------
+-------------------------
              |   period1 
--------------+----------
+-------------+-----------
         rate |    5.3804 
           se |    0.6841 
-------------------------
+-------------------------
 Overall maximum convergence ratio: 0.166 (criterion: below 0.25; met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 
@@ -141,12 +141,12 @@ sym1_to_sym3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
 ------------------------------------------------------------------------------
 Rate parameters (estimated, one per inter-wave period):
 
------------------------------------
+------------------------------------
              |   period1    period2 
--------------+---------------------
+-------------+----------------------
         rate |    2.0224     1.7380 
           se |    0.3064     0.2660 
------------------------------------
+------------------------------------
 Overall maximum convergence ratio: 0.028 (criterion: below 0.25; met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 

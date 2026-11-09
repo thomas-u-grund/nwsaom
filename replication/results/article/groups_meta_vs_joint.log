@@ -28,46 +28,47 @@ Separate fits, one per class
 . * (b) combine the four fits: mean effect, between-class standard deviation, heterogeneity test
 . nwsaom meta school1 school2 school3 school4
 
-Meta-analysis of 4 fits
+Meta-analysis of separate fits                  Number of fits    =         4
+
 Estimates with a standard error of 10 or more are excluded;
-tests of the means use a t distribution with n-1 d.f.
+tests of the means use a t distribution with N-1 d.f.
 
 IWLS estimates (Snijders and Baerveldt 2003)
--------------------------------------------------------------------------------
-      Effect |   n      Mean  Std. err.       t   P>|t|      SD       Q     P>Q
--------------+-----------------------------------------------------------------
-   outdegree |   4   -2.3922     0.2552   -9.37   0.003  0.5104    9.44   0.024
- reciprocity |   4    1.8994     0.2698    7.04   0.006  0.5397    6.51   0.089
-   transtrip |   4    0.6963     0.1711    4.07   0.027  0.3422    8.53   0.036
--------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+      Effect |  N      Mean Std. err.        t   P>|t|      SD       Q     P>Q
+-------------+----------------------------------------------------------------
+   outdegree |  4   -2.3922    0.2552    -9.37   0.003  0.5104    9.44   0.024
+ reciprocity |  4    1.8994    0.2698     7.04   0.006  0.5397    6.51   0.089
+   transtrip |  4    0.6963    0.1711     4.07   0.027  0.3422    8.53   0.036
+------------------------------------------------------------------------------
 
 Maximum likelihood under normality: mean of the parameter
-----------------------------------------------------------
-      Effect |      Mean  Std. err.   [95% conf. interval]
--------------+--------------------------------------------
-   outdegree |   -2.2584     0.1071      -2.8379   -1.9836
- reciprocity |    1.8673     0.2259       1.3384    2.5535
-   transtrip |    0.5202     0.0547       0.3965    1.0588
-----------------------------------------------------------
+------------------------------------------------------------------------------
+      Effect |           Mean      Std. err.              [95% conf. interval]
+-------------+----------------------------------------------------------------
+   outdegree |        -2.2584         0.1071          -2.8379          -1.9836
+ reciprocity |         1.8673         0.2259           1.3384           2.5535
+   transtrip |         0.5202         0.0547           0.3965           1.0588
+------------------------------------------------------------------------------
 
 Maximum likelihood under normality: standard deviation between groups
-------------------------------------------------
-      Effect |        SD    [95% conf. interval]
--------------+----------------------------------
-   outdegree |    0.1163        0.0000    0.8546
- reciprocity |    0.2797        0.0000    1.0987
-   transtrip |    0.0001        0.0000    0.6287
-------------------------------------------------
+------------------------------------------------------------------------------
+      Effect |             SD              [95% conf. interval]
+-------------+----------------------------------------------------------------
+   outdegree |         0.1163           0.0000           0.8546
+ reciprocity |         0.2797           0.0000           1.0987
+   transtrip |         0.0001           0.0000           0.6287
+------------------------------------------------------------------------------
 
-Fisher's combination of one-sided tests (chi-squared, 2n d.f.)
-----------------------------------------------------------
-             |           Right-sided            Left-sided
-      Effect |     chi2  Prob > chi2     chi2  Prob > chi2
--------------+--------------------------------------------
-   outdegree |    0.000        1.000  759.535        0.000
- reciprocity |  148.298        0.000    0.001        1.000
-   transtrip |  118.941        0.000    0.000        1.000
-----------------------------------------------------------
+Fisher's combination of one-sided tests (chi-squared, 2N d.f.)
+------------------------------------------------------------------------------
+             |                     Right-sided                      Left-sided
+      Effect |            chi2     Prob > chi2            chi2     Prob > chi2
+-------------+----------------------------------------------------------------
+   outdegree |           0.000           1.000         759.535           0.000
+ reciprocity |         148.298           0.000           0.001           1.000
+   transtrip |         118.941           0.000           0.000           1.000
+------------------------------------------------------------------------------
 Correlations of estimates and standard errors are in r(meta).
 
 . 
@@ -87,12 +88,12 @@ Groups: 4 (variable class), actors per group: 45, 37, 33, 36; waves per group: 2
 ------------------------------------------------------------------------------
 Rate parameters (estimated, one per inter-wave period):
 
----------------------------------------------------------
+----------------------------------------------------------
              |   period1    period3    period5    period7 
--------------+-------------------------------------------
+-------------+--------------------------------------------
         rate |    6.4989     5.3821     2.2893     8.2490 
           se |    0.9714     1.4169     0.5299     2.1306 
----------------------------------------------------------
+----------------------------------------------------------
 Overall maximum convergence ratio: 0.017 (criterion: below 0.25; met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 
@@ -154,12 +155,12 @@ interact_egox_c2_reciprocity |   1.100587   .4208535     2.62   0.009     .27572
 ----------------------------------------------------------------------------------------------
 Rate parameters (estimated, one per inter-wave period):
 
----------------------------------------------------------
+----------------------------------------------------------
              |   period1    period3    period5    period7 
--------------+-------------------------------------------
+-------------+--------------------------------------------
         rate |    6.6966     3.8551     2.2665     8.9157 
           se |    1.0520     0.7526     0.5252     2.4250 
----------------------------------------------------------
+----------------------------------------------------------
 Overall maximum convergence ratio: 0.193 (criterion: below 0.25; met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for reciprocity (-0.115)
 Convergence is good only if both criteria are met. Refit starting from these estimates with theta0()

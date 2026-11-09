@@ -12,7 +12,7 @@ All commands below are run from this folder, the folder that holds this README. 
 | RSiena | 1.6.14 | `Rscript R/00_install.R` |
 | Stata | 17 (the listings of the examples) and 18 BE (comparisons and benchmark); the article's examples give the same numbers under 18 and 19 | |
 | nwcommands | 3.17.2 | see below |
-| nwsaom | 1.5.8 | see below |
+| nwsaom | 1.5.10 | see below |
 | Python | 3, standard library only | for the scripts in `tools/` |
 
 RSiena 1.6.14 is newer than the version on CRAN (1.6.6). `R/00_install.R` installs it from its release tag in the RSiena repository on GitHub, which needs a C++ compiler. The script also installs ggplot2 4.0.3, jsonlite 2.0.0 and scales 1.4.0, which are needed for the benchmark figure only. On 8 November 2026, RSiena 1.6.14 was the newest release, and the development branch of the repository carried the same version, so there was no newer RSiena to run the comparisons against.
@@ -22,10 +22,10 @@ In Stata, install the versions used in the article from their release tags on Gi
 ```
 . net install nwcommands, replace from(https://raw.githubusercontent.com/thomas-u-grund/nwcommands/v3.17.2/)
 . nwinstall, all from(https://raw.githubusercontent.com/thomas-u-grund/nwcommands/v3.17.2)
-. nwinstall, modelpkg(nwsaom) release(v1.5.8)
+. nwinstall, modelpkg(nwsaom) release(v1.5.10)
 ```
 
-On 9 November 2026 we ran these three commands under Stata 18 with an empty PLUS folder; they installed nwsaom 1.5.8 with its compiled plugin (build 154), and `stata/01_check_data.do` then ran on the installed packages.
+On 9 November 2026 we ran these three commands under Stata 18 with an empty PLUS folder; they installed nwsaom 1.5.10 with its compiled plugin (build 154), and `stata/01_check_data.do` then ran on the installed packages.
 
 Every do-file runs `stata/setup.do` first. By default, `setup.do` uses these installed packages. To use git checkouts of the two packages instead, set the globals `NWCORE` and `NWSAOM` to the two trees before running a do-file. The optional global `NWPLUS` names an empty folder to use as PLUS, so that no other installed copy interferes. `setup.do` prints the version of `nwsaom` that it found.
 
@@ -71,7 +71,7 @@ stata -e do article/plot_glasgow.do
 stata -e do article/groups_joint.do        # and the three other groups_*.do files
 ```
 
-The logs in `results/article` were made under Stata 17 with the files of `nwsaom` 1.5.8 (those of the tag) on the ado-path. In `extras.log`, the location of the plugin that `nwsaom version` prints is shortened to `<nwsaom>`.
+The logs in `results/article` were made under Stata 17 with the files of `nwsaom` 1.5.10 (those of the tag) on the ado-path. In `extras.log`, the location of the plugin that `nwsaom version` prints is shortened to `<nwsaom>`.
 
 With the Stata Journal's `sjlog` installed, `gen_logs.do` writes the listings as `.log.tex` files, as in the article; without it, it writes plain `.log` files with the same content.
 
@@ -114,9 +114,9 @@ The effect counts:
 python3 tools/count_effects.py
 ```
 
-`results/coverage/SAOM_EFFECTS_INVENTORY.csv` is a copy of `docs/SAOM_EFFECTS_INVENTORY.csv` in the nwsaom repository at tag v1.5.8. It has one row per RSiena short name, variable type and context in the effects table of RSiena 1.6.6, giving the `nwsaom` option, its roles, and whether it was compared with `siena07`. The tools that built it from `getEffects()` are in `docs/inventory_tools` there.
+`results/coverage/SAOM_EFFECTS_INVENTORY.csv` is a copy of `docs/SAOM_EFFECTS_INVENTORY.csv` in the nwsaom repository at tag v1.5.10. It has one row per RSiena short name, variable type and context in the effects table of RSiena 1.6.6, giving the `nwsaom` option, its roles, and whether it was compared with `siena07`. The tools that built it from `getEffects()` are in `docs/inventory_tools` there.
 
-Some statements of Sections 5.8 and 6 rest on comparisons in `nwsaom`'s test suite rather than in this folder, in the nwsaom repository at tag v1.5.8:
+Some statements of Sections 5.8 and 6 rest on comparisons in `nwsaom`'s test suite rather than in this folder, in the nwsaom repository at tag v1.5.10:
 
 - `estat score` against RSiena's `score.Test`, eight seeds: `dev/saom_rsiena_score_*.csv`.
 - `estat timetest` against `sienaTimeTest`: `cscripts/test_nwsaom_tt.do` and `dev/saom_rsiena_groups_tt.csv`.
