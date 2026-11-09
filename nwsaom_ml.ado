@@ -1,4 +1,4 @@
-*! version 1.5.7  09nov2026 nwcommands: maximum likelihood estimation of a SAOM (Robbins-Monro on the score of the augmented data) after nwsaom
+*! version 1.5.8  09nov2026 nwcommands: maximum likelihood estimation of a SAOM (Robbins-Monro on the score of the augmented data) after nwsaom
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -71,7 +71,7 @@ program nwsaom_ml, eclass
 		local mbs "__nwsaom_ml_Mb0, __nwsaom_ml_Bw0, 0, 0"
 	}
 	mata: __nwsaom_ml_Gs = (`gs')
-	di as txt "Maximum likelihood: phase 1 `n1' iterations, phase 2 `nsub' subphases from `nstart2' iterations, phase 3 `n3' iterations ..."
+	di as txt "Maximum likelihood (iterations: phase 1 `n1', phase 2 `nsub' x `nstart2', phase 3 `n3') ..."
 	mata: st_matrix("`out'", SaomMLRun(__nwsaom_ml_Gs, `nper', __nwsaom_last_M, `coev', `mbs', st_matrix("`b'"), st_matrix("`rt'"), `n1', `nsub', `nstart2', `n3', `nmh', `seed', `mult', `gain', `mhgeom'))
 	capture mata: mata drop __nwsaom_ml_Gs __nwsaom_ml_Mb0 __nwsaom_ml_Bw0
 	local KP = `K' + `NR'
@@ -145,12 +145,12 @@ program nwsaom_ml, eclass
 		di as txt "Maximum likelihood estimates (Robbins-Monro on the score of the augmented data)"
 		ereturn display
 		di as txt "Rate parameters (one per inter-wave period):"
-		matrix list e(rates_ml), noheader format(%9.4f)
+		matlist e(rates_ml), format(%9.4f) border(top bottom)
 		if `coev' {
 			di as txt "Behavior rate parameters:"
-			matrix list e(rates_beh_ml), noheader format(%9.4f)
+			matlist e(rates_beh_ml), format(%9.4f) border(top bottom)
 		}
-		di as txt "Overall maximum t-ratio of the scores: " as res %5.3f `tmax' as txt cond(`tmax' < 0.1, " (good; below 0.1)", cond(`tmax' < 0.25, " (acceptable)", " (poor: run longer, e.g. n3() and nstart2())"))
+		di as txt "Overall maximum t-ratio of the scores: " as res %5.3f `tmax' as txt cond(`tmax' < 0.1, " (good; below 0.1)", cond(`tmax' < 0.25, " (acceptable)", " (poor; increase n3() and nstart2())"))
 		if !`ok' di as txt "(the information matrix was not positive definite: the standard errors are those of the complete-data information, too small)"
 	}
 end

@@ -1,4 +1,4 @@
-*! version 1.5.7  09nov2026 nwcommands: stochastic actor-oriented model (SAOM) estimation, v1 (+ harmonisation unit 26 co-evolution, N-wave, avsim, native backend)
+*! version 1.5.8  09nov2026 nwcommands: stochastic actor-oriented model (SAOM) estimation, v1 (+ harmonisation unit 26 co-evolution, N-wave, avsim, native backend)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -3447,7 +3447,7 @@ program nwsaom, eclass
 	// nwsaom versions carried.
 	ereturn post `b' `V', depname("`__ns_depname'") obs(`nodes')
 	ereturn local cmd "nwsaom"
-	ereturn local version "1.5.7"
+	ereturn local version "1.5.8"
 	_nwsaom_postengine
 	// RSiena's effect names and the covariate centring means (RSiena
 	// prints both), 2026-10-01
@@ -3581,15 +3581,15 @@ program nwsaom, eclass
 		ereturn local behavior_names "`__ns_allbeh'"
 		ereturn scalar nbeh = `__ns_nbehv'
 
-		di as text "{hline}"
+		di
 		di as text "SAOM co-evolution of the network and `__ns_nbehv' behaviors (Method of Moments), waves: " as result "`__ns_wavelist'"
 		di as text "Actors: " as result `nodes' _col(40) as text "Periods: " as result `=`__nwsaom_nwaves'-1'
 		di as text "Behaviors:" as result "`__ns_allbeh'"
 		if `__ns_isgrp' _nwsaom_groups show, groups(`groups') w(`__ns_gW')
-		di as text "{hline}"
+		di
 		ereturn display
 		di as text "Rate parameters (estimated, one per inter-wave period; network, then each behavior):"
-		matlist `ratetab', format(%9.4f)
+		matlist `ratetab', format(%9.4f) border(top bottom)
 
 		mata: st_numscalar("__ns_r1", __ns_fit_mb.ratesNet[1])
 		ereturn scalar rate = scalar(__ns_r1)
@@ -3657,15 +3657,15 @@ program nwsaom, eclass
 		matrix rownames `ratetab' = network_rate se behavior_rate se
 		ereturn local waves "`__ns_wavelist'"
 		ereturn local behavior "`=cond(`__ns_isgrp', "`__ns_gbehorig'", "`behavior'")'"
-		di as text "{hline}"
+		di
 		di as text "SAOM co-evolution (Method of Moments), waves: " as result "`__ns_wavelist'"
 		di as text "Actors: " as result `nodes' _col(40) as text "Periods: " as result `=`__nwsaom_nwaves'-1'
 		di as text "Behavior: " as result "`=cond(`__ns_isgrp', "`__ns_gbehorig'", "`behavior'")'"
 		if `__ns_isgrp' _nwsaom_groups show, groups(`groups') w(`__ns_gW')
-		di as text "{hline}"
+		di
 		ereturn display
 		di as text "Rate parameters (estimated, one per inter-wave period):"
-		matlist `ratetab', format(%9.4f)
+		matlist `ratetab', format(%9.4f) border(top bottom)
 
 		ereturn matrix rates = `ratesnet'
 		ereturn matrix rate_tratios = `ratetrnet'
@@ -3709,11 +3709,11 @@ program nwsaom, eclass
 		ereturn local wave2 "`wave2'"
 		ereturn local behavior "`behavior'"
 
-		di as text "{hline}"
+		di
 		di as text "SAOM co-evolution (Method of Moments), waves: " as result "`wave1'" as text " -> " as result "`wave2'"
 		di as text "Actors: " as result `nodes' _col(40) as text "Network rate: " as result %6.3f `__ns_rate' as text " (" as result %5.3f `__ns_ratese' as text ")"
 		di as text "Behavior: " as result "`behavior'" _col(40) as text "Behavior rate: " as result %6.3f `__ns_ratebeh' as text " (" as result %5.3f `__ns_ratebehse' as text ")"
-		di as text "{hline}"
+		di
 		ereturn display
 	}
 	else if `__ns_multi' {
@@ -3763,15 +3763,15 @@ program nwsaom, eclass
 		matrix `ratetab' = `rates' \ `ratese'
 		matrix rownames `ratetab' = rate se
 
-		di as text "{hline}"
+		di
 		di as text "SAOM (Method of Moments, " as result cond(`__ns_iscond', "conditional", "unconditional") as text "), waves: " as result "`__ns_wavelist'"
 		di as text "Actors: " as result `nodes' _col(40) as text "Periods: " as result `=`__nwsaom_nwaves'-1'
 		if `__ns_isgrp' _nwsaom_groups show, groups(`groups') w(`__ns_gW')
 		if `__nwsaom_tm' di as text "Two-mode network: " as result `__nwsaom_tm_na' as text " actors choose among " as result `__nwsaom_tm_ne' as text " events"
-		di as text "{hline}"
+		di
 		ereturn display
 		di as text "Rate parameters (estimated, one per inter-wave period):"
-		matlist `ratetab', format(%9.4f)
+		matlist `ratetab', format(%9.4f) border(top bottom)
 		if `__ns_iscond' & "`detail'" != "" di as text "(conditional: rate = mean time to reach the observed distance, se = its SD)"
 
 		ereturn matrix rates = `rates'
@@ -3873,11 +3873,11 @@ program nwsaom, eclass
 			ereturn matrix ratecoefs_fixed = `__rcfx', copy
 		}
 
-		di as text "{hline}"
+		di
 		di as text "SAOM (Method of Moments, " as result cond(`__ns_iscond', "conditional", "unconditional") as text "), waves: " as result "`wave1'" as text " -> " as result "`wave2'"
 		di as text "Actors: " as result `nodes' _col(40) as text "Estimated rate: " as result %6.3f `__ns_rate' as text " (" as result %5.3f `__ns_ratese' as text ")"
 		if `__nwsaom_tm' di as text "Two-mode network: " as result `__nwsaom_tm_na' as text " actors choose among " as result `__nwsaom_tm_ne' as text " events"
-		di as text "{hline}"
+		di
 		ereturn display
 		if `__ns_iscond' & "`detail'" != "" di as text "(conditional: rate = mean time to reach the observed distance, se = its SD)"
 		if "`symmetric'" != "" di as text "(non-directed relation, model type " as result "`__ns_symtypenm'" as text " = RSiena modelType " as result "`__ns_mtnum'" as text ")"

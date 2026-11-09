@@ -1,4 +1,4 @@
-*! version 1.5.7  09nov2026 nwcommands: multi-group meta-analysis of separate nwsaom fits (RSiena's siena08)
+*! version 1.5.8  09nov2026 nwcommands: multi-group meta-analysis of separate nwsaom fits (RSiena's siena08)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -87,54 +87,54 @@ program nwsaom_meta, rclass
 	matrix colnames `M' = n_used corr corr_p iwls_mean iwls_se iwls_t iwls_p iwls_sd Tsq Tsq_p Q Q_p ml_mean ml_se mu_lo mu_hi ml_sd sd_lo sd_hi fisher_right fisher_right_p fisher_left fisher_left_p level
 	if "`notable'" == "" {
 		di
-		di as text "Meta-analysis of " as result `ng' as text " fits (as RSiena {bf:siena08})"
+		di as text "Meta-analysis of " as result `ng' as text " fits"
 		di as text "Estimates with a standard error of " as result `bound' as text " or more are excluded;"
 		di as text "tests of the means use a t distribution with n-1 d.f."
 		di
 		di as text "{bf:IWLS estimates} (Snijders and Baerveldt 2003)"
-		di as text "{hline 13}{c TT}{hline 65}"
-		di as text %12s "effect" " {c |}" %4s "n" %10s "Mean" %11s "Std. err." %8s "t" %8s "P>|t|" %8s "SD" %8s "Q" %8s "P>Q"
+		di as text "{hline 79}"
+		di as text %12s "Effect" " {c |}" %4s "n" %10s "Mean" %11s "Std. err." %8s "t" %8s "P>|t|" %8s "SD" %8s "Q" %8s "P>Q"
 		di as text "{hline 13}{c +}{hline 65}"
 		local i 0
 		foreach c of local rn {
 			local ++i
 			di as text %12s abbrev("`c'", 12) " {c |}" as result %4.0f `M'[`i', 1] %10.4f `M'[`i', 4] %11.4f `M'[`i', 5] %8.2f `M'[`i', 6] %8.3f `M'[`i', 7] %8.4f `M'[`i', 8] %8.2f `M'[`i', 11] %8.3f `M'[`i', 12]
 		}
-		di as text "{hline 13}{c BT}{hline 65}"
+		di as text "{hline 79}"
 		di
 		di as text "{bf:Maximum likelihood under normality}: mean of the parameter"
-		di as text "{hline 13}{c TT}{hline 44}"
-		di as text %12s "effect" " {c |}" %10s "Mean" %11s "Std. err." "   [" as result %2.0f 100*(1-`alpha') as text "% conf. interval]"
+		di as text "{hline 58}"
+		di as text %12s "Effect" " {c |}" %10s "Mean" %11s "Std. err." "   [" as result %2.0f 100*(1-`alpha') as text "% conf. interval]"
 		di as text "{hline 13}{c +}{hline 44}"
 		local i 0
 		foreach c of local rn {
 			local ++i
 			di as text %12s abbrev("`c'", 12) " {c |}" as result %10.4f `M'[`i', 13] %11.4f `M'[`i', 14] "   " %10.4f `M'[`i', 15] %10.4f `M'[`i', 16]
 		}
-		di as text "{hline 13}{c BT}{hline 44}"
+		di as text "{hline 58}"
 		di
 		di as text "{bf:Maximum likelihood under normality}: standard deviation between groups"
-		di as text "{hline 13}{c TT}{hline 34}"
-		di as text %12s "effect" " {c |}" %10s "SD" "    [" as result %2.0f 100*(1-`alpha') as text "% conf. interval]"
+		di as text "{hline 48}"
+		di as text %12s "Effect" " {c |}" %10s "SD" "    [" as result %2.0f 100*(1-`alpha') as text "% conf. interval]"
 		di as text "{hline 13}{c +}{hline 34}"
 		local i 0
 		foreach c of local rn {
 			local ++i
 			di as text %12s abbrev("`c'", 12) " {c |}" as result %10.4f `M'[`i', 17] "    " %10.4f `M'[`i', 18] %10.4f `M'[`i', 19]
 		}
-		di as text "{hline 13}{c BT}{hline 34}"
+		di as text "{hline 48}"
 		di
 		di as text "{bf:Fisher's combination of one-sided tests} (chi-squared, 2n d.f.)"
-		di as text "{hline 13}{c TT}{hline 44}"
-		di as text %12s "" " {c |}" %20s "Right-sided" %20s "Left-sided"
-		di as text %12s "effect" " {c |}" %9s "chi2" %11s "Prob>chi2" %9s "chi2" %11s "Prob>chi2"
+		di as text "{hline 58}"
+		di as text %12s "" " {c |}" %22s "Right-sided" %22s "Left-sided"
+		di as text %12s "Effect" " {c |}" %9s "chi2" %13s "Prob > chi2" %9s "chi2" %13s "Prob > chi2"
 		di as text "{hline 13}{c +}{hline 44}"
 		local i 0
 		foreach c of local rn {
 			local ++i
-			di as text %12s abbrev("`c'", 12) " {c |}" as result %9.3f `M'[`i', 20] %11.3f `M'[`i', 21] %9.3f `M'[`i', 22] %11.3f `M'[`i', 23]
+			di as text %12s abbrev("`c'", 12) " {c |}" as result %9.3f `M'[`i', 20] %13.3f `M'[`i', 21] %9.3f `M'[`i', 22] %13.3f `M'[`i', 23]
 		}
-		di as text "{hline 13}{c BT}{hline 44}"
+		di as text "{hline 58}"
 		di as text "Correlations of estimates and standard errors are in {bf:r(meta)}."
 	}
 	return matrix meta = `M'

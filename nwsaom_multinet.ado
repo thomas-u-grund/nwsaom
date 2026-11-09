@@ -1,4 +1,4 @@
-*! version 1.5.7  09nov2026 nwsaom multinet (split out of nwsaom.ado, see nwsaom_multiplex.ado)
+*! version 1.5.8  09nov2026 nwsaom multinet (split out of nwsaom.ado, see nwsaom_multiplex.ado)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -476,14 +476,14 @@ program define nwsaom_multinet, eclass
 	ereturn matrix tconv = `tc'
 	ereturn scalar tconv_max = scalar(`tc'_max)
 	ereturn local cmd "nwsaom_multinet"
-	ereturn local version "1.5.7"
+	ereturn local version "1.5.8"
 	_nwsaom_postengine
-	di as text "{hline}"
+	di
 	if `__tmany' di as text "Several co-evolving networks (Method of Moments), `nw1' waves, `__nA1' actors and `=`nodes'-`__nA1'' events (network " cond(`__tm1', "1", "2") " is two-mode)"
 	else di as text "Several co-evolving networks (Method of Moments), `nw1' waves, `nodes' actors"
-	di as text "{hline}"
+	di
 	ereturn display
 	di as text "Rates (estimated):"
-	matrix list e(rates), noheader format(%8.3f)
+	matlist e(rates), format(%8.3f) border(top bottom)
 	di as text "Overall maximum convergence ratio: " as result %5.3f e(tconv_max) as text " (criterion: below 0.25; " cond(e(tconv_max) < 0.25, "met", "{bf:not met}") ")"
 end

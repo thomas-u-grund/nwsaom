@@ -3,6 +3,16 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.5.8] - 2026-11-09
+
+### Changed
+- **Output tables follow Stata's conventions.** Every table of nwsaom is laid out like those of Stata's own commands: plain full-width rules above and below, a 12-character first column with a capitalised header (Effect, Statistic, Wave, Period, ...), names longer than 12 characters abbreviated as Stata does, `df` and `Prob > chi2` in tests. This covers `estat score`, `estat timetest`, `estat importance`, `estat gof` (also with groups), `estat simulate`, `estat mems`, `nwsaom describe`, `nwsaom meta` and `nwsaom bayes`. The rate tables after a fit have top and bottom rules (also after maximum likelihood and `nwsaom multinet`), and the header of a fit is set off by blank lines instead of rules.
+- Titles no longer name RSiena functions (for example "Score-type test of fixed effects" instead of "... (as RSiena score.Test)"); the tests state their null hypothesis. `nwsaom bayes` labels its columns Mean, Std. dev. and the credible interval. Lines wider than 80 characters were wrapped.
+- Display only: no estimate, test or stored result changes.
+
+### Documentation
+- The manual's listings show the new layout.
+
 ## [1.5.7] - 2026-11-09
 
 ### Fixed

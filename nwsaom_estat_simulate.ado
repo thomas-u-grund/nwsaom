@@ -1,4 +1,4 @@
-*! version 1.5.7  09nov2026 nwcommands: estat simulate after nwsaom
+*! version 1.5.8  09nov2026 nwcommands: estat simulate after nwsaom
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -218,7 +218,8 @@ program define nwsaom_estat_simulate, rclass
 	di as txt "Simulation from the fitted model: " as res `nsim' as txt " replication(s) of " as res `nperiods' as txt " period(s)"
 	if `tm' di as txt "(two-mode network: " e(n_actors) " actors x " e(n_events) " events; ties are attendances)"
 	di
-	di as txt %13s "statistic" " {c |}" %10s "Sim" %10s "Obs"
+	di as txt "{hline 36}"
+	di as txt %13s "Statistic" " {c |}" %10s "Sim" %10s "Obs"
 	di as txt "{hline 14}{c +}{hline 21}"
 	forvalues pd = 1/`nperiods' {
 		mata: st_numscalar("__nwsaom_sim_m3", mean(select(st_matrix("`sim'")[., 3], st_matrix("`sim'")[., 2] :== `pd')))
@@ -235,7 +236,7 @@ program define nwsaom_estat_simulate, rclass
 			di as txt %13s "Behavior" " {c |}" as res %10.2f __nwsaom_sim_m6 %10.2f `obs'[`pd', 6]
 		}
 	}
-	di as txt "{hline 14}{c BT}{hline 21}"
+	di as txt "{hline 36}"
 	di as txt "Sim is the mean over the replications; Obs is the observed end wave."
 	capture scalar drop __nwsaom_sim_m3 __nwsaom_sim_m4 __nwsaom_sim_m5 __nwsaom_sim_m6
 	return matrix sim = `sim'

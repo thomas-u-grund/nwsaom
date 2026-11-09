@@ -1,4 +1,4 @@
-*! version 1.5.7  09nov2026 nwsaom multiplex (split out of nwsaom.ado: the programs of one ado-file all count towards Stata's 1000 KB adosize while loaded)
+*! version 1.5.8  09nov2026 nwsaom multiplex (split out of nwsaom.ado: the programs of one ado-file all count towards Stata's 1000 KB adosize while loaded)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -66,7 +66,7 @@ program define nwsaom_multiplex, eclass
 		ereturn scalar rate1_se = `__r'[3, 1]
 		ereturn scalar rate2_se = `__r'[4, 1]
 		ereturn local cmd "nwsaom_multiplex"
-		ereturn local version "1.5.7"
+		ereturn local version "1.5.8"
 		exit
 	}
 	if `seed' != -1 set seed `seed'
@@ -150,13 +150,13 @@ program define nwsaom_multiplex, eclass
 	matrix rownames __nwsaom_mp_rate1_tconv = tconv
 	ereturn matrix tconv = __nwsaom_mp_rate1_tconv
 	ereturn local cmd "nwsaom_multiplex"
-	ereturn local version "1.5.7"
+	ereturn local version "1.5.8"
 	_nwsaom_postengine
 
-	di as text "{hline}"
+	di
 	if `wantcrprod' | `wantcrprodb' di as text "Multiplex SAOM (Stage 2: crprod cross-network effect), Method of Moments"
 	else di as text "Multiplex SAOM (Stage 1: within-network effects only), Method of Moments"
-	di as text "{hline}"
+	di
 	ereturn display
 	di as text "Rates (estimated): net1 " as result %6.3f e(rate1) as text " (" as result %5.3f e(rate1_se) as text "), net2 " as result %6.3f e(rate2) as text " (" as result %5.3f e(rate2_se) as text ")"
 	_nwsaom_tconvtable, `detail'

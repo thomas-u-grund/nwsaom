@@ -1,4 +1,4 @@
-*! version 1.5.7  09nov2026 nwcommands: nwsaom describe - the data description that comes before a SAOM fit
+*! version 1.5.8  09nov2026 nwcommands: nwsaom describe - the data description that comes before a SAOM fit
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -128,8 +128,8 @@ program define nwsaom_describe, rclass
 	di
 	if `tm' di as txt "Network data: " as res `nw' as txt " waves, two-mode network, " as res `na' as txt " actors (mode `actormode') x " as res `ne' as txt " events; ties are attendances (actor-event cells), density is over the " as res `na' * `ne' as txt " cells"
 	else di as txt "Network data: " as res `nw' as txt " waves, " as res `n0' as txt " actors, " as res cond(`dir1', "directed", "undirected")
-	di as txt "{hline 13}{c TT}{hline 39}"
-	di as txt %12s "wave" " {c |}" %9s "ties" %12s "density" %14s "avg. degree"
+	di as txt "{hline 53}"
+	di as txt %12s "Wave" " {c |}" %9s "ties" %12s "density" %14s "avg. degree"
 	di as txt "{hline 13}{c +}{hline 39}"
 	forvalues w = 1/`nw' {
 		di as txt %12s "`w'" " {c |}" as res %9.0f `W'[`w', 1] %12.4f `W'[`w', 2] %14.3f `W'[`w', 3]
@@ -141,15 +141,15 @@ program define nwsaom_describe, rclass
 			di as txt "  wave `w': " as res `W'[`w', 4] as txt " structural zeros, " as res `W'[`w', 5] as txt " structural ones"
 		}
 	}
-	di as txt "{hline 13}{c BT}{hline 39}"
+	di as txt "{hline 53}"
 	di
-	di as txt "{hline 13}{c TT}{hline 56}"
-	di as txt %12s "period" " {c |}" %8s "kept" %10s "created" %11s "dissolved" %10s "Jaccard" %10s "Hamming"
+	di as txt "{hline 70}"
+	di as txt %12s "Period" " {c |}" %8s "kept" %10s "created" %11s "dissolved" %10s "Jaccard" %10s "Hamming"
 	di as txt "{hline 13}{c +}{hline 56}"
 	forvalues w = 1/`=`nw'-1' {
 		di as txt %12s "`w'->`=`w'+1'" " {c |}" as res %8.0f `P'[`w', 1] %10.0f `P'[`w', 2] %11.0f `P'[`w', 3] %10.3f `P'[`w', 4] %10.0f `P'[`w', 5]
 	}
-	di as txt "{hline 13}{c BT}{hline 56}"
+	di as txt "{hline 70}"
 	forvalues w = 1/`=`nw'-1' {
 		if `P'[`w', 4] < 0.3 di as txt "Note: Jaccard < 0.3 in period `w'->`=`w'+1'; few ties stay, the data say little about change."
 	}
@@ -171,8 +171,8 @@ program define nwsaom_describe, rclass
 		tempname Bh
 		matrix `Bh' = J(`nw', 3, .)
 		di
-		di as txt "{hline 13}{c TT}{hline 36}"
-		di as txt %12s "behavior" " {c |}" %12s "mean" %12s "sd" %12s "missing"
+		di as txt "{hline 50}"
+		di as txt %12s "Behavior" " {c |}" %12s "mean" %12s "sd" %12s "missing"
 		di as txt "{hline 13}{c +}{hline 36}"
 		forvalues w = 1/`nw' {
 			local v : word `w' of `behavior'
@@ -184,10 +184,10 @@ program define nwsaom_describe, rclass
 		}
 		tempname Bc
 		matrix `Bc' = J(`=`nw'-1', 3, .)
-		di as txt "{hline 13}{c BT}{hline 36}"
+		di as txt "{hline 50}"
 		di
-		di as txt "{hline 13}{c TT}{hline 36}"
-		di as txt %12s "change" " {c |}" %12s "up" %12s "down" %12s "same"
+		di as txt "{hline 50}"
+		di as txt %12s "Change" " {c |}" %12s "up" %12s "down" %12s "same"
 		di as txt "{hline 13}{c +}{hline 36}"
 		forvalues w = 1/`=`nw'-1' {
 			local v1 : word `w' of `behavior'
@@ -203,7 +203,7 @@ program define nwsaom_describe, rclass
 			matrix `Bc'[`w', 3] = `sm'
 			di as txt %12s "`w'->`=`w'+1'" " {c |}" as res %12.0f `up' %12.0f `dn' %12.0f `sm'
 		}
-		di as txt "{hline 13}{c BT}{hline 36}"
+		di as txt "{hline 50}"
 		matrix colnames `Bc' = up down same
 		return matrix behchange = `Bc'
 	}

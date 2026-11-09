@@ -1,4 +1,4 @@
-*! version 1.5.7  09nov2026 nwcommands: estat score after nwsaom
+*! version 1.5.8  09nov2026 nwcommands: estat score after nwsaom
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -70,29 +70,30 @@ program define nwsaom_estat_score, rclass
 	local pv = chi2tail(`df', `c')
 
 	di
-	di as txt "Score-type test of the restricted model (as RSiena {bf:score.Test})"
-	di as txt "Tests whether the fixed effects below differ from their fixed values."
+	di as txt "Score-type test of fixed effects"
+	di as txt "H0: each effect below equals its fixed value"
 	tempname sep
 	matrix `sep' = __nwsaom_score_res
 	di
-	di as txt %18s "effect" " {c |}" %10s "Fixed at" %9s "chi2" %6s "d.f." %10s "Prob>chi2" %12s "One-sided z"
-	di as txt "{hline 19}{c +}{hline 47}"
+	di as txt "{hline 65}"
+	di as txt %12s "Effect" " {c |}" %10s "Fixed at" %10s "chi2" %5s "df" %13s "Prob > chi2" %13s "One-sided z"
+	di as txt "{hline 13}{c +}{hline 51}"
 	if `df' == 1 {
 		local w : word 1 of `tested'
 		local pos : list posof "`w'" in names
-		di as txt %18s abbrev("`w'", 18) " {c |}" as res %10.4f `b'[1, `pos'] %9.3f `c' %6.0f 1 %10.4f `pv' %12.3f scalar(__nwsaom_score_oneS)
+		di as txt %12s abbrev("`w'", 12) " {c |}" as res %10.4f `b'[1, `pos'] %10.3f `c' %5.0f 1 %13.4f `pv' %13.3f scalar(__nwsaom_score_oneS)
 	}
 	else {
 		local j 0
 		foreach w of local tested {
 			local ++j
 			local pos : list posof "`w'" in names
-			di as txt %18s abbrev("`w'", 18) " {c |}" as res %10.4f `b'[1, `pos'] %9.3f `sep'[`j', 1] %6.0f 1 %10.4f chi2tail(1, `sep'[`j', 1]) %12.3f `sep'[`j', 2]
+			di as txt %12s abbrev("`w'", 12) " {c |}" as res %10.4f `b'[1, `pos'] %10.3f `sep'[`j', 1] %5.0f 1 %13.4f chi2tail(1, `sep'[`j', 1]) %13.3f `sep'[`j', 2]
 		}
-		di as txt "{hline 19}{c +}{hline 47}"
-		di as txt %18s "Joint test" " {c |}" as res %10s "" %9.3f `c' %6.0f `df' %10.4f `pv'
+		di as txt "{hline 13}{c +}{hline 51}"
+		di as txt %12s "Joint" " {c |}" as res %10s "" %10.3f `c' %5.0f `df' %13.4f `pv'
 	}
-	di as txt "{hline 19}{c BT}{hline 47}"
+	di as txt "{hline 65}"
 	tempname os
 	matrix `os' = __nwsaom_score_onestep
 	local onames `names'
@@ -101,14 +102,15 @@ program define nwsaom_estat_score, rclass
 	}
 	matrix colnames `os' = `onames'
 	di
-	di as txt "One-step estimates (restricted estimate plus the one-step correction)"
-	di as txt %18s "effect" " {c |}" %10s "Estimate"
-	di as txt "{hline 19}{c +}{hline 10}"
+	di as txt "One-step estimates (restricted estimates plus the one-step correction)"
+	di as txt "{hline 26}"
+	di as txt %12s "Effect" " {c |}" %12s "Estimate"
+	di as txt "{hline 13}{c +}{hline 12}"
 	forvalues i = 1/`nall' {
 		local nm : word `i' of `onames'
-		di as txt %18s abbrev("`nm'", 18) " {c |}" as res %10.4f `os'[1, `i']
+		di as txt %12s abbrev("`nm'", 12) " {c |}" as res %12.4f `os'[1, `i']
 	}
-	di as txt "{hline 19}{c BT}{hline 10}"
+	di as txt "{hline 26}"
 	capture scalar drop __nwsaom_score_have __nwsaom_score_nfix __nwsaom_score_same
 	return scalar chi2 = `c'
 	return scalar df = `df'

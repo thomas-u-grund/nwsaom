@@ -1,4 +1,4 @@
-*! version 1.5.7  09nov2026 _nwsaom_groupspost: e() results of nwsaom for the joint estimation of several groups of a grouped fit (groups() option)
+*! version 1.5.8  09nov2026 _nwsaom_groupspost: e() results of nwsaom for the joint estimation of several groups of a grouped fit (groups() option)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -36,9 +36,10 @@ program define nwsaom_estat_gofgroups, rclass
 	}
 	if `group' == 0 & `G' > 1 & "`join'" != "off" {
 		di
-		di as txt "Combined over the groups (inverse normal method, Liptak; the manual of RSiena)"
+		di as txt "Combined over the groups (inverse normal method, Liptak)"
 		di
-		di as txt %12s "statistic" " {c |}" %12s "Combined P"
+		di as txt "{hline 26}"
+		di as txt %12s "Statistic" " {c |}" %12s "Combined P"
 		di as txt "{hline 13}{c +}{hline 12}"
 		foreach s of local stats {
 			local z 0
@@ -50,7 +51,7 @@ program define nwsaom_estat_gofgroups, rclass
 			di as txt %12s proper("`s'") " {c |}" as res %12.3f `pc'
 			return scalar p_`s' = `pc'
 		}
-		di as txt "{hline 13}{c BT}{hline 12}"
+		di as txt "{hline 26}"
 	}
 end
 
