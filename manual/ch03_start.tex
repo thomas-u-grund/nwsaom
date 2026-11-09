@@ -1,6 +1,6 @@
 \chapter{Getting started}\label{ch:start}
 
-This chapter takes you from data to a first fitted model, shows how to read the output and which results are stored. All commands were run with \nwsaom{} 1.5.4 on the Glasgow data of RSiena's tutorial.
+This chapter takes you from data to a first fitted model, shows how to read the output and which results are stored. All commands were run with \nwsaom{} 1.5.7 on the Glasgow data of RSiena's tutorial.
 
 \section{The data}
 
@@ -158,23 +158,23 @@ Behavior: alcohol1 alcohol2 alcohol3
 -------------------------------------------------------------------------------
 glasgow1_to~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
 --------------+----------------------------------------------------------------
-    outdegree |  -2.749642   .1459627   -18.84   0.000    -3.035723    -2.46356
-  reciprocity |   2.359217   .2027157    11.64   0.000     1.961902    2.756533
-    transtrip |   .6158222   .0744183     8.28   0.000     .4699651    .7616794
-       behsim |   1.393792   .5858828     2.38   0.017     .2454825    2.542101
-   beh_linear |   .3952831   .2236895     1.77   0.077    -.0431402    .8337065
-beh_quadratic |  -.5801033   .3628872    -1.60   0.110    -1.291349    .1311426
-    beh_avalt |   1.265907    .885596     1.43   0.153     -.469829    3.001643
+    outdegree |   -2.76126   .1460683   -18.90   0.000    -3.047548   -2.474971
+  reciprocity |    2.35587   .1982928    11.88   0.000     1.967223    2.744517
+    transtrip |    .621357   .0803867     7.73   0.000      .463802    .7789121
+       behsim |   1.460717   .6218014     2.35   0.019      .242009    2.679426
+   beh_linear |   .3948453   .2135712     1.85   0.064    -.0237465    .8134372
+beh_quadratic |  -.6002813    .320045    -1.88   0.061    -1.227558    .0269954
+    beh_avalt |   1.305018   .7780128     1.68   0.093    -.2198586    2.829896
 -------------------------------------------------------------------------------
 Rate parameters (estimated, one per inter-wave period):
              |   period1    period2
 -------------+---------------------
-network_rate |    6.4674     5.1900
-          se |    1.1432     0.9149
-behavior_r~e |    1.3142     1.7971
-          se |    0.3288     0.5491
+network_rate |    6.4944     5.1666
+          se |    1.2965     0.8975
+behavior_r~e |    1.3126     1.8015
+          se |    0.3471     0.4619
 ...
-Overall maximum convergence ratio: 0.152 (criterion: below 0.25; met)
+Overall maximum convergence ratio: 0.138 (criterion: below 0.25; met)
 \end{lstlisting}
 The behavior coefficients carry the prefix \texttt{beh\_}; the network coefficients come first in \texttt{e(b)} (their number is \texttt{e(p\_net)}, here 4). The rates of the behavior are in \texttt{e(rates\_beh)}. The co-evolution is the subject of its own chapter.
 

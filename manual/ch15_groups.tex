@@ -1,6 +1,6 @@
 \chapter{Several groups: joint estimation}\label{ch:groups}
 
-Many network panels consist of several independent groups of actors: school classes, teams, villages, organizations. Each group is a separate network with its own actors, observed at the same occasions (or at different ones). RSiena offers two ways to analyze such data: fit one model to all groups at once (\texttt{sienaGroupCreate} and \texttt{siena07}), or fit each group separately and combine the estimates (\texttt{siena08}). \nwsaom{} offers both. This chapter is about the first, the option \opt{groups()}; the second is \texttt{nwsaom meta} (Section~\ref{sec:meta}), and Section~\ref{sec:groups-vs-meta} says when to use which. All outputs below were produced with \nwsaom{} 1.5.4 in Stata/BE~18; the data and do-files are described at the end of the chapter.
+Many network panels consist of several independent groups of actors: school classes, teams, villages, organizations. Each group is a separate network with its own actors, observed at the same occasions (or at different ones). RSiena offers two ways to analyze such data: fit one model to all groups at once (\texttt{sienaGroupCreate} and \texttt{siena07}), or fit each group separately and combine the estimates (\texttt{siena08}). \nwsaom{} offers both. This chapter is about the first, the option \opt{groups()}; the second is \texttt{nwsaom meta} (Section~\ref{sec:meta}), and Section~\ref{sec:groups-vs-meta} says when to use which. All outputs below were produced with \nwsaom{} 1.5.7 in Stata/BE~18; the data and do-files are described at the end of the chapter.
 
 \section{The idea}\label{sec:groups-idea}
 
@@ -222,27 +222,28 @@ Groups: 3 (variable group), actors per group: 15, 20, 15; waves per group: 3, 3,
 -------------------------------------------------------------------------------
      g1_to_g3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
 --------------+----------------------------------------------------------------
-    outdegree |  -2.979759   .2651703   -11.24   0.000    -3.499483   -2.460035
-  reciprocity |   2.926493    .387654     7.55   0.000     2.166705    3.686281
-    transtrip |   .6575888   .1447619     4.54   0.000     .3738608    .9413168
-      behegox |   .0301964   .1884763     0.16   0.873    -.3392103    .3996032
-      behaltx |   .0032172   .1811325     0.02   0.986    -.3517959    .3582303
-   beh_linear |   .3875032   .1776752     2.18   0.029     .0392662    .7357402
-beh_quadratic |  -.2760965    .142015    -1.94   0.052    -.5544408    .0022479
-    beh_avalt |   .5164657   .3908412     1.32   0.186    -.2495691      1.2825
+    outdegree |   -2.97652   .2708628   -10.99   0.000    -3.507401   -2.445639
+  reciprocity |   2.932225   .4010968     7.31   0.000      2.14609     3.71836
+    transtrip |   .6524343   .1433909     4.55   0.000     .3713933    .9334754
+      behegox |   .0226293   .1657629     0.14   0.891      -.30226    .3475187
+      behaltx |   .0072251   .1742447     0.04   0.967    -.3342883    .3487385
+   beh_linear |   .3868227    .177321     2.18   0.029     .0392798    .7343655
+beh_quadratic |  -.2763856   .1344151    -2.06   0.040    -.5398343   -.0129369
+    beh_avalt |   .5175959   .3764368     1.37   0.169    -.2202067    1.255399
 -------------------------------------------------------------------------------
 Rate parameters (estimated, one per inter-wave period):
 
              |   period1    period2    period4    period5    period7    period8 
 -------------+-----------------------------------------------------------------
-network_rate |    3.5664     1.9519     5.6228     2.3230     1.1524     2.3186 
-          se |    1.3963     0.9052     1.6681     0.6032     0.5639     1.0487 
-behavior_r~e |    1.2840     1.4549     1.8805     2.0406     0.6661     1.4242 
-          se |    0.5666     0.6849     0.7055     0.8367     0.3453     0.6534 
-Overall maximum convergence ratio: 0.204 (criterion: below 0.25; met)
-Convergence t-ratios (criterion: all below 0.1 in absolute value): met
+network_rate |    3.6424     1.9581     5.6745     2.3518     1.1541     2.3119
+          se |    1.2967     0.9412     1.6757     0.6873     0.4610     1.0138
+behavior_r~e |    1.2842     1.4431     1.8853     2.0285     0.6628     1.4247
+          se |    0.7216     0.6579     0.6827     0.8332     0.3364     0.6035
+Overall maximum convergence ratio: 0.211 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for rate_period2 (0.101)
+Convergence is good only if both criteria are met. Refit starting from these estimates with theta0(); see nwsaom.
 \end{lstlisting}
-Six periods, six network rates and six behavior rates: groups 1, 2 and 3 have the periods 1--2, 4--5 and 7--8. The effects are shared. The estimated influence of the friends' alcohol use (\texttt{beh\_avalt} 0.52, $z=1.3$) and the selection effects are not distinguishable from zero in these small groups.
+Six periods, six network rates and six behavior rates: groups 1, 2 and 3 have the periods 1--2, 4--5 and 7--8. The effects are shared. The estimated influence of the friends' alcohol use (\texttt{beh\_avalt} 0.52, $z=1.4$) and the selection effects are not distinguishable from zero in these small groups.
 
 \paragraph{Groups observed at different waves.} The groups need not have been observed at the same occasions. Suppose that group~1 was observed at all three waves, group~2 only at the first two and group~3 only at the last two. The option \opt{gwaves()} gives the waves of the groups by their position in \opt{waves()}:
 \begin{lstlisting}
@@ -357,16 +358,16 @@ Example & Parameter & \nwsaom{} & RSiena & Difference\\
 & transitive triplets & 0.465 & 0.464 & 0.001\\
 & rates (periods 1, 3, 5, 7) & 6.50, 5.37, 2.30, 8.16 & 6.51, 5.38, 2.31, 8.16 & $\le 0.010$\\
 \addlinespace
-3a (co-evolution) & outdegree & $-2.983$ & $-2.982$ & $-0.001$\\
-& reciprocity & 2.939 & 2.936 & 0.003\\
+3a (co-evolution) & outdegree & $-2.981$ & $-2.982$ & 0.001\\
+& reciprocity & 2.935 & 2.936 & $-0.001$\\
 & transitive triplets & 0.655 & 0.657 & $-0.002$\\
-& behavior ego (\texttt{behegox}) & 0.030 & 0.026 & 0.004\\
-& behavior alter (\texttt{behaltx}) & 0.005 & 0.006 & $-0.001$\\
+& behavior ego (\texttt{behegox}) & 0.028 & 0.026 & 0.002\\
+& behavior alter (\texttt{behaltx}) & 0.007 & 0.006 & 0.000\\
 & linear shape & 0.386 & 0.384 & 0.002\\
 & quadratic shape & $-0.276$ & $-0.273$ & $-0.003$\\
-& average alter & 0.522 & 0.512 & 0.010\\
-& network rates (6) & 1.13 to 5.70 & 1.13 to 5.70 & $\le 0.015$\\
-& behavior rates (6) & 0.65 to 2.03 & 0.65 to 2.02 & $\le 0.014$\\
+& average alter & 0.523 & 0.512 & 0.010\\
+& network rates (6) & 1.12 to 5.69 & 1.13 to 5.70 & $\le 0.016$\\
+& behavior rates (6) & 0.65 to 2.02 & 0.65 to 2.02 & $\le 0.014$\\
 \addlinespace
 3b (waves 3, 2, 2) & outdegree & $-2.672$ & $-2.677$ & 0.005\\
 & reciprocity & 2.611 & 2.615 & $-0.004$\\

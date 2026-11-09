@@ -12,6 +12,7 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Documentation
 - The help file and the manual describe the quadratic statistic correctly.
+- The manual's output listings of co-evolution models were rerun with this version (chapters 3, 6, 8, 14 and 15); several fits that missed a convergence criterion with 1.5.5 now meet it. Network-only listings are unchanged.
 
 ## [1.5.6] - 2026-11-09
 
