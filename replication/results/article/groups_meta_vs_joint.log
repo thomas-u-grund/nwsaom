@@ -1,34 +1,84 @@
 
 . 
-. * (a) four separate fits of the same model, stored
-. forvalues s = 1/4 {
-  2.     quietly nwsaom, wave1(school`s'_w1) wave2(school`s'_w2) outdegree reciprocity transtrip see
-> d(5)
-  3.     estimates store school`s'
-  4. }
+. * (a) fifteen separate fits of the same model (a first fit, then a restart fro
+> m its estimates), stored
+. local fits ""
 
-. estimates table school1 school2 school3 school4, b(%7.3f) se(%7.3f) title("Separate fits, one per 
-> class")
+. forvalues s = 1/15 {
+  2.     quietly nwsaom, waves(class`s'_w1 class`s'_w2) outdegree reciprocity tr
+> anstrip seed(1)
+  3.     matrix b = e(b)
+  4.     quietly nwsaom, waves(class`s'_w1 class`s'_w2) outdegree reciprocity tr
+> anstrip seed(2) theta0(`=b[1,1]' `=b[1,2]' `=b[1,3]')
+  5.     estimates store class`s'
+  6.     display "class `s': max convergence ratio " %5.3f e(tconv_max)
+  7.     local fits `fits' class`s'
+  8. }
+class 1: max convergence ratio 0.116
+class 2: max convergence ratio 0.122
+class 3: max convergence ratio 0.029
+class 4: max convergence ratio 0.061
+class 5: max convergence ratio 0.041
+class 6: max convergence ratio 0.118
+class 7: max convergence ratio 0.057
+class 8: max convergence ratio 0.043
+class 9: max convergence ratio 0.053
+class 10: max convergence ratio 0.134
+class 11: max convergence ratio 0.035
+class 12: max convergence ratio 0.075
+class 13: max convergence ratio 0.115
+class 14: max convergence ratio 0.087
+class 15: max convergence ratio 0.055
+
+. estimates table `fits', b(%7.3f) se(%7.3f) title("Separate fits, one per class
+> ")
 
 Separate fits, one per class
 
-------------------------------------------------------
-    Variable | school1   school2   school3   school4  
--------------+----------------------------------------
-   outdegree |  -2.274    -2.343    -3.331    -2.011  
-             |   0.122     0.214     0.428     0.141  
- reciprocity |   1.571     2.611     2.266     1.554  
-             |   0.238     0.385     0.675     0.302  
-   transtrip |   0.469     1.133     1.043     0.494  
-             |   0.066     0.284     0.291     0.110  
-------------------------------------------------------
-                                          Legend: b/se
+--------------------------------------------------------------------------
+    Variable | class1    class2    class3    class4    class5    class6   
+-------------+------------------------------------------------------------
+   outdegree |  -2.338    -3.361    -2.008    -2.238    -2.466    -2.427  
+             |   0.213     0.437     0.135     0.116     0.079     0.127  
+ reciprocity |   2.616     2.301     1.552     1.960     1.831     1.965  
+             |   0.403     0.678     0.283     0.228     0.170     0.265  
+   transtrip |   1.112     1.049     0.487     0.524     0.417     0.450  
+             |   0.284     0.306     0.114     0.093     0.068     0.087  
+--------------------------------------------------------------------------
+                                                              Legend: b/se
+
+
+--------------------------------------------------------------------------
+    Variable | class7    class8    class9    class10   class11   class12  
+-------------+------------------------------------------------------------
+   outdegree |  -2.360    -2.393    -2.670    -2.102    -2.698    -2.274  
+             |   0.074     0.126     0.238     0.122     0.237     0.129  
+ reciprocity |   2.193     2.454     1.843     1.816     2.211     2.270  
+             |   0.156     0.236     0.368     0.232     0.403     0.249  
+   transtrip |   0.534     0.457     0.705     0.343     0.732     0.465  
+             |   0.062     0.128     0.221     0.083     0.231     0.139  
+--------------------------------------------------------------------------
+                                                              Legend: b/se
+
+
+--------------------------------------------
+    Variable | class13   class14   class15  
+-------------+------------------------------
+   outdegree |  -2.270    -2.788    -2.470  
+             |   0.136     0.139     0.148  
+ reciprocity |   1.547     2.426     2.534  
+             |   0.253     0.270     0.271  
+   transtrip |   0.471     1.042     0.677  
+             |   0.066     0.174     0.117  
+--------------------------------------------
+                                Legend: b/se
 
 . 
-. * (b) combine the four fits: mean effect, between-class standard deviation, heterogeneity test
-. nwsaom meta school1 school2 school3 school4
+. * (b) combine the fifteen fits: mean effect, between-class standard deviation,
+>  heterogeneity test
+. nwsaom meta `fits'
 
-Meta-analysis of separate fits                  Number of fits    =         4
+Meta-analysis of separate fits                  Number of fits    =        15
 
 Estimates with a standard error of 10 or more are excluded;
 tests of the means use a t distribution with N-1 d.f.
@@ -37,27 +87,27 @@ IWLS estimates (Snijders and Baerveldt 2003)
 ------------------------------------------------------------------------------
       Effect |  N      Mean Std. err.        t   P>|t|      SD       Q     P>Q
 -------------+----------------------------------------------------------------
-   outdegree |  4   -2.3922    0.2552    -9.37   0.003  0.5104    9.44   0.024
- reciprocity |  4    1.8994    0.2698     7.04   0.006  0.5397    6.51   0.089
-   transtrip |  4    0.6963    0.1711     4.07   0.027  0.3422    8.53   0.036
+   outdegree | 15   -2.3926    0.0644   -37.15   0.000  0.2494   34.26   0.002
+ reciprocity | 15    2.0701    0.0861    24.05   0.000  0.3334   22.22   0.074
+   transtrip | 15    0.5548    0.0522    10.63   0.000  0.2022   27.78   0.015
 ------------------------------------------------------------------------------
 
 Maximum likelihood under normality: mean of the parameter
 ------------------------------------------------------------------------------
       Effect |           Mean      Std. err.              [95% conf. interval]
 -------------+----------------------------------------------------------------
-   outdegree |        -2.2584         0.1071          -2.8379          -1.9836
- reciprocity |         1.8673         0.2259           1.3384           2.5535
-   transtrip |         0.5202         0.0547           0.3965           1.0588
+   outdegree |        -2.3834         0.0528          -2.5066          -2.2763
+ reciprocity |         2.0692         0.0832           1.8964           2.2508
+   transtrip |         0.5161         0.0322           0.4528           0.6287
 ------------------------------------------------------------------------------
 
 Maximum likelihood under normality: standard deviation between groups
 ------------------------------------------------------------------------------
       Effect |             SD              [95% conf. interval]
 -------------+----------------------------------------------------------------
-   outdegree |         0.1163           0.0000           0.8546
- reciprocity |         0.2797           0.0000           1.0987
-   transtrip |         0.0001           0.0000           0.6287
+   outdegree |         0.1442           0.0266           0.2876
+ reciprocity |         0.1820           0.0000           0.4098
+   transtrip |         0.0583           0.0000           0.2039
 ------------------------------------------------------------------------------
 
 Fisher's combination of one-sided tests (chi-squared, 2N d.f.)
@@ -65,105 +115,148 @@ Fisher's combination of one-sided tests (chi-squared, 2N d.f.)
              |                     Right-sided                      Left-sided
       Effect |            chi2     Prob > chi2            chi2     Prob > chi2
 -------------+----------------------------------------------------------------
-   outdegree |           0.000           1.000         759.535           0.000
- reciprocity |         148.298           0.000           0.001           1.000
-   transtrip |         118.941           0.000           0.000           1.000
+   outdegree |           0.000           1.000        5437.687           0.000
+ reciprocity |        1128.027           0.000           0.001           1.000
+   transtrip |         472.412           0.000           0.005           1.000
 ------------------------------------------------------------------------------
 Correlations of estimates and standard errors are in r(meta).
 
 . 
-. * (c) one joint model for all classes
-. nwsaom, waves(w1 w2) groups(class) outdegree reciprocity transtrip seed(5)
+. * (c) one joint model for all classes (as in groups_joint.do)
+. quietly nwsaom, waves(w1 w2) groups(class) outdegree reciprocity transtrip see
+> d(1)
+
+. matrix b = e(b)
+
+. nwsaom, waves(w1 w2) groups(class) outdegree reciprocity transtrip seed(2) the
+> ta0(`=b[1,1]' `=b[1,2]' `=b[1,3]')
 
 SAOM (Method of Moments, conditional), waves: w1 w2
-Actors: 151                            Periods: 4
-Groups: 4 (variable class), actors per group: 45, 37, 33, 36; waves per group: 2, 2, 2, 2
+Actors: 810                            Periods: 15
+Groups: 15 (variable class), actors per group: 37, 33, 36, 54, 91, 47, 90, 61, 3
+> 8, 43, 48, 52, 45, 82, 53; waves per group: 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
+> , 2, 2, 2
 
 ------------------------------------------------------------------------------
     w1_to_w2 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
 -------------+----------------------------------------------------------------
-   outdegree |  -2.246167   .0820687   -27.37   0.000    -2.407018   -2.085315
- reciprocity |   1.862864   .1569308    11.87   0.000     1.555285    2.170443
-   transtrip |   .4655751   .0541992     8.59   0.000     .3593466    .5718035
+   outdegree |  -2.388411   .0324147   -73.68   0.000    -2.451943    -2.32488
+ reciprocity |   2.090156   .0634363    32.95   0.000     1.965823    2.214489
+   transtrip |   .4906151   .0293686    16.71   0.000     .4330537    .5481765
 ------------------------------------------------------------------------------
 Rate parameters (estimated, one per inter-wave period):
 
-----------------------------------------------------------
-             |   period1    period3    period5    period7 
--------------+--------------------------------------------
-        rate |    6.4989     5.3821     2.2893     8.2490 
-          se |    0.9714     1.4169     0.5299     2.1306 
-----------------------------------------------------------
-Overall maximum convergence ratio: 0.017 (criterion: below 0.25; met)
+--------------------------------------------------------------------------------
+             |   period1    period3    period5    period7    period9   period11 
+-------------+------------------------------------------------------------------
+        rate |    5.9713     2.4288     8.9880     5.5680     6.8816     7.5012 
+          se |    1.6163     0.5756     2.4855     0.8184     0.8492     1.4763 
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+             |  period13   period15   period17   period19   period21   period23 
+-------------+------------------------------------------------------------------
+        rate |   10.8801     4.6802     3.8846     6.9265     2.2390     6.0332 
+          se |    1.4863     0.8449     0.7602     1.2196     0.4279     1.0367 
+--------------------------------------------------------------------------------
+
+-----------------------------------------------
+             |  period25   period27   period29 
+-------------+---------------------------------
+        rate |    6.6389     3.4201     5.1583 
+          se |    1.0566     0.4869     0.9294 
+-----------------------------------------------
+Overall maximum convergence ratio: 0.068 (criterion: below 0.25; met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 
 . estimates store joint
 
 . 
-. * (d) side by side: the joint estimate lies close to the mean of the classes
-. quietly nwsaom meta school1 school2 school3 school4, notable
+. * (d) side by side: simple average of the classes, IWLS mean, joint estimate; 
+> standard errors of the joint and the IWLS mean
+. quietly nwsaom meta `fits', notable
 
 . matrix T = r(theta)
 
-. matrix meanT = J(1, 4, 0.25) * T                 // simple average of the four separate estimates
+. matrix meanT = J(1, 15, 1/15) * T
 
 . matrix MM = r(meta)
 
-. local c = colnumb(MM, "iwls_mean")
+. matrix iwls = MM[1..3, colnumb(MM, "iwls_mean")]'
 
-. matrix iwls = MM[1..3, `c']'                     // IWLS mean of every effect
+. matrix iwlsse = MM[1..3, colnumb(MM, "iwls_se")]'
 
-. estimates restore joint                          // nwsaom meta leaves the last class active
+. estimates restore joint
 (results joint are active now)
 
 . matrix jt = e(b)
 
-. matrix cmp = meanT \ iwls \ jt
+. matrix V = e(V)
 
-. matrix rownames cmp = avg_classes meta_IWLS joint
+. matrix jse = (sqrt(V[1,1]), sqrt(V[2,2]), sqrt(V[3,3]))
+
+. matrix cmp = meanT \ iwls \ jt[1, 1..3] \ iwlsse \ jse
+
+. matrix rownames cmp = avg_classes meta_IWLS joint se_meta se_joint
 
 . matrix colnames cmp = outdegree reciprocity transtrip
 
 . matrix list cmp, format(%7.3f)
 
-cmp[3,3]
+cmp[5,3]
                outdegree  reciprocity    transtrip
-avg_classes       -2.490        2.001        0.785
-  meta_IWLS       -2.392        1.899        0.696
-      joint       -2.246        1.863        0.466
+avg_classes       -2.458        2.101        0.631
+  meta_IWLS       -2.393        2.070        0.555
+      joint       -2.388        2.090        0.491
+    se_meta        0.064        0.086        0.052
+   se_joint        0.032        0.063        0.029
 
 . 
-. * (e) a joint model in which reciprocity may differ for class 2: add an indicator and its interact
-> ion
-. generate byte c2 = (class == 2)
+. * (e) a joint model in which reciprocity may differ for class 1, the class wit
+> h the largest separate estimate
+. generate byte c1 = (class == 1)
 
-. nwsaom, waves(w1 w2) groups(class) outdegree reciprocity transtrip egox(c2) interact(egox_c2#recip
-> rocity) seed(5)
+. nwsaom, waves(w1 w2) groups(class) outdegree reciprocity transtrip egox(c1) in
+> teract(egox_c1#reciprocity) seed(2) theta0(`=b[1,1]' `=b[1,2]' `=b[1,3]' 0 0)
 
 SAOM (Method of Moments, conditional), waves: w1 w2
-Actors: 151                            Periods: 4
-Groups: 4 (variable class), actors per group: 45, 37, 33, 36; waves per group: 2, 2, 2, 2
+Actors: 810                            Periods: 15
+Groups: 15 (variable class), actors per group: 37, 33, 36, 54, 91, 47, 90, 61, 3
+> 8, 43, 48, 52, 45, 82, 53; waves per group: 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
+> , 2, 2, 2
 
-----------------------------------------------------------------------------------------------
-                    w1_to_w2 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
------------------------------+----------------------------------------------------------------
-                   outdegree |  -2.235427   .0821592   -27.21   0.000    -2.396456   -2.074398
-                 reciprocity |   1.864939   .1691134    11.03   0.000     1.533482    2.196395
-                     egox_c2 |   .1400424   .1937284     0.72   0.470    -.2396584    .5197431
-                   transtrip |   .4968187    .057962     8.57   0.000     .3832153    .6104222
-interact_egox_c2_reciprocity |   1.100587   .4208535     2.62   0.009     .2757298    1.925445
-----------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+     w1_to_w2 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+--------------+----------------------------------------------------------------
+    outdegree |  -2.384326   .0324028   -73.58   0.000    -2.447835   -2.320818
+  reciprocity |    2.08892   .0689691    30.29   0.000     1.953743    2.224097
+      egox_c1 |   .2615522   .1740855     1.50   0.133    -.0796492    .6027536
+    transtrip |   .4963974   .0271248    18.30   0.000     .4432337    .5495611
+interact_eg~y |   .6680217   .3641829     1.83   0.067    -.0457637    1.381807
+-------------------------------------------------------------------------------
 Rate parameters (estimated, one per inter-wave period):
 
-----------------------------------------------------------
-             |   period1    period3    period5    period7 
--------------+--------------------------------------------
-        rate |    6.6966     3.8551     2.2665     8.9157 
-          se |    1.0520     0.7526     0.5252     2.4250 
-----------------------------------------------------------
-Overall maximum convergence ratio: 0.193 (criterion: below 0.25; met)
-Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for reciprocity (-0.115)
-Convergence is good only if both criteria are met. Refit starting from these estimates with theta0()
-> ; see nwsaom.
+--------------------------------------------------------------------------------
+             |   period1    period3    period5    period7    period9   period11 
+-------------+------------------------------------------------------------------
+        rate |    3.8736     2.4402     9.1677     5.6277     6.9780     7.5309 
+          se |    0.7355     0.5898     2.5406     0.8357     0.8594     1.3963 
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+             |  period13   period15   period17   period19   period21   period23 
+-------------+------------------------------------------------------------------
+        rate |   11.0607     4.7093     3.9093     7.0295     2.2395     6.0782 
+          se |    1.6088     0.8056     0.7551     1.2526     0.4243     1.1001 
+--------------------------------------------------------------------------------
+
+-----------------------------------------------
+             |  period25   period27   period29 
+-------------+---------------------------------
+        rate |    6.6472     3.4449     5.1526 
+          se |    1.0386     0.5106     0.9422 
+-----------------------------------------------
+Overall maximum convergence ratio: 0.120 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 
 . log close

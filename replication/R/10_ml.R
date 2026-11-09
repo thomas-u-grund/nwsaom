@@ -1,4 +1,4 @@
-# Appendix "Estimation in detail": RSiena's maximum-likelihood estimates of the model outdegree, reciprocity,
+# Section 6.3 (maximum-likelihood and Bayesian estimation): RSiena's maximum-likelihood estimates of the model outdegree, reciprocity,
 # transitive triplets on the three Glasgow waves (seeds 1 to 3), which the article compares with nwsaom's
 # (article/gen_logs.do, extras.log: nwsaom ..., ml seed(1) and seed(2)). Prints the estimates, standard errors
 # and times. Run from the replication folder: Rscript R/10_ml.R   (about 15 minutes)

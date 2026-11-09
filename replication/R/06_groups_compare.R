@@ -1,5 +1,5 @@
 # Compares the nwsaom runs (exN_nwsaom.csv, ten seeds) with the RSiena runs (exN_rsiena.csv, ten seeds): means over seeds.
-# Table 4 of the article and the agreement numbers of Section 5.9. Run from the replication folder after
+# The agreement numbers of Section 5.7 of the article. Run from the replication folder after
 # stata/03_groups_ex1.do to 05_groups_ex4.do and R/03_groups_ex1.R to 05_groups_ex4.R:
 #     Rscript R/06_groups_compare.R   (writes results/groups/compare.log)
 dir.create("results/groups", recursive = TRUE, showWarnings = FALSE)

@@ -1,9 +1,9 @@
-* Example 1, agreement with RSiena: the same model fitted with ten seeds; writes results/groups/ex1_nwsaom.csv (compared in R/06_groups_compare.R)
+* Example 1, agreement with RSiena (Section 5.7): four of the classes in one joint model, fitted with ten seeds; writes results/groups/ex1_nwsaom.csv (compared in R/06_groups_compare.R)
 do stata/setup.do
 set linesize 100
 capture mkdir results
 capture mkdir results/groups
-do stata/groups_stack_classes.do
+do stata/groups_stack_four.do
 tempname h
 postfile `h' seed str20 name double(theta se) using results/groups/ex1_nwsaom.dta, replace
 forvalues s = 1/10 {

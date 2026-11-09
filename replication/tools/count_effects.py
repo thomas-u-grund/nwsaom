@@ -1,4 +1,4 @@
-"""The effect counts of the article (Section "How much of RSiena is there", Table 5): rows of RSiena 1.6.6's
+"""The effect counts of the article (Section 9, "What is not implemented"): rows of RSiena 1.6.6's
 effects table (getEffects() over twelve data configurations), how many nwsaom implements, and how many are
 not implemented. Reads results/coverage/SAOM_EFFECTS_INVENTORY.csv, a copy of docs/SAOM_EFFECTS_INVENTORY.csv
 of the nwsaom repository at tag v1.5.2 (built by docs/inventory_tools there; one row per RSiena short name,

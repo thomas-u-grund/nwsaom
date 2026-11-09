@@ -1,4 +1,4 @@
-* Times of the slower estimators quoted in Section 6 (appendix): nwsaom's maximum-likelihood fit with seeds 1 to 3
+* Times of the slower estimators quoted in Section 6.3: nwsaom's maximum-likelihood fit with seeds 1 to 3
 * and the default Bayesian run, for the model with outdegree, reciprocity and transitive triplets.
 * Run from the replication folder:  stata -e do stata/13_ml_bayes_time.do   (about 7 minutes)
 quietly do stata/setup.do

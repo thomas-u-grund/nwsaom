@@ -1,6 +1,6 @@
-# The benchmark figure of the article (difference between the mean estimates of nwsaom and RSiena, in RSiena
-# standard errors: fig_bench_agree) and the timing figure (fig_bench_time, not in the article; Table 6 has
-# the same numbers). Reads bench_results.json written by tools/build_tables.py.
+# Two benchmark figures, neither in the article: the difference between the mean estimates of nwsaom and RSiena
+# for every parameter, in RSiena standard errors (fig_bench_agree; Section 8.2 gives its largest and mean value),
+# and the timing figure (fig_bench_time; the manual's Appendix D has the same numbers). Reads bench_results.json written by tools/build_tables.py.
 # Run from the replication folder: Rscript R/08_bench_figures.R [TABLES_DIR [FIG_DIR]]
 # Defaults: results/benchmark/tables and results/benchmark/figures.
 suppressPackageStartupMessages({

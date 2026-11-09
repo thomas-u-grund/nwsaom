@@ -1,4 +1,4 @@
-# Table "The estimates of two examples, nwsaom and RSiena" (Section 5.7) and the sienaGOF reference:
+# Table "The estimates of two examples, nwsaom and RSiena" (Section 8.2) and the sienaGOF reference:
 # the article's examples E1, E3, E4, E5 fitted in RSiena with the same data, effects and Phase 3 length
 # (1,000 simulations) as stata/02_examples.do, seeds 12345, 1, 2, 3, 4.
 # Run from the replication folder: Rscript R/02_examples.R   (about 5 minutes)
