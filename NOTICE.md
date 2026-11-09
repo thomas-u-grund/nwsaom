@@ -20,7 +20,7 @@ Estimates, standard errors, rate parameters, target statistics, score tests, sim
 
 ## AI assistance
 
-The software was developed with Claude Code (Anthropic), an AI coding assistant, working under the author's direction. It helped port algorithms from RSiena and multiSiena into Stata, Mata and C and helped write the tests. The author specified the scope, reviewed the code, and is responsible for the package. Its correctness rests on validation, not on the assistant: the results are compared numerically with RSiena and multiSiena, and the test suite reruns these comparisons.
+The software was developed with Claude Code (Anthropic), an AI coding assistant, working under the author's direction. It helped port algorithms from RSiena and multiSiena into Stata, Mata and C and helped write the tests. The author specified the scope, reviewed the code, and is responsible for the package. Its correctness rests on validation, not on the assistant: the results are compared numerically with RSiena (the Bayesian sampler, which follows multiSiena, with RSiena's maximum-likelihood estimates and an exact calculation), and the test suite reruns these comparisons.
 
 ## How to cite
 

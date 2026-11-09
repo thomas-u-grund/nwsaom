@@ -86,7 +86,10 @@ def pairs_for(m, rs_rows, nw_rows, all_fits=False):
         if None in er or None in en or None in sr or None in sn: continue
         ser = st.mean(sr)
         res.append(dict(param=k, nw=st.mean(en), rs=st.mean(er), d=(st.mean(en)-st.mean(er))/ser, se_ratio=st.median(sn)/st.median(sr),
-                        rs_sd=(st.stdev(er)/ser if len(er) > 1 else None)))
+                        rs_sd=(st.stdev(er)/ser if len(er) > 1 else None),
+        # Monte Carlo error of the difference of the two means (seed-to-seed sd / sqrt(seeds), both programs)
+        mcse=((st.variance(er)/len(er) + st.variance(en)/len(en))**0.5 if len(er) > 1 and len(en) > 1 else None),
+        diff=st.mean(en)-st.mean(er)))
     return res
 models = []
 allp = []
@@ -104,6 +107,11 @@ mac["benchmaxdiff"] = f"{max(abs(p['d']) for p in allp):.2f}"; mac["benchmeandif
 # the largest difference of each model, and the largest and second-largest model (the article names the model with the largest)
 mdiff = sorted(((max(abs(r["d"]) for r in m["rows"]), m["id"]) for m in models if m["rows"]), reverse=True)
 mac["benchmaxdiffmodel"] = mdiff[0][1]
+# each difference against its Monte Carlo error (|diff| > 1.96 MC errors; about 5% would by chance)
+mcp = [p for p in allp if p["mcse"]]
+mcbig = [p for p in mcp if abs(p["diff"]) > 1.96 * p["mcse"]]
+mac["benchmcn"] = str(len(mcp)); mac["benchmcbig"] = str(len(mcbig)); mac["benchmcexp"] = str(round(0.05 * len(mcp)))
+mac["benchmcbigmax"] = f"{max(abs(p['d']) for p in mcbig):.2f}"
 allp_any = [p for i in ALLINFO for p in pairs_for(i, ALLINFO[i]["impls"].get("RSiena", []), ALLINFO[i]["impls"].get("nwsaom", []), True)]
 mac["benchmaxdiffall"] = f"{max(abs(p['d']) for p in allp_any):.2f}"; mac["benchmeandiffall"] = f"{st.mean(abs(p['d']) for p in allp_any):.2f}"
 mac["benchmaxdiffnext"] = f"{mdiff[1][0]:.2f}"
