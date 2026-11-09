@@ -3,6 +3,16 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.5.7] - 2026-11-09
+
+### Fixed
+- **The statistic of the quadratic shape effect is that of the centred behavior values, as in RSiena.** RSiena's statistic is the sum of (z - mean)^2, where mean is the overall mean of the observed behavior: its `StatisticCalculator` centres the values before `QuadraticShapeEffect` squares them. nwsaom summed the raw z^2 (except in models with several groups). The two differ by 2 * mean times the linear shape statistic plus a constant. Estimates, standard errors and the overall maximum convergence ratio do not depend on that, but since 1.5.3 Phase 2 applies RSiena's Dolby correction to each statistic separately, and that correction does: the raw statistic was almost uncorrelated with its score function (correlation 0.02 against 0.90 in RSiena on the article's 50-actor co-evolution model), so the correction did little for it and co-evolution fits with a quadratic effect converged less often than in RSiena. With the centred statistic, nwsaom and RSiena converge alike (7 of 7 seeds for that model in both). The convergence t-ratio of the quadratic effect, and `estat timetest` for it, now use the centred statistic directly; `estat timetest` converted it before.
+- An audit of all behavior effects found no other statistic that disagrees with its ministep change contribution, apart from effects where RSiena itself has that form (totSim, avSimPopAlt, totSimPopAlt, avAltPop, totAltPop, quad_cc), which nwsaom keeps as in RSiena. New test: `test_nwsaom_quadcentre`.
+- The plugin (protocol 154) computes the centred statistic. With an older plugin, a model with the quadratic effect runs in Mata (`nwsaom multinet` stops with a message), so that the observed and simulated statistics are always computed the same way.
+
+### Documentation
+- The help file and the manual describe the quadratic statistic correctly.
+
 ## [1.5.6] - 2026-11-09
 
 ### Fixed

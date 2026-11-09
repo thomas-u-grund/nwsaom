@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.5.6  09nov2026 author: Thomas Grund}{...}
+{* *! version 1.5.7  09nov2026 author: Thomas Grund}{...}
 
 {title:Title}
 
@@ -262,9 +262,9 @@ and is required with {opt behavior()}. Ministep contribution: the change (+1 or 
 sum of the actors' current values.
 
 {pstd}
-{bf:quadratic} (RSiena's quad, {cmd:QuadraticShapeEffect}): as in RSiena, the ministep contribution
-uses the centred value, {cmd:(2*(value-mean)+diff)*diff}, while the statistic is the sum of the
-uncentred values squared.
+{bf:quadratic} (RSiena's quad, {cmd:QuadraticShapeEffect}): as in RSiena, the statistic is the sum
+of the squared centred values, {cmd:(value-mean)^2}, and the ministep contribution is its change,
+{cmd:(2*(value-mean)+diff)*diff}; {it:mean} is the overall mean of the observed behavior.
 
 {pstd}
 {bf:avalt} (RSiena's avAlt, {cmd:AverageAlterEffect}) is the standard influence effect: an actor's
@@ -1149,4 +1149,4 @@ The same estimates are available as {cmd:nwsaom_ml} after an {cmd:nwsaom} fit. T
     {help nwsaom}, {help nwsaom_estat}, {help nwergm}
 
 {hline}
-{pstd}{it:nwsaom version 1.5.6, 9 November 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.5.7, 9 November 2026}{p_end}{* nwversion}

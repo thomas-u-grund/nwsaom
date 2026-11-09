@@ -7859,6 +7859,7 @@ struct SaomBehaviorNativeConfig {
 	real scalar needv43		// protocol 43: behavior effects of the network x a covariate
 	real scalar needv36		// protocol 36: effFrom terms (covariate main effects on a behavior)
 	real scalar needv35		// protocol 35: network-position / alter / similarity-family behavior effects (term codes 105-124)
+	real scalar needv154		// protocol 154: the quadratic shape statistic of the centred values (an older plugin sums the raw squares)
 }
 
 /* ===================================================================
@@ -10333,22 +10334,17 @@ real scalar change_saom_linear(class SaomBehavior scalar Beh, class SaomGraph sc
 /*
    Quadratic shape (RSiena's own QuadraticShapeEffect.cpp) - captures
    whether actors' own behavior tends toward the extremes of its
-   observed range (positive coefficient) or the middle (negative). A
-   real, easy-to-miss subtlety caught only by reading the actual C++
-   source, not the SIENA manual, and kept exactly as RSiena has it
-   rather than "corrected" toward internal consistency (see this file's
-   own unit-26 DESIGN account for why): the MINISTEP delta uses the
-   CENTERED value (`2*centeredValue(i) + diff) * diff' - the exact
-   algebraic delta of `(centeredValue(i)+diff)^2 - centeredValue(i)^2'),
-   but the GLOBAL/observed statistic (egoStatistic() in the real source)
-   sums the RAW, UNCENTERED `value_i^2' - two genuinely different scales
-   for the same effect, both needed, matching RSiena's own real numbers
-   being this codebase's own certification standard throughout.
+   observed range (positive coefficient) or the middle (negative). The
+   statistic is sum((value_i - overallMean)^2): RSiena's egoStatistic()
+   squares currentValues, which its StatisticCalculator has centred at
+   the overall mean. The ministep change (2*centeredValue(i) + diff) *
+   diff is the exact change of that statistic. (Up to 1.5.6 the
+   statistic summed the raw value_i^2: the estimates are the same, but
+   the raw statistic mixes in 2*overallMean times the linear statistic,
+   which broke the Dolby correction and the t-ratio of the quadratic.)
 */
 real rowvector stat_saom_quadratic(class SaomBehavior scalar Beh, class SaomGraph scalar G){
-	// several groups: the statistic of the centred values (RSiena); the mean of the group changes between the periods
-	if (SaomGroupsMode()) return(sum((Beh.values :- Beh.overallMean) :^ 2))
-	return(sum(Beh.values :* Beh.values))
+	return(sum((Beh.values :- Beh.overallMean) :^ 2))
 }
 real scalar change_saom_quadratic(class SaomBehavior scalar Beh, class SaomGraph scalar G, real scalar i, real scalar diff){
 	return((2*Beh.centeredValue(i) + diff) * diff)
@@ -12501,6 +12497,10 @@ struct SaomMNBFit scalar SaomEstimateMNB(pointer(class SaomGraph scalar) rowvect
 		errprintf("nwsaom multinet: tou needs a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)).\n")
 		exit(198)
 	}
+	if (cfgB.needv154 & ver < 154) {
+		errprintf("nwsaom multinet: the quadratic shape effect needs a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)).\n")
+		exit(198)
+	}
 	if (any(cfgB.termcodes :>= 30000) & ver < 103) {
 		errprintf("nwsaom multinet: interactions of behavior effects need a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)).\n")
 		exit(198)
@@ -12575,16 +12575,6 @@ struct SaomMNBFit scalar SaomEstimateMNB(pointer(class SaomGraph scalar) rowvect
 	par0 = (theta01, theta02, thetab0, rate10, rate20, rateb0)
 	israte = (J(1, C.p, 0), J(1, 3 * P, 1))
 	nf = SaomRMCore(C, &SaomMNBSimManyCB(), par0, C.p, israte, 1 :- israte, K0, K3, firstg)
-	{
-		real scalar tq, tl
-		tq = .
-		tl = .
-		for (k=1; k<=Mbeh.nterms; k++) {
-			if (Mbeh.names[k] == "quadratic") tq = k
-			if (Mbeh.names[k] == "linear") tl = k
-		}
-		if (tq < . & tl < .) SaomStoreQuadFix(p1 + p2 + tq, p1 + p2 + tl, overallMean)
-	}
 	fit.par = nf.par
 	fit.tconv = nf.tconv
 	fit.Vfull = nf.Vfull
@@ -13420,7 +13410,7 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 			C.use_native = 0
 			C.use_batch = 0
 		}
-		if ((C.cfgBeh.needv35 & k < 35) | (C.cfgBeh.needv36 & k < 38) | (C.cfgBeh.needv43 & k < 44)) {
+		if ((C.cfgBeh.needv35 & k < 35) | (C.cfgBeh.needv36 & k < 38) | (C.cfgBeh.needv43 & k < 44) | (C.cfgBeh.needv154 & k < 154)) {
 			C.use_native = 0
 			C.use_batch = 0
 		}
@@ -13761,16 +13751,6 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 
 	Dhat3 = SaomJacobianPerPeriod(Zp3, Sp3, cols(Zp3) / ptot, ptot)
 	SaomStoreScoreInputs(Dhat3, S3, m3, userfixc, theta, Zp3, Sp3)
-	{
-		real scalar tq, tl
-		tq = .
-		tl = .
-		for (k=1; k<=Mbeh.nterms; k++) {
-			if (Mbeh.names[k] == "quadratic") tq = k
-			if (Mbeh.names[k] == "linear") tl = k
-		}
-		if (tq < . & tl < .) SaomStoreQuadFix(C.pNet + tq, C.pNet + tl, C.overallMean)
-	}
 	// a fixed effect gets no standard error (0; RSiena: NA)
 	for (k=1; k<=ptot; k++) {
 		if (coevfixed[k]) {
@@ -14691,6 +14671,7 @@ struct SaomBehaviorNativeConfig scalar SaomBehaviorNativeSetup(class SaomBehavio
 	cfg.fntype = J(1, Mbeh.nterms, 0)
 	cfg.eligible = 1
 	cfg.needv35 = 0
+	cfg.needv154 = 0
 	cfg.needv36 = 0
 	cfg.needv43 = 0
 	for (t=1; t<=Mbeh.nterms; t++) {
@@ -14701,7 +14682,10 @@ struct SaomBehaviorNativeConfig scalar SaomBehaviorNativeSetup(class SaomBehavio
 		if (strpos(nm, "_endow")) nm = subinstr(nm, "_endow", "")
 		if (strpos(nm, "_creation")) nm = subinstr(nm, "_creation", "")
 		if (nm == "linear") cfg.termcodes[t] = 101
-		else if (nm == "quadratic") cfg.termcodes[t] = 102
+		else if (nm == "quadratic") {
+			cfg.termcodes[t] = 102
+			cfg.needv154 = 1
+		}
 		else if (nm == "avalt") cfg.termcodes[t] = 103
 		else if (nm == "avsim") cfg.termcodes[t] = 104
 		else if (substr(nm, 1, 3) == "bn_") {
@@ -15554,16 +15538,6 @@ void SaomStoreScoreInputs(real matrix D, real matrix S, real rowvector m, real r
 	__nwsaom_score_par = par
 	__nwsaom_score_Zp = Zp
 	__nwsaom_score_Sp = Sp
-	external real rowvector __nwsaom_score_qf
-	__nwsaom_score_qf = J(1, 0, .)
-}
-
-/* the raw quadratic-shape statistic of the behavior (sum of squares) differs from RSiena's centred one by a multiple of the linear statistic;
-   estat timetest drops other dummies in its separate tests, so it needs the centred form: qi, li = positions of the quadratic and linear
-   effects, m = the overall behavior mean */
-void SaomStoreQuadFix(real scalar qi, real scalar li, real scalar m) {
-	external real rowvector __nwsaom_score_qf
-	__nwsaom_score_qf = (qi, li, m)
 }
 
 /* RSiena's EvaluateTestStatistic() (R/Sienatest.r) for the generalised score test (maxlike = FALSE). test, redundant: 1 x n 0/1.
@@ -15641,7 +15615,7 @@ void SaomScoreRun(real rowvector test) {
    period), and the effect indices in __nwsaom_tt_eff. effects: 1 x ptot 0/1 of the effects to test. */
 void SaomTimeTestRun(real scalar nper, real rowvector effects, real scalar neffpar, real scalar fixrates, | real matrix grp) {
 	external real matrix __nwsaom_score_Zp, __nwsaom_score_Sp
-	external real rowvector __nwsaom_score_fix, __nwsaom_score_par, __nwsaom_score_qf
+	external real rowvector __nwsaom_score_fix, __nwsaom_score_par
 	real matrix Zq2, Dq2
 	real scalar ptot, K, q, j, k, i, ne, nd, N, idx, r
 	real matrix Dq, Ztot, Daug, Saug, Zaug, Zq, Sq, Dsum, D2, res, effres
@@ -15668,10 +15642,6 @@ void SaomTimeTestRun(real scalar nper, real rowvector effects, real scalar neffp
 		Dsum = Dsum + Dq
 		Zq2 = Zq
 		Dq2 = Dq
-		if (cols(__nwsaom_score_qf) == 3) {
-			Zq2[., __nwsaom_score_qf[1]] = Zq[., __nwsaom_score_qf[1]] - 2 * __nwsaom_score_qf[3] * Zq[., __nwsaom_score_qf[2]]
-			Dq2[__nwsaom_score_qf[1], .] = Dq[__nwsaom_score_qf[1], .] - 2 * __nwsaom_score_qf[3] * Dq[__nwsaom_score_qf[2], .]
-		}
 		if (q >= 2) {
 			for (j=1; j<=ne; j++) {
 				idx = ptot + (j-1)*(nper-1) + (q-1)
@@ -15996,7 +15966,7 @@ real scalar SaomGofSimCoev(class SaomGraph scalar G, class SaomModel scalar M, r
 	cfg = SaomNativeSetup(M)
 	cfgBeh = SaomBehaviorNativeSetup(Mbeh)
 	native = cfg.eligible & cfgBeh.eligible & SaomNativeAvailable()
-	if (native) native = (SaomNativePluginVersion() >= (any(cfgBeh.fntype :!= 0) ? 12 : 3))
+	if (native) native = (SaomNativePluginVersion() >= (cfgBeh.needv154 ? 154 : (any(cfgBeh.fntype :!= 0) ? 12 : 3)))
 	if (native) {
 		SaomStructSend1(G.n)
 		r = SaomSimulateIntervalCoevNative(G, M, cfg, thetaNet, Beh, Mbeh, cfgBeh, thetaBeh, rateNet, rateBeh, 1)
@@ -16847,7 +16817,7 @@ struct SaomMBCtx scalar SaomMBInit(
 	real rowvector ratesNet0, stb
 	real matrix ratesBeh0
 	real colvector zero
-	real scalar pd, b, p, why_ok, anyneed35, anyneed36, anyneed43
+	real scalar pd, b, p, why_ok, anyneed35, anyneed36, anyneed43, anyneed154
 	string scalar why
 
 	SaomBehCovFillDyn(Behwaves, overallMean)
@@ -16900,8 +16870,10 @@ struct SaomMBCtx scalar SaomMBInit(
 	anyneed35 = 0
 	anyneed36 = 0
 	anyneed43 = 0
+	anyneed154 = 0
 	for (b=1; b<=C.nb; b++) {
 		cb = SaomBehaviorNativeSetup(*Mbehs[b])
+		anyneed154 = anyneed154 | cb.needv154
 		anyneed35 = anyneed35 | cb.needv35
 		anyneed36 = anyneed36 | cb.needv36
 		anyneed43 = anyneed43 | cb.needv43
@@ -16911,7 +16883,7 @@ struct SaomMBCtx scalar SaomMBInit(
 	}
 	C.use_native = why_ok & SaomNativeAvailable()
 	if (C.use_native & SaomGroupsMode()) C.use_native = (SaomNativePluginVersion() >= 152)
-	if (C.use_native) C.use_native = (SaomNativePluginVersion() >= (C.hastimed ? 27 : 19) & (!anyneed35 | SaomNativePluginVersion() >= 35) & (!anyneed36 | SaomNativePluginVersion() >= 38) & (!anyneed43 | SaomNativePluginVersion() >= 44))
+	if (C.use_native) C.use_native = (SaomNativePluginVersion() >= (C.hastimed ? 27 : 19) & (!anyneed35 | SaomNativePluginVersion() >= 35) & (!anyneed36 | SaomNativePluginVersion() >= 38) & (!anyneed43 | SaomNativePluginVersion() >= 44) & (!anyneed154 | SaomNativePluginVersion() >= 154))
 	why = ""
 	if (!SaomNativeAvailable()) why = "no native plugin for this platform"
 	else if (!C.cfg.eligible) why = C.cfg.whynot

@@ -1219,12 +1219,8 @@ void saom_test_unit26_quad_certify(real scalar n, real scalar seed) {
 	assert(maxerrC < 1e-8)
 	printf("unit 26 PASS: change_saom_quadratic()'s ministep delta matches the CENTERED statistic's own before/after difference exactly (the formula it actually implements)\n")
 
-	// Separate, explicit demonstration (not folded into the loop above,
-	// for clarity) that the ministep delta does NOT equal the RAW
-	// (uncentered) statistic's own difference whenever mean!=0 - the
-	// real RSiena quirk, pinned down so a future "fix" toward internal
-	// consistency would break this assertion rather than silently
-	// drifting from real RSiena's own actual behavior.
+	// The statistic itself (stat_saom_quadratic()) is that of the centred values, as in RSiena (its StatisticCalculator
+	// centres the values before QuadraticShapeEffect squares them; 1.5.7), so its own change equals the ministep delta.
 	Beh = SaomBehavior()
 	Beh.init((1\2\3\4\5), 1, 5, 3)		// overallMean = 3 != 0
 	i = 1
@@ -1233,9 +1229,10 @@ void saom_test_unit26_quad_certify(real scalar n, real scalar seed) {
 	predC = change_saom_quadratic(Beh, G, i, diff)		// ministep delta, captured BEFORE mutating Beh (change_saom_quadratic() reads Beh's current state)
 	Beh.setvalue(i, Beh.value(i) + diff)
 	afterR = stat_saom_quadratic(Beh, G)[1]
-	printf("unit 26 quadratic quirk-check: raw-scale actual change = %g, ministep delta = %g (genuinely different, as expected - both real RSiena's own construction, not a bug)\n", afterR-beforeR, predC)
-	assert(abs((afterR - beforeR) - predC) > 1e-6)
-	printf("unit 26 PASS: confirmed change_saom_quadratic()'s own ministep delta genuinely differs from the raw statistic's own difference when overallMean!=0, matching real RSiena's own documented (not internally 'fixed') behavior\n")
+	printf("unit 26 quadratic statistic: actual change = %g, ministep delta = %g\n", afterR-beforeR, predC)
+	assert(abs(beforeR - 10) < 1e-12)
+	assert(abs((afterR - beforeR) - predC) < 1e-12)
+	printf("unit 26 PASS: stat_saom_quadratic() is the centred statistic and its change equals the ministep delta\n")
 }
 
 real scalar saom_ego_avalt(class SaomBehavior scalar Beh, class SaomGraph scalar G, real scalar i) {

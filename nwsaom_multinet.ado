@@ -1,4 +1,4 @@
-*! version 1.5.6  09nov2026 nwsaom multinet (split out of nwsaom.ado, see nwsaom_multiplex.ado)
+*! version 1.5.7  09nov2026 nwsaom multinet (split out of nwsaom.ado, see nwsaom_multiplex.ado)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -158,7 +158,6 @@ program define nwsaom_multinet, eclass
 	capture mata: mata drop __nwsaom_score_par
 	capture mata: mata drop __nwsaom_score_Zp
 	capture mata: mata drop __nwsaom_score_Sp
-	capture mata: mata drop __nwsaom_score_qf
 	capture mata: mata drop __nwsaom_mn_theta0
 	local nw1 : word count `net1'
 	local nw2 : word count `net2'
@@ -477,7 +476,7 @@ program define nwsaom_multinet, eclass
 	ereturn matrix tconv = `tc'
 	ereturn scalar tconv_max = scalar(`tc'_max)
 	ereturn local cmd "nwsaom_multinet"
-	ereturn local version "1.5.6"
+	ereturn local version "1.5.7"
 	_nwsaom_postengine
 	di as text "{hline}"
 	if `__tmany' di as text "Several co-evolving networks (Method of Moments), `nw1' waves, `__nA1' actors and `=`nodes'-`__nA1'' events (network " cond(`__tm1', "1", "2") " is two-mode)"

@@ -673,8 +673,7 @@ fit time of a small model (X2 of the article's extra benchmark: 0.77 s -> 0.26 s
   (own range, own pairs; for a changing covariate pooled over the group's periods), the balance mean (`calcBalmean()` of the group's own data), the mean (`overallMean`), similarity mean
   and variance of a dependent behavior. The overall mean of actor covariates and the ranges ARE overall. `SaomGroupsRegister()` registers the terms that carry such a constant
   (simcov, balance*, behegox/behaltx/behegoplusalt, behsim); `SaomGroupsSync()` sets them per period for the targets in Mata and `BATCHSETUP` gets a per-period table (the plugin copies
-  the model per period, `Mpd`). A statistic that is nonlinear in the centred behavior (quadratic shape) must use the centred values in groups: the raw sum is only equivalent to the centred
-  one while the mean is the same in all periods (fixed in `stat_saom_quadratic()` and the plugin).
+  the model per period, `Mpd`). The quadratic shape statistic uses the centred values (since 1.5.7 always, see the next section).
 - A dyadic covariate is centred by the mean of its off-diagonal cells within each group (`SaomDyadPrep()`).
 - RSiena 1.6.14 stops with `INTEGER() can only be applied to a 'integer', not a 'list'` (initializeFRAN) for a group object whose groups have different numbers of waves, with or without
   covariates; `gwaves()` is validated against the equivalent object made of two-wave groups (uncentred covariates, no group constants in the model). Also in 1.6.14 the "GroupTest" of
@@ -720,3 +719,14 @@ The dialog engine cannot evaluate parentheses inside an `if` condition of a PROG
 ## `nwinstall, buildmata(nwsaom)` compiles the source files listed in the core (2026-11-03)
 
 The user-side rebuild of lnwsaom1.mlib and lnwsaom2.mlib lives in the core (`nwinstall_buildmata.ado`, table `nwinstall_buildmata_tab`): it lists the source files of this package, the library names and the `mata mlib add` patterns copied from `lib/build.do`. If this package gets a new Mata source file (as nwsaom did with `unw_saom_struct.do`, included by `unw_saom.do`) or another library, the table must change, or the rebuild fails with "file ... not found" (r(601)) or leaves functions out. The sources fetched are those on `main`.
+
+## The quadratic shape statistic is that of the centred values (1.5.7, 2026-11-09)
+
+RSiena's `QuadraticShapeEffect::egoStatistic()` squares `currentValues`, but `StatisticCalculator` has already centred them at the overall
+mean (`currentState[i] - overallMean()`), so the statistic is sum((z - c)^2). Up to 1.5.6 nwsaom summed the raw z^2, read off egoStatistic()
+alone. The raw statistic equals the centred one + 2c * linear + constant: the estimates, standard errors and the maximum convergence ratio
+are invariant to that, but the per-statistic Dolby correction (since 1.5.3) and the t-ratio of the quadratic are not; the correlation of the
+quadratic statistic with its score was 0.02 instead of RSiena's 0.9, and co-evolution fits converged less often than RSiena. Check for this
+class of bug: for an effect whose statistic only depends on ego's own value (or on alters for an ego without in-ties), stat(z + d e_i) - stat(z)
+must equal the change statistic. The audit of all behavior effects (2026-11-09) found only quadratic; totSim, avSimPopAlt, totSimPopAlt,
+avAltPop, totAltPop and quad_cc fail it in RSiena's own source too, and nwsaom copies RSiena there.

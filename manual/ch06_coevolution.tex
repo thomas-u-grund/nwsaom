@@ -79,7 +79,7 @@ option & RSiena effect & what it does \\
 \midrule
 \endhead
 \opt{linear} & \texttt{linear} & Baseline tendency to higher values. Ministep statistic: the raw change ($\pm1$); observed statistic: sum of the current values. Required unless \opt{behshape()} replaces the shape effects. \\
-\opt{quadratic} & \texttt{quad} & Quadratic shape. Copied from RSiena as defined there: the ministep uses the \emph{centered} value ($(2(z-\bar z)+d)\,d$), while the global statistic sums the raw, uncentered squared value. \\
+\opt{quadratic} & \texttt{quad} & Quadratic shape, as in RSiena: the statistic sums the squared centered values $(z-\bar z)^2$, and the ministep uses its change $(2(z-\bar z)+d)\,d$. \\
 \opt{behshape(quad\_cc)}, \opt{behshape(quad\_nc)} & \texttt{quad} variants (centred / non-centred) & Alternatives to \opt{quadratic}; use them \emph{instead of} it, never together. \\
 \opt{behshape(threshold:\#)} & \texttt{threshold} & Indicator for values at or above a threshold. \\
 \opt{behshape(simallnear:\#)}, \opt{behshape(simallfar:\#)} & \texttt{simAllNear}, \texttt{simAllFar} & Similarity to \emph{all} actors within / beyond a distance (defaults 2 and 4). \\
