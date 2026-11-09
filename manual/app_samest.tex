@@ -161,15 +161,6 @@ RSiena's as well.
 parameter of every model, in RSiena standard errors; the band marks $\pm0.1$.}
 \end{figure}
 
-\paragraph{The degree effects with a square root.} In RSiena 1.6.1 to 1.6.12 the
-effects \texttt{outPop.c}, \texttt{outPopSqrt}, \texttt{outPopMore},
-\texttt{outPopSqrtMore}, \texttt{outPopThreshold}, \texttt{inAct.c} and
-\texttt{inActSqrt} had the default internal effect parameter 0, with which the
-statistic used the degrees at the start of the period while the ministep used the
-current degrees. \nwsaom{} implements the documented definition, which RSiena 1.6.13
-made the default. Comparisons with older RSiena versions need
-\texttt{setEffect(..., parameter = 1)}.
-
 \paragraph{Limits of the comparison.} One data set (Glasgow and disconnected copies
 of it) for the one-mode models and one specification per family for the further
 models; agreement may differ for other effects and for sparser or denser networks.
