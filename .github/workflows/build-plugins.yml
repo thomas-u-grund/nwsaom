@@ -45,7 +45,7 @@ jobs:
         run: |
           mkdir lib\plugins\windows
           cd native
-          cl /LD /DSYSTEM=STWIN32 /I spi saom_sim.c spi\stplugin.c /Fe:..\lib\plugins\windows\saom_sim_windows.plugin
+          cl /LD /O2 /DSYSTEM=STWIN32 /I spi saom_sim.c spi\stplugin.c /Fe:..\lib\plugins\windows\saom_sim_windows.plugin
       - uses: actions/upload-artifact@v4
         with:
           name: plugins-windows

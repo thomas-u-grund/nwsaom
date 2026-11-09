@@ -4,7 +4,7 @@
 # published at https://www.stata.com/plugins/); it is not this package's own code.
 #   make macos    universal (x86_64 + arm64) binaries, run on macOS
 #   make unix     Linux (run on a Linux host or the CI runner)
-# Windows (Visual Studio x64 prompt): cl /LD /DSYSTEM=STWIN32 /I spi <plugin>.c spi\stplugin.c /Fe:..\lib\plugins\windows\<plugin>_windows.plugin
+# Windows (Visual Studio x64 prompt): cl /LD /O2 /DSYSTEM=STWIN32 /I spi <plugin>.c spi\stplugin.c /Fe:..\lib\plugins\windows\<plugin>_windows.plugin
 
 CC = clang
 CFLAGS = -O2 -Wall -Ispi
