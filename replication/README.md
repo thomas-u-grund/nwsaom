@@ -146,4 +146,4 @@ Timings depend on the machine and its load; `results/benchmark/raw` records the 
 
 ## Where the speed comes from
 
-Appendix D of the `nwsaom` manual explains, with the measurements of the scripts named in the table above, why `nwsaom` is faster than RSiena although it runs the same algorithm with the same defaults.
+Appendix D of the `nwsaom` manual explains (the manual is archived at Zenodo, <https://doi.org/10.5281/zenodo.23623807> (all versions), and is also in the `nwsaom` repository: <https://github.com/thomas-u-grund/nwsaom/blob/main/manual/nwsaom_manual.pdf>), with the measurements of the scripts named in the table above, why `nwsaom` is faster than RSiena although it runs the same algorithm with the same defaults.

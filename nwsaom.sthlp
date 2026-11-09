@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.5.8  09nov2026 author: Thomas Grund}{...}
+{* *! version 1.5.9  09nov2026 author: Thomas Grund}{...}
 {marker topic}
 {helpb nwtopical##analysis_statmodels:[NW-2.6.6] Statistical Estimation of Networks}
 
@@ -670,7 +670,7 @@ deprecated: use {cmd:nwsaom multinet}.
 {title:Remarks}
 
 {pstd}
-A user manual and reference (nwsaom_manual.pdf, in the {cmd:manual} folder of the package source) covers the model, every option, the complete effects
+A user manual and reference (archived at Zenodo, {browse "https://doi.org/10.5281/zenodo.23623807":doi:10.5281/zenodo.23623807}, all versions; also nwsaom_manual.pdf in the {cmd:manual} folder of the package source) covers the model, every option, the complete effects
 reference, the validation against siena07 and a list of what RSiena offers that nwsaom does not (yet). See {help nwsaom_remarks} for the full
 effect-derivation library (every effect's own ministep
 formula and how it was verified against RSiena's real source), interaction/multiplex/co-evolution
@@ -928,4 +928,4 @@ It is not affiliated with or endorsed by the RSiena project.
 	{help nwergm}, {help nwset}, {help nwrandom}
 
 {hline}
-{pstd}{it:nwsaom version 1.5.8, 9 November 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.5.9, 9 November 2026}{p_end}{* nwversion}

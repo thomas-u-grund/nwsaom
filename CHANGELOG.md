@@ -3,6 +3,16 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.5.9] - 2026-11-09
+
+### Changed
+- The Windows plugin is compiled with optimisation (`/O2`), like those of the core and nwergm: fits on Windows take about half the time (the first example of the manual 2.0 s instead of 3.4 s, a Bayesian run 191 s instead of 436 s on the test PC). The results are the same numbers as with the previous Windows plugin; the macOS and Linux plugins are unchanged. The full test suite passes on Windows.
+- Affiliation in `nwsaom.pkg`: RWTH Aachen University.
+
+### Documentation
+- The replication files of the Stata Journal article are in `replication/` (the benchmark comparison is also reported with every fit, converged or not).
+- Manual and README: the Windows plugin passes the full test suite; macOS and Windows agree in every digit Stata displays.
+
 ## [1.5.8] - 2026-11-09
 
 ### Changed
