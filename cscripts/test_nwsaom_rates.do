@@ -205,6 +205,8 @@ capture estat gof
 assert _rc == 198
 
 * non-directed network with a behavior (siena07 modelType 2: dev/saom_rsiena_rates_coev_sym.R)
+* ratecov(a): only the target statistic is checked; the model does not converge with these data (overall maximum convergence
+* ratio 0.4 to 4.9 over seeds 1 to 3 with the default phase lengths), so its estimate depends on the run
 nwclear
 clear
 forvalues w = 1/3 {
@@ -216,7 +218,7 @@ forvalues w = 1/3 {
 	nwset, mat(S`w') directed name(sy`w') nooutput
 }
 foreach row in ///
-	"ratecov(a)|854|0.43|0.4" "behratecov(s1)|-1.8|0|0" "behrate(outrate)|194|0|0" "behrate(avexposure)|186.629|0.42|0.7" "behrate(totexposure)|637|0.06|0.08" ///
+	"ratecov(a)|854|0|0" "behratecov(s1)|-1.8|0|0" "behrate(outrate)|194|0|0" "behrate(avexposure)|186.629|0.42|0.7" "behrate(totexposure)|637|0.06|0.08" ///
 	"behrate(infectdeg)|2814|0.015|0.012" "behrate(susceptavcovar(s1))|15.081|0|0" "behrate(infectcovar(s1))|76.94|0|0" {
 	tokenize `"`row'"', parse("|")
 	local opt `"`1'"'

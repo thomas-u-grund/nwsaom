@@ -1,4 +1,4 @@
-*! version 1.5.5  08nov2026 nwsaom multinet (split out of nwsaom.ado, see nwsaom_multiplex.ado)
+*! version 1.5.6  09nov2026 nwsaom multinet (split out of nwsaom.ado, see nwsaom_multiplex.ado)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -10,6 +10,7 @@
 capture quietly _nwsaom_libcheck
 capture mata: mata drop __nwsaom_mn_addwave()
 capture mata: mata drop __nwsaom_mn_post()
+capture mata: mata drop __nwsaom_mn_startnet()
 capture mata: mata drop __nwsaom_mnb_post()
 capture mata: mata drop __nwsaom_mn_avg()
 capture mata: mata drop __nwsaom_mn_avgsq()
@@ -53,6 +54,20 @@ real scalar __nwsaom_mn_avgsq(real scalar slot) {
 	}
 	return(tot / (n * cols(Gs)))
 }
+/* RSiena's data-derived starting values (getEffects()) for a model without theta0(): the outdegree (density)
+   effect of a one-mode network, from its waves (SaomOutdegreeStart()), and the linear shape effect of the
+   behavior (SaomBehLinearStart()). Not for a model with a two-mode network, whose effects keep 0. */
+real rowvector __nwsaom_mn_startnet(real rowvector t, string rowvector cn, pointer(class SaomGraph scalar) rowvector Gs, real scalar sym) {
+	real scalar k
+	if (findexternal("__nwsaom_mn_tm1") != NULL) return(t)
+	for (k=1; k<=cols(cn); k++) if (cn[k] == "outdegree") t[k] = SaomOutdegreeStart(Gs, sym)
+	if (st_global("NWSAOM_TRACE") == "1") {
+		printf("TRACE starting values:")
+		for (k=1; k<=cols(t); k++) printf(" %s %9.4f", cn[k], t[k])
+		printf("\n")
+	}
+	return(t)
+}
 void __nwsaom_mn_post(real rowvector theta01, real rowvector theta02, real scalar K0, real scalar K3, real scalar firstg, real scalar sym1, real scalar sym2,
 	string scalar bname, string scalar Vname, string scalar ratename, string scalar tcname, string scalar ncoefname, string scalar targetname) {
 	external pointer(class SaomGraph scalar) rowvector __nwsaom_mn_Gs1, __nwsaom_mn_Gs2
@@ -65,6 +80,10 @@ void __nwsaom_mn_post(real rowvector theta01, real rowvector theta02, real scala
 	if (findexternal("__nwsaom_mn_theta0") != NULL) {
 		t1 = (*findexternal("__nwsaom_mn_theta0"))[1..__nwsaom_mn_M1.nparam()]
 		t2 = (*findexternal("__nwsaom_mn_theta0"))[(__nwsaom_mn_M1.nparam()+1)..(__nwsaom_mn_M1.nparam()+__nwsaom_mn_M2.nparam())]
+	}
+	else {
+		t1 = __nwsaom_mn_startnet(t1, __nwsaom_mn_M1.coefnames, __nwsaom_mn_Gs1, sym1)
+		t2 = __nwsaom_mn_startnet(t2, __nwsaom_mn_M2.coefnames, __nwsaom_mn_Gs2, sym2)
 	}
 	fit = SaomEstimateMN(__nwsaom_mn_Gs1, __nwsaom_mn_M1, __nwsaom_mn_Gs2, __nwsaom_mn_M2, t1, t2, K0, K3, firstg, sym1, sym2)
 	p = fit.p1 + fit.p2
@@ -87,7 +106,7 @@ void __nwsaom_mnb_post(real rowvector theta01, real rowvector theta02, real rowv
 	external real rowvector __nwsaom_mn_net2flag
 	external real scalar __nwsaom_mn_behmin, __nwsaom_mn_behmax
 	struct SaomMNBFit scalar fit
-	real scalar p, P
+	real scalar p, P, k
 	real rowvector t1, t2, tb
 	t1 = (cols(theta01) == __nwsaom_mn_M1.nparam() & !any(theta01 :>= .) ? theta01 : J(1, __nwsaom_mn_M1.nparam(), 0))
 	t2 = (cols(theta02) == __nwsaom_mn_M2.nparam() & !any(theta02 :>= .) ? theta02 : J(1, __nwsaom_mn_M2.nparam(), 0))
@@ -96,6 +115,18 @@ void __nwsaom_mnb_post(real rowvector theta01, real rowvector theta02, real rowv
 		t1 = (*findexternal("__nwsaom_mn_theta0"))[1..__nwsaom_mn_M1.nparam()]
 		t2 = (*findexternal("__nwsaom_mn_theta0"))[(__nwsaom_mn_M1.nparam()+1)..(__nwsaom_mn_M1.nparam()+__nwsaom_mn_M2.nparam())]
 		tb = (*findexternal("__nwsaom_mn_theta0"))[(__nwsaom_mn_M1.nparam()+__nwsaom_mn_M2.nparam()+1)..(__nwsaom_mn_M1.nparam()+__nwsaom_mn_M2.nparam()+__nwsaom_mn_Mbeh.nparam())]
+	}
+	else {
+		t1 = __nwsaom_mn_startnet(t1, __nwsaom_mn_M1.coefnames, __nwsaom_mn_Gs1, sym1)
+		t2 = __nwsaom_mn_startnet(t2, __nwsaom_mn_M2.coefnames, __nwsaom_mn_Gs2, sym2)
+		if (findexternal("__nwsaom_mn_tm1") == NULL) for (k=1; k<=cols(__nwsaom_mn_Mbeh.coefnames); k++) {
+			if (__nwsaom_mn_Mbeh.coefnames[k] == "beh_linear" | __nwsaom_mn_Mbeh.coefnames[k] == "linear") tb[k] = SaomBehLinearStart(__nwsaom_mn_Bw, __nwsaom_mn_behmin, __nwsaom_mn_behmax)
+		}
+		if (st_global("NWSAOM_TRACE") == "1") {
+			printf("TRACE behavior starting values:")
+			for (k=1; k<=cols(tb); k++) printf(" %s %9.4f", __nwsaom_mn_Mbeh.coefnames[k], tb[k])
+			printf("\n")
+		}
 	}
 	fit = SaomEstimateMNB(__nwsaom_mn_Gs1, __nwsaom_mn_M1, __nwsaom_mn_Gs2, __nwsaom_mn_M2, __nwsaom_mn_Bw, __nwsaom_mn_behmin, __nwsaom_mn_behmax, __nwsaom_mn_Mbeh,
 		__nwsaom_mn_net2flag, t1, t2, tb, K0, K3, firstg, sym1, sym2)
@@ -446,7 +477,7 @@ program define nwsaom_multinet, eclass
 	ereturn matrix tconv = `tc'
 	ereturn scalar tconv_max = scalar(`tc'_max)
 	ereturn local cmd "nwsaom_multinet"
-	ereturn local version "1.5.5"
+	ereturn local version "1.5.6"
 	_nwsaom_postengine
 	di as text "{hline}"
 	if `__tmany' di as text "Several co-evolving networks (Method of Moments), `nw1' waves, `__nA1' actors and `=`nodes'-`__nA1'' events (network " cond(`__tm1', "1", "2") " is two-mode)"

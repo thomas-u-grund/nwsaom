@@ -111,7 +111,8 @@ assert inlist(_rc, 0, 498)
 if _rc == 0 assert "`e(engine)'" == "native" & colsof(e(b)) == 8 & rowsof(e(rates)) == 6
 capture nwsaom multinet, net1(na1 na2 na3) net2(nb1 nb2 nb3) eff1(outdegree reciprocity behegox behaltx behsim) behavior(bv1 bv2 bv3) k0(20) k3(60) seed(2)
 assert inlist(_rc, 0, 498)
-if _rc == 0 assert "`e(engine)'" == "native" & colsof(e(b)) == 9
+* 5 effects of net1, 2 of net2 (default) and 3 of the behavior (default)
+if _rc == 0 assert "`e(engine)'" == "native" & colsof(e(b)) == 10
 capture nwsaom multinet, net1(na1 na2 na3) net2(nb1 nb2 nb3) behavior(bv1 bv2 bv3) cross1(samewwclosure:behavior) k0(20) k3(60) seed(2)
 assert inlist(_rc, 0, 498)
 if _rc == 0 assert "`e(engine)'" == "native" & colsof(e(b)) == 8

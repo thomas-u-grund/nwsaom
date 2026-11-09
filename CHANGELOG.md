@@ -3,6 +3,15 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.5.6] - 2026-11-09
+
+### Fixed
+- **Starting values of co-evolution and multi-network models, as in RSiena.** Without `theta0()`, the outdegree effect of a co-evolution model started at 0 instead of RSiena's value computed from the data. A change of 1 October 2026 meant to do this, and the help text describes it, but a merge before version 1.0.0 restored the older condition that limited it to network-only models, so no release had it. `nwsaom multinet` started every effect at 0; each one-mode network's outdegree effect and the behavior's linear shape effect now start at RSiena's values (`getEffects()`), which agree with RSiena's to four digits on the article's models. A model with a two-mode network keeps 0.
+- Why it matters since 1.5.3: Phase 1 estimates the coefficients of the Dolby correction of Phase 2. From a start at 0, the simulated networks are far too dense, and the coefficients came out far from those at the estimates. Phase 2 then ended farther from the solution: in the article's benchmark, fewer co-evolution and multi-network fits met the convergence criterion than in RSiena (for example 1 of 7 seeds for the 200-actor co-evolution model, against 4 of 7 for RSiena). With the new starting values, nwsaom and RSiena converge alike. Network-only models are unchanged, to the last digit.
+
+### Documentation
+- The manual (PDF) is still that of 1.5.5. Its listings of co-evolution and multi-network models come from 1.5.5; with 1.5.6 their estimates differ within simulation error.
+
 ## [1.5.5] - 2026-11-08
 
 ### Fixed

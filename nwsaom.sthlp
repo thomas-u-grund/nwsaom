@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.5.5  08nov2026 author: Thomas Grund}{...}
+{* *! version 1.5.6  09nov2026 author: Thomas Grund}{...}
 {marker topic}
 {helpb nwtopical##analysis_statmodels:[NW-2.6.6] Statistical Estimation of Networks}
 
@@ -416,8 +416,8 @@ default RSiena's closed-form starting value, computed from the data. With {opt t
 fits on RSiena's scale, as e(rate). Not used under conditional estimation, where the rates are not estimated by Robbins-Monro (see
 {help nwsaom_remarks##estimation:Estimation} in nwsaom_remarks){p_end}
 {synopt:{opt theta0(numlist)}}Starting values for the eval-parameter vector, one per requested effect IN THE ORDER LISTED IN THE ERROR MESSAGE if
-omitted or mis-sized (outdegree first, then every other effect in the order its own option appears above); default all zero, except that a
-network-only model starts {opt outdegree} at RSiena's data-derived starting value{p_end}
+omitted or mis-sized (outdegree first, then every other effect in the order its own option appears above); default all zero, except that
+{opt outdegree} starts at RSiena's data-derived starting value, in network-only and co-evolution models{p_end}
 {synopt:{opt k0(int)}}Phase-1 replicate count (Jacobian estimation via the score-function derivative estimator); default, as RSiena, max(50, 7 + 3{it:p}), where {it:p} is the number of estimated parameters{p_end}
 {synopt:{opt k3(int)}}Phase-3 replicate count (convergence diagnostics and the covariance matrix e(V)); default 1,000{p_end}
 {synopt:{opt ml}}estimate by maximum likelihood (Robbins-Monro on the likelihood of the augmented data) instead of the method of moments; see {help nwsaom_remarks##ml:Maximum likelihood}{p_end}
@@ -509,8 +509,9 @@ cross-network effects below, e.g. {cmd:cross1(samewwclosure:behavior)}). Behavio
 behavior on tie formation, endowment/creation, {opt behint()} and {opt missbeh()} are described in {help nwsaom_remarks##multinetbeh:the remarks}. {bf:Native plugin only}.
 
 {p 4 4 2}
-{opt theta0()} gives the starting values of all effects in the order of the coefficients ({cmd:net1_*}, {cmd:net2_*}, then the behavior effects) and
-{opt fix()} holds the named effects (coefficient names, or {cmd:_all}) at those values, as in the single-network fit. After a {cmd:multinet} fit,
+{opt theta0()} gives the starting values of all effects in the order of the coefficients ({cmd:net1_*}, {cmd:net2_*}, then the behavior effects);
+without it, each one-mode network's {opt outdegree} and the behavior's {opt linear} effect start at RSiena's data-derived values and the other
+effects at 0. {opt fix()} holds the named effects (coefficient names, or {cmd:_all}) at those values, as in the single-network fit. After a {cmd:multinet} fit,
 {help nwsaom_estat##estat_score:estat score} and {help nwsaom_estat##estat_timetest:estat timetest} are available.
 
 {p 4 4 2}
@@ -927,4 +928,4 @@ It is not affiliated with or endorsed by the RSiena project.
 	{help nwergm}, {help nwset}, {help nwrandom}
 
 {hline}
-{pstd}{it:nwsaom version 1.5.5, 8 November 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.5.6, 9 November 2026}{p_end}{* nwversion}

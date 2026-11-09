@@ -1,4 +1,4 @@
-*! version 1.5.5  08nov2026 nwcommands: stochastic actor-oriented model (SAOM) estimation, v1 (+ harmonisation unit 26 co-evolution, N-wave, avsim, native backend)
+*! version 1.5.6  09nov2026 nwcommands: stochastic actor-oriented model (SAOM) estimation, v1 (+ harmonisation unit 26 co-evolution, N-wave, avsim, native backend)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -2987,16 +2987,18 @@ program nwsaom, eclass
 		}
 		mata: __nwsaom_fixmask = strtoreal(tokens("`__ns_fm'"))
 	}
-	// network-only models without theta0(): start the outdegree effect
-	// at RSiena's data-derived value (getNetworkStartingVals()) instead of
-	// 0, as RSiena does - with the rate estimated jointly, a start at 0
-	// (a network that densifies quickly) can make the phase-1 derivative
-	// estimates unusable
-	if "`theta0'" == "" & !`__nwsaom_coev' & "`outdegree'" != "" {
+	// models without theta0(), co-evolution models included: start the
+	// outdegree effect at RSiena's data-derived value
+	// (getNetworkStartingVals()) instead of 0, as RSiena does - with the rate
+	// estimated jointly, a start at 0 (a network that densifies quickly) can
+	// make the phase-1 derivative estimates unusable, and phase 1 also gives
+	// the coefficients of the Dolby correction
+	if "`theta0'" == "" & "`outdegree'" != "" {
 		local __ns_ndy = `nodes' * (`nodes' - 1)
 		if `__nwsaom_tm' local __ns_ndy = `__nwsaom_tm_na' * `__nwsaom_tm_ne'
 		if `__ns_multi' mata: __nwsaom_theta0[1] = SaomOutdegreeStart(__nwsaom_last_Gwaves, ("`symmetric'" != ""), `__ns_ndy')
 		else mata: __nwsaom_theta0[1] = SaomOutdegreeStart((&__nwsaom_last_G1, &__nwsaom_last_G2), ("`symmetric'" != ""), `__ns_ndy')
+		if "$NWSAOM_TRACE" == "1" mata: printf("TRACE outdegree starting value %9.4f\n", __nwsaom_theta0[1])
 	}
 
 	// --- behtheta0(): same size-checked-starting-value convention as
@@ -3445,7 +3447,7 @@ program nwsaom, eclass
 	// nwsaom versions carried.
 	ereturn post `b' `V', depname("`__ns_depname'") obs(`nodes')
 	ereturn local cmd "nwsaom"
-	ereturn local version "1.5.5"
+	ereturn local version "1.5.6"
 	_nwsaom_postengine
 	// RSiena's effect names and the covariate centring means (RSiena
 	// prints both), 2026-10-01

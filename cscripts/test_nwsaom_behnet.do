@@ -38,7 +38,9 @@ gen double z2 = mod(_n * 7 + (_n > 20), 5)
 gen double z3 = mod(_n * 7 + (_n > 20) + (_n > 10), 5)
 foreach ef in indeg outdeg recipdeg isolate outisolate totalt avaltpop totaltpop maxalt minalt avrecalt totrecalt totsim avatthigher avattlower totatthigher totattlower avsimpopalt totsimpopalt avsimpopego avinsim totinsim avinsimpopalt totinsimpopalt avsimrecip totsimrecip avsimrecpop totsimrecpop popalt totpopalt avinalt totinalt avaltdist2 totaltdist2 avtaltdist2 totaaltdist2 avinaltdist2 totinaltdist2 avtinaltdist2 totainaltdist2 {
 	capture nwsaom, waves(bs1 bs2 bs3) outdegree reciprocity behavior(z1 z2 z3 : linear) beheff(`ef') k0(10) k3(40) seed(3)
-	assert inlist(_rc, 0, 498)
+	* an effect that these synthetic data do not identify stops with r(498) (divergence in phase 2) or r(505) (singular
+	* phase-3 covariance), both reports of weak identification (isolate: r(498) with the default phase lengths)
+	assert inlist(_rc, 0, 498, 505)
 	if _rc == 0 {
 		assert "`e(engine)'" == "native" & colsof(e(b)) == 4
 	}
