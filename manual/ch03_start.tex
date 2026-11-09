@@ -1,6 +1,6 @@
 \chapter{Getting started}\label{ch:start}
 
-This chapter takes you from data to a first fitted model, shows how to read the output and which results are stored. All commands were run with \nwsaom{} 1.5.7 on the Glasgow data of RSiena's tutorial.
+This chapter takes you from data to a first fitted model, shows how to read the output and which results are stored. All commands were run with \nwsaom{} 1.5.8 on the Glasgow data of RSiena's tutorial.
 
 \section{The data}
 
@@ -60,10 +60,10 @@ The classical first model has three effects: the outdegree (density) effect, the
 \begin{lstlisting}
 . nwwebuse glasgow, nwclear
 . nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip seed(1)
------------------------------------------------------------------------------------------
+
 SAOM (Method of Moments, conditional), waves: glasgow1 glasgow2 glasgow3
 Actors: 50                             Periods: 2
------------------------------------------------------------------------------------------
+
 ------------------------------------------------------------------------------
 glasgow1_t~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
 -------------+----------------------------------------------------------------
@@ -73,10 +73,12 @@ glasgow1_t~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
 ------------------------------------------------------------------------------
 Rate parameters (estimated, one per inter-wave period):
 
+-----------------------------------
              |   period1    period2
 -------------+---------------------
         rate |    6.4432     5.2473
           se |    1.0683     0.8841
+-----------------------------------
 Overall maximum convergence ratio: 0.123 (criterion: below 0.25; met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 \end{lstlisting}
@@ -131,10 +133,10 @@ Note three things. First, the coefficients are named \emph{effect}\texttt{\_}\em
 Two waves can be given as \opt{wave1()} and \opt{wave2()}. The rate is then a scalar:
 \begin{lstlisting}
 . nwsaom, wave1(glasgow1) wave2(glasgow2) outdegree reciprocity seed(1)
------------------------------------------------------------------------------------------
+
 SAOM (Method of Moments, conditional), waves: glasgow1 -> glasgow2
 Actors: 50                             Estimated rate:  5.552 (0.856)
------------------------------------------------------------------------------------------
+
 ------------------------------------------------------------------------------
 glasgow1_t~2 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
 -------------+----------------------------------------------------------------
@@ -150,11 +152,11 @@ Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 A behavior is added with \opt{behavior()}, with one variable per wave. At least the effect \opt{linear} is required with it. The network side then has the effect \opt{behsim} (similarity of the behavior as a selection effect), and the behavior side has the effects \opt{linear}, \opt{quadratic} and \opt{avalt} (average alter, an influence effect). Co-evolution models are always estimated unconditionally.
 \begin{lstlisting}
 . nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip behsim behavior(alcohol1 alcohol2 alcohol3) linear quadratic avalt seed(12345)
------------------------------------------------------------------------------------------
+
 SAOM co-evolution (Method of Moments), waves: glasgow1 glasgow2 glasgow3
 Actors: 50                             Periods: 2
 Behavior: alcohol1 alcohol2 alcohol3
------------------------------------------------------------------------------------------
+
 -------------------------------------------------------------------------------
 glasgow1_to~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
 --------------+----------------------------------------------------------------
@@ -167,12 +169,14 @@ beh_quadratic |  -.6002813    .320045    -1.88   0.061    -1.227558    .0269954
     beh_avalt |   1.305018   .7780128     1.68   0.093    -.2198586    2.829896
 -------------------------------------------------------------------------------
 Rate parameters (estimated, one per inter-wave period):
+-----------------------------------
              |   period1    period2
 -------------+---------------------
 network_rate |    6.4944     5.1666
           se |    1.2965     0.8975
 behavior_r~e |    1.3126     1.8015
           se |    0.3471     0.4619
+-----------------------------------
 ...
 Overall maximum convergence ratio: 0.138 (criterion: below 0.25; met)
 \end{lstlisting}
@@ -186,7 +190,8 @@ After a fit, \texttt{estat gof} compares the observed network with networks simu
 . estat gof
 Goodness of fit: Mahalanobis distance test, 50 simulations at the estimates (2 periods pooled)
 
-           statistic |   Mahalanobis  P-value      Fit
+------------------------------------------------------
+           Statistic |   Mahalanobis  P-value      Fit
 ---------------------+--------------------------------
            Outdegree |        13.714    0.100       ok
             Indegree |         8.669    0.560       ok

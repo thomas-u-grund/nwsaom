@@ -113,12 +113,14 @@ In a co-evolution model the rate of the behavior can depend on actor characteris
 \begin{lstlisting}
 . nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip behavior(smoke1 smoke2 smoke3 : linear quadratic avalt) behratecov(alcohol1) behrate(outrate) k0(100) k3(1000) seed(1)
 Rate parameters (estimated, one per inter-wave period):
+-----------------------------------
              |   period1    period2
 -------------+---------------------
 network_rate |    6.5112     5.3081
           se |    1.4385     0.9347
 behavior_r~e |    1.2519     1.2129
           se |    1.3106     1.0362
+-----------------------------------
 Rate effect of the behavior (alcohol1):    0.4195 (se 0.4656)
 Rate effect of the behavior (outrate):    0.3039 (se 0.2800)
 Overall maximum convergence ratio: 0.180 (criterion: below 0.25; met)

@@ -14,7 +14,7 @@ Before a fit, \texttt{nwsaom describe} prints what RSiena prints before an estim
 . nwsaom describe, waves(glasgow1 glasgow2 glasgow3) behavior(alcohol1 alcohol2 alcohol3)
 Network data: 3 waves, 50 actors, directed
 -----------------------------------------------------
-        wave |     ties     density   avg. degree
+        Wave |     ties     density   avg. degree
 -------------+---------------------------------------
            1 |      113      0.0461         2.260
            2 |      116      0.0473         2.320
@@ -22,14 +22,14 @@ Network data: 3 waves, 50 actors, directed
 -----------------------------------------------------
 
 ----------------------------------------------------------------------
-      period |    kept   created  dissolved   Jaccard   Hamming
+      Period |    kept   created  dissolved   Jaccard   Hamming
 -------------+--------------------------------------------------------
         1->2 |      57        59         56     0.331       115
         2->3 |      66        56         50     0.384       106
 ----------------------------------------------------------------------
 
 --------------------------------------------------
-    behavior |        mean          sd     missing
+    Behavior |        mean          sd     missing
 -------------+------------------------------------
       wave 1 |       2.880       1.118           0
       wave 2 |       3.100       1.199           0
@@ -37,7 +37,7 @@ Network data: 3 waves, 50 actors, directed
 --------------------------------------------------
 
 --------------------------------------------------
-      change |          up        down        same
+      Change |          up        down        same
 -------------+------------------------------------
         1->2 |          16           6          28
         2->3 |          18           9          23
@@ -68,7 +68,8 @@ The fixed coefficient equals its start value and its variance is 0. The overall 
 . estat simulate, nsim(20) seed(5)
 Simulation from the fitted model: 20 replication(s) of 1 period(s)
 
-    statistic |       Sim       Obs
+------------------------------------
+    Statistic |       Sim       Obs
 --------------+---------------------
 Period 1      |
          Ties |     112.4       116
@@ -82,7 +83,8 @@ Options: \opt{theta(\emph{matname})} replaces the coefficients (a row vector in 
 \paragraph{Simulation-only mode.} \texttt{nwsaom simulate} simulates at coefficients you choose, without any estimation (RSiena's \texttt{siena07} with \texttt{simOnly = TRUE}). The model is specified exactly as in \texttt{nwsaom}; \opt{theta()} gives one coefficient per network effect in the order of the coefficient table of a fit of the same model (the order in which \nwsaom{} lists the effects, which is not always the order in which you typed them), \opt{behtheta()} one per behavior effect, \opt{rates()} the rate of each period.
 \begin{lstlisting}
 . nwsaom simulate, wave1(glasgow1) wave2(glasgow2) outdegree reciprocity transtrip theta(-2.3 2 0.5) rates(5) nsim(30) seed(3)
-    statistic |       Sim       Obs
+------------------------------------
+    Statistic |       Sim       Obs
 --------------+---------------------
 Period 1      |
          Ties |     127.1       116
@@ -100,25 +102,27 @@ The score-type test of Schweinberger (2012) asks, for effects that are not in th
 . nwsaom, wave1(glasgow1) wave2(glasgow2) outdegree reciprocity transtrip cycle3 theta0(-2.3 2 0 0) fix(transtrip cycle3) k0(100) k3(1000) seed(1)
 . estat score
 
-Score-type test of the restricted model (as RSiena score.Test)
-Tests whether the fixed effects below differ from their fixed values.
+Score-type test of fixed effects
+H0: each effect below equals its fixed value
 
-            effect |  Fixed at     chi2  d.f. Prob>chi2 One-sided z
--------------------+-----------------------------------------------
-         transtrip |    0.0000   81.920     1    0.0000       9.051
-            cycle3 |    0.0000   67.902     1    0.0000       8.240
--------------------+-----------------------------------------------
-        Joint test |             82.061     2    0.0000
--------------------------------------------------------------------
+-----------------------------------------------------------------
+      Effect |  Fixed at      chi2   df  Prob > chi2  One-sided z
+-------------+---------------------------------------------------
+   transtrip |    0.0000    81.920    1       0.0000        9.051
+      cycle3 |    0.0000    67.902    1       0.0000        8.240
+-------------+---------------------------------------------------
+       Joint |              82.061    2       0.0000
+-----------------------------------------------------------------
 
-One-step estimates (restricted estimate plus the one-step correction)
-            effect |  Estimate
--------------------+----------
-         outdegree |   -2.6717
-       reciprocity |    2.0383
-         transtrip |    1.3303
-            cycle3 |    0.2607
-------------------------------
+One-step estimates (restricted estimates plus the one-step correction)
+--------------------------
+      Effect |    Estimate
+-------------+------------
+   outdegree |     -2.6717
+ reciprocity |      2.0383
+   transtrip |      1.3303
+      cycle3 |      0.2607
+--------------------------
 \end{lstlisting}
 The joint statistic $c$ is chi-squared with as many degrees of freedom as tested effects. The one-sided variate is a normal variate with the sign changed, as in RSiena, so that it is positive when the effect is expected to be positive. The one-step estimates give the value each coefficient would approximately take if the tested effects were freed, which is a quick way to see the size of the effects before fitting the larger model. \opt{tested(\emph{effects})} restricts the test to some of the fixed effects; the others stay fixed and are treated as redundant. The test works for network effects and for the effects of a co-evolving behavior.
 
@@ -127,29 +131,31 @@ The joint statistic $c$ is chi-squared with as many degrees of freedom as tested
 . nwsaom multinet, net1(glasgow1 glasgow2 glasgow3) net2(advice1 advice2 advice3) eff1(outdegree reciprocity transtrip) eff2(outdegree reciprocity) cross1(crprod) cross2(from) theta0(-2.6 2.5 0.6 0 -1.9 1 0) fix(net1_x_crprod) seed(1) k3(300)
 . estat score
 
-Score-type test of the restricted model (as RSiena score.Test)
-Tests whether the fixed effects below differ from their fixed values.
+Score-type test of fixed effects
+H0: each effect below equals its fixed value
 
-            effect |  Fixed at     chi2  d.f. Prob>chi2 One-sided z
--------------------+-----------------------------------------------
-     net1_x_crprod |    0.0000    2.323     1    0.1275      -1.524
--------------------------------------------------------------------
+-----------------------------------------------------------------
+      Effect |  Fixed at      chi2   df  Prob > chi2  One-sided z
+-------------+---------------------------------------------------
+net1_x_crp~d |    0.0000     2.323    1       0.1275       -1.524
+-----------------------------------------------------------------
 
-One-step estimates (restricted estimate plus the one-step correction)
-            effect |  Estimate
--------------------+----------
-    net1_outdegree |   -2.6173
-  net1_reciprocity |    2.5168
-    net1_transtrip |    0.6207
-     net1_x_crprod |   -0.4489
-    net2_outdegree |   -1.9142
-  net2_reciprocity |    1.1544
-       net2_x_from |    0.2009
-             rate1 |    5.5497
-             rate2 |    5.0184
-             rate3 |    1.8038
-             rate4 |    1.7646
-------------------------------
+One-step estimates (restricted estimates plus the one-step correction)
+--------------------------
+      Effect |    Estimate
+-------------+------------
+net1_outde~e |     -2.6173
+net1_recip~y |      2.5168
+net1_trans~p |      0.6207
+net1_x_crp~d |     -0.4489
+net2_outde~e |     -1.9142
+net2_recip~y |      1.1544
+ net2_x_from |      0.2009
+       rate1 |      5.5497
+       rate2 |      5.0184
+       rate3 |      1.8038
+       rate4 |      1.7646
+--------------------------
 \end{lstlisting}
 On the artificial advice network \texttt{crprod} has no evidence in its favour, as in the fit of Section~\ref{sec:multinet}. The rates are listed as \texttt{rate1}, \texttt{rate2} (the first network in periods 1 and 2) and \texttt{rate3}, \texttt{rate4} (the second network).
 
@@ -159,25 +165,27 @@ On the artificial advice network \texttt{crprod} has no evidence in its favour, 
 \begin{lstlisting}
 . nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip k0(100) k3(1000) seed(1)
 . estat timetest
-Test of time heterogeneity (score-type test; as RSiena sienaTimeTest)
-Is the parameter of an effect the same in all periods?
+Test of time heterogeneity (score-type test)
+H0: the parameter of each effect is the same in all periods
 
-            effect |      chi2  d.f.  Prob>chi2
--------------------+---------------------------
-         outdegree |     0.074     1     0.7860
-       reciprocity |     0.963     1     0.3264
-         transtrip |     0.439     1     0.5075
--------------------+---------------------------
-        Joint test |     3.567     3     0.3122
------------------------------------------------
+-------------------------------------------
+      Effect |      chi2    df  Prob > chi2
+-------------+-----------------------------
+   outdegree |     0.074     1       0.7860
+ reciprocity |     0.963     1       0.3264
+   transtrip |     0.439     1       0.5075
+-------------+-----------------------------
+       Joint |     3.567     3       0.3122
+-------------------------------------------
 
 Period-specific deviations (one-step estimates) and separate tests
-            effect |  Period   Deviation      chi2  Prob>chi2
--------------------+-----------------------------------------
-         outdegree |       2     -0.3527     0.074     0.7860
-       reciprocity |       2      0.6927     0.963     0.3264
-         transtrip |       2      0.0779     0.439     0.5075
--------------------------------------------------------------
+---------------------------------------------------------
+      Effect |  Period   Deviation      chi2  Prob > chi2
+-------------+-------------------------------------------
+   outdegree |       2     -0.3527     0.074       0.7860
+ reciprocity |       2      0.6927     0.963       0.3264
+   transtrip |       2      0.0779     0.439       0.5075
+---------------------------------------------------------
 \end{lstlisting}
 With $P$ periods there are $P-1$ deviations per effect. In this example there is no evidence that the effects change between the two periods. The tests are most informative when the deviation of an effect is the question: the deviation is reported as the one-step estimate of the difference between the period and the first period. \opt{effects(\emph{names})} restricts the test to some effects.
 
@@ -186,20 +194,21 @@ With $P$ periods there are $P-1$ deviations per effect. In this example there is
 \paragraph{After \texttt{nwsaom multinet}.} The test is also available for the effects of all networks and of the behavior of a multinet fit.
 \begin{lstlisting}
 . estat timetest
-Test of time heterogeneity (score-type test; as RSiena sienaTimeTest)
-Is the parameter of an effect the same in all periods?
+Test of time heterogeneity (score-type test)
+H0: the parameter of each effect is the same in all periods
 
-            effect |      chi2  d.f.  Prob>chi2
--------------------+---------------------------
-    net1_outdegree |     0.077     1     0.7808
-  net1_reciprocity |     0.998     1     0.3177
-    net1_transtrip |     0.396     1     0.5291
-    net2_outdegree |     1.487     1     0.2227
-  net2_reciprocity |     3.592     1     0.0580
-       net2_x_from |     1.501     1     0.2205
--------------------+---------------------------
-        Joint test |     7.105     6     0.3113
------------------------------------------------
+-------------------------------------------
+      Effect |      chi2    df  Prob > chi2
+-------------+-----------------------------
+net1_outde~e |     0.077     1       0.7808
+net1_recip~y |     0.998     1       0.3177
+net1_trans~p |     0.396     1       0.5291
+net2_outde~e |     1.487     1       0.2227
+net2_recip~y |     3.592     1       0.0580
+ net2_x_from |     1.501     1       0.2205
+-------------+-----------------------------
+       Joint |     7.105     6       0.3113
+-------------------------------------------
 \end{lstlisting}
 (Run after the multinet fit above with \texttt{crprod} fixed. The output continues with the period-specific deviations.)
 
@@ -209,15 +218,16 @@ Is the parameter of an effect the same in all periods?
 \begin{lstlisting}
 . nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip cycle3 k0(100) k3(500) seed(1)
 . estat importance
-            effect | Estimate  Std. err.    Sigma  Semi-std.     RI p1     RI p2
--------------------+------------------------------------------------------------
-         outdegree |  -2.7041     0.1146   0.4384    -1.1854    0.4309    0.5015
-       reciprocity |   2.5066     0.2064   0.2140     0.5364    0.3763    0.3085
-         transtrip |   0.6853     0.1514   0.6514     0.4464    0.1741    0.1727
-            cycle3 |  -0.1348     0.2977   0.3374    -0.0455    0.0187    0.0173
--------------------+------------------------------------------------------------
-     Certainty R_H |                                            0.2674    0.3548
---------------------------------------------------------------------------------
+--------------------------------------------------------------------------
+      Effect | Estimate  Std. err.    Sigma  Semi-std.     RI p1     RI p2
+-------------+------------------------------------------------------------
+   outdegree |  -2.7041     0.1146   0.4384    -1.1854    0.4309    0.5015
+ reciprocity |   2.5066     0.2064   0.2140     0.5364    0.3763    0.3085
+   transtrip |   0.6853     0.1514   0.6514     0.4464    0.1741    0.1727
+      cycle3 |  -0.1348     0.2977   0.3374    -0.0455    0.0187    0.0173
+-------------+------------------------------------------------------------
+   Certainty |                                            0.2674    0.3548
+--------------------------------------------------------------------------
 \end{lstlisting}
 The command is available after fits of a directed or non-directed one-mode network or of a two-mode network, with or without one co-evolving behavior, without endowment and creation effects, \opt{structural()}, \opt{present()} or missing-data options; RSiena has the same restrictions. It needs the native plugin. All sizes agree with \texttt{sienaRI} to four decimals.
 
@@ -225,39 +235,42 @@ The command is available after fits of a directed or non-directed one-mode netwo
 \begin{lstlisting}
 . nwsaom, waves(tm1 tm2 tm3) outdegree cycle4 nodeocov(age) nodeicov(size) seed(1) k3(300)
 . estat importance
-            effect | Estimate  Std. err.    Sigma  Semi-std.     RI p1     RI p2
--------------------+------------------------------------------------------------
-         outdegree |  -0.8968     0.1182   0.6843    -0.6136    0.7242    0.6962
-     nodeicov_size |  -0.1309     0.0748   1.2020    -0.1574    0.1678    0.1533
-      nodeocov_age |   0.0139     0.0909   0.7709     0.0107    0.0136    0.0129
-            cycle4 |   0.0550     0.0336   2.6018     0.1431    0.0943    0.1376
--------------------+------------------------------------------------------------
-     Certainty R_H |                                            0.0771    0.0732
---------------------------------------------------------------------------------
+--------------------------------------------------------------------------
+      Effect | Estimate  Std. err.    Sigma  Semi-std.     RI p1     RI p2
+-------------+------------------------------------------------------------
+   outdegree |  -0.8968     0.1182   0.6843    -0.6136    0.7242    0.6962
+nodeicov_s~e |  -0.1309     0.0748   1.2020    -0.1574    0.1678    0.1533
+nodeocov_age |   0.0139     0.0909   0.7709     0.0107    0.0136    0.0129
+      cycle4 |   0.0550     0.0336   2.6018     0.1431    0.0943    0.1376
+-------------+------------------------------------------------------------
+   Certainty |                                            0.0771    0.0732
+--------------------------------------------------------------------------
 \end{lstlisting}
 \paragraph{Co-evolution.} After a co-evolution fit a second table gives the behavior effects. The options of an actor are to change the behavior by $-1$, $0$ or $+1$; the importance of a behavior effect is again the $L^1$ distance of these choice probabilities with and without the effect. The results are \texttt{r(ri\_beh)}, \texttt{r(importance\_beh)}, \texttt{r(sigma\_beh)}, \opt{r(sigma\_period\_beh)} and \texttt{r(certainty\_beh)}.
 \begin{lstlisting}
 . nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip behavior(smoke1 smoke2 smoke3 : linear quadratic avalt) k0(100) k3(500) seed(1)
 . estat importance
 Network effects
-            effect | Estimate  Std. err.    Sigma  Semi-std.     RI p1     RI p2
--------------------+------------------------------------------------------------
-         outdegree |  -2.6446     0.1408   0.4384    -1.1593    0.4444    0.5151
-       reciprocity |   2.4235     0.2075   0.2140     0.5186    0.3895    0.3204
-         transtrip |   0.6070     0.0942   0.6514     0.3954    0.1661    0.1646
--------------------+------------------------------------------------------------
-     Certainty R_H |                                            0.2604    0.3396
---------------------------------------------------------------------------------
+--------------------------------------------------------------------------
+      Effect | Estimate  Std. err.    Sigma  Semi-std.     RI p1     RI p2
+-------------+------------------------------------------------------------
+   outdegree |  -2.6446     0.1408   0.4384    -1.1593    0.4444    0.5151
+ reciprocity |   2.4235     0.2075   0.2140     0.5186    0.3895    0.3204
+   transtrip |   0.6070     0.0942   0.6514     0.3954    0.1661    0.1646
+-------------+------------------------------------------------------------
+   Certainty |                                            0.2604    0.3396
+--------------------------------------------------------------------------
 
 Behavior effects (the options are changing by -1, 0, +1)
-            effect | Estimate  Std. err.    Sigma  Semi-std.     RI p1     RI p2
--------------------+------------------------------------------------------------
-        beh_linear |  -1.9183     0.3811   0.7517    -1.4419    0.6001    0.5875
-     beh_quadratic |   2.0247     0.4437   0.6712     1.3590    0.1808    0.2095
-         beh_avalt |   1.9822     1.4992   0.4392     0.8707    0.2191    0.2030
--------------------+------------------------------------------------------------
-     Certainty R_H |                                            0.5814    0.5745
---------------------------------------------------------------------------------
+--------------------------------------------------------------------------
+      Effect | Estimate  Std. err.    Sigma  Semi-std.     RI p1     RI p2
+-------------+------------------------------------------------------------
+  beh_linear |  -1.9183     0.3811   0.7517    -1.4419    0.6001    0.5875
+beh_quadra~c |   2.0247     0.4437   0.6712     1.3590    0.1808    0.2095
+   beh_avalt |   1.9822     1.4992   0.4392     0.8707    0.2191    0.2030
+-------------+------------------------------------------------------------
+   Certainty |                                            0.5814    0.5745
+--------------------------------------------------------------------------
 \end{lstlisting}
 
 \section{Several groups: \texttt{nwsaom meta}}\label{sec:meta}
@@ -275,11 +288,11 @@ The following example runs with the data of the package. It makes four groups by
 .     estimates store grp`s'
 . }
 . nwsaom meta grp1 grp2 grp3 grp4
-Meta-analysis of 4 fits (as RSiena siena08)
+Meta-analysis of 4 fits
 Estimates with a standard error of 10 or more are excluded;
 tests of the means use a t distribution with n-1 d.f.
 IWLS estimates (Snijders and Baerveldt 2003)
-      effect |   n      Mean  Std. err.       t   P>|t|      SD       Q     P>Q
+      Effect |   n      Mean  Std. err.       t   P>|t|      SD       Q     P>Q
 -------------+-----------------------------------------------------------------
    outdegree |   4   -2.2509     0.0579  -38.87   0.000  0.1158    2.59   0.460
  reciprocity |   4    1.8694     0.0737   25.37   0.000  0.1473    1.18   0.759

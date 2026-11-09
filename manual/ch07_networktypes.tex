@@ -306,9 +306,13 @@ net1_xc_covnetnet_alcohol1 |   .2316152   .4222422     0.55   0.583
           net2_reciprocity |   1.049762   .2890008     3.63   0.000
                net2_x_from |   .1985325    .318445     0.62   0.533
 Rates (estimated):
-           period1  period2
-rate_net1    5.703    4.761
-rate_net2    1.729    1.739
+
+---------------------------------
+             |  period1   period2
+-------------+-------------------
+   rate_net1 |    5.703     4.761
+   rate_net2 |    1.729     1.739
+---------------------------------
 Overall maximum convergence ratio: 0.341 (criterion: below 0.25; not met)
 \end{lstlisting}
 This fit has not converged by the two criteria (the overall ratio is 0.341); before it is reported it would be restarted from its estimates with \opt{theta0()}, as Chapter~\ref{ch:estimation} explains. Coefficients are named \texttt{net1\_}/\texttt{net2\_} plus the effect; cross effects add \texttt{x\_} (\texttt{net1\_x\_crprod}) or, with a covariate, \texttt{xc\_}\emph{effect}\texttt{\_}\emph{var}. \texttt{e(rates)} has four rows (rate and standard error for each network). On these artificial data \texttt{crprod} is not significant, as expected, and because the advice network is a thinned copy of the friendship network a model with \texttt{crprod} in \emph{both} directions diverged (return code 498) in a trial run: when one network is nearly a subset of the other, the cross effects are close to unidentified.
@@ -357,11 +361,15 @@ Several co-evolving networks (Method of Moments), 3 waves, 40 actors and 20 even
  net2_reciprocity |   .3832283   .2964688     1.29   0.196      -.19784    .9642965
 -----------------------------------------------------------------------------------
 Rates (estimated):
-           period1  period2
-rate_net1    2.039    2.068
-rate_net2    1.940    1.965
-  se_net1    0.285    0.281
-  se_net2    0.269    0.245
+
+---------------------------------
+             |  period1   period2
+-------------+-------------------
+   rate_net1 |    2.039     2.068
+   rate_net2 |    1.940     1.965
+     se_net1 |    0.285     0.281
+     se_net2 |    0.269     0.245
+---------------------------------
 Overall maximum convergence ratio: 0.098
 \end{lstlisting}
 (This listing comes from an earlier version of \nwsaom{} and was not rerun for this edition, because the code that builds its data is not shown; the numbers of a run with the current version differ within simulation error.)
@@ -402,10 +410,14 @@ net2_reciprocity |   -.444934   .2799107    -1.59   0.112
        beh_avalt |   1.774456    1.18047     1.50   0.133
       beh2_avalt |  -.1019861   1.064681    -0.10   0.924
 Rates (estimated):
-           period1  period2
-rate_net1    5.799    4.521
-rate_net2    1.893    2.139
- rate_beh    2.782    2.645
+
+---------------------------------
+             |  period1   period2
+-------------+-------------------
+   rate_net1 |    5.799     4.521
+   rate_net2 |    1.893     2.139
+    rate_beh |    2.782     2.645
+---------------------------------
 Overall maximum convergence ratio: 0.209
 \end{lstlisting}
 (This listing comes from an earlier version of \nwsaom{} and was not rerun for this edition, because the code that builds its data is not shown; the numbers of a run with the current version differ within simulation error.)

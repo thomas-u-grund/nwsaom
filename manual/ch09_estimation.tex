@@ -159,7 +159,8 @@ Stored estimates can be combined across networks with \texttt{nwsaom meta}, the 
 . estat gof, nsim(30) seed(1)
 Goodness of fit: Mahalanobis distance test, 30 simulations at the estimates (2 periods pooled)
 
-           statistic |   Mahalanobis  P-value      Fit
+------------------------------------------------------
+           Statistic |   Mahalanobis  P-value      Fit
 ---------------------+--------------------------------
            Outdegree |        23.919    0.067       ok
             Indegree |        14.906    0.133       ok
@@ -201,10 +202,14 @@ glasgow1_t~2 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
    transtrip |   .6850565   .0905747     7.56   0.000     .5075335    .8625796
 ------------------------------------------------------------------------------
 Rate parameters (one per inter-wave period):
-       period1
- rate   6.4168
-   se   0.9363
-tconv  -0.0593
+
+------------------------
+             |   period1
+-------------+----------
+        rate |    6.4168
+          se |    0.9363
+       tconv |   -0.0593
+------------------------
 Overall maximum t-ratio of the scores: 0.096 (good; below 0.1)
 \end{lstlisting}
 The method-of-moments fit of the same model, which is printed first and used as the starting point, has $-2.53$, $2.15$ and $0.59$. With the default controls this example takes about half a minute on an Apple M5 Pro and ends with a largest $t$-ratio of 0.22, which the output flags as acceptable; the longer phases above (a little over a minute) bring it below 0.1, and the output tells you to run longer when this happens. Estimates from different seeds differ by simulation noise. Against \texttt{siena07} with \texttt{maxlike = TRUE} the estimates of this model are $-2.65$, $2.22$ to $2.24$ and $0.69$ to $0.70$ in \nwsaom{} (several runs) and $-2.66$ and $-2.63$, $2.22$ and $2.19$, $0.71$ and $0.70$ in two runs of RSiena. With a co-evolving behavior the estimates are within 0.1 standard errors of RSiena's.
@@ -225,14 +230,16 @@ The following example uses a short run to keep the time low (about 25 seconds on
 Bayesian SAOM (data augmentation)                Number of actors  =       50
 Waves: glasgow1 glasgow2                         Saved draws       =      100
 Pre-warm 20, warm 20, main 100 x 20              Mean chain length =    306.2
-Acceptance: effects 0.497, rates 0.246; chain steps: diagonal 0.751, permute 0.755, insert-permute 0.410, delete-permute 0.370
+Acceptance rates: effects 0.497, rates 0.246
+Chain steps accepted: diagonal 0.751, permute 0.755
+                      insert-permute 0.410, delete-permute 0.370
 -----------------------------------------------------------------------------
-      Effect |Post. mean  Post. sd[95% interval]             Median      ESS
+      Effect |       Mean  Std. dev.    [95% cred. interval]     Median   ESS
 -------------+---------------------------------------------------------------
-   outdegree |   -2.5229    0.1446   -2.7498   -2.2554   -2.5264       46
- reciprocity |    2.0143    0.2430    1.5666    2.4366    2.0243       36
-   transtrip |    0.6618    0.0988    0.4623    0.8475    0.6545       77
-rate_period1 |    6.0569    0.6129    4.9734    7.2384    6.0627       65
+   outdegree |    -2.5229     0.1446     -2.7498     -2.2554    -2.5264    46
+ reciprocity |     2.0143     0.2430      1.5666      2.4366     2.0243    36
+   transtrip |     0.6618     0.0988      0.4623      0.8475     0.6545    77
+rate_period1 |     6.0569     0.6129      4.9734      7.2384     6.0627    65
 -----------------------------------------------------------------------------
 \end{lstlisting}
 The result replaces the estimates of the fit (\texttt{estimates store} first to keep them): \texttt{e(b)} and \texttt{e(V)} are the posterior means and covariance matrix, \texttt{e(rates)} the posterior mean and standard deviation of the rates, \texttt{e(interval)} the interval limits and median, \texttt{e(ess)} the effective sample sizes, and \texttt{e(post\_frame)} the name of the frame that holds the draws (one row per main iteration). The acceptance rates of all steps are in \texttt{e(accept\_effects)}, \texttt{e(accept\_rates)} and the \texttt{e(accept\_}\emph{step}\texttt{)} results, the tuned scale factors in \texttt{e(scale\_effects)}.
