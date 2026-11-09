@@ -25,7 +25,7 @@ In Stata, install the versions used in the article from their release tags on Gi
 . nwinstall, modelpkg(nwsaom) release(v1.5.11)
 ```
 
-On 9 November 2026 we ran these three commands under Stata 18 with an empty PLUS folder; they installed nwsaom 1.5.10 with its compiled plugin (build 154), and `stata/01_check_data.do` then ran on the installed packages.
+On 9 November 2026 we ran these three commands under Stata 18 with an empty PLUS folder; they installed nwsaom 1.5.11 with its compiled plugin (build 154), and `stata/01_check_data.do` then ran on the installed packages.
 
 Every do-file runs `stata/setup.do` first. By default, `setup.do` uses these installed packages. To use git checkouts of the two packages instead, set the globals `NWCORE` and `NWSAOM` to the two trees before running a do-file. The optional global `NWPLUS` names an empty folder to use as PLUS, so that no other installed copy interferes. `setup.do` prints the version of `nwsaom` that it found.
 
