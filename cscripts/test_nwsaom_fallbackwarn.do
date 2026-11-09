@@ -52,8 +52,8 @@ assert scalar(nCg) == 1
 assert scalar(nQ) == 0
 
 * (B) a copy of the package without any plugin file
-local scr "`c(tmpdir)'/nwsaom_fbw_`=floor(runiform()*1e9)'"
-capture shell rm -rf "`scr'"
+* cscript fixes the seed, so the name also carries the time (a folder left by an earlier run is then not in the way)
+local scr "`c(tmpdir)'/nwsaom_fbw_`=subinstr("`c(current_time)'", ":", "", .)'_`=floor(runiform()*1e6)'"
 mkdir "`scr'"
 foreach f in nwsaom*.ado _nwsaom*.ado {
 	local fl : dir "." files "`f'"
@@ -81,5 +81,6 @@ mata: st_numscalar("nBf", sum(strpos(cat(st_local("lB")), "was not found") :> 0)
 assert scalar(nB) == 1
 assert scalar(nBf) == 1
 assert mreldif(bB, bC) < 1e-12
-capture shell rm -rf "`scr'"
+if "`c(os)'" == "Windows" capture shell rmdir /s /q "`=subinstr("`scr'", "/", char(92), .)'"
+else capture shell rm -rf "`scr'"
 di "PASS test_nwsaom_fallbackwarn"
