@@ -1,6 +1,6 @@
 
 . nwsaom version
-nwsaom version 1.5.10, 09nov2026
+nwsaom version 1.5.11, 09nov2026
   core package nwcommands : installed (development copy, no distribution date)
   native plugin           : <nwsaom>/lib/plugins/macos/saom_sim_macos.plugin (plugin build 154)
   compared with           : R RSiena 1.6.14
@@ -309,7 +309,7 @@ Priors are flat unless priormean(), priorsd() or priorrate() are given.
 . timer off 9
 
 . timer list 9
-   9:    149.87 /        1 =     149.8670
+   9:    150.21 /        1 =     150.2100
 
 . nwsaom simulate, waves(glasgow1 glasgow2) outdegree reciprocity transtrip thet
 > a(-2.3 2 0.5) rates(5) nsim(4) seed(7) generate(g)

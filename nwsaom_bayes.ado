@@ -1,4 +1,4 @@
-*! version 1.5.10  09nov2026 nwcommands: Bayesian estimation of a SAOM (data augmentation, Metropolis-Hastings) after nwsaom
+*! version 1.5.11  09nov2026 nwcommands: Bayesian estimation of a SAOM (data augmentation, Metropolis-Hastings) after nwsaom
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -232,7 +232,7 @@ program nwsaom_bayes, eclass
 	local cent_keep = e(centered)
 	ereturn post `bb' `Vb', obs(`nodes_keep')
 	ereturn local cmd "nwsaom_bayes"
-	ereturn local version "1.5.10"
+	ereturn local version "1.5.11"
 	ereturn local title "Stochastic actor-oriented model (Bayesian: data augmentation, Metropolis-Hastings)"
 	ereturn local waves `"`waves_keep'"'
 	ereturn local post_frame "`frame'"
@@ -277,7 +277,7 @@ program nwsaom_bayes, eclass
 			di as txt "Chain steps accepted: diagonal " as res %5.3f `acc_dg' as txt ", permute " as res %5.3f `acc_pe'
 			di as txt "                      insert-permute " as res %5.3f `acc_ip' as txt ", delete-permute " as res %5.3f `acc_dp'
 		}
-		di as txt "{hline 77}"
+		di as txt "{hline 13}{c TT}{hline 63}"
 		di as txt %12s "Effect" " {c |}" %11s "Mean" %11s "Std. dev." %24s "[`level'% cred. interval]" %11s "Median" %6s "ESS"
 		di as txt "{hline 13}{c +}{hline 63}"
 		forvalues k = 1/`Kp' {
@@ -287,7 +287,7 @@ program nwsaom_bayes, eclass
 			local nmk = abbrev("`nmk'", 12)
 			di as txt %12s "`nmk'" " {c |}" as res %11.4f `mean'[1, `k'] %11.4f `sd'[1, `k'] %12.4f `QQ'[1, `k'] %12.4f `QQ'[3, `k'] %11.4f `QQ'[2, `k'] %6.0f `EQ'[1, `k']
 		}
-		di as txt "{hline 77}"
+		di as txt "{hline 13}{c BT}{hline 63}"
 		di as txt "Draws (one per main iteration) are in frame {bf:`frame'}:"
 		di as txt "  b1..b`K' (effects), " cond(`nper' > 1, "rate1..rate`nper'", "rate1") cond(`coev', cond(`nper' > 1, ", brate1..brate`nper'", ", brate1"), "") ", nchain, loglik."
 		di as txt "Priors are flat unless priormean(), priorsd() or priorrate() are given."

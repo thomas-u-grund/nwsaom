@@ -11,7 +11,7 @@ nwwebuse glasgow, nwclear
 nwplot glasgow2, layout(kk) generate(gx gy) nodraw
 * style shared with the nwergm article: grey markers with a thin black outline, thin grey ties, no legend
 * (three small legends were unreadable): the caption gives the key
-local opt color(smoke1, legendoff colorpalette(gs11 gs6 black)) symbol(smoke1, legendoff symbolpalette(circle diamond square)) nodefactor(1.3) arrowfactor(.7) scatteropt(mlcolor(black) mlwidth(vthin)) lineopt(lcolor(gs10) lwidth(vthin)) legend(off) xsize(3) ysize(3)
+local opt color(smoke1, legendoff colorpalette(gs11 gs6 black)) symbol(smoke1, legendoff symbolpalette(circle diamond square)) nodefactor(.8) arrowfactor(.7) scatteropt(mlcolor(black) mlwidth(vthin)) lineopt(lcolor(gs10) lwidth(vthin)) legend(off) xsize(3) ysize(3)
 nwplot glasgow1, nodexy(gx gy) `opt' title("Wave 1") name(w1, replace)
 nwplot glasgow2, nodexy(gx gy) `opt' title("Wave 2") name(w2, replace)
 nwplot glasgow3, nodexy(gx gy) `opt' title("Wave 3") name(w3, replace)

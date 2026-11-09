@@ -3,6 +3,12 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.5.11] - 2026-11-09
+
+### Changed
+- **Output tables: the top and bottom rules meet the column bar**, as in Stata's own tables (`{c TT}` and `{c BT}`), in `nwsaom describe`, `nwsaom meta`, `nwsaom bayes`, `estat score`, `estat timetest`, `estat simulate`, `estat gof`, `estat importance` and `estat mems`, and in the combined table of `estat gof` after a fit of several groups. The coefficient and rate tables already did.
+- Display only: no estimate, test or stored result changes; in a text log the rules look as before.
+
 ## [1.5.10] - 2026-11-09
 
 ### Changed

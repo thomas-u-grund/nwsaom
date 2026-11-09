@@ -1,4 +1,4 @@
-*! version 1.5.10  09nov2026 nwcommands: multi-group meta-analysis of separate nwsaom fits (RSiena's siena08)
+*! version 1.5.11  09nov2026 nwcommands: multi-group meta-analysis of separate nwsaom fits (RSiena's siena08)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -95,7 +95,7 @@ program nwsaom_meta, rclass
 		di as text "tests of the means use a t distribution with N-1 d.f."
 		di
 		di as text "{bf:IWLS estimates} (Snijders and Baerveldt 2003)"
-		di as text "{hline 78}"
+		di as text "{hline 13}{c TT}{hline 64}"
 		di as text %12s "Effect" " {c |}" %3s "N" %10s "Mean" %10s "Std. err." %9s "t" %8s "P>|t|" %8s "SD" %8s "Q" %8s "P>Q"
 		di as text "{hline 13}{c +}{hline 64}"
 		local i 0
@@ -103,10 +103,10 @@ program nwsaom_meta, rclass
 			local ++i
 			di as text %12s abbrev("`c'", 12) " {c |}" as result %3.0f `M'[`i', 1] %10.4f `M'[`i', 4] %10.4f `M'[`i', 5] %9.2f `M'[`i', 6] %8.3f `M'[`i', 7] %8.4f `M'[`i', 8] %8.2f `M'[`i', 11] %8.3f `M'[`i', 12]
 		}
-		di as text "{hline 78}"
+		di as text "{hline 13}{c BT}{hline 64}"
 		di
 		di as text "{bf:Maximum likelihood under normality}: mean of the parameter"
-		di as text "{hline 78}"
+		di as text "{hline 13}{c TT}{hline 64}"
 		di as text %12s "Effect" " {c |}" %15s "Mean" %15s "Std. err." %34s "`ci'"
 		di as text "{hline 13}{c +}{hline 64}"
 		local i 0
@@ -114,10 +114,10 @@ program nwsaom_meta, rclass
 			local ++i
 			di as text %12s abbrev("`c'", 12) " {c |}" as result %15.4f `M'[`i', 13] %15.4f `M'[`i', 14] %17.4f `M'[`i', 15] %17.4f `M'[`i', 16]
 		}
-		di as text "{hline 78}"
+		di as text "{hline 13}{c BT}{hline 64}"
 		di
 		di as text "{bf:Maximum likelihood under normality}: standard deviation between groups"
-		di as text "{hline 78}"
+		di as text "{hline 13}{c TT}{hline 64}"
 		di as text %12s "Effect" " {c |}" %15s "SD" %34s "`ci'"
 		di as text "{hline 13}{c +}{hline 64}"
 		local i 0
@@ -125,10 +125,10 @@ program nwsaom_meta, rclass
 			local ++i
 			di as text %12s abbrev("`c'", 12) " {c |}" as result %15.4f `M'[`i', 17] %17.4f `M'[`i', 18] %17.4f `M'[`i', 19]
 		}
-		di as text "{hline 78}"
+		di as text "{hline 13}{c BT}{hline 64}"
 		di
 		di as text "{bf:Fisher's combination of one-sided tests} (chi-squared, 2N d.f.)"
-		di as text "{hline 78}"
+		di as text "{hline 13}{c TT}{hline 64}"
 		di as text %12s "" " {c |}" %32s "Right-sided" %32s "Left-sided"
 		di as text %12s "Effect" " {c |}" %16s "chi2" %16s "Prob > chi2" %16s "chi2" %16s "Prob > chi2"
 		di as text "{hline 13}{c +}{hline 64}"
@@ -137,7 +137,7 @@ program nwsaom_meta, rclass
 			local ++i
 			di as text %12s abbrev("`c'", 12) " {c |}" as result %16.3f `M'[`i', 20] %16.3f `M'[`i', 21] %16.3f `M'[`i', 22] %16.3f `M'[`i', 23]
 		}
-		di as text "{hline 78}"
+		di as text "{hline 13}{c BT}{hline 64}"
 		di as text "Correlations of estimates and standard errors are in {bf:r(meta)}."
 	}
 	return matrix meta = `M'

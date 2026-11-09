@@ -4,8 +4,8 @@
 * By default the installed packages are used. To install the versions of the article from their release tags:
 *     net install nwcommands, replace from(https://raw.githubusercontent.com/thomas-u-grund/nwcommands/v3.17.2/)
 *     nwinstall, all from(https://raw.githubusercontent.com/thomas-u-grund/nwcommands/v3.17.2)
-*     nwinstall, modelpkg(nwsaom) release(v1.5.10)
-* To use source trees instead (git checkouts of nwcommands 3.17.2 and nwsaom 1.5.10), set before running:
+*     nwinstall, modelpkg(nwsaom) release(v1.5.11)
+* To use source trees instead (git checkouts of nwcommands 3.17.2 and nwsaom 1.5.11), set before running:
 *     global NWCORE "<nwcommands tree>"
 *     global NWSAOM "<nwsaom tree>"
 *     global NWPLUS "<an empty folder>"   (optional: a PLUS folder without other installed copies)

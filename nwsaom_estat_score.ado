@@ -1,4 +1,4 @@
-*! version 1.5.10  09nov2026 nwcommands: estat score after nwsaom
+*! version 1.5.11  09nov2026 nwcommands: estat score after nwsaom
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -75,7 +75,7 @@ program define nwsaom_estat_score, rclass
 	tempname sep
 	matrix `sep' = __nwsaom_score_res
 	di
-	di as txt "{hline 65}"
+	di as txt "{hline 13}{c TT}{hline 51}"
 	di as txt %12s "Effect" " {c |}" %10s "Fixed at" %10s "chi2" %5s "df" %13s "Prob > chi2" %13s "One-sided z"
 	di as txt "{hline 13}{c +}{hline 51}"
 	if `df' == 1 {
@@ -93,7 +93,7 @@ program define nwsaom_estat_score, rclass
 		di as txt "{hline 13}{c +}{hline 51}"
 		di as txt %12s "Joint" " {c |}" as res %10s "" %10.3f `c' %5.0f `df' %13.4f `pv'
 	}
-	di as txt "{hline 65}"
+	di as txt "{hline 13}{c BT}{hline 51}"
 	tempname os
 	matrix `os' = __nwsaom_score_onestep
 	local onames `names'
@@ -103,14 +103,14 @@ program define nwsaom_estat_score, rclass
 	matrix colnames `os' = `onames'
 	di
 	di as txt "One-step estimates (restricted estimates plus the one-step correction)"
-	di as txt "{hline 65}"
+	di as txt "{hline 13}{c TT}{hline 51}"
 	di as txt %12s "Effect" " {c |}" %12s "Estimate"
 	di as txt "{hline 13}{c +}{hline 51}"
 	forvalues i = 1/`nall' {
 		local nm : word `i' of `onames'
 		di as txt %12s abbrev("`nm'", 12) " {c |}" as res %12.4f `os'[1, `i']
 	}
-	di as txt "{hline 65}"
+	di as txt "{hline 13}{c BT}{hline 51}"
 	capture scalar drop __nwsaom_score_have __nwsaom_score_nfix __nwsaom_score_same
 	return scalar chi2 = `c'
 	return scalar df = `df'

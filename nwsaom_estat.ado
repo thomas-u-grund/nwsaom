@@ -1,4 +1,4 @@
-*! version 1.5.10  09nov2026 nwcommands: post-estimation for nwsaom (harmonisation units 21+26, RSiena-faithful GOF + co-evolution, N-wave)
+*! version 1.5.11  09nov2026 nwcommands: post-estimation for nwsaom (harmonisation units 21+26, RSiena-faithful GOF + co-evolution, N-wave)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -573,7 +573,7 @@ program define nwsaom_estat_gof, rclass
 	else di as txt " (one test per period)"
 	local __gof_graphs ""
 	di
-	di as txt "{hline 54}"
+	di as txt "{hline 21}{c TT}{hline 32}"
 	di as txt %20s "Statistic" " {c |}" %14s "Mahalanobis" %9s "P-value" %9s "Fit"
 	di as txt "{hline 21}{c +}{hline 32}"
 	foreach __gof_s of local stats {
@@ -622,7 +622,7 @@ program define nwsaom_estat_gof, rclass
 		}
 	  }
 	}
-	di as txt "{hline 54}"
+	di as txt "{hline 21}{c BT}{hline 32}"
 	di as txt "Fit is rejected when P < 0.05 (" cond(`__gof_twotailed', "two", "one") "-tailed test)."
 	di as txt "Violin plots:" as res "`__gof_graphs'"
 
@@ -1273,12 +1273,12 @@ program define nwsaom_estat_mems, rclass
 	di
 	di as text "MEMS: micro effects on macro structure (Duxbury), macro statistic " as result "`macro'"
 	di as text "Micro process: " as result "`effect'" as text "  Interval: " as result "`interval'" as text "  nsim: " as result `nsim'
-	di as text "{hline 71}"
+	di as text "{hline 13}{c TT}{hline 57}"
 	di as text %12s "" " {c |}" %10s "Estimate" %11s "Std. dev." %24s "[95% conf. interval]" %12s "MC p-value"
 	di as text "{hline 13}{c +}{hline 57}"
 	di as text %12s "MEMS" " {c |}" as result %10.4f `__mems_est' %11.4f `__mems_sd' %12.4f `__mems_lo' %12.4f `__mems_hi' %12.4f `__mems_pval'
 	di as text %12s "Prop. change" " {c |}" as result %10.4f `__mems_prop'
-	di as text "{hline 71}"
+	di as text "{hline 13}{c BT}{hline 57}"
 	local __mems_hiI = word("`interval'", `__mems_nint')
 	local __mems_loI = word("`interval'", 1)
 	di as text "MEMS: mean difference in {bf:`macro'} between interval=`__mems_hiI' and interval=`__mems_loI'."

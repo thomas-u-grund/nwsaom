@@ -1,4 +1,4 @@
-*! version 1.5.10  09nov2026 nwcommands: nwsaom describe - the data description that comes before a SAOM fit
+*! version 1.5.11  09nov2026 nwcommands: nwsaom describe - the data description that comes before a SAOM fit
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -137,13 +137,13 @@ program define nwsaom_describe, rclass
 		di as txt cond(`dir1', "Directed", "Undirected") _col(37) "Number of waves" _col(55) "=" as res %10.0fc `nw'
 	}
 	di
-	di as txt "{hline 66}"
+	di as txt "{hline 13}{c TT}{hline 52}"
 	di as txt %12s "Wave" " {c |}" %11s "Ties" %12s "Density" %14s "Avg. degree"
 	di as txt "{hline 13}{c +}{hline 52}"
 	forvalues w = 1/`nw' {
 		di as txt %12s "`w'" " {c |}" as res %11.0fc `W'[`w', 1] %12.4f `W'[`w', 2] %14.3f `W'[`w', 3]
 	}
-	di as txt "{hline 66}"
+	di as txt "{hline 13}{c BT}{hline 52}"
 	if `tm' di as txt "Ties are attendances (actor-event cells); density is over the" _n as res strtrim(string(`na' * `ne', "%15.0fc")) as txt " cells."
 	mata: st_numscalar("__nwsd_anys", sum(st_matrix("`W'")[., 4..5]) > 0)
 	if scalar(__nwsd_anys) {
@@ -153,13 +153,13 @@ program define nwsaom_describe, rclass
 		}
 	}
 	di
-	di as txt "{hline 66}"
+	di as txt "{hline 13}{c TT}{hline 52}"
 	di as txt %12s "Period" " {c |}" %8s "Kept" %10s "Created" %11s "Dissolved" %10s "Jaccard" %10s "Hamming"
 	di as txt "{hline 13}{c +}{hline 52}"
 	forvalues w = 1/`=`nw'-1' {
 		di as txt %12s "`w'->`=`w'+1'" " {c |}" as res %8.0fc `P'[`w', 1] %10.0fc `P'[`w', 2] %11.0fc `P'[`w', 3] %10.3f `P'[`w', 4] %10.0fc `P'[`w', 5]
 	}
-	di as txt "{hline 66}"
+	di as txt "{hline 13}{c BT}{hline 52}"
 	forvalues w = 1/`=`nw'-1' {
 		if `P'[`w', 4] < 0.3 di as txt "Note: Jaccard < 0.3 in period `w'->`=`w'+1'; few ties stay, the data say little about change."
 	}
@@ -181,7 +181,7 @@ program define nwsaom_describe, rclass
 		tempname Bh
 		matrix `Bh' = J(`nw', 3, .)
 		di
-		di as txt "{hline 66}"
+		di as txt "{hline 13}{c TT}{hline 52}"
 		di as txt %12s "Behavior" " {c |}" %12s "Mean" %12s "Std. dev." %12s "Missing"
 		di as txt "{hline 13}{c +}{hline 52}"
 		forvalues w = 1/`nw' {
@@ -194,9 +194,9 @@ program define nwsaom_describe, rclass
 		}
 		tempname Bc
 		matrix `Bc' = J(`=`nw'-1', 3, .)
-		di as txt "{hline 66}"
+		di as txt "{hline 13}{c BT}{hline 52}"
 		di
-		di as txt "{hline 66}"
+		di as txt "{hline 13}{c TT}{hline 52}"
 		di as txt %12s "Change" " {c |}" %12s "Up" %12s "Down" %12s "Same"
 		di as txt "{hline 13}{c +}{hline 52}"
 		forvalues w = 1/`=`nw'-1' {
@@ -213,7 +213,7 @@ program define nwsaom_describe, rclass
 			matrix `Bc'[`w', 3] = `sm'
 			di as txt %12s "`w'->`=`w'+1'" " {c |}" as res %12.0f `up' %12.0f `dn' %12.0f `sm'
 		}
-		di as txt "{hline 66}"
+		di as txt "{hline 13}{c BT}{hline 52}"
 		matrix colnames `Bc' = up down same
 		return matrix behchange = `Bc'
 	}

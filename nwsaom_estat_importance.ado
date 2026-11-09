@@ -1,4 +1,4 @@
-*! version 1.5.10  09nov2026 nwcommands: estat importance after nwsaom
+*! version 1.5.11  09nov2026 nwcommands: estat importance after nwsaom
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -122,7 +122,7 @@ program define nwsaom_imp_table
 	syntax , NAMES(string) FIRST(integer) B(name) V(name) SG(name) RI(name) RH(name) NPER(integer)
 	local p : word count `names'
 	local w = 40 + 10 * `nper'
-	di as txt "{hline `=14 + `w''}"
+	di as txt "{hline 13}{c TT}{hline `w'}"
 	di as txt %12s "Effect" " {c |}" %9s "Estimate" %11s "Std. err." %9s "Sigma" %11s "Semi-std." _continue
 	forvalues pd = 1/`nper' {
 		di as txt %10s "RI p`pd'" _continue
@@ -145,5 +145,5 @@ program define nwsaom_imp_table
 		di as res %10.4f `rh'[1, `pd'] _continue
 	}
 	di
-	di as txt "{hline `=14 + `w''}"
+	di as txt "{hline 13}{c BT}{hline `w'}"
 end
