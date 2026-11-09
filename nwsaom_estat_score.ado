@@ -1,4 +1,4 @@
-*! version 1.5.9  09nov2026 nwcommands: estat score after nwsaom
+*! version 1.5.10  09nov2026 nwcommands: estat score after nwsaom
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -103,14 +103,14 @@ program define nwsaom_estat_score, rclass
 	matrix colnames `os' = `onames'
 	di
 	di as txt "One-step estimates (restricted estimates plus the one-step correction)"
-	di as txt "{hline 26}"
+	di as txt "{hline 65}"
 	di as txt %12s "Effect" " {c |}" %12s "Estimate"
-	di as txt "{hline 13}{c +}{hline 12}"
+	di as txt "{hline 13}{c +}{hline 51}"
 	forvalues i = 1/`nall' {
 		local nm : word `i' of `onames'
 		di as txt %12s abbrev("`nm'", 12) " {c |}" as res %12.4f `os'[1, `i']
 	}
-	di as txt "{hline 26}"
+	di as txt "{hline 65}"
 	capture scalar drop __nwsaom_score_have __nwsaom_score_nfix __nwsaom_score_same
 	return scalar chi2 = `c'
 	return scalar df = `df'

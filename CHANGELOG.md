@@ -3,6 +3,15 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.5.10] - 2026-11-09
+
+### Changed
+- **Output tables, second pass of the Stata conventions of 1.5.8.** `nwsaom describe` starts with a header block (number of actors and waves, as `label = value`), its column headers are capitalised (Ties, Density, Avg. degree, Kept, Created, Dissolved; Mean, Std. dev., Missing; Up, Down, Same), and all its tables have one width. `nwsaom meta` starts with a header block (number of fits), and its four tables have one width of 78 characters (the first was 79) with `N` for the number of groups. Within `estat score` and `estat timetest` all tables have one width, and `estat simulate` uses the 12-character first column of every other table.
+- Display only: no estimate, test or stored result changes.
+
+### Documentation
+- The listings of the manual show the new layout; four older coefficient tables in the manual now show the 12-character first column.
+
 ## [1.5.9] - 2026-11-09
 
 ### Changed

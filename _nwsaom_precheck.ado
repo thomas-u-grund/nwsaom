@@ -1,4 +1,4 @@
-*! version 1.5.9  09nov2026 _nwsaom_precheck - option checks moved out of nwsaom.ado (Stata limits the size of one ado program)
+*! version 1.5.10  09nov2026 _nwsaom_precheck - option checks moved out of nwsaom.ado (Stata limits the size of one ado program)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P.).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General

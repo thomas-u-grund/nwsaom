@@ -1,4 +1,4 @@
-*! version 1.5.9  09nov2026 nwcommands: nwsaom describe - the data description that comes before a SAOM fit
+*! version 1.5.10  09nov2026 nwcommands: nwsaom describe - the data description that comes before a SAOM fit
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -125,31 +125,41 @@ program define nwsaom_describe, rclass
 		matrix `P'[`w', 6] = cond(`kept' + `dis' > 0, `kept' / (`kept' + `dis'), .)
 	}
 	capture mata: mata drop `MA' `MB' `EX' `ISA'
+	* Stata-style layout: a header block (label = value) and tables of one width (66 characters)
 	di
-	if `tm' di as txt "Network data: " as res `nw' as txt " waves, two-mode network, " as res `na' as txt " actors (mode `actormode') x " as res `ne' as txt " events; ties are attendances (actor-event cells), density is over the " as res `na' * `ne' as txt " cells"
-	else di as txt "Network data: " as res `nw' as txt " waves, " as res `n0' as txt " actors, " as res cond(`dir1', "directed", "undirected")
-	di as txt "{hline 53}"
-	di as txt %12s "Wave" " {c |}" %9s "ties" %12s "density" %14s "avg. degree"
-	di as txt "{hline 13}{c +}{hline 39}"
-	forvalues w = 1/`nw' {
-		di as txt %12s "`w'" " {c |}" as res %9.0f `W'[`w', 1] %12.4f `W'[`w', 2] %14.3f `W'[`w', 3]
+	if `tm' {
+		di as txt "Network data" _col(37) "Number of actors" _col(55) "=" as res %10.0fc `na'
+		di as txt "Two-mode (actors: mode `actormode')" _col(37) "Number of events" _col(55) "=" as res %10.0fc `ne'
+		di as txt _col(37) "Number of waves" _col(55) "=" as res %10.0fc `nw'
 	}
+	else {
+		di as txt "Network data" _col(37) "Number of actors" _col(55) "=" as res %10.0fc `n0'
+		di as txt cond(`dir1', "Directed", "Undirected") _col(37) "Number of waves" _col(55) "=" as res %10.0fc `nw'
+	}
+	di
+	di as txt "{hline 66}"
+	di as txt %12s "Wave" " {c |}" %11s "Ties" %12s "Density" %14s "Avg. degree"
+	di as txt "{hline 13}{c +}{hline 52}"
+	forvalues w = 1/`nw' {
+		di as txt %12s "`w'" " {c |}" as res %11.0fc `W'[`w', 1] %12.4f `W'[`w', 2] %14.3f `W'[`w', 3]
+	}
+	di as txt "{hline 66}"
+	if `tm' di as txt "Ties are attendances (actor-event cells); density is over the" _n as res strtrim(string(`na' * `ne', "%15.0fc")) as txt " cells."
 	mata: st_numscalar("__nwsd_anys", sum(st_matrix("`W'")[., 4..5]) > 0)
 	if scalar(__nwsd_anys) {
-		di as txt "Structural values (codes 10 and 11), counted as ties when 11; the distance (Hamming) between two waves leaves out the dyads that are structural at either end, as RSiena (the kept/created/dissolved counts and the Jaccard index include them):"
+		di as txt "{p 0 0 0 66}Structural values (codes 10 and 11) count as ties when 11. The Hamming distance between two waves leaves out the dyads that are structural at either end, as RSiena does; Kept, Created, Dissolved and Jaccard include them.{p_end}"
 		forvalues w = 1/`nw' {
-			di as txt "  wave `w': " as res `W'[`w', 4] as txt " structural zeros, " as res `W'[`w', 5] as txt " structural ones"
+			di as txt "  Wave `w': " as res `W'[`w', 4] as txt " structural zeros, " as res `W'[`w', 5] as txt " structural ones"
 		}
 	}
-	di as txt "{hline 53}"
 	di
-	di as txt "{hline 70}"
-	di as txt %12s "Period" " {c |}" %8s "kept" %10s "created" %11s "dissolved" %10s "Jaccard" %10s "Hamming"
-	di as txt "{hline 13}{c +}{hline 56}"
+	di as txt "{hline 66}"
+	di as txt %12s "Period" " {c |}" %8s "Kept" %10s "Created" %11s "Dissolved" %10s "Jaccard" %10s "Hamming"
+	di as txt "{hline 13}{c +}{hline 52}"
 	forvalues w = 1/`=`nw'-1' {
-		di as txt %12s "`w'->`=`w'+1'" " {c |}" as res %8.0f `P'[`w', 1] %10.0f `P'[`w', 2] %11.0f `P'[`w', 3] %10.3f `P'[`w', 4] %10.0f `P'[`w', 5]
+		di as txt %12s "`w'->`=`w'+1'" " {c |}" as res %8.0fc `P'[`w', 1] %10.0fc `P'[`w', 2] %11.0fc `P'[`w', 3] %10.3f `P'[`w', 4] %10.0fc `P'[`w', 5]
 	}
-	di as txt "{hline 70}"
+	di as txt "{hline 66}"
 	forvalues w = 1/`=`nw'-1' {
 		if `P'[`w', 4] < 0.3 di as txt "Note: Jaccard < 0.3 in period `w'->`=`w'+1'; few ties stay, the data say little about change."
 	}
@@ -171,24 +181,24 @@ program define nwsaom_describe, rclass
 		tempname Bh
 		matrix `Bh' = J(`nw', 3, .)
 		di
-		di as txt "{hline 50}"
-		di as txt %12s "Behavior" " {c |}" %12s "mean" %12s "sd" %12s "missing"
-		di as txt "{hline 13}{c +}{hline 36}"
+		di as txt "{hline 66}"
+		di as txt %12s "Behavior" " {c |}" %12s "Mean" %12s "Std. dev." %12s "Missing"
+		di as txt "{hline 13}{c +}{hline 52}"
 		forvalues w = 1/`nw' {
 			local v : word `w' of `behavior'
 			qui count if missing(`v') in 1/`n0'
 			local nmiss = r(N)
 			qui summarize `v' in 1/`n0'
 			matrix `Bh'[`w', 1] = r(mean)
-			di as txt %12s "wave `w'" " {c |}" as res %12.3f r(mean) %12.3f r(sd) %12.0f `nmiss'
+			di as txt %12s "Wave `w'" " {c |}" as res %12.3f r(mean) %12.3f r(sd) %12.0f `nmiss'
 		}
 		tempname Bc
 		matrix `Bc' = J(`=`nw'-1', 3, .)
-		di as txt "{hline 50}"
+		di as txt "{hline 66}"
 		di
-		di as txt "{hline 50}"
-		di as txt %12s "Change" " {c |}" %12s "up" %12s "down" %12s "same"
-		di as txt "{hline 13}{c +}{hline 36}"
+		di as txt "{hline 66}"
+		di as txt %12s "Change" " {c |}" %12s "Up" %12s "Down" %12s "Same"
+		di as txt "{hline 13}{c +}{hline 52}"
 		forvalues w = 1/`=`nw'-1' {
 			local v1 : word `w' of `behavior'
 			local v2 : word `=`w'+1' of `behavior'
@@ -203,7 +213,7 @@ program define nwsaom_describe, rclass
 			matrix `Bc'[`w', 3] = `sm'
 			di as txt %12s "`w'->`=`w'+1'" " {c |}" as res %12.0f `up' %12.0f `dn' %12.0f `sm'
 		}
-		di as txt "{hline 50}"
+		di as txt "{hline 66}"
 		matrix colnames `Bc' = up down same
 		return matrix behchange = `Bc'
 	}

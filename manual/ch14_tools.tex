@@ -12,36 +12,38 @@ Before a fit, \texttt{nwsaom describe} prints what RSiena prints before an estim
 \begin{lstlisting}
 . nwwebuse glasgow, nwclear
 . nwsaom describe, waves(glasgow1 glasgow2 glasgow3) behavior(alcohol1 alcohol2 alcohol3)
-Network data: 3 waves, 50 actors, directed
------------------------------------------------------
-        Wave |     ties     density   avg. degree
--------------+---------------------------------------
-           1 |      113      0.0461         2.260
-           2 |      116      0.0473         2.320
-           3 |      122      0.0498         2.440
------------------------------------------------------
+Network data                        Number of actors  =        50
+Directed                            Number of waves   =         3
 
-----------------------------------------------------------------------
-      Period |    kept   created  dissolved   Jaccard   Hamming
--------------+--------------------------------------------------------
+------------------------------------------------------------------
+        Wave |       Ties     Density   Avg. degree
+-------------+----------------------------------------------------
+           1 |        113      0.0461         2.260
+           2 |        116      0.0473         2.320
+           3 |        122      0.0498         2.440
+------------------------------------------------------------------
+
+------------------------------------------------------------------
+      Period |    Kept   Created  Dissolved   Jaccard   Hamming
+-------------+----------------------------------------------------
         1->2 |      57        59         56     0.331       115
         2->3 |      66        56         50     0.384       106
-----------------------------------------------------------------------
+------------------------------------------------------------------
 
---------------------------------------------------
-    Behavior |        mean          sd     missing
--------------+------------------------------------
-      wave 1 |       2.880       1.118           0
-      wave 2 |       3.100       1.199           0
-      wave 3 |       3.360       0.985           0
---------------------------------------------------
+------------------------------------------------------------------
+    Behavior |        Mean   Std. dev.     Missing
+-------------+----------------------------------------------------
+      Wave 1 |       2.880       1.118           0
+      Wave 2 |       3.100       1.199           0
+      Wave 3 |       3.360       0.985           0
+------------------------------------------------------------------
 
---------------------------------------------------
-      Change |          up        down        same
--------------+------------------------------------
+------------------------------------------------------------------
+      Change |          Up        Down        Same
+-------------+----------------------------------------------------
         1->2 |          16           6          28
         2->3 |          18           9          23
---------------------------------------------------
+------------------------------------------------------------------
 \end{lstlisting}
 A period with a Jaccard index below about 0.3 has few stable ties and carries little information about the change process; here the two periods are at 0.33 and 0.38. The results are in \texttt{r(periods)}, \texttt{r(waves)} and \texttt{r(behchange)}. For a two-mode network the ties are the attendances (the cells of the actors-by-events matrix), the density is taken over those cells and the average degree is the mean number of events per actor; the option \opt{actormode(\#)} names the mode of the actors (default 2, as in \texttt{nwsaom}), and \texttt{r(n\_actors)} and \texttt{r(n\_events)} hold the numbers of actors and events. The description of a stacked data set with groups (Chapter~\ref{ch:groups}) is that of the combined network; describe the groups one by one by making a network of each.
 
@@ -69,12 +71,12 @@ The fixed coefficient equals its start value and its variance is 0. The overall 
 Simulation from the fitted model: 20 replication(s) of 1 period(s)
 
 ------------------------------------
-    Statistic |       Sim       Obs
---------------+---------------------
-Period 1      |
-         Ties |     112.4       116
-       Mutual |      34.0        35
-   Transitive |      77.8        88
+   Statistic |       Sim       Obs
+-------------+----------------------
+Period 1     |
+        Ties |     112.4       116
+      Mutual |      34.0        35
+  Transitive |      77.8        88
 ------------------------------------
 Sim is the mean over the replications; Obs is the observed end wave.
 \end{lstlisting}
@@ -84,12 +86,12 @@ Options: \opt{theta(\emph{matname})} replaces the coefficients (a row vector in 
 \begin{lstlisting}
 . nwsaom simulate, wave1(glasgow1) wave2(glasgow2) outdegree reciprocity transtrip theta(-2.3 2 0.5) rates(5) nsim(30) seed(3)
 ------------------------------------
-    Statistic |       Sim       Obs
---------------+---------------------
-Period 1      |
-         Ties |     127.1       116
-       Mutual |      36.3        35
-   Transitive |      72.0        88
+   Statistic |       Sim       Obs
+-------------+----------------------
+Period 1     |
+        Ties |     127.1       116
+      Mutual |      36.3        35
+  Transitive |      72.0        88
 ------------------------------------
 Sim is the mean over the replications; Obs is the observed end wave.
 \end{lstlisting}
@@ -115,14 +117,14 @@ H0: each effect below equals its fixed value
 -----------------------------------------------------------------
 
 One-step estimates (restricted estimates plus the one-step correction)
---------------------------
+-----------------------------------------------------------------
       Effect |    Estimate
--------------+------------
+-------------+---------------------------------------------------
    outdegree |     -2.6717
  reciprocity |      2.0383
    transtrip |      1.3303
       cycle3 |      0.2607
---------------------------
+-----------------------------------------------------------------
 \end{lstlisting}
 The joint statistic $c$ is chi-squared with as many degrees of freedom as tested effects. The one-sided variate is a normal variate with the sign changed, as in RSiena, so that it is positive when the effect is expected to be positive. The one-step estimates give the value each coefficient would approximately take if the tested effects were freed, which is a quick way to see the size of the effects before fitting the larger model. \opt{tested(\emph{effects})} restricts the test to some of the fixed effects; the others stay fixed and are treated as redundant. The test works for network effects and for the effects of a co-evolving behavior.
 
@@ -141,9 +143,9 @@ net1_x_crp~d |    0.0000     2.323    1       0.1275       -1.524
 -----------------------------------------------------------------
 
 One-step estimates (restricted estimates plus the one-step correction)
---------------------------
+-----------------------------------------------------------------
       Effect |    Estimate
--------------+------------
+-------------+---------------------------------------------------
 net1_outde~e |     -2.6173
 net1_recip~y |      2.5168
 net1_trans~p |      0.6207
@@ -155,7 +157,7 @@ net2_recip~y |      1.1544
        rate2 |      5.0184
        rate3 |      1.8038
        rate4 |      1.7646
---------------------------
+-----------------------------------------------------------------
 \end{lstlisting}
 On the artificial advice network \texttt{crprod} has no evidence in its favour, as in the fit of Section~\ref{sec:multinet}. The rates are listed as \texttt{rate1}, \texttt{rate2} (the first network in periods 1 and 2) and \texttt{rate3}, \texttt{rate4} (the second network).
 
@@ -168,15 +170,15 @@ On the artificial advice network \texttt{crprod} has no evidence in its favour, 
 Test of time heterogeneity (score-type test)
 H0: the parameter of each effect is the same in all periods
 
--------------------------------------------
-      Effect |      chi2    df  Prob > chi2
--------------+-----------------------------
-   outdegree |     0.074     1       0.7860
- reciprocity |     0.963     1       0.3264
-   transtrip |     0.439     1       0.5075
--------------+-----------------------------
-       Joint |     3.567     3       0.3122
--------------------------------------------
+---------------------------------------------------------
+      Effect |          chi2        df        Prob > chi2
+-------------+-------------------------------------------
+   outdegree |         0.074         1             0.7860
+ reciprocity |         0.963         1             0.3264
+   transtrip |         0.439         1             0.5075
+-------------+-------------------------------------------
+       Joint |         3.567         3             0.3122
+---------------------------------------------------------
 
 Period-specific deviations (one-step estimates) and separate tests
 ---------------------------------------------------------
@@ -197,18 +199,18 @@ With $P$ periods there are $P-1$ deviations per effect. In this example there is
 Test of time heterogeneity (score-type test)
 H0: the parameter of each effect is the same in all periods
 
--------------------------------------------
-      Effect |      chi2    df  Prob > chi2
--------------+-----------------------------
-net1_outde~e |     0.077     1       0.7808
-net1_recip~y |     0.998     1       0.3177
-net1_trans~p |     0.396     1       0.5291
-net2_outde~e |     1.487     1       0.2227
-net2_recip~y |     3.592     1       0.0580
- net2_x_from |     1.501     1       0.2205
--------------+-----------------------------
-       Joint |     7.105     6       0.3113
--------------------------------------------
+---------------------------------------------------------
+      Effect |          chi2        df        Prob > chi2
+-------------+-------------------------------------------
+net1_outde~e |         0.077         1             0.7808
+net1_recip~y |         0.998         1             0.3177
+net1_trans~p |         0.396         1             0.5291
+net2_outde~e |         1.487         1             0.2227
+net2_recip~y |         3.592         1             0.0580
+ net2_x_from |         1.501         1             0.2205
+-------------+-------------------------------------------
+       Joint |         7.105         6             0.3113
+---------------------------------------------------------
 \end{lstlisting}
 (Run after the multinet fit above with \texttt{crprod} fixed. The output continues with the period-specific deviations.)
 
@@ -288,9 +290,10 @@ The following example runs with the data of the package. It makes four groups by
 .     estimates store grp`s'
 . }
 . nwsaom meta grp1 grp2 grp3 grp4
-Meta-analysis of 4 fits
+Meta-analysis of separate fits                  Number of fits    =         4
+
 Estimates with a standard error of 10 or more are excluded;
-tests of the means use a t distribution with n-1 d.f.
+tests of the means use a t distribution with N-1 d.f.
 IWLS estimates (Snijders and Baerveldt 2003)
       Effect |   n      Mean  Std. err.       t   P>|t|      SD       Q     P>Q
 -------------+-----------------------------------------------------------------
