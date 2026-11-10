@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.5.11  09nov2026 author: Thomas Grund}{...}
+{* *! version 1.5.12  10nov2026 author: Thomas Grund}{...}
 
 {title:Title}
 
@@ -1075,7 +1075,7 @@ standard errors (e(V), RSiena's sandwich formula), the convergence t-ratios {cmd
 deviation / its standard deviation, one per parameter including the rates) and RSiena's overall
 maximum convergence ratio {cmd:e(tconv_max)}. As in RSiena, a fit is considered converged when
 every |t| is below 0.1 and the overall ratio below 0.25; otherwise, run the model again from the
-estimates ({opt theta0()} and {opt rate0()}, see the examples in {help nwsaom}). If after one or two restarts the overall ratio stays
+estimates: {help nwsaom##refit:nwsaom refit} (or {opt theta0()} and {opt rate0()} by hand). If after one or two restarts the overall ratio stays
 near 0.25 while the estimates hardly change, restart once more with a longer phase 3, for example {opt k3(3000)}. Below the coefficient
 table, every fit prints the two criteria on separate lines, each with the statement "met" or "not met": the overall ratio (criterion: below 0.25)
 and the individual t-ratios (criterion: every |t| below 0.1, with the parameters that fail named); the
@@ -1149,4 +1149,4 @@ The same estimates are available as {cmd:nwsaom_ml} after an {cmd:nwsaom} fit. T
     {help nwsaom}, {help nwsaom_estat}, {help nwergm}
 
 {hline}
-{pstd}{it:nwsaom version 1.5.11, 9 November 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.5.12, 10 November 2026}{p_end}{* nwversion}

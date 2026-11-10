@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.5.11  09nov2026 author: Thomas Grund}{...}
+{* *! version 1.5.12  10nov2026 author: Thomas Grund}{...}
 {marker topic}
 {helpb nwtopical##analysis_statmodels:[NW-2.6.6] Statistical Estimation of Networks}
 
@@ -412,7 +412,7 @@ Method-of-Moments parameters. The default for a network-only model is CONDITIONA
 ({cmd:cond = TRUE}); co-evolution and {cmd:nwsaom multiplex} models are always unconditional, as in RSiena (see
 {help nwsaom_remarks##estimation:Estimation} in nwsaom_remarks){p_end}
 {synopt:{opt rate0(numlist)}}Starting value(s) of the network rate(s) of an unconditional network-only fit: one value, or one per inter-wave period;
-default RSiena's closed-form starting value, computed from the data. With {opt theta0()}, restarts a fit from earlier estimates. For {opt symmetric}
+default RSiena's closed-form starting value, computed from the data. With {opt theta0()}, restarts a fit from earlier estimates. {help nwsaom##refit:nwsaom refit} does this for you. For {opt symmetric}
 fits on RSiena's scale, as e(rate). Not used under conditional estimation, where the rates are not estimated by Robbins-Monro (see
 {help nwsaom_remarks##estimation:Estimation} in nwsaom_remarks){p_end}
 {synopt:{opt theta0(numlist)}}Starting values for the eval-parameter vector, one per requested effect IN THE ORDER LISTED IN THE ERROR MESSAGE if
@@ -661,10 +661,35 @@ Simulates a model at coefficients chosen by you, without estimating anything (RS
 per behavior effect, {opt rates()} the rate of every period and {opt ratesbeh()} the behavior rates. The result is that of
 {help nwsaom_estat##estat_simulate:estat simulate}. After a fit, {cmd:estat simulate} simulates the fitted model.
 
+{marker refit}{...}
+{title:Refitting from the last estimates: nwsaom refit}
+
+{p 8 17 2}
+{cmd:nwsaom refit} [{cmd:,} {opt maxruns(#)} {opt k3(#)} {opt seed(#)} {opt cores(#)} {opt firstg(#)} {opt tconv(#)} {opt tmax(#)} {opt nodisplay}]
+
+{pstd}
+Runs the last {cmd:nwsaom} fit again, starting from its estimates: the counterpart of RSiena's {cmd:prevAns}. The command
+is the one stored in {cmd:e(cmdline)}; {opt theta0()} and {opt behtheta0()} are replaced by the coefficients in {cmd:e(b)},
+{opt rate0()} by the rates of an unconditional network-only fit, and {opt ratecovcoef()} by {cmd:e(ratecoefs)}. Everything else
+(the effects, the data, {opt fix()}, {opt k0()}, the seed) is kept unless given here. Unlike RSiena, Phase 1 is run again.
+Co-evolution models start their rates from the closed form, as with {opt theta0()}.
+
+{synoptset 16}{...}
+{synopt:{opt maxruns(#)}}refit up to # times, stopping once the fit has converged (every |t| below {opt tconv()}, overall ratio below {opt tmax()}); default 1{p_end}
+{synopt:{opt k3(#)}, {opt seed(#)}, {opt cores(#)}, {opt firstg(#)}}replace these options of the stored command; a longer Phase 3 ({opt k3()}) gives more precise t-ratios{p_end}
+{synopt:{opt tconv(#)}, {opt tmax(#)}}the convergence criteria used by {opt maxruns()}; defaults 0.1 and 0.25, as in RSiena{p_end}
+{synopt:{opt nodisplay}}show one line per run instead of the full output{p_end}
+
+{pstd}
+Besides the results of the new fit, {cmd:e(refit_runs)} holds the number of runs and {cmd:e(refit_converged)} whether the last one met both
+criteria. Example: {cmd:nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip k3(200) seed(12345)}, then
+{cmd:nwsaom refit, k3(1000) seed(12346)}. Not available after {cmd:nwsaom multinet} or {cmd:nwsaom multiplex}, nor for results of
+nwsaom 1.5.11 or earlier (they have no {cmd:e(cmdline)}).
+
 {pstd}
 {bf:Syntax rule.} A property of the data (two-mode, non-directed) is detected from the network; an option changes
 how a model is specified or fitted ({opt behavior()}, {opt present()}, {opt fix()}); a different job is a subcommand
-({cmd:nwsaom multinet}, {cmd:nwsaom simulate}) or a postestimation command ({cmd:estat}). {cmd:nwsaom multiplex} is
+({cmd:nwsaom multinet}, {cmd:nwsaom simulate}, {cmd:nwsaom refit}) or a postestimation command ({cmd:estat}). {cmd:nwsaom multiplex} is
 deprecated: use {cmd:nwsaom multinet}.
 
 {title:Remarks}
@@ -747,6 +772,7 @@ fits: on RSiena's scale for pairwise models (see {help nwsaom_remarks##undirecte
 
 		Macros
 		  {bf:e(cmd)}			{bf:nwsaom}
+		  {bf:e(cmdline)}		the command as typed; {help nwsaom##refit:nwsaom refit} reruns it
 		  {bf:e(title)}			title of estimation
 		  {bf:e(waves)}			list of wave network names, in temporal order
 		  {bf:e(symtype)}		non-directed fits only: the model type, {bf:forcing}, {bf:confirmation}, {bf:force}, {bf:agree}, or {bf:joint}
@@ -928,4 +954,4 @@ It is not affiliated with or endorsed by the RSiena project.
 	{help nwergm}, {help nwset}, {help nwrandom}
 
 {hline}
-{pstd}{it:nwsaom version 1.5.11, 9 November 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.5.12, 10 November 2026}{p_end}{* nwversion}

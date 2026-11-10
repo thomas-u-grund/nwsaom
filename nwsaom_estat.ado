@@ -1,4 +1,4 @@
-*! version 1.5.11  09nov2026 nwcommands: post-estimation for nwsaom (harmonisation units 21+26, RSiena-faithful GOF + co-evolution, N-wave)
+*! version 1.5.12  10nov2026 nwcommands: post-estimation for nwsaom (harmonisation units 21+26, RSiena-faithful GOF + co-evolution, N-wave)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -565,12 +565,13 @@ program define nwsaom_estat_gof, rclass
 	// --- the Mahalanobis test + violin plot, per auxiliary statistic.
 	local __gof_twotailed = ("`twotailed'" != "")
 	di
-	di as txt "Goodness of fit: Mahalanobis distance test, " as res `nsim' as txt " simulations at the estimates" _continue
+	di as txt "Goodness of fit: Mahalanobis distance test"
+	di as res `nsim' as txt " simulations at the estimates" _continue
 	if `__gof_join' {
-		if `nperiods' > 1 di as txt " (" as res `nperiods' as txt " periods pooled)"
+		if `nperiods' > 1 di as txt ", " as res `nperiods' as txt " periods pooled"
 		else di ""
 	}
-	else di as txt " (one test per period)"
+	else di as txt ", one test per period"
 	local __gof_graphs ""
 	di
 	di as txt "{hline 21}{c TT}{hline 32}"
@@ -623,8 +624,17 @@ program define nwsaom_estat_gof, rclass
 	  }
 	}
 	di as txt "{hline 21}{c BT}{hline 32}"
-	di as txt "Fit is rejected when P < 0.05 (" cond(`__gof_twotailed', "two", "one") "-tailed test)."
-	di as txt "Violin plots:" as res "`__gof_graphs'"
+	di as txt "rejected: P < 0.05 (" cond(`__gof_twotailed', "two", "one") "-tailed); the model does not reproduce this statistic"
+	// the graph names, broken between names
+	local __gof_line "Violin plots:"
+	foreach __g of local __gof_graphs {
+		if strlen("`__gof_line' `__g'") > 78 {
+			di as txt "`__gof_line'"
+			local __gof_line " "
+		}
+		local __gof_line "`__gof_line' `__g'"
+	}
+	di as txt "`__gof_line'"
 
 	capture mata: mata drop __nwsaom_gof_cfg
 	foreach __gof_s of local stats {

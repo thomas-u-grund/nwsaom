@@ -3,6 +3,21 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.5.12] - 2026-11-10
+
+### Added
+- **`nwsaom refit`** runs the last fit again, starting from its estimates (RSiena's `prevAns`), without typing the estimates into `theta0()`. It reruns the stored command with `theta0()` and `behtheta0()` set to `e(b)`, `rate0()` to the rates of an unconditional network-only fit and `ratecovcoef()` to `e(ratecoefs)`; `k3()`, `seed()`, `cores()` and `firstg()` given to it replace those of the stored command. `maxruns(#)` repeats the refit until both convergence criteria are met (every |t| below 0.1, overall ratio below 0.25), at most # times; `nodisplay` shows one line per run. `e(refit_runs)` and `e(refit_converged)` report what happened. The result is the same as typing the estimates into `theta0()` with full precision (tested in `cscripts/test_nwsaom_refit.do`). Not available after `nwsaom multinet` or `nwsaom multiplex`.
+- `e(cmdline)`: the command as typed.
+
+### Changed
+- When a fit has not converged, the note below the table says to type `nwsaom refit`.
+- The parameters whose convergence t-ratio is too large are listed on lines of their own, broken between parameters (a long list was cut inside a name at 80 columns).
+- `estat gof`: the header is on two lines and the names of the violin plots are broken between names, so that no line is cut inside a word at 80 columns; the note below the table says what "rejected" means ("P < 0.05 ...; the model does not reproduce this statistic").
+
+### Documentation
+- Help file (section "Refitting from the last estimates"), remarks and manual (Chapter 9) describe `nwsaom refit`.
+- Manual (Chapters 10, 11 and 15): the note that joint estimates of several groups with missing behavior values and `behegox`/`behaltx` differ from RSiena is removed. The difference was fixed in 1.2.0 (a tie does not count in these statistics when its covariate value was missing at the start of the period, as in RSiena), and a new check with ten seeds on three groups with 20 missing values agrees with RSiena 1.6.14 within 0.04 standard errors.
+
 ## [1.5.11] - 2026-11-09
 
 ### Changed

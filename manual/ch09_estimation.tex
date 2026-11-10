@@ -41,23 +41,19 @@ Option & Meaning\\
 
 \paragraph{Seeds and threads.} Every simulation draws from its own random stream derived from the seed and the position of the simulation. A given \opt{seed()} therefore gives identical results with \texttt{cores(1)} and with any other number of threads. Results for different seeds differ by simulation noise; when comparing two specifications, fit each with several seeds.
 
-\paragraph{Starting values and restarts.} \opt{theta0()} takes one value per requested effect, in the order shown by \texttt{matrix list e(b)} (outdegree first, then the effects in the order in which their options appear in the help file; if the count is wrong the error message lists the order). Without \opt{theta0()} all parameters start at zero, except that a network-only model starts \opt{outdegree} at RSiena's data-derived value. To continue a fit that has not converged, restart from its estimates:
+\paragraph{Starting values and restarts.} \opt{theta0()} takes one value per requested effect, in the order shown by \texttt{matrix list e(b)} (outdegree first, then the effects in the order in which their options appear in the help file; if the count is wrong the error message lists the order). Without \opt{theta0()} all parameters start at zero, except that a network-only model starts \opt{outdegree} at RSiena's data-derived value. To continue a fit that has not converged, restart from its estimates with \texttt{nwsaom refit} (new in 1.5.12; RSiena's \texttt{prevAns}):
 \begin{lstlisting}
 nwwebuse glasgow, nwclear
 nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip seed(1)
+nwsaom refit, seed(2)
+\end{lstlisting}
+\texttt{nwsaom refit} reruns the command stored in \texttt{e(cmdline)} with \opt{theta0()} and \opt{behtheta0()} set to \texttt{e(b)}, \opt{rate0()} to the rates of an unconditional network-only fit and \opt{ratecovcoef()} to \texttt{e(ratecoefs)}; \opt{k3()}, \opt{seed()}, \opt{cores()} and \opt{firstg()} given to it replace those of the stored command. \opt{maxruns(\#)} repeats the refit until both convergence criteria below are met, at most \# times, and \texttt{e(refit\_runs)} and \texttt{e(refit\_converged)} report what happened. By hand, the same restart is
+\begin{lstlisting}
 matrix b = e(b)
 nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip ///
     theta0(`=b[1,1]' `=b[1,2]' `=b[1,3]') seed(2)
 \end{lstlisting}
-For an unconditional fit also pass the rates, taken from \texttt{e(rates)} (or \texttt{e(rate)} for the two-wave path), through \opt{rate0()}:
-\begin{lstlisting}
-nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip ///
-    unconditional seed(1)
-matrix b = e(b)
-matrix r = e(rates)
-nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip ///
-    unconditional theta0(`=b[1,1]' `=b[1,2]' `=b[1,3]') rate0(`=r[1,1]' `=r[1,2]') seed(2)
-\end{lstlisting}
+and an unconditional fit also passes the rates, from \texttt{e(rates)} (or \texttt{e(rate)} for the two-wave path), through \opt{rate0()}.
 A start far from the data, for example twice the closed-form rate, can make the phase-1 derivative estimates unusable and the fit diverge. As in RSiena, a parameter whose absolute value exceeds 50 in phase 2 (\texttt{thetaBound}) stops the fit with a message and the error r(498); this holds for every free parameter, the rates and the rate-effect coefficients included, and it stops a co-evolution fit with a behavior rate effect that the data do not support within seconds instead of after hours. A simulated period that needs more than $\max(10^6, 500n)$ ministeps is abandoned in the same way.
 
 \paragraph{Which engine ran.} If the compiled plugin cannot be used (the plugin file is missing for the platform, it is older than the model needs, or the model exceeds a limit of the native engine), \nwsaom{} falls back to the Mata engine, and says so: one warning line is printed before the estimation starts, and a note follows the table (Section~\ref{sec:fallbackwarn}). The results are the same, but the fit is orders of magnitude slower. \texttt{e(engine)} (\texttt{native} or \texttt{mata}) and \texttt{e(engine\_why)} give the engine and the reason. Many effects exist only natively (Appendix~\ref{app:mata} lists those that also run in Mata); a missing or too-old plugin then gives an explicit error rather than a fallback (Chapter~\ref{ch:effects}).
@@ -68,7 +64,7 @@ After the coefficient table, \nwsaom{} prints the rate table and the convergence
 \item every $|t|$ is below 0.1, and
 \item the overall maximum convergence ratio \texttt{e(tconv\_max)} is below 0.25.
 \end{itemize}
-If either condition fails, run the model again from the estimates as shown above. If after one or two restarts the overall ratio stays near 0.25 while the estimates hardly change from one restart to the next, the remaining excess is mostly noise in the phase-3 estimate of the ratio: restart once more with a longer phase 3, for example \opt{k3(3000)}, rather than restarting again and again with the default length. The $t$-ratios of the coefficients in \texttt{e(b)} are in \texttt{e(tratio)}; all of them, with the rates, are in \texttt{e(tconv)}.
+If either condition fails, run the model again from the estimates with \texttt{nwsaom refit}, as shown above. If after one or two restarts the overall ratio stays near 0.25 while the estimates hardly change from one restart to the next, the remaining excess is mostly noise in the phase-3 estimate of the ratio: restart once more with a longer phase 3, for example \opt{k3(3000)}, rather than restarting again and again with the default length. The $t$-ratios of the coefficients in \texttt{e(b)} are in \texttt{e(tratio)}; all of them, with the rates, are in \texttt{e(tconv)}.
 
 A real run on the Glasgow data (RSiena's \texttt{s50}, three waves) illustrates the output. All three $t$-ratios are below 0.1 in absolute value, and the overall ratio of 0.123 is below 0.25 (the two criteria are separate, and the detail listing is shown):
 \begin{lstlisting}
@@ -157,7 +153,8 @@ Stored estimates can be combined across networks with \texttt{nwsaom meta}, the 
 
 \begin{lstlisting}
 . estat gof, nsim(30) seed(1)
-Goodness of fit: Mahalanobis distance test, 30 simulations at the estimates (2 periods pooled)
+Goodness of fit: Mahalanobis distance test
+30 simulations at the estimates, 2 periods pooled
 
 ------------------------------------------------------
            Statistic |   Mahalanobis  P-value      Fit
@@ -166,7 +163,7 @@ Goodness of fit: Mahalanobis distance test, 30 simulations at the estimates (2 p
             Indegree |        14.906    0.133       ok
             Geodesic |        23.311    0.000 rejected
 ------------------------------------------------------
-Fit is rejected when P < 0.05 (one-tailed test).
+rejected: P < 0.05 (one-tailed); the model does not reproduce this statistic
 \end{lstlisting}
 This three-effect model on the Glasgow data is deliberately minimal; the output shows how a poorly fitting specification is reported, and that it is a reason to extend the model, not a failure of the command. \opt{nsim()} defaults to 50 (minimum 5); \texttt{nsim(30)} was used here only to be quick.
 

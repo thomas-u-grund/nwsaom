@@ -1,4 +1,4 @@
-*! version 1.5.11  09nov2026 _nwsaom_tconvtable (split out of nwsaom.ado: a program of another ado-file is dropped without a trace when Stata evicts it, so cross-file helpers need their own file)
+*! version 1.5.12  10nov2026 _nwsaom_tconvtable (split out of nwsaom.ado: a program of another ado-file is dropped without a trace when Stata evicts it, so cross-file helpers need their own file)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -29,10 +29,13 @@ program define _nwsaom_tconvtable
 	}
 	else {
 		local bad ""
+		local nbad 0
 		forvalues j = 1/`k' {
 			if abs(`m'[1,`j']) >= 0.1 {
 				local nm : word `j' of `names'
 				local bad "`bad' `nm' (`: di %5.3f `m'[1,`j']')"
+				local ++nbad
+				local bad`nbad' "`nm' (`: di %5.3f `m'[1,`j']')"
 			}
 		}
 		/* RSiena's two criteria are separate and both are needed (siena.Rd): every convergence t-ratio below 0.1 in absolute value
@@ -41,9 +44,22 @@ program define _nwsaom_tconvtable
 		local ok = e(tconv_max) < 0.25
 		di as text "Overall maximum convergence ratio: " as result %5.3f e(tconv_max) as text " (criterion: below 0.25; " cond(`ok', "met", "{bf:not met}") ")"
 		if "`bad'" == "" di as text "Convergence t-ratios (criterion: all below 0.1 in absolute value): met"
-		else di as text "Convergence t-ratios (criterion: all below 0.1 in absolute value): {bf:not met} for" as result "`bad'"
+		else {
+			// the parameters that fail on lines of their own, broken between parameters, never within a name
+			di as text "Convergence t-ratios (criterion: all below 0.1 in absolute value): {bf:not met} for"
+			local line ""
+			forvalues j = 1/`nbad' {
+				if `"`line'"' != "" & strlen(`"`line' `bad`j''"') > 76 {
+					di as result "  `line'"
+					local line ""
+				}
+				local line = trim(`"`line' `bad`j''"')
+			}
+			if `"`line'"' != "" di as result "  `line'"
+		}
 		if !`ok' | "`bad'" != "" {
-			di as text "Convergence is good only if both criteria are met. Refit starting from these estimates with theta0(); see {help nwsaom}."
+			if "`e(cmd)'" == "nwsaom" & `"`e(cmdline)'"' != "" di as text "Convergence is good only if both criteria are met." _n "To refit starting from these estimates, type {bf:nwsaom refit}."
+			else di as text "Convergence is good only if both criteria are met. Refit starting from these estimates with theta0(); see {help nwsaom}."
 		}
 	}
 	if "`e(engine)'" == "mata" {

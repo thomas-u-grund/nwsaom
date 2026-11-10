@@ -100,7 +100,7 @@ The following cases are the honest edge of the validation. They fall into four k
 \subsection{Several groups}
 \begin{itemize}
 \item RSiena 1.6.14 stops with an error (\texttt{INTEGER()} applied to a non-list in \texttt{initializeFRAN}) for a group object whose groups have different numbers of waves, although its manual allows this. \opt{gwaves()} was therefore checked against the equivalent object of two-wave groups (uncentered covariates, no effects with group constants).
-\item With \opt{groups()}, missing behavior values together with the selection effects \opt{behegox} or \opt{behaltx} give estimates that differ from RSiena's; in a single group the two programs agree. The cause has not been found, so this combination is not claimed as validated. The comparison of composition change in groups used joiners; leavers (with a behavior) were not compared and are not claimed.
+\item With \opt{groups()}, missing behavior values together with the selection effects \opt{behegox} or \opt{behaltx} agree with RSiena (since 1.2.0, as in RSiena a tie does not count in the statistic when its covariate value was missing at the start of the period; checked again for 1.5.12 with ten seeds on three groups with 20 missing values: every estimate within 0.04 standard errors). The comparison of composition change in groups used joiners; leavers (with a behavior) were not compared and are not claimed.
 \item Constraints (\texttt{higher}, \texttt{disjoint}, \texttt{atLeastOne}) are not supported by RSiena with groups, and \nwsaom{} does not offer them.
 \end{itemize}
 

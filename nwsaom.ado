@@ -1,4 +1,4 @@
-*! version 1.5.11  09nov2026 nwcommands: stochastic actor-oriented model (SAOM) estimation, v1 (+ harmonisation unit 26 co-evolution, N-wave, avsim, native backend)
+*! version 1.5.12  10nov2026 nwcommands: stochastic actor-oriented model (SAOM) estimation, v1 (+ harmonisation unit 26 co-evolution, N-wave, avsim, native backend)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -105,6 +105,14 @@ program nwsaom, eclass
 		nwsaom_bayes , `__saom_rest'
 		exit
 	}
+	if `"`1'"' == "refit" | `"`1'"' == "refit," {
+		// nwsaom refit: rerun the last fit from its estimates (RSiena's prevAns)
+		gettoken __saom_sub 0 : 0
+		local __saom_rest = trim(`"`0'"')
+		if substr(`"`__saom_rest'"', 1, 1) == "," local __saom_rest = substr(`"`__saom_rest'"', 2, .)
+		nwsaom_refit , `__saom_rest'
+		exit
+	}
 	if `"`1'"' == "simulate" | `"`1'"' == "simulate," {
 		gettoken __saom_sub 0 : 0
 		nwsaom_simulate , `0'
@@ -124,6 +132,9 @@ program nwsaom, eclass
 		nwsaom_multiplex , `0'
 		exit
 	}
+	// the command as typed, stored in e(cmdline); nwsaom refit reruns it
+	local __ns_cmdline = trim(`"`0'"')
+	local __ns_cmdline `"nwsaom`=cond(substr(`"`__ns_cmdline'"', 1, 1) == ",", "", " ")'`__ns_cmdline'"'
 	syntax [, ML MLOPTIONS(string) WAVE1(string) WAVE2(string) WAVES(string) OUTDEGREE DEGREE DENSITY RECIPROCITY NODEMATCH(string) ///
 		OUTDEGREEENDOW OUTDEGREECREATION RECIPROCITYENDOW RECIPROCITYCREATION TRANSTIESENDOW TRANSTIESCREATION ///
 		NODECOV(string) NODEICOV(string) NODEOCOV(string) ///
@@ -3447,7 +3458,8 @@ program nwsaom, eclass
 	// nwsaom versions carried.
 	ereturn post `b' `V', depname("`__ns_depname'") obs(`nodes')
 	ereturn local cmd "nwsaom"
-	ereturn local version "1.5.11"
+	ereturn local cmdline `"`__ns_cmdline'"'
+	ereturn local version "1.5.12"
 	_nwsaom_postengine
 	// RSiena's effect names and the covariate centring means (RSiena
 	// prints both), 2026-10-01

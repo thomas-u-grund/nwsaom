@@ -116,7 +116,7 @@ Overall maximum convergence ratio: 0.258 (criterion: below 0.25; not met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for outdegree (0.114) transtrip (0.102) beh_linear (0.126) rate_beh_period2 (0.118)
 Convergence is good only if both criteria are met. Refit starting from these estimates with theta0(); see nwsaom.
 \end{lstlisting}
-This fit has not converged by the two criteria (the overall ratio is 0.258 and four $t$-ratios are above 0.1); before it is reported it would be restarted from its estimates with \opt{theta0()}, as Chapter~\ref{ch:estimation} explains.
+This fit has not converged by the two criteria (the overall ratio is 0.258 and four $t$-ratios are above 0.1); before it is reported it would be restarted from its estimates with \texttt{nwsaom refit}, as Chapter~\ref{ch:estimation} explains.
 
 \subsection{Endowment and creation roles}
 
@@ -224,7 +224,7 @@ Overall maximum convergence ratio: 0.218 (criterion: below 0.25; met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for beh_linear (-0.138)
 Convergence is good only if both criteria are met. Refit starting from these estimates with theta0(); see nwsaom.
 \end{lstlisting}
-This fit has not converged by the two criteria (the overall ratio is 0.218, but one $t$-ratio is above 0.1); before it is reported it would be restarted from its estimates with \opt{theta0()}, as Chapter~\ref{ch:estimation} explains.
+This fit has not converged by the two criteria (the overall ratio is 0.218, but one $t$-ratio is above 0.1); before it is reported it would be restarted from its estimates with \texttt{nwsaom refit}, as Chapter~\ref{ch:estimation} explains.
 
 According to the validation runs, 32 \opt{netbeh()} estimates agree with \texttt{siena07} on the s50 data; \texttt{degNegDiffX} is degenerate in both programs.
 
@@ -254,7 +254,7 @@ Overall maximum convergence ratio: 0.268 (criterion: below 0.25; not met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for behsim (-0.100) beh_alcohol_linear (-0.105) rate_smoke_period1 (0.142)
 Convergence is good only if both criteria are met. Refit starting from these estimates with theta0(); see nwsaom.
 \end{lstlisting}
-This fit has not converged by the two criteria (the overall ratio is 0.268 and three $t$-ratios are above 0.1); before it is reported it would be restarted from its estimates with \opt{theta0()}, as Chapter~\ref{ch:estimation} explains. \opt{behsim} is written inside the group of the \emph{first} behavior. (A global \opt{behsim} given outside the groups together with several behaviors was accepted without error but produced no \texttt{behsim} coefficient and the same estimates as the model without it, so always put it inside the first group.)
+This fit has not converged by the two criteria (the overall ratio is 0.268 and three $t$-ratios are above 0.1); before it is reported it would be restarted from its estimates with \texttt{nwsaom refit}, as Chapter~\ref{ch:estimation} explains. \opt{behsim} is written inside the group of the \emph{first} behavior. (A global \opt{behsim} given outside the groups together with several behaviors was accepted without error but produced no \texttt{behsim} coefficient and the same estimates as the model without it, so always put it inside the first group.)
 
 Coefficients are named \texttt{beh\_}\emph{name}\texttt{\_}\emph{effect}, with \emph{name} the first variable without trailing digits. \texttt{e(rates\_beh)} has one row per behavior (values of the model above):
 \begin{lstlisting}
