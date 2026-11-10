@@ -1,4 +1,4 @@
-*! version 1.5.13  10nov2026 nwsaom_refit 1.5.12 10nov2026
+*! version 1.5.14  10nov2026 nwsaom_refit 1.5.12 10nov2026
 * nwsaom refit: rerun the last nwsaom fit, starting from its estimates
 * (RSiena's prevAns), also after nwsaom multinet. The command is taken from e(cmdline); theta0(),
 * behtheta0(), rate0() and ratecovcoef() are replaced by the estimates of

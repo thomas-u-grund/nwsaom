@@ -1,4 +1,4 @@
-*! version 1.5.13  10nov2026 _nwsaom_tconvtable (split out of nwsaom.ado: a program of another ado-file is dropped without a trace when Stata evicts it, so cross-file helpers need their own file)
+*! version 1.5.14  10nov2026 _nwsaom_tconvtable (split out of nwsaom.ado: a program of another ado-file is dropped without a trace when Stata evicts it, so cross-file helpers need their own file)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -16,6 +16,12 @@ program define _nwsaom_tconvtable
 	matrix `m' = e(tconv)
 	local names : colnames `m'
 	local k = colsof(`m')
+	// RSiena's two criteria, used by both layouts for the refit hint below
+	local ok = e(tconv_max) < 0.25
+	local anybad 0
+	forvalues j = 1/`k' {
+		if abs(`m'[1,`j']) >= 0.1 local anybad 1
+	}
 	if "`detail'" != "" {
 		di as text "Convergence t-ratios (criterion: every |t| below 0.1; the overall maximum ratio below 0.25 is a separate criterion):"
 		forvalues j = 1/`k' {
@@ -41,7 +47,6 @@ program define _nwsaom_tconvtable
 		/* RSiena's two criteria are separate and both are needed (siena.Rd): every convergence t-ratio below 0.1 in absolute value
 		   AND the overall maximum convergence ratio (a different quantity, it also reflects the correlations of the deviations) below
 		   0.25. Each line states one criterion and whether it is met, so that the text cannot contradict the numbers. */
-		local ok = e(tconv_max) < 0.25
 		di as text "Overall maximum convergence ratio: " as result %5.3f e(tconv_max) as text " (criterion: below 0.25; " cond(`ok', "met", "{bf:not met}") ")"
 		if "`bad'" == "" di as text "Convergence t-ratios (criterion: all below 0.1 in absolute value): met"
 		else {
@@ -57,10 +62,11 @@ program define _nwsaom_tconvtable
 			}
 			if `"`line'"' != "" di as result "  `line'"
 		}
-		if !`ok' | "`bad'" != "" {
-			if "`e(cmd)'" == "nwsaom" & `"`e(cmdline)'"' != "" di as text "Convergence is good only if both criteria are met." _n "To refit starting from these estimates, type {bf:nwsaom refit}."
-			else di as text "Convergence is good only if both criteria are met. Refit starting from these estimates with theta0(); see {help nwsaom}."
-		}
+	}
+	// the hint also follows the detail layout (it was printed only without detail up to 1.5.13)
+	if !`ok' | `anybad' {
+		if "`e(cmd)'" == "nwsaom" & `"`e(cmdline)'"' != "" di as text "Convergence is good only if both criteria are met." _n "To refit starting from these estimates, type {bf:nwsaom refit}."
+		else di as text "Convergence is good only if both criteria are met. Refit starting from these estimates with theta0(); see {help nwsaom}."
 	}
 	if "`e(engine)'" == "mata" {
 		di as text "(simulated in Mata, not the native plugin: `e(engine_why)')"

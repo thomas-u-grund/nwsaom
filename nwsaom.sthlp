@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.5.13  10nov2026 author: Thomas Grund}{...}
+{* *! version 1.5.14  10nov2026 author: Thomas Grund}{...}
 {marker topic}
 {helpb nwtopical##analysis_statmodels:[NW-2.6.6] Statistical Estimation of Networks}
 
@@ -955,4 +955,4 @@ It is not affiliated with or endorsed by the RSiena project.
 	{help nwergm}, {help nwset}, {help nwrandom}
 
 {hline}
-{pstd}{it:nwsaom version 1.5.13, 10 November 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.5.14, 10 November 2026}{p_end}{* nwversion}

@@ -1,10 +1,10 @@
-*! version 1.5.13  10nov2026 nwsaom version: shows the package, core, plugin and reference versions
+*! version 1.5.14  10nov2026 nwsaom version: shows the package, core, plugin and reference versions
 * Copyright (C) 2026 Thomas U. Grund
 * nwsaom is free software under the GNU General Public License, version 3 (file LICENSE).
 capture program drop nwsaom_version
 program nwsaom_version, rclass
 	version 14
-	local __pkgver "1.5.13"
+	local __pkgver "1.5.14"
 	local __pkgdate "10nov2026"
 	// the core package: its distribution date from Stata's package list (net install writes it to stata.trk)
 	local __core "not found"

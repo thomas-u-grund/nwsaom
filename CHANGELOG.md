@@ -3,6 +3,11 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.5.14] - 2026-11-10
+
+### Fixed
+- **The hint to type `nwsaom refit` also follows the convergence table printed with `detail`.** After a fit that had not converged, the hint was printed only without `detail`. Results are unchanged.
+
 ## [1.5.13] - 2026-11-10
 
 ### Added

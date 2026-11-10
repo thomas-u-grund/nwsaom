@@ -82,6 +82,30 @@ nwsaom refit, maxruns(2) nodisplay
 assert inrange(e(refit_runs), 1, 2)
 assert e(refit_converged) == 1 | e(refit_runs) == 2
 di as text "PASS: maxruns()"
+* the refit hint follows the convergence table with and without detail (with detail it was missing up to 1.5.13)
+quietly nwsaom, waves(glasgow1 glasgow2) outdegree reciprocity k0(30) k3(100) seed(1)
+capture program drop _t_notconv
+program define _t_notconv, eclass
+	ereturn scalar tconv_max = 0.5
+end
+_t_notconv
+foreach d in "" "detail" {
+	tempfile lg
+	quietly log using `"`lg'"', text replace name(_thint)
+	_nwsaom_tconvtable, `d'
+	quietly log close _thint
+	tempname fh
+	file open `fh' using `"`lg'"', read text
+	local found 0
+	file read `fh' line
+	while r(eof) == 0 {
+		if strpos(`"`macval(line)'"', "type nwsaom refit") | strpos(`"`macval(line)'"', "type {bf:nwsaom refit}") local found 1
+		file read `fh' line
+	}
+	file close `fh'
+	assert `found' == 1
+}
+di as text "PASS: refit hint with and without detail"
 * errors
 ereturn clear
 capture nwsaom refit
