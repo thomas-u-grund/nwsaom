@@ -47,7 +47,7 @@ nwwebuse glasgow, nwclear
 nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip seed(1)
 nwsaom refit, seed(2)
 \end{lstlisting}
-\texttt{nwsaom refit} reruns the command stored in \texttt{e(cmdline)} with \opt{theta0()} and \opt{behtheta0()} set to \texttt{e(b)}, \opt{rate0()} to the rates of an unconditional network-only fit and \opt{ratecovcoef()} to \texttt{e(ratecoefs)}; \opt{k3()}, \opt{seed()}, \opt{cores()} and \opt{firstg()} given to it replace those of the stored command. \opt{maxruns(\#)} repeats the refit until both convergence criteria below are met, at most \# times, and \texttt{e(refit\_runs)} and \texttt{e(refit\_converged)} report what happened. By hand, the same restart is
+\texttt{nwsaom refit} reruns the command stored in \texttt{e(cmdline)} with \opt{theta0()} and \opt{behtheta0()} set to \texttt{e(b)}, \opt{rate0()} to the rates of an unconditional network-only fit and \opt{ratecovcoef()} to \texttt{e(ratecoefs)}; \opt{k3()}, \opt{seed()}, \opt{cores()} and \opt{firstg()} given to it replace those of the stored command. \opt{maxruns(\#)} repeats the refit until both convergence criteria below are met, at most \# times, and \texttt{e(refit\_runs)} and \texttt{e(refit\_converged)} report what happened. Since 1.5.13 it also works after \texttt{nwsaom multinet}, where \opt{theta0()} gets all coefficients of both networks and the behavior. By hand, the same restart is
 \begin{lstlisting}
 matrix b = e(b)
 nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip ///

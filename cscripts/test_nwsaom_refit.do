@@ -50,6 +50,32 @@ local bt = strofreal(b0[1,3], "%21.0g") + " " + strofreal(b0[1,4], "%21.0g")
 quietly nwsaom, waves(glasgow1 glasgow2) outdegree reciprocity behavior(alcohol1 alcohol2) linear avalt k0(30) k3(100) seed(4) theta0(`th') behtheta0(`bt')
 assert mreldif(e(b), b1) < 1e-12
 di as text "PASS: co-evolution refit = theta0() behtheta0() by hand"
+* multinet: one theta0() with all coefficients (net1_*, net2_*, beh_*); a second
+* network overlapping with friendship, as in the nwsaom tutorial 6
+nwtomata glasgow1, mat(F1)
+nwtomata glasgow2, mat(F2)
+set seed 20261001
+mata: A1 = (F1 :* (runiform(50, 50) :< 0.7) + (runiform(50, 50) :< 0.005)) :> 0
+mata: _diag(A1, 0)
+mata: A2 = (A1 :* (runiform(50, 50) :< 0.8) + F2 :* (1 :- A1) :* (runiform(50, 50) :< 0.4)) :> 0
+mata: _diag(A2, 0)
+nwset, mat(A1) directed name(advice1)
+nwset, mat(A2) directed name(advice2)
+quietly nwsaom multinet, net1(glasgow1 glasgow2) net2(advice1 advice2) cross1(crprod) cross2(crprod) behavior(alcohol1 alcohol2) beheff1(linear) k0(30) k3(100) seed(5)
+assert `"`e(cmdline)'"' == "nwsaom multinet, net1(glasgow1 glasgow2) net2(advice1 advice2) cross1(crprod) cross2(crprod) behavior(alcohol1 alcohol2) beheff1(linear) k0(30) k3(100) seed(5)"
+matrix b0 = e(b)
+quietly nwsaom refit, seed(6)
+assert "`e(cmd)'" == "nwsaom_multinet"
+matrix b1 = e(b)
+local th ""
+forvalues j = 1/`=colsof(b0)' {
+	local th `th' `=strofreal(b0[1,`j'], "%21.0g")'
+}
+quietly nwsaom multinet, net1(glasgow1 glasgow2) net2(advice1 advice2) cross1(crprod) cross2(crprod) behavior(alcohol1 alcohol2) beheff1(linear) k0(30) k3(100) seed(6) theta0(`th')
+assert mreldif(e(b), b1) < 1e-12
+capture nwsaom refit, cores(2)
+assert _rc == 198
+di as text "PASS: multinet refit = theta0() by hand"
 * maxruns(): stops at convergence or after the given number of runs
 quietly nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip k0(30) k3(100) seed(12345)
 nwsaom refit, maxruns(2) nodisplay

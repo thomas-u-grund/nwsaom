@@ -1,6 +1,6 @@
-*! version 1.5.12  10nov2026 nwsaom_refit 1.5.12 10nov2026
+*! version 1.5.13  10nov2026 nwsaom_refit 1.5.12 10nov2026
 * nwsaom refit: rerun the last nwsaom fit, starting from its estimates
-* (RSiena's prevAns). The command is taken from e(cmdline); theta0(),
+* (RSiena's prevAns), also after nwsaom multinet. The command is taken from e(cmdline); theta0(),
 * behtheta0(), rate0() and ratecovcoef() are replaced by the estimates of
 * the last fit. With maxruns(#) > 1 the refit is repeated until the
 * convergence criteria are met (all |t| < tconv(), overall maximum
@@ -9,14 +9,19 @@ program nwsaom_refit, eclass
 	version 14
 	syntax [, MAXRUNS(integer 1) TCONV(real 0.1) TMAX(real 0.25) ///
 		K3(integer -1) SEED(integer -1) CORES(integer -1) FIRSTG(real -1) noDISPlay]
-	if "`e(cmd)'" != "nwsaom" {
-		di "{err}nwsaom refit needs the results of {bf:nwsaom} in memory (e(cmd) is " ///
+	if !inlist("`e(cmd)'", "nwsaom", "nwsaom_multinet") {
+		di "{err}nwsaom refit needs the results of {bf:nwsaom} or {bf:nwsaom multinet} in memory (e(cmd) is " ///
 			cond("`e(cmd)'" == "", "empty", "`e(cmd)'") ")."
 		exit 301
 	}
 	if `"`e(cmdline)'"' == "" {
-		di "{err}e(cmdline) is not stored; these results come from nwsaom 1.5.11 or earlier. Rerun the model with nwsaom 1.5.12 or later."
+		di "{err}e(cmdline) is not stored; these results come from an earlier release of nwsaom. Rerun the model with the current release."
 		exit 301
+	}
+	local multinet = ("`e(cmd)'" == "nwsaom_multinet")
+	if `multinet' & `cores' >= 0 {
+		di "{err}cores() is not an option of nwsaom multinet."
+		exit 198
 	}
 	if `maxruns' < 1 {
 		di "{err}maxruns() must be at least 1."
@@ -35,9 +40,10 @@ program nwsaom_refit, eclass
 		if `firstg' >= 0 local drop `drop' firstg
 		mata: st_local("cmd", _nwsaom_refit_strip(st_local("cmd"), tokens(st_local("drop"))))
 		// coefficients: the network effects first, then the behavior effects
+		// (multinet: one theta0() with all coefficients, in the order of e(b))
 		tempname b
 		matrix `b' = e(b)
-		local pn = e(p_net)
+		local pn = cond(`multinet', colsof(`b'), e(p_net))
 		local pt = colsof(`b')
 		local add ""
 		local th ""
@@ -53,7 +59,7 @@ program nwsaom_refit, eclass
 			local add `"`add' behtheta0(`th')"'
 		}
 		// rates: network-only models of one group (co-evolution models start the rates from the closed form)
-		if !e(has_behavior) & "`e(groupvar)'" == "" & "`e(symtype)'" == "" & !e(conditional) {
+		if !`multinet' & !e(has_behavior) & "`e(groupvar)'" == "" & "`e(symtype)'" == "" & !e(conditional) {
 			local r ""
 			capture confirm matrix e(rates)
 			if !_rc {
@@ -67,7 +73,7 @@ program nwsaom_refit, eclass
 			if "`r'" != "" local add `"`add' rate0(`r')"'
 		}
 		capture confirm matrix e(ratecoefs)
-		if !_rc & "`e(ratecov)'" != "" {
+		if !_rc & "`e(ratecov)'" != "" & !`multinet' {
 			tempname rc
 			matrix `rc' = e(ratecoefs)
 			local r ""

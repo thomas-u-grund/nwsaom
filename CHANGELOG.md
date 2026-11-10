@@ -3,6 +3,12 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.5.13] - 2026-11-10
+
+### Added
+- **`nwsaom refit` after `nwsaom multinet`.** `nwsaom multinet` stores the command as typed in `e(cmdline)`, and `nwsaom refit` reruns it with `theta0()` set to all coefficients of `e(b)` (both networks and the behavior, in that order). `k3()`, `seed()` and `firstg()` given to `refit` replace those of the stored command; `cores()` is not an option of `multinet`. The result is the same as typing the estimates into `theta0()` (tested in `cscripts/test_nwsaom_refit.do`).
+- When a `multinet` fit has not converged (overall ratio 0.25 or above), the output says to type `nwsaom refit`.
+
 ## [1.5.12] - 2026-11-10
 
 ### Added

@@ -1,4 +1,4 @@
-*! version 1.5.12  10nov2026 nwsaom multinet (split out of nwsaom.ado, see nwsaom_multiplex.ado)
+*! version 1.5.13  10nov2026 nwsaom multinet (split out of nwsaom.ado, see nwsaom_multiplex.ado)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -146,6 +146,12 @@ capture program drop nwsaom_multinet
 program define nwsaom_multinet, eclass
 	version 14
 	_nwsaom_libcheck
+	// the command as typed, stored in e(cmdline); nwsaom refit reruns it
+	local __mn_cmdline = trim(`"`0'"')
+	while substr(`"`__mn_cmdline'"', 1, 1) == "," {
+		local __mn_cmdline = trim(substr(`"`__mn_cmdline'"', 2, .))
+	}
+	local __mn_cmdline `"nwsaom multinet, `__mn_cmdline'"'
 	syntax , NET1(string) NET2(string) [ EFF1(string) EFF2(string) CROSS1(string) CROSS2(string) SYM1 SYM2 BEHavior(string) BEHEFF1(string) BEHEFF2(string) BEHEFF12(string) BEHEFF21(string) MISSBEH(string) BEHINT(string) THETA0(numlist) FIX(string) TVCOV(string) ///
 		K0(integer 0) K3(integer 1000) FIRSTG(real 0.2) seed(integer -1) ACTORmode(integer 2) ]
 
@@ -476,7 +482,8 @@ program define nwsaom_multinet, eclass
 	ereturn matrix tconv = `tc'
 	ereturn scalar tconv_max = scalar(`tc'_max)
 	ereturn local cmd "nwsaom_multinet"
-	ereturn local version "1.5.12"
+	ereturn local cmdline `"`__mn_cmdline'"'
+	ereturn local version "1.5.13"
 	_nwsaom_postengine
 	di
 	if `__tmany' di as text "Several co-evolving networks (Method of Moments), `nw1' waves, `__nA1' actors and `=`nodes'-`__nA1'' events (network " cond(`__tm1', "1", "2") " is two-mode)"
@@ -486,4 +493,5 @@ program define nwsaom_multinet, eclass
 	di as text "Rates (estimated):"
 	matlist e(rates), format(%8.3f) border(top bottom)
 	di as text "Overall maximum convergence ratio: " as result %5.3f e(tconv_max) as text " (criterion: below 0.25; " cond(e(tconv_max) < 0.25, "met", "{bf:not met}") ")"
+	if e(tconv_max) >= 0.25 di as text "To refit starting from these estimates, type {bf:nwsaom refit}."
 end

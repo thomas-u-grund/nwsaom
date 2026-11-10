@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.5.12  10nov2026 author: Thomas Grund}{...}
+{* *! version 1.5.13  10nov2026 author: Thomas Grund}{...}
 {marker topic}
 {helpb nwtopical##analysis_statmodels:[NW-2.6.6] Statistical Estimation of Networks}
 
@@ -672,7 +672,8 @@ Runs the last {cmd:nwsaom} fit again, starting from its estimates: the counterpa
 is the one stored in {cmd:e(cmdline)}; {opt theta0()} and {opt behtheta0()} are replaced by the coefficients in {cmd:e(b)},
 {opt rate0()} by the rates of an unconditional network-only fit, and {opt ratecovcoef()} by {cmd:e(ratecoefs)}. Everything else
 (the effects, the data, {opt fix()}, {opt k0()}, the seed) is kept unless given here. Unlike RSiena, Phase 1 is run again.
-Co-evolution models start their rates from the closed form, as with {opt theta0()}.
+Co-evolution models start their rates from the closed form, as with {opt theta0()}. After {cmd:nwsaom multinet}, {opt theta0()} gets all coefficients
+(both networks and the behavior) in the order of {cmd:e(b)}.
 
 {synoptset 16}{...}
 {synopt:{opt maxruns(#)}}refit up to # times, stopping once the fit has converged (every |t| below {opt tconv()}, overall ratio below {opt tmax()}); default 1{p_end}
@@ -683,8 +684,8 @@ Co-evolution models start their rates from the closed form, as with {opt theta0(
 {pstd}
 Besides the results of the new fit, {cmd:e(refit_runs)} holds the number of runs and {cmd:e(refit_converged)} whether the last one met both
 criteria. Example: {cmd:nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip k3(200) seed(12345)}, then
-{cmd:nwsaom refit, k3(1000) seed(12346)}. Not available after {cmd:nwsaom multinet} or {cmd:nwsaom multiplex}, nor for results of
-nwsaom 1.5.11 or earlier (they have no {cmd:e(cmdline)}).
+{cmd:nwsaom refit, k3(1000) seed(12346)}. Also available after {cmd:nwsaom multinet} (since 1.5.13; {opt cores()} does not apply there); not
+available after {cmd:nwsaom multiplex}, nor for results of earlier releases that have no {cmd:e(cmdline)}.
 
 {pstd}
 {bf:Syntax rule.} A property of the data (two-mode, non-directed) is detected from the network; an option changes
@@ -954,4 +955,4 @@ It is not affiliated with or endorsed by the RSiena project.
 	{help nwergm}, {help nwset}, {help nwrandom}
 
 {hline}
-{pstd}{it:nwsaom version 1.5.12, 10 November 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.5.13, 10 November 2026}{p_end}{* nwversion}
