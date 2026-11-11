@@ -1,4 +1,4 @@
-*! version 1.5.14  10nov2026 nwcommands: estat importance after nwsaom
+*! version 1.5.15  11nov2026 nwcommands: estat importance after nwsaom
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -36,7 +36,7 @@ program define nwsaom_estat_importance, rclass
 	local coev = (e(has_behavior) == 1)
 	mata: st_numscalar("__nwsaom_imp_bad", any(_SaomGofExt("__nwsaom_last_fntype", J(1, 0, 0)) :!= 0) | rows(_SaomGofExt("__nwsaom_last_present", J(0, 1, 0))) > 0)
 	if scalar(__nwsaom_imp_bad) == 1 {
-		di as err "estat importance is not available with endowment/creation effects, present() or missing-data options (as in RSiena's sienaRI)."
+		di as err "{p 0 0 2}estat importance is not available with endowment/creation effects, present() or missing-data options (as in RSiena's sienaRI).{p_end}"
 		exit 198
 	}
 	local nwaves = e(nwaves)
@@ -83,7 +83,7 @@ program define nwsaom_estat_importance, rclass
 
 	di
 	di as txt "Relative importance of effects" _n "Expected over the actors at the start of each period"
-	if "`e(symtype)'" != "" di as txt "Non-directed network: effect sizes are for the forcing model (RSiena modelType 2), as in RSiena."
+	if "`e(symtype)'" != "" di as txt "{p 0 0 2}Non-directed network: effect sizes are for the forcing model (RSiena modelType 2), as in RSiena.{p_end}"
 	if `coev' di as txt "Network effects"
 	nwsaom_imp_table, names(`names_net') first(1) b(`b') v(`V') sg(`sg') ri(`RI') rh(`RH') nper(`nper')
 	if `coev' {

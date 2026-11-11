@@ -1,4 +1,4 @@
-*! version 1.5.14  10nov2026 _nwsaom_nx - the native-only network options of nwsaom (netx ownx dyadx tvdyadcov tvdyadcovrecip tvdyadx), split out of nwsaom.ado because Stata caps one ado program at about 141 KB of code
+*! version 1.5.15  11nov2026 _nwsaom_nx - the native-only network options of nwsaom (netx ownx dyadx tvdyadcov tvdyadcovrecip tvdyadx), split out of nwsaom.ado because Stata caps one ado program at about 141 KB of code
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -39,7 +39,7 @@ program define _nwsaom_nx, rclass
 		if inlist("`__f'", "simdist2", "simegodist2", "simegoindist2", "simrecipx", "simxtranstrip") local __kind "s"
 		local __vl "`__vv'"
 		if inlist("`__f'", "avgroupegox", "totgroupegox") & !`: list __vv in __nwsaom_tvnames' {
-			di "{err}netx(`__f'): RSiena defines it for a changing covariate (tvcov()) or the dependent behavior only."
+			di "{p 0 0 2}{err}netx(`__f'): RSiena defines it for a changing covariate (tvcov()) or the dependent behavior only.{p_end}"
 			error 198
 		}
 		if `: list __vv in __nwsaom_tvnames' local __vl "${NWSAOM_TVV_`__vv'}"
@@ -60,7 +60,7 @@ program define _nwsaom_nx, rclass
 			if inlist("`__f'", "crossxoutact", "avgroupegox", "totgroupegox") {
 				// RSiena reads the actor covariate at the EVENT's index within its mode for the alter (copied): needs at least as many actors as events
 				if `__nwsaom_tm_ne' > `__nwsaom_tm_na' {
-					di "{err}netx(`__f') in a two-mode network needs at least as many actors as events (RSiena reads the actor covariate at the event's index)."
+					di "{p 0 0 2}{err}netx(`__f') in a two-mode network needs at least as many actors as events (RSiena reads the actor covariate at the event's index).{p_end}"
 					error 198
 				}
 				mata: SaomRegNat(__nwsaom_last_M, "`__f'", `__code', "`__kind'", "`__vv'", "`__vl'", `nodes', `=`__nwsaom_nwaves'-1', `__nwsaom_center', `xparam', `__tmidx', __nwsaom_tm_evidx)
@@ -99,7 +99,7 @@ program define _nwsaom_nx, rclass
 		if "`__f'" == "transtripfr" local __f "transrectrip2"
 		local __fi : list posof "`__f'" in __n0_names
 		if `__fi' == 0 {
-			di "{err}ownx(): `__t' is not an effect; effects: `__n0_names' (transtripfr = transrectrip2)."
+			di "{p 0 0 2}{err}ownx(): `__t' is not an effect; effects: `__n0_names' (transtripfr = transrectrip2).{p_end}"
 			error 198
 		}
 		local __code : word `__fi' of `__n0_codes'
@@ -146,7 +146,7 @@ program define _nwsaom_nx, rclass
 		local __r2 = `nodes'
 		if `__nwsaom_tm' {
 			if !inlist("`__f'", "wxx", "xwx", "xwx1", "xwx2", "wxzx") {
-				di "{err}dyadx(`__f') is not available for a two-mode network (available: wxx with a matrix among the actors, xwx xwx1 xwx2 with a matrix among the events, wxzx:W:Z)."
+				di "{p 0 0 2}{err}dyadx(`__f') is not available for a two-mode network (available: wxx with a matrix among the actors, xwx xwx1 xwx2 with a matrix among the events, wxzx:W:Z).{p_end}"
 				error 198
 			}
 			local __r1 = cond(inlist("`__f'", "wxx", "wxzx"), `__nwsaom_tm_na', `__nwsaom_tm_ne')
@@ -180,7 +180,7 @@ program define _nwsaom_nx, rclass
 			forvalues __p = 1/`=`__nwsaom_nwaves'-1' {
 				capture confirm matrix `__st'`__p'
 				if _rc {
-					di "{err}{bf:`__dk'()}: matrix {bf:`__st'`__p'} not found (a matrix for each of the `=`__nwsaom_nwaves'-1' periods: `__st'1 ...)."
+					di "{p 0 0 2}{err}{bf:`__dk'()}: matrix {bf:`__st'`__p'} not found (a matrix for each of the `=`__nwsaom_nwaves'-1' periods: `__st'1 ...).{p_end}"
 					error 111
 				}
 			}

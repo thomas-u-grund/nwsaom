@@ -1,4 +1,4 @@
-*! version 1.5.14  10nov2026 nwcommands: estat simulate after nwsaom
+*! version 1.5.15  11nov2026 nwcommands: estat simulate after nwsaom
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -36,7 +36,7 @@ program define nwsaom_estat_simulate, rclass
 	local tm = ("`e(twomode)'" == "1")
 	capture mata: __nwsaom_last_M.nparam()
 	if _rc {
-		di as err "no fitted nwsaom model available for simulation - re-run nwsaom before estat simulate."
+		di as err "{p 0 0 2}no fitted nwsaom model available for simulation - re-run nwsaom before estat simulate.{p_end}"
 		exit 498
 	}
 	if `nsim' < 1 {
@@ -59,7 +59,7 @@ program define nwsaom_estat_simulate, rclass
 			exit 111
 		}
 		if colsof(`theta') != colsof(`bmat') | rowsof(`theta') != 1 {
-			di as err "theta() must be a row vector with " colsof(`bmat') " coefficient(s), in the order of e(b) (a 1 x " colsof(`bmat') " matrix, not a network or covariate matrix; matrix `theta' is " rowsof(`theta') " x " colsof(`theta') ")."
+			di as err "{p 0 0 2}theta() must be a row vector with " colsof(`bmat') " coefficient(s), in the order of e(b) (a 1 x " colsof(`bmat') " matrix, not a network or covariate matrix; matrix `theta' is " rowsof(`theta') " x " colsof(`theta') ").{p_end}"
 			exit 198
 		}
 		matrix `bmat' = `theta'
@@ -215,7 +215,7 @@ program define nwsaom_estat_simulate, rclass
 
 	matrix colnames `sim' = sim period ties mutual transitive behmean
 	matrix colnames `obs' = sim period ties mutual transitive behmean
-	di as txt "Simulation from the fitted model: " as res `nsim' as txt " replication(s) of " as res `nperiods' as txt " period(s)"
+	di as txt "{p 0 0 2}Simulation from the fitted model: " as res `nsim' as txt " replication(s) of " as res `nperiods' as txt " period(s){p_end}"
 	if `tm' di as txt "(two-mode network: " e(n_actors) " actors x " e(n_events) " events; ties are attendances)"
 	di
 	di as txt "{hline 13}{c TT}{hline 22}"

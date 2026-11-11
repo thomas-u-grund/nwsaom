@@ -1,4 +1,4 @@
-*! version 1.5.14  10nov2026 nwsaom_refit 1.5.12 10nov2026
+*! version 1.5.15  11nov2026 nwsaom_refit 1.5.12 10nov2026
 * nwsaom refit: rerun the last nwsaom fit, starting from its estimates
 * (RSiena's prevAns), also after nwsaom multinet. The command is taken from e(cmdline); theta0(),
 * behtheta0(), rate0() and ratecovcoef() are replaced by the estimates of
@@ -10,12 +10,12 @@ program nwsaom_refit, eclass
 	syntax [, MAXRUNS(integer 1) TCONV(real 0.1) TMAX(real 0.25) ///
 		K3(integer -1) SEED(integer -1) CORES(integer -1) FIRSTG(real -1) noDISPlay]
 	if !inlist("`e(cmd)'", "nwsaom", "nwsaom_multinet") {
-		di "{err}nwsaom refit needs the results of {bf:nwsaom} or {bf:nwsaom multinet} in memory (e(cmd) is " ///
-			cond("`e(cmd)'" == "", "empty", "`e(cmd)'") ")."
+		di "{p 0 0 2}{err}nwsaom refit needs the results of {bf:nwsaom} or {bf:nwsaom multinet} in memory (e(cmd) is " ///
+			cond("`e(cmd)'" == "", "empty", "`e(cmd)'") ").{p_end}"
 		exit 301
 	}
 	if `"`e(cmdline)'"' == "" {
-		di "{err}e(cmdline) is not stored; these results come from an earlier release of nwsaom. Rerun the model with the current release."
+		di "{p 0 0 2}{err}e(cmdline) is not stored; these results come from an earlier release of nwsaom. Rerun the model with the current release.{p_end}"
 		exit 301
 	}
 	local multinet = ("`e(cmd)'" == "nwsaom_multinet")
@@ -91,8 +91,8 @@ program nwsaom_refit, eclass
 		local prevmax = e(tconv_max)
 		if "`display'" == "" {
 			di as text _n "{hline 78}"
-			di as text "nwsaom refit, run `run'" cond(`maxruns' > 1, " of at most `maxruns'", "") ": starting from the last estimates" ///
-				cond(`prevmax' < ., " (overall ratio " + strofreal(`prevmax', "%5.3f") + ")", "")
+			di as text "{p 0 0 2}nwsaom refit, run `run'" cond(`maxruns' > 1, " of at most `maxruns'", "") ": starting from the last estimates" ///
+				cond(`prevmax' < ., " (overall ratio " + strofreal(`prevmax', "%5.3f") + ")", "") "{p_end}"
 			di as text "{hline 78}"
 		}
 		if "`display'" != "" quietly `cmd'

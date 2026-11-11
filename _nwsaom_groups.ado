@@ -1,4 +1,4 @@
-*! version 1.5.14  10nov2026 _nwsaom_groups: helpers of nwsaom for the joint estimation of several groups (groups() option; kept out of nwsaom.ado, whose size is at Stata's limit)
+*! version 1.5.15  11nov2026 _nwsaom_groups: helpers of nwsaom for the joint estimation of several groups (groups() option; kept out of nwsaom.ado, whose size is at Stata's limit)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -118,6 +118,6 @@ program define _nwsaom_groups, rclass
 		forvalues g = 1/`G' {
 			local wz "`wz'`=cond(`g'>1, ", ", "")'`=`gw'[1,`g']'"
 		}
-		di as text "Groups: " as result `G' as text " (variable " as result "`groups'" as text "), actors per group: " as result "`sz'" as text "; waves per group: " as result "`wz'"
+		di as text "{p 0 0 2}Groups: " as result `G' as text " (variable " as result "`groups'" as text "), actors per group: " as result "`sz'" as text "; waves per group: " as result "`wz'{p_end}"
 	}
 end

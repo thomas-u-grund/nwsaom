@@ -1,4 +1,4 @@
-*! version 1.5.14  10nov2026 _nwsaom_symcheck (the checks of symmetric/symtype() of nwsaom, split out because nwsaom.ado is at the size limit of one ado program)
+*! version 1.5.15  11nov2026 _nwsaom_symcheck (the checks of symmetric/symtype() of nwsaom, split out because nwsaom.ado is at the size limit of one ado program)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -12,11 +12,11 @@ program define _nwsaom_symcheck, rclass
 	local __ns_symtypeval = 4
 	if "`symmetric'" != "" {
 		if `hasnetgate' {
-			di "{err}{bf:symmetric} cannot be combined with {bf:endow()}/{bf:creation()} of network effects. {bf:waves()}, {bf:present()}, {bf:missnet()}, {bf:ratecov()} and {bf:behavior()} are otherwise combinable with {bf:symmetric}."
+			di "{p 0 0 2}{err}{bf:symmetric} cannot be combined with {bf:endow()}/{bf:creation()} of network effects. {bf:waves()}, {bf:present()}, {bf:missnet()}, {bf:ratecov()} and {bf:behavior()} are otherwise combinable with {bf:symmetric}.{p_end}"
 			error 198
 		}
 		if "`reciprocity'" != "" {
-			di "{err}{bf:reciprocity} is not meaningful under {bf:symmetric} - every tie is reciprocated by construction once both directions are forced equal, so this effect's own statistic is a constant (RSiena itself does not offer {bf:recip} for a non-directed dependent variable)."
+			di "{p 0 0 2}{err}{bf:reciprocity} is not meaningful under {bf:symmetric} - every tie is reciprocated by construction once both directions are forced equal, so this effect's own statistic is a constant (RSiena itself does not offer {bf:recip} for a non-directed dependent variable).{p_end}"
 			exit 198
 		}
 		// symtype(): the model type of the non-directed relation, named
@@ -42,7 +42,7 @@ program define _nwsaom_symcheck, rclass
 			else if inlist("`__ns_symtype_lc'", "forcing", "2") local __ns_symtypeval = 4
 			else if inlist("`__ns_symtype_lc'", "confirmation", "3") local __ns_symtypeval = 5
 			if `__ns_symtypeval' == 0 {
-				di "{err}{bf:symtype()} must be {bf:forcing} (default; RSiena modelType 2), {bf:confirmation} (3), {bf:force} (4), {bf:agree} (5), or {bf:joint} (6), or one of these numbers - got {bf:`symtype'}."
+				di "{p 0 0 2}{err}{bf:symtype()} must be {bf:forcing} (default; RSiena modelType 2), {bf:confirmation} (3), {bf:force} (4), {bf:agree} (5), or {bf:joint} (6), or one of these numbers - got {bf:`symtype'}.{p_end}"
 				error 198
 			}
 		}
@@ -86,7 +86,7 @@ program define _nwsaom_symcheck, rclass
 		// interaction forms regardless, so no restriction is needed for
 		// the covariate family.
 		if `symbad' {
-			di "{err}under {bf:symmetric}, {bf:cycle3}/{bf:inactivity}/{bf:outpopularity}/{bf:ininass}/{bf:inoutass}/{bf:outoutass}/{bf:antiiso}/{bf:isolatepop}/{bf:transrectrip}/{bf:transtrip} are each either a constant, an exact duplicate of an already-available effect, or an effect real RSiena itself does not offer for a non-directed relation (confirmed against RSiena's own real {bf:getEffects()} output, not assumed) - {bf:outdegree}/{bf:indegpopularity}/{bf:outactivity}/{bf:cycle4}/{bf:isolatenet}/{bf:outiso}/{bf:antiiniso}/{bf:antiiniso2}/{bf:outinass}/{bf:gwesp}/{bf:transties}/{bf:balance} and every covariate effect remain available."
+			di "{p 0 0 2}{err}under {bf:symmetric}, {bf:cycle3}/{bf:inactivity}/{bf:outpopularity}/{bf:ininass}/{bf:inoutass}/{bf:outoutass}/{bf:antiiso}/{bf:isolatepop}/{bf:transrectrip}/{bf:transtrip} are each either a constant, an exact duplicate of an already-available effect, or an effect real RSiena itself does not offer for a non-directed relation (confirmed against RSiena's own real {bf:getEffects()} output, not assumed) - {bf:outdegree}/{bf:indegpopularity}/{bf:outactivity}/{bf:cycle4}/{bf:isolatenet}/{bf:outiso}/{bf:antiiniso}/{bf:antiiniso2}/{bf:outinass}/{bf:gwesp}/{bf:transties}/{bf:balance} and every covariate effect remain available.{p_end}"
 			error 198
 		}
 		// data-level symmetry check - a real, disclosed requirement, not
@@ -95,12 +95,12 @@ program define _nwsaom_symcheck, rclass
 		mata: st_numscalar("__ns_symchk1", max(abs(__nwsaom_last_G1.to_dense() - __nwsaom_last_G1.to_dense()')))
 		mata: st_numscalar("__ns_symchk2", max(abs(__nwsaom_last_G2.to_dense() - __nwsaom_last_G2.to_dense()')))
 		if __ns_symchk1 > 0 | __ns_symchk2 > 0 {
-			di "{err}{bf:symmetric} requires both wave networks to be tie-symmetric (x_ij == x_ji for every dyad); it selects a non-directed ministep, it does not symmetrize the data."
+			di "{p 0 0 2}{err}{bf:symmetric} requires both wave networks to be tie-symmetric (x_ij == x_ji for every dyad); it selects a non-directed ministep, it does not symmetrize the data.{p_end}"
 			error 198
 		}
 	}
 	else if "`symtype'" != "" {
-		di "{err}{bf:symtype()} applies to a non-directed relation only (tie-symmetric or undirected waves, or {bf:symmetric})."
+		di "{p 0 0 2}{err}{bf:symtype()} applies to a non-directed relation only (tie-symmetric or undirected waves, or {bf:symmetric}).{p_end}"
 		error 198
 	}
 	return scalar symtypeval = `__ns_symtypeval'

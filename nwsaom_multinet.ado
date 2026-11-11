@@ -1,4 +1,4 @@
-*! version 1.5.14  10nov2026 nwsaom multinet (split out of nwsaom.ado, see nwsaom_multiplex.ado)
+*! version 1.5.15  11nov2026 nwsaom multinet (split out of nwsaom.ado, see nwsaom_multiplex.ado)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -201,7 +201,7 @@ program define nwsaom_multinet, eclass
 			local __mnsc = `__mnsc' + r(nstruct)
 			local __wtm = ("`mn`__s'_`__w'is2mode'" == "true")
 			if r(nstruct) > 0 & (`__wtm' | "`sym`__s''" != "" | "`behavior'" != "") {
-				di "{err}structural zeros and ones (the codes 10 and 11) are not yet supported in nwsaom multinet for a two-mode or non-directed network, or together with behavior()."
+				di "{p 0 0 2}{err}structural zeros and ones (the codes 10 and 11) are not yet supported in nwsaom multinet for a two-mode or non-directed network, or together with behavior().{p_end}"
 				error 198
 			}
 			if `__w' == 1 local __tm`__s' = `__wtm'
@@ -210,7 +210,7 @@ program define nwsaom_multinet, eclass
 				error 198
 			}
 			if !`__wtm' & "`mn`__s'_`__w'directed'" != "true" & "`sym`__s''" == "" {
-				di "{err}nwsaom multinet needs directed one-mode networks (or undirected ones with sym1 / sym2)."
+				di "{p 0 0 2}{err}nwsaom multinet needs directed one-mode networks (or undirected ones with sym1 / sym2).{p_end}"
 				error 198
 			}
 			if `__wtm' & "`sym`__s''" != "" {
@@ -248,11 +248,11 @@ program define nwsaom_multinet, eclass
 			}
 		}
 		if `__nA1' != `__nA2' {
-			di "{err}the actors of the two networks differ in number (`__nA1' and `__nA2'); a two-mode network and a one-mode one need the same actors."
+			di "{p 0 0 2}{err}the actors of the two networks differ in number (`__nA1' and `__nA2'); a two-mode network and a one-mode one need the same actors.{p_end}"
 			error 198
 		}
 		if `__tm1' & `__tm2' {
-			di "{err}only one of the two networks can be two-mode (the other one is a one-mode network on the actors)."
+			di "{p 0 0 2}{err}only one of the two networks can be two-mode (the other one is a one-mode network on the actors).{p_end}"
 			error 198
 		}
 		local nodes = cond(`__tm1', `mn1_1nodes', `mn2_1nodes')
@@ -275,7 +275,7 @@ program define nwsaom_multinet, eclass
 		forvalues __w = 1/`nw`__s'' {
 			if `nodes' == . local nodes = `mn`__s'_`__w'nodes'
 			if `mn`__s'_`__w'nodes' != `nodes' & !`__tmany' {
-				di "{err}every network/wave passed to nwsaom multinet must share the same number of nodes."
+				di "{p 0 0 2}{err}every network/wave passed to nwsaom multinet must share the same number of nodes.{p_end}"
 				error 198
 			}
 			if !`__tmany' local __nA`__s' = `mn`__s'_`__w'nodes'
@@ -293,7 +293,7 @@ program define nwsaom_multinet, eclass
 		mata: __nwsaom_mn_Miss = J(1, 0, NULL)
 		if "`missbeh'" != "" {
 			if `: word count `missbeh'' != `nb' {
-				di "{err}missbeh() needs one 0/1 variable per wave (`nb'): 1 = the behavior value is missing."
+				di "{p 0 0 2}{err}missbeh() needs one 0/1 variable per wave (`nb'): 1 = the behavior value is missing.{p_end}"
 				error 198
 			}
 		}
@@ -315,7 +315,7 @@ program define nwsaom_multinet, eclass
 		capture mata: mata drop __nwsaom_mn_Bw
 		capture mata: mata drop __nwsaom_mn_Miss
 		if "`missbeh'`beheff1'`beheff2'`beheff12'`beheff21'`behint'" != "" {
-			di "{err}missbeh(), beheff1(), beheff2(), beheff12(), beheff21() and behint() need behavior()."
+			di "{p 0 0 2}{err}missbeh(), beheff1(), beheff2(), beheff12(), beheff21() and behint() need behavior().{p_end}"
 			error 198
 		}
 	}
@@ -328,7 +328,7 @@ program define nwsaom_multinet, eclass
 		foreach __t of local eff`__s' {
 			gettoken __e __v : __t, parse(":")
 			if `__tm`__s'' & !inlist("`__e'", "outdegree", "indegpop", "outact", "cycle4") {
-				di "{err}`__e' is not available for a two-mode network in nwsaom multinet (available: outdegree indegpop outact cycle4)."
+				di "{p 0 0 2}{err}`__e' is not available for a two-mode network in nwsaom multinet (available: outdegree indegpop outact cycle4).{p_end}"
 				error 198
 			}
 			local __v = subinstr("`__v'", ":", "", 1)
@@ -349,7 +349,7 @@ program define nwsaom_multinet, eclass
 				if `__tmany' {
 					if `__tm`__os'' local __co = `__nA1'
 					if `__tm`__os'' & "`__e'" == "tou" & `nodes' - `__nA1' > `__nA1' {
-						di "{err}tou needs at most as many events as actors when the other network is two-mode (the effect indexes both networks by the same node number)."
+						di "{p 0 0 2}{err}tou needs at most as many events as actors when the other network is two-mode (the effect indexes both networks by the same node number).{p_end}"
 						error 198
 					}
 				}
@@ -360,7 +360,7 @@ program define nwsaom_multinet, eclass
 			if `__iscov' {
 				if `__tmany' {
 					if `__tm`__s'' & inlist("`__e'", "altdist2w", "totdist2w", "simdist2w", "altindist2w", "totindist2w", "simegodist2w", "simegoindist2w") & `nodes' - `__nA1' > `__nA1' {
-						di "{err}`__e' needs at most as many events as actors when the own network is two-mode (the effect indexes the other network by the event number)."
+						di "{p 0 0 2}{err}`__e' needs at most as many events as actors when the own network is two-mode (the effect indexes the other network by the event number).{p_end}"
 						error 198
 					}
 				}
@@ -380,7 +380,7 @@ program define nwsaom_multinet, eclass
 				local __nE = `nodes' - `__nA1'
 				// RSiena reads the other network's (or the own network's) node with the index of an event for these effects: defined only when the events are not more than the actors
 				if (`__tm`__s'' & inlist("`__e'", "divinaltintn", "joutmix", "gwespfbmix") & `__nE' > `__nA1') | (`__tm`__os'' & inlist("`__e'", "outoutactintn", "outoutavintn") & `__nE' > `__nA1') {
-					di "{err}`__e' needs at most as many events as actors when a two-mode network is combined with a one-mode one (the effect indexes both networks by the same node number)."
+					di "{p 0 0 2}{err}`__e' needs at most as many events as actors when a two-mode network is combined with a one-mode one (the effect indexes both networks by the same node number).{p_end}"
 					error 198
 				}
 				if `__tm`__os'' & "`__e'" == "toany" {
@@ -428,7 +428,7 @@ program define nwsaom_multinet, eclass
 		if "`theta0'" != "" {
 			local __nt : word count `theta0'
 			if `__nt' != `__pall' {
-				di "{err}theta0() must supply exactly `__pall' starting value(s), in the order: `__cnall'."
+				di "{p 0 0 2}{err}theta0() must supply exactly `__pall' starting value(s), in the order: `__cnall'.{p_end}"
 				error 198
 			}
 			mata: __nwsaom_mn_theta0 = strtoreal(tokens("`theta0'"))
@@ -483,11 +483,11 @@ program define nwsaom_multinet, eclass
 	ereturn scalar tconv_max = scalar(`tc'_max)
 	ereturn local cmd "nwsaom_multinet"
 	ereturn local cmdline `"`__mn_cmdline'"'
-	ereturn local version "1.5.14"
+	ereturn local version "1.5.15"
 	_nwsaom_postengine
 	di
-	if `__tmany' di as text "Several co-evolving networks (Method of Moments), `nw1' waves, `__nA1' actors and `=`nodes'-`__nA1'' events (network " cond(`__tm1', "1", "2") " is two-mode)"
-	else di as text "Several co-evolving networks (Method of Moments), `nw1' waves, `nodes' actors"
+	if `__tmany' di as text "{p 0 0 2}Several co-evolving networks (Method of Moments), `nw1' waves, `__nA1' actors and `=`nodes'-`__nA1'' events (network " cond(`__tm1', "1", "2") " is two-mode){p_end}"
+	else di as text "{p 0 0 2}Several co-evolving networks (Method of Moments), `nw1' waves, `nodes' actors{p_end}"
 	di
 	ereturn display
 	di as text "Rates (estimated):"

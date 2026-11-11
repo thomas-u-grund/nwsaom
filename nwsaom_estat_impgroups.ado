@@ -1,4 +1,4 @@
-*! version 1.5.14  10nov2026 _nwsaom_groupspost: e() results of nwsaom for the joint estimation of several groups of a grouped fit (groups() option)
+*! version 1.5.15  11nov2026 _nwsaom_groupspost: e() results of nwsaom for the joint estimation of several groups of a grouped fit (groups() option)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -10,7 +10,7 @@ program define nwsaom_estat_impgroups, rclass
 	syntax [, GROUP(integer 0)]
 	local G = e(ngroups)
 	if "`e(ratecov)'" != "" | "`e(present)'" != "" {
-		di as err "estat importance after a fit with groups is not available together with {bf:ratecov()}/{bf:present()}."
+		di as err "{p 0 0 2}estat importance after a fit with groups is not available together with {bf:ratecov()}/{bf:present()}.{p_end}"
 		exit 198
 	}
 	if `group' < 0 | `group' > `G' {

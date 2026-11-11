@@ -1,4 +1,4 @@
-*! version 1.5.14  10nov2026 nwcommands: estat score after nwsaom
+*! version 1.5.15  11nov2026 nwcommands: estat score after nwsaom
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -31,7 +31,7 @@ program define nwsaom_estat_score, rclass
 	}
 	capture mata: st_numscalar("__nwsaom_score_have", rows(__nwsaom_score_D))
 	if _rc {
-		di as err "estat score needs a fit with fix(): fit the restricted model (the effects to be tested held fixed with fix() at their restricted values) first."
+		di as err "{p 0 0 2}estat score needs a fit with fix(): fit the restricted model (the effects to be tested held fixed with fix() at their restricted values) first.{p_end}"
 		exit 198
 	}
 	tempname b
@@ -41,7 +41,7 @@ program define nwsaom_estat_score, rclass
 	mata: st_numscalar("__nwsaom_score_nfix", sum(__nwsaom_score_fix))
 	mata: st_numscalar("__nwsaom_score_same", cols(__nwsaom_score_par) >= `p')
 	if scalar(__nwsaom_score_nfix) == 0 | scalar(__nwsaom_score_same) == 0 {
-		di as err "estat score needs a fit with fix(): fit the restricted model (the effects to be tested held fixed with fix() at their restricted values) first."
+		di as err "{p 0 0 2}estat score needs a fit with fix(): fit the restricted model (the effects to be tested held fixed with fix() at their restricted values) first.{p_end}"
 		exit 198
 	}
 	local testlist ""

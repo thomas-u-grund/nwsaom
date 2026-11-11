@@ -1,4 +1,4 @@
-*! version 1.5.14  10nov2026 nwcommands: post-estimation for nwsaom (harmonisation units 21+26, RSiena-faithful GOF + co-evolution, N-wave)
+*! version 1.5.15  11nov2026 nwcommands: post-estimation for nwsaom (harmonisation units 21+26, RSiena-faithful GOF + co-evolution, N-wave)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -128,7 +128,7 @@ program define nwsaom_estat, rclass
 	local subcmd = lower(trim("`subcmd'"))
 	if `"`e(cmd)'"' == "nwsaom" & e(ngroups) < . & e(nbeh) < . {
 		if e(nbeh) > 1 {
-			di as err "estat `subcmd' is not yet available after a fit with several behaviors in {bf:behavior()}."
+			di as err "{p 0 0 2}estat `subcmd' is not yet available after a fit with several behaviors in {bf:behavior()}.{p_end}"
 			exit 198
 		}
 	}
@@ -152,7 +152,7 @@ program define nwsaom_estat, rclass
 		exit 198
 	}
 	if `"`e(cmd)'"' == "nwsaom_multinet" & !inlist("`subcmd'", "score", "timetest") {
-		di as err "estat `subcmd' is not yet available after nwsaom multinet (available: {bf:score}, {bf:timetest})."
+		di as err "{p 0 0 2}estat `subcmd' is not yet available after nwsaom multinet (available: {bf:score}, {bf:timetest}).{p_end}"
 		exit 198
 	}
 	if `"`e(cmd)'"' == "nwsaom" {
@@ -161,21 +161,21 @@ program define nwsaom_estat, rclass
 			mata: SaomStructRestoreLast()
 		}
 		if scalar(__nwsaom_sflast) == 1 & !inlist("`subcmd'", "gof", "mems", "simulate", "importance", "score", "timetest") {
-			di as err "estat `subcmd' is not yet available after a fit with structural zeros or ones (the codes 10 and 11 in the wave networks)."
+			di as err "{p 0 0 2}estat `subcmd' is not yet available after a fit with structural zeros or ones (the codes 10 and 11 in the wave networks).{p_end}"
 			exit 198
 		}
 	}
 	if "`e(tvcov)'" != "" {
-		di as err "estat `subcmd' is not yet available after a fit with time-varying covariates ({bf:tvcov()})."
+		di as err "{p 0 0 2}estat `subcmd' is not yet available after a fit with time-varying covariates ({bf:tvcov()}).{p_end}"
 		exit 198
 	}
 	if "`e(behratecov)'`e(behrate)'" != "" | (e(has_behavior) == 1 & "`e(ratecov)'" != "") {
-		di as err "estat `subcmd' is not yet available after a fit with a behavior and covariate rate effects ({bf:ratecov()}, {bf:behratecov()}, {bf:behrate()})."
+		di as err "{p 0 0 2}estat `subcmd' is not yet available after a fit with a behavior and covariate rate effects ({bf:ratecov()}, {bf:behratecov()}, {bf:behrate()}).{p_end}"
 		exit 198
 	}
 	if e(nbeh) < . {
 		if e(nbeh) > 1 {
-			di as err "estat `subcmd' is not yet available after a fit with several behaviors in {bf:behavior()}."
+			di as err "{p 0 0 2}estat `subcmd' is not yet available after a fit with several behaviors in {bf:behavior()}.{p_end}"
 			exit 198
 		}
 	}
@@ -208,7 +208,7 @@ program define nwsaom_estat, rclass
 		return add
 	}
 	else {
-		di as err "estat `subcmd' not allowed after nwsaom - only {bf:gof}, {bf:mems}, {bf:simulate}, {bf:score}, {bf:timetest} and {bf:importance} are currently supported."
+		di as err "{p 0 0 2}estat `subcmd' not allowed after nwsaom - only {bf:gof}, {bf:mems}, {bf:simulate}, {bf:score}, {bf:timetest} and {bf:importance} are currently supported.{p_end}"
 		exit 321
 	}
 end
@@ -226,7 +226,7 @@ program define nwsaom_estat_gof, rclass
 	// numlist/onoff-typed option - matches this codebase's own existing
 	// idiom for similar binary "off" switches (e.g. `nonative').
 	if !inlist("`join'", "", "off") {
-		di as err "join() only accepts {bf:off} (v1 scope - omit join() entirely for the default pooled/join=TRUE behavior)."
+		di as err "{p 0 0 2}join() only accepts {bf:off} (v1 scope - omit join() entirely for the default pooled/join=TRUE behavior).{p_end}"
 		exit 198
 	}
 	local __gof_join = ("`join'" != "off")
@@ -242,14 +242,14 @@ program define nwsaom_estat_gof, rclass
 	}
 	capture mata: __nwsaom_last_M.nparam()
 	if _rc {
-		di as err "no fitted nwsaom model available for simulation - re-run nwsaom before estat gof."
+		di as err "{p 0 0 2}no fitted nwsaom model available for simulation - re-run nwsaom before estat gof.{p_end}"
 		exit 498
 	}
 	if `seed' != -1 {
 		set seed `seed'
 	}
 	if `nsim' < 5 {
-		di as err "nsim() must be at least 5 - the Mahalanobis test needs a genuine reference distribution, not a handful of draws."
+		di as err "{p 0 0 2}nsim() must be at least 5 - the Mahalanobis test needs a genuine reference distribution, not a handful of draws.{p_end}"
 		exit 198
 	}
 
@@ -267,11 +267,11 @@ program define nwsaom_estat_gof, rclass
 	}
 	foreach __gof_s of local stats {
 		if !inlist("`__gof_s'", "outdegree", "indegree", "geodesic", "behavior", "triad") {
-			di as err "stats() only supports {bf:outdegree}, {bf:indegree}, {bf:geodesic}, {bf:behavior}, {bf:triad} (v1 scope; got `__gof_s')."
+			di as err "{p 0 0 2}stats() only supports {bf:outdegree}, {bf:indegree}, {bf:geodesic}, {bf:behavior}, {bf:triad} (v1 scope; got `__gof_s').{p_end}"
 			exit 198
 		}
 		if "`__gof_s'" == "behavior" & !`__gof_coev' {
-			di as err "stats(behavior) requires a co-evolution fit (nwsaom's own {bf:behavior()} option) - the last nwsaom estimates in memory have no behavior variable."
+			di as err "{p 0 0 2}stats(behavior) requires a co-evolution fit (nwsaom's own {bf:behavior()} option) - the last nwsaom estimates in memory have no behavior variable.{p_end}"
 			exit 198
 		}
 	}
@@ -624,7 +624,7 @@ program define nwsaom_estat_gof, rclass
 	  }
 	}
 	di as txt "{hline 21}{c BT}{hline 32}"
-	di as txt "rejected: P < 0.05 (" cond(`__gof_twotailed', "two", "one") "-tailed); the model does not reproduce this statistic"
+	di as txt "{p 0 0 2}rejected: P < 0.05 (" cond(`__gof_twotailed', "two", "one") "-tailed); the model does not reproduce this statistic{p_end}"
 	// the graph names, broken between names
 	local __gof_line "Violin plots:"
 	foreach __g of local __gof_graphs {
@@ -1163,18 +1163,18 @@ program define nwsaom_estat_mems, rclass
 	}
 	capture mata: __nwsaom_last_M.nparam()
 	if _rc {
-		di as err "no fitted nwsaom model available for simulation - re-run nwsaom before estat mems."
+		di as err "{p 0 0 2}no fitted nwsaom model available for simulation - re-run nwsaom before estat mems.{p_end}"
 		exit 498
 	}
 	if e(has_behavior) {
-		di as err "estat mems does not yet support co-evolution ({bf:behavior()}) fits - v1 scope, network-only (see this file's own header comment on why)."
+		di as err "{p 0 0 2}estat mems does not yet support co-evolution ({bf:behavior()}) fits - v1 scope, network-only (see this file's own header comment on why).{p_end}"
 		exit 498
 	}
 	local __mems_rate = .
 	capture confirm matrix e(rates)
 	if _rc == 0 {
 		if colsof(e(rates)) > 1 {
-			di as err "estat mems does not yet support fits with more than two waves - v1 scope, exactly two waves ({bf:waves(a b)})."
+			di as err "{p 0 0 2}estat mems does not yet support fits with more than two waves - v1 scope, exactly two waves ({bf:waves(a b)}).{p_end}"
 			exit 498
 		}
 		local __mems_rate = el(e(rates), 1, 1)
@@ -1182,7 +1182,7 @@ program define nwsaom_estat_mems, rclass
 	else {
 		capture confirm scalar e(rate)
 		if _rc {
-			di as err "estat mems requires an ordinary two-wave network-only nwsaom fit (no {bf:symmetric}, multiplex, or other v1-excluded combination)."
+			di as err "{p 0 0 2}estat mems requires an ordinary two-wave network-only nwsaom fit (no {bf:symmetric}, multiplex, or other v1-excluded combination).{p_end}"
 			exit 498
 		}
 		local __mems_rate = e(rate)
@@ -1195,7 +1195,7 @@ program define nwsaom_estat_mems, rclass
 		exit 198
 	}
 	if `nsim' < 20 {
-		di as err "nsim() must be at least 20 - MEMs needs a genuine Monte Carlo reference distribution, not a handful of draws."
+		di as err "{p 0 0 2}nsim() must be at least 20 - MEMs needs a genuine Monte Carlo reference distribution, not a handful of draws.{p_end}"
 		exit 198
 	}
 
@@ -1207,7 +1207,7 @@ program define nwsaom_estat_mems, rclass
 	local __mems_names : colnames `bmat'
 	local __mems_effpos : list posof "`effect'" in __mems_names
 	if `__mems_effpos' == 0 {
-		di as err "effect(`effect') is not one of this fitted model's own coefficients. Available: `__mems_names'"
+		di as err "{p 0 0 2}effect(`effect') is not one of this fitted model's own coefficients. Available: `__mems_names'{p_end}"
 		exit 198
 	}
 
@@ -1227,7 +1227,7 @@ program define nwsaom_estat_mems, rclass
 	mata: __nwsaom_mems_trialmat = __nwsaom_last_G1.to_dense()
 	capture nwsaom_mems_callmacro __nwsaom_mems_trialmat "`macro'"
 	if _rc {
-		di as err "macro(`macro') failed on a trial call using the observed starting network (rc=`=_rc'). `macro' must be a defined Stata program taking ONE argument (a network name) and returning its own macro-level statistic in r(stat) - e.g. a program that runs args netname, then nwsummarize on that network name with the matonly option, then return scalar stat = r(density)."
+		di as err "{p 0 0 2}macro(`macro') failed on a trial call using the observed starting network (rc=`=_rc'). `macro' must be a defined Stata program taking ONE argument (a network name) and returning its own macro-level statistic in r(stat) - e.g. a program that runs args netname, then nwsummarize on that network name with the matonly option, then return scalar stat = r(density).{p_end}"
 		mata: mata drop __nwsaom_mems_trialmat
 		exit 498
 	}
@@ -1291,7 +1291,7 @@ program define nwsaom_estat_mems, rclass
 	di as text "{hline 13}{c BT}{hline 57}"
 	local __mems_hiI = word("`interval'", `__mems_nint')
 	local __mems_loI = word("`interval'", 1)
-	di as text "MEMS: mean difference in {bf:`macro'} between interval=`__mems_hiI' and interval=`__mems_loI'."
+	di as text "{p 0 0 2}MEMS: mean difference in {bf:`macro'} between interval=`__mems_hiI' and interval=`__mems_loI'.{p_end}"
 	di as text "Prop. change: that difference as a share of the value at interval=`__mems_hiI'."
 	di as text "MC p-value: share of draws with the opposite sign. Each draw is simulated"
 	di as text "independently (no common random numbers); no E-value sensitivity bound."

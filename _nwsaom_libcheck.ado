@@ -1,4 +1,4 @@
-*! version 1.5.14  10nov2026 _nwsaom_libcheck - make the nwsaom Mata libraries visible; clear message when the core nwcommands and nwsaom Mata libraries do not match
+*! version 1.5.15  11nov2026 _nwsaom_libcheck - make the nwsaom Mata libraries visible; clear message when the core nwcommands and nwsaom Mata libraries do not match
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom (GPL-3, see the file LICENSE).
 * Stata indexes the Mata libraries (.mlib) once, early in a session. Libraries installed by net install can be missing from that
@@ -16,7 +16,7 @@ program define _nwsaom_libcheck
 	capture mata: __nwsaom_libcheck()
 	if _rc == 3021 | _rc == 3260 {
 		di as error "the installed core nwcommands and nwsaom were built for different versions"
-		di as error "reinstall the model package: nwinstall, models   (or: net install nwsaom, from(...) replace)"
+		di as error "{p 0 0 2}reinstall the model package: nwinstall, models   (or: net install nwsaom, from(...) replace){p_end}"
 		di as error "or build the libraries with your own Stata: nwinstall, buildmata(all)"
 		exit 3021
 	}

@@ -1,4 +1,4 @@
-*! version 1.5.14  10nov2026 nwcommands: maximum likelihood estimation of a SAOM (Robbins-Monro on the score of the augmented data) after nwsaom
+*! version 1.5.15  11nov2026 nwcommands: maximum likelihood estimation of a SAOM (Robbins-Monro on the score of the augmented data) after nwsaom
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -26,16 +26,16 @@ program nwsaom_ml, eclass
 	}
 	mata: st_numscalar("__nwsaom_sflast", SaomStructLastOn())
 	if scalar(__nwsaom_sflast) == 1 {
-		di as err "maximum likelihood estimation is not yet available with structural zeros or ones (the codes 10 and 11 in the wave networks)."
+		di as err "{p 0 0 2}maximum likelihood estimation is not yet available with structural zeros or ones (the codes 10 and 11 in the wave networks).{p_end}"
 		exit 198
 	}
 	if e(twomode) == 1 | `"`e(symtype)'"' != "" | `"`e(ratecov)'"' != "" {
-		di as err "maximum likelihood estimation covers one directed one-mode network with at most one co-evolving behavior, without two-mode data, non-directed models or rate covariates."
+		di as err "{p 0 0 2}maximum likelihood estimation covers one directed one-mode network with at most one co-evolving behavior, without two-mode data, non-directed models or rate covariates.{p_end}"
 		exit 198
 	}
 	mata: st_numscalar("__nwsaom_ml_bad", any(_SaomGofExt("__nwsaom_last_fntype", J(1, 0, 0)) :!= 0) | rows(_SaomGofExt("__nwsaom_last_present", J(0, 1, 0))) > 0 | rows(_SaomGofExt("__nwsaom_last_struct", J(0, 0, 0))) > 0)
 	if scalar(__nwsaom_ml_bad) == 1 {
-		di as err "maximum likelihood estimation does not cover endowment/creation effects, present()/joinat()/leaveat(), structural() or missing-data options."
+		di as err "{p 0 0 2}maximum likelihood estimation does not cover endowment/creation effects, present()/joinat()/leaveat(), structural() or missing-data options.{p_end}"
 		exit 198
 	}
 	local nwaves = e(nwaves)
@@ -71,7 +71,7 @@ program nwsaom_ml, eclass
 		local mbs "__nwsaom_ml_Mb0, __nwsaom_ml_Bw0, 0, 0"
 	}
 	mata: __nwsaom_ml_Gs = (`gs')
-	di as txt "Maximum likelihood (iterations: phase 1 `n1', phase 2 `nsub' x `nstart2', phase 3 `n3') ..."
+	di as txt "{p 0 0 2}Maximum likelihood (iterations: phase 1 `n1', phase 2 `nsub' x `nstart2', phase 3 `n3') ...{p_end}"
 	mata: st_matrix("`out'", SaomMLRun(__nwsaom_ml_Gs, `nper', __nwsaom_last_M, `coev', `mbs', st_matrix("`b'"), st_matrix("`rt'"), `n1', `nsub', `nstart2', `n3', `nmh', `seed', `mult', `gain', `mhgeom'))
 	capture mata: mata drop __nwsaom_ml_Gs __nwsaom_ml_Mb0 __nwsaom_ml_Bw0
 	local KP = `K' + `NR'
@@ -151,6 +151,6 @@ program nwsaom_ml, eclass
 			matlist e(rates_beh_ml), format(%9.4f) border(top bottom)
 		}
 		di as txt "Overall maximum t-ratio of the scores: " as res %5.3f `tmax' as txt cond(`tmax' < 0.1, " (good; below 0.1)", cond(`tmax' < 0.25, " (acceptable)", " (poor; increase n3() and nstart2())"))
-		if !`ok' di as txt "(the information matrix was not positive definite: the standard errors are those of the complete-data information, too small)"
+		if !`ok' di as txt "{p 0 0 2}(the information matrix was not positive definite: the standard errors are those of the complete-data information, too small){p_end}"
 	}
 end

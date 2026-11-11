@@ -1,4 +1,4 @@
-*! version 1.5.14  10nov2026 _nwsaom_tconvtable (split out of nwsaom.ado: a program of another ado-file is dropped without a trace when Stata evicts it, so cross-file helpers need their own file)
+*! version 1.5.15  11nov2026 _nwsaom_tconvtable (split out of nwsaom.ado: a program of another ado-file is dropped without a trace when Stata evicts it, so cross-file helpers need their own file)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -23,7 +23,7 @@ program define _nwsaom_tconvtable
 		if abs(`m'[1,`j']) >= 0.1 local anybad 1
 	}
 	if "`detail'" != "" {
-		di as text "Convergence t-ratios (criterion: every |t| below 0.1; the overall maximum ratio below 0.25 is a separate criterion):"
+		di as text "{p 0 0 2}Convergence t-ratios (criterion: every |t| below 0.1; the overall maximum ratio below 0.25 is a separate criterion):{p_end}"
 		forvalues j = 1/`k' {
 			local nm : word `j' of `names'
 			if udstrlen("`nm'") > 24 local nm = usubstr("`nm'", 1, 23) + "~"
@@ -66,7 +66,7 @@ program define _nwsaom_tconvtable
 	// the hint also follows the detail layout (it was printed only without detail up to 1.5.13)
 	if !`ok' | `anybad' {
 		if "`e(cmd)'" == "nwsaom" & `"`e(cmdline)'"' != "" di as text "Convergence is good only if both criteria are met." _n "To refit starting from these estimates, type {bf:nwsaom refit}."
-		else di as text "Convergence is good only if both criteria are met. Refit starting from these estimates with theta0(); see {help nwsaom}."
+		else di as text "{p 0 0 2}Convergence is good only if both criteria are met. Refit starting from these estimates with theta0(); see {help nwsaom}.{p_end}"
 	}
 	if "`e(engine)'" == "mata" {
 		di as text "(simulated in Mata, not the native plugin: `e(engine_why)')"

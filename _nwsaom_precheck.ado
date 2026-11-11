@@ -1,4 +1,4 @@
-*! version 1.5.14  10nov2026 _nwsaom_precheck - option checks moved out of nwsaom.ado (Stata limits the size of one ado program)
+*! version 1.5.15  11nov2026 _nwsaom_precheck - option checks moved out of nwsaom.ado (Stata limits the size of one ado program)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P.).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -51,7 +51,7 @@ program define _nwsaom_precheck_structural
 	}
 	if "`structural'" != "" {
 		if `multi' & !`tm' {
-			di "{err}option {bf:structural()} is v1 scope: exactly two waves ({bf:wave1()}/{bf:wave2()}, not {bf:waves()})."
+			di "{p 0 0 2}{err}option {bf:structural()} is v1 scope: exactly two waves ({bf:wave1()}/{bf:wave2()}, not {bf:waves()}).{p_end}"
 			error 198
 		}
 		if `coev' & !`tm' {
@@ -67,7 +67,7 @@ program define _nwsaom_precheck_structural
 			error 198
 		}
 		if "`ode'" != "" | "`odc'" != "" | "`rce'" != "" | "`rcc'" != "" {
-			di "{err}option {bf:structural()} is v1 scope: not yet combinable with {bf:outdegreeendow()}/{bf:outdegreecreation()}/{bf:reciprocityendow()}/{bf:reciprocitycreation()} (network endowment/creation)."
+			di "{p 0 0 2}{err}option {bf:structural()} is v1 scope: not yet combinable with {bf:outdegreeendow()}/{bf:outdegreecreation()}/{bf:reciprocityendow()}/{bf:reciprocitycreation()} (network endowment/creation).{p_end}"
 			error 198
 		}
 		confirm matrix `structural'
@@ -75,12 +75,12 @@ program define _nwsaom_precheck_structural
 		mata: `chk' = st_matrix("`structural'")
 		mata: st_local("dimok", strofreal(rows(`chk') == `nodes' & cols(`chk') == `nodes'))
 		if `dimok' == 0 {
-			di "{err}option {bf:structural()} matrix must be `nodes' x `nodes' (one row/column per actor) - `structural' is not."
+			di "{p 0 0 2}{err}option {bf:structural()} matrix must be `nodes' x `nodes' (one row/column per actor) - `structural' is not.{p_end}"
 			error 198
 		}
 		mata: st_local("valok", strofreal(all((`chk' :== 0) :| (`chk' :== 1))))
 		if `valok' == 0 {
-			di "{err}option {bf:structural()} matrix must be coded 0/1 (1=dyad frozen, not toggleable this period) - `structural' has a value outside {0,1}."
+			di "{p 0 0 2}{err}option {bf:structural()} matrix must be coded 0/1 (1=dyad frozen, not toggleable this period) - `structural' has a value outside {0,1}.{p_end}"
 			error 198
 		}
 		mata: st_local("diagok", strofreal(sum(diagonal(`chk')) == 0))
@@ -102,7 +102,7 @@ program define _nwsaom_precheck_timed
 	syntax , [JOINAT(string) LEAVEAT(string) PRESENT(string) OPTS(string)]
 	if "`joinat'`leaveat'" == "" exit
 	if "`present'" != "" {
-		di "{err}{bf:joinat()}/{bf:leaveat()} and {bf:present()} are alternatives: give the actors' joining and leaving times, or their presence at each wave, not both."
+		di "{p 0 0 2}{err}{bf:joinat()}/{bf:leaveat()} and {bf:present()} are alternatives: give the actors' joining and leaving times, or their presence at each wave, not both.{p_end}"
 		error 198
 	}
 	foreach opt in joinat leaveat {
@@ -122,7 +122,7 @@ program define _nwsaom_precheck_miss
 	if "`missnet'" != "" {
 		local n : word count `missnet'
 		if `n' != `nwaves' {
-			di "{err}option {bf:missnet()} must supply exactly `nwaves' matrix name(s), one per wave, in the same temporal order."
+			di "{p 0 0 2}{err}option {bf:missnet()} must supply exactly `nwaves' matrix name(s), one per wave, in the same temporal order.{p_end}"
 			error 198
 		}
 		local hasmissnet = 1
@@ -135,7 +135,7 @@ program define _nwsaom_precheck_miss
 		}
 		local n : word count `missbeh'
 		if `n' != `nwaves' {
-			di "{err}option {bf:missbeh()} must supply exactly `nwaves' variable name(s), one per wave, in the same temporal order."
+			di "{p 0 0 2}{err}option {bf:missbeh()} must supply exactly `nwaves' variable name(s), one per wave, in the same temporal order.{p_end}"
 			error 198
 		}
 		local hasmissbeh = 1

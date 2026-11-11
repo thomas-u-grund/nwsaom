@@ -1,4 +1,4 @@
-*! version 1.5.14  10nov2026 _nwsaom_structural - structural zeros and ones (the codes 10 and 11 in the wave networks, as RSiena): build the per-wave sets, refuse the combinations not yet supported
+*! version 1.5.15  11nov2026 _nwsaom_structural - structural zeros and ones (the codes 10 and 11 in the wave networks, as RSiena): build the per-wave sets, refuse the combinations not yet supported
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -30,12 +30,12 @@ program define _nwsaom_structural_build
 	if "`groups'" != "" local bad "`bad' groups()"
 	if "`structural'" != "" & !(`tm' & "`structural'" == "__nwsaom_tm_structmat") local bad "`bad' structural()"
 	if "`bad'" != "" {
-		di "{err}structural zeros and ones (the codes 10 and 11 in the wave networks) are not yet supported together with:`bad'."
+		di "{p 0 0 2}{err}structural zeros and ones (the codes 10 and 11 in the wave networks) are not yet supported together with:`bad'.{p_end}"
 		error 198
 	}
 	// structural(matname), the older way: converted to the per-wave lists of the codes (the value of a marked dyad is the value of the data)
 	if "`ustruct'" != "" {
-		di as txt "(note: structural(matname) is deprecated; it is replaced by the codes 10 and 11 in the wave networks and converted to them here)"
+		di as txt "{p 0 0 2}(note: structural(matname) is deprecated; it is replaced by the codes 10 and 11 in the wave networks and converted to them here){p_end}"
 		local ptrs ""
 		forvalues w = 1/`nwaves' {
 			local ptrs "`ptrs'`=cond(`w' > 1, ",", "")'&__nwsaom_last_G`w'"
@@ -51,7 +51,7 @@ program define _nwsaom_structural_build
 	if "`symmetric'`symtype'" != "" {
 		mata: st_local("symbad", strofreal(SaomStructSymCheck(`nwaves', `nodes')))
 		if `symbad' {
-			di "{err}in a non-directed relation the structural codes (10 and 11) must be given for both directions of a dyad, with the same value (wave `symbad' has a code that is not mirrored); RSiena would treat the network as directed."
+			di "{p 0 0 2}{err}in a non-directed relation the structural codes (10 and 11) must be given for both directions of a dyad, with the same value (wave `symbad' has a code that is not mirrored); RSiena would treat the network as directed.{p_end}"
 			error 198
 		}
 	}

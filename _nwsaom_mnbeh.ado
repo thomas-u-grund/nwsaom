@@ -1,4 +1,4 @@
-*! version 1.5.14  10nov2026 _nwsaom_mnbeh - translates the behavior effect lists beheff1() / beheff2() of nwsaom multinet that name covariates, shape effects or further network effects
+*! version 1.5.15  11nov2026 _nwsaom_mnbeh - translates the behavior effect lists beheff1() / beheff2() of nwsaom multinet that name covariates, shape effects or further network effects
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -94,7 +94,7 @@ program define _nwsaom_mnbeh, rclass
 				local out`k' "`out`k'' bu`=`fi'-1'_`vv'"
 			}
 			else if "`vv'" != "" {
-				di "{err}beheff`k'(): `t' is not an effect; covariate effects: `xfam' `bxfam'; shape effects: `shfam'; network effects: `bufam'."
+				di "{p 0 0 2}{err}beheff`k'(): `t' is not an effect; covariate effects: `xfam' `bxfam'; shape effects: `shfam'; network effects: `bufam'.{p_end}"
 				error 198
 			}
 			else local out`k' "`out`k'' `f'"

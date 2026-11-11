@@ -1,4 +1,4 @@
-*! version 1.5.14  10nov2026 nwcommands: nwsaom simulate (simulation-only mode)
+*! version 1.5.15  11nov2026 nwcommands: nwsaom simulate (simulation-only mode)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -41,7 +41,7 @@ program define nwsaom_simulate, rclass
 		}
 	}
 	if "`theta'" == "" & "`behtheta'" == "" {
-		di as err "nwsaom simulate needs theta() (and behtheta() with behavior effects): the coefficients to simulate at."
+		di as err "{p 0 0 2}nwsaom simulate needs theta() (and behtheta() with behavior effects): the coefficients to simulate at.{p_end}"
 		exit 198
 	}
 	if "`rates'" == "" {
@@ -60,7 +60,7 @@ program define nwsaom_simulate, rclass
 	matrix `tm' = e(b)
 	local nt : word count `theta' `behtheta'
 	if `nt' != colsof(`tm') {
-		di as err "theta()/behtheta() give `nt' value(s) but the model has " colsof(`tm') " coefficient(s)."
+		di as err "{p 0 0 2}theta()/behtheta() give `nt' value(s) but the model has " colsof(`tm') " coefficient(s).{p_end}"
 		exit 198
 	}
 	local j 0

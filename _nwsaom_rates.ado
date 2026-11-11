@@ -1,4 +1,4 @@
-*! version 1.5.14  10nov2026 _nwsaom_rates: helpers of nwsaom for the covariate, structural and diffusion rate effects of models with a behavior (kept out of nwsaom.ado, whose size is at Stata's limit)
+*! version 1.5.15  11nov2026 _nwsaom_rates: helpers of nwsaom for the covariate, structural and diffusion rate effects of models with a behavior (kept out of nwsaom.ado, whose size is at Stata's limit)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -73,11 +73,11 @@ program define _nwsaom_rates_check
 			error 198
 		}
 		if (`haspresent' & !`tm') | `hastimed' | `hasmiss' {
-			di "{err}the rate effects of a model with a behavior cannot yet be combined with {bf:present()}, {bf:joinat()}/{bf:leaveat()}, {bf:missnet()} or {bf:missbeh()}."
+			di "{p 0 0 2}{err}the rate effects of a model with a behavior cannot yet be combined with {bf:present()}, {bf:joinat()}/{bf:leaveat()}, {bf:missnet()} or {bf:missbeh()}.{p_end}"
 			error 198
 		}
 		if `nsr' > 0 {
-			di "{err}the structural rate effects of the network (outrate, ...) cannot yet be combined with {bf:behavior()}; the behavior's own rate effects are {bf:behrate()}."
+			di "{p 0 0 2}{err}the structural rate effects of the network (outrate, ...) cannot yet be combined with {bf:behavior()}; the behavior's own rate effects are {bf:behrate()}.{p_end}"
 			error 198
 		}
 		if `tm' & `hasbr' {
@@ -93,7 +93,7 @@ program define _nwsaom_rates_prep, rclass
 		[ RATECOV(string) RATECOVCOEF(string) BEHAVIOR(string) BEHRATECOV(string) BEHRATE(string) BEHRATECOEF(string) TVNAMES(string) BEHSTEM(string) SYMMETRIC(integer 0) SYMTYPE(integer 0) ]
 	local nper = `nwaves' - 1
 	if `coev' & inlist(`symtype', 1, 2, 3) & (`hasratecov' | `hasbr') {
-		di "{err}rate effects with a behavior are available for the non-directed model types forcing and confirmation (symtype()), not for the pairwise types joint, force and agree."
+		di "{p 0 0 2}{err}rate effects with a behavior are available for the non-directed model types forcing and confirmation (symtype()), not for the pairwise types joint, force and agree.{p_end}"
 		error 198
 	}
 	if `coev' & "`behstem'" == "" {
@@ -138,7 +138,7 @@ program define _nwsaom_rates_prep, rclass
 			else {
 				capture confirm numeric variable `t'
 				if _rc {
-					di "{err}behratecov(): {bf:`t'} is not a numeric variable, a changing covariate of tvcov(), or the behavior."
+					di "{p 0 0 2}{err}behratecov(): {bf:`t'} is not a numeric variable, a changing covariate of tvcov(), or the behavior.{p_end}"
 					exit 198
 				}
 				mata: st_local("idx", strofreal(SaomBRDataConst("`t'", `nodes', `center')))
@@ -176,11 +176,11 @@ program define _nwsaom_rates_prep, rclass
 				exit 198
 			}
 			if `symmetric' & !inlist(`type', 2, 10, 11, 15, 20, 21) {
-				di "{err}behrate(): {bf:`tok'} is not available for a non-directed network (available: outrate, avexposure, totexposure, infectdeg, susceptavcovar(), infectcovar())."
+				di "{p 0 0 2}{err}behrate(): {bf:`tok'} is not available for a non-directed network (available: outrate, avexposure, totexposure, infectdeg, susceptavcovar(), infectcovar()).{p_end}"
 				exit 198
 			}
 			if !`symmetric' & `type' == 15 {
-				di "{err}behrate(): {bf:infectdeg} is an effect of a non-directed network; for a directed network use infectin or infectout."
+				di "{p 0 0 2}{err}behrate(): {bf:infectdeg} is an effect of a non-directed network; for a directed network use infectin or infectout.{p_end}"
 				exit 198
 			}
 			if inlist(`type', 20, 21) & "`cov'" == "" {
@@ -200,7 +200,7 @@ program define _nwsaom_rates_prep, rclass
 				else {
 					capture confirm numeric variable `cov'
 					if _rc {
-						di "{err}behrate(): {bf:`cov'} is not a numeric variable or a changing covariate of tvcov()."
+						di "{p 0 0 2}{err}behrate(): {bf:`cov'} is not a numeric variable or a changing covariate of tvcov().{p_end}"
 						exit 198
 					}
 					mata: st_local("col", strofreal(SaomBRDataConst("`cov'", `nodes', `center')))
@@ -218,13 +218,13 @@ program define _nwsaom_rates_prep, rclass
 		if "`behratecoef'" == "" local behratecoef "0"
 		capture numlist "`behratecoef'"
 		if _rc {
-			di "{err}{bf:behratecoef()} must be a list of numbers (starting values of the rate-effect coefficients of the behavior)."
+			di "{p 0 0 2}{err}{bf:behratecoef()} must be a list of numbers (starting values of the rate-effect coefficients of the behavior).{p_end}"
 			exit 198
 		}
 		local bl "`r(numlist)'"
 		local nb : word count `bl'
 		if `nb' != 1 & `nb' != `n' {
-			di "{err}{bf:behratecoef()} must give one starting value, or one per rate effect of the behavior (`n')."
+			di "{p 0 0 2}{err}{bf:behratecoef()} must give one starting value, or one per rate effect of the behavior (`n').{p_end}"
 			exit 198
 		}
 		forvalues i = 1/`n' {
@@ -301,7 +301,7 @@ program define _nwsaom_rates_post, eclass
 		local k 0
 		foreach v of local ratecov {
 			local ++k
-			di as text "Covariate-rate coefficient of the network (" as result "`v'" as text "): " as result %9.4f `r1'[1,`k'] as text " (se " as result %6.4f `r1se'[1,`k'] as text ")"
+			di as text "{p 0 0 2}Covariate-rate coefficient of the network (" as result "`v'" as text "): " as result %9.4f `r1'[1,`k'] as text " (se " as result %6.4f `r1se'[1,`k'] as text "){p_end}"
 		}
 		if `n1' == 1 {
 			ereturn scalar ratecoef = `r1'[1,1]
@@ -323,7 +323,7 @@ program define _nwsaom_rates_post, eclass
 		local k 0
 		foreach v of local brnames {
 			local ++k
-			di as text "Rate effect of the behavior (" as result "`v'" as text "): " as result %9.4f `r2'[1,`k'] as text " (se " as result %6.4f `r2se'[1,`k'] as text ")"
+			di as text "{p 0 0 2}Rate effect of the behavior (" as result "`v'" as text "): " as result %9.4f `r2'[1,`k'] as text " (se " as result %6.4f `r2se'[1,`k'] as text "){p_end}"
 		}
 		if `n2' == 1 {
 			ereturn scalar behratecoef = `r2'[1,1]

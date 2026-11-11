@@ -1,4 +1,4 @@
-*! version 1.5.14  10nov2026 nwsaom multiplex (split out of nwsaom.ado: the programs of one ado-file all count towards Stata's 1000 KB adosize while loaded)
+*! version 1.5.15  11nov2026 nwsaom multiplex (split out of nwsaom.ado: the programs of one ado-file all count towards Stata's 1000 KB adosize while loaded)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -50,7 +50,7 @@ program define nwsaom_multiplex, eclass
 	syntax , NETAWAVE1(string) NETAWAVE2(string) NETBWAVE1(string) NETBWAVE2(string) ///
 		[ THETA01(string) THETA02(string) K0(integer 0) K3(integer 1000) FIRSTG(real 0.2) seed(integer -1) CRPROD CRPRODB DETail ]
 
-	di as text "note: {bf:nwsaom multiplex} is deprecated; use {bf:nwsaom multinet} (net1() net2() ...), which includes everything multiplex does."
+	di as text "{p 0 0 2}note: {bf:nwsaom multiplex} is deprecated; use {bf:nwsaom multinet} (net1() net2() ...), which includes everything multiplex does.{p_end}"
 	// the estimates of multiplex and multinet agree (same model, same engine); forward unless start values are given
 	if "`theta01'" == "" & "`theta02'" == "" {
 		local __c1 ""
@@ -66,7 +66,7 @@ program define nwsaom_multiplex, eclass
 		ereturn scalar rate1_se = `__r'[3, 1]
 		ereturn scalar rate2_se = `__r'[4, 1]
 		ereturn local cmd "nwsaom_multiplex"
-		ereturn local version "1.5.14"
+		ereturn local version "1.5.15"
 		exit
 	}
 	if `seed' != -1 set seed `seed'
@@ -82,7 +82,7 @@ program define nwsaom_multiplex, eclass
 	foreach __w in w1a w1b w2a w2b {
 		_nwsaom_chkbin, netobj(``__w'netobj') name(``__w'netname') valued(``__w'valued')
 		if "``__w'directed'" != "true" {
-			di "{err}nwsaom multiplex requires directed networks, matching plain nwsaom's own v1 scope."
+			di "{p 0 0 2}{err}nwsaom multiplex requires directed networks, matching plain nwsaom's own v1 scope.{p_end}"
 			error 198
 		}
 		if "``__w'is2mode'" == "true" {
@@ -91,7 +91,7 @@ program define nwsaom_multiplex, eclass
 		}
 	}
 	if `w1anodes' != `w1bnodes' | `w1anodes' != `w2anodes' | `w1anodes' != `w2bnodes' {
-		di "{err}every network/wave passed to nwsaom multiplex must share the same, fixed number of nodes."
+		di "{p 0 0 2}{err}every network/wave passed to nwsaom multiplex must share the same, fixed number of nodes.{p_end}"
 		error 198
 	}
 	local nodes = `w1anodes'
@@ -150,7 +150,7 @@ program define nwsaom_multiplex, eclass
 	matrix rownames __nwsaom_mp_rate1_tconv = tconv
 	ereturn matrix tconv = __nwsaom_mp_rate1_tconv
 	ereturn local cmd "nwsaom_multiplex"
-	ereturn local version "1.5.14"
+	ereturn local version "1.5.15"
 	_nwsaom_postengine
 
 	di

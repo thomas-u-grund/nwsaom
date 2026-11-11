@@ -1,4 +1,4 @@
-*! version 1.5.14  10nov2026 nwcommands: multi-group meta-analysis of separate nwsaom fits (RSiena's siena08)
+*! version 1.5.15  11nov2026 nwcommands: multi-group meta-analysis of separate nwsaom fits (RSiena's siena08)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -26,7 +26,7 @@ program nwsaom_meta, rclass
 	foreach nm of local namelist {
 		capture quietly estimates restore `nm'
 		if _rc {
-			di "{err}stored estimates {bf:`nm'} not found (use {bf:estimates store `nm'} after each {bf:nwsaom} fit)."
+			di "{p 0 0 2}{err}stored estimates {bf:`nm'} not found (use {bf:estimates store `nm'} after each {bf:nwsaom} fit).{p_end}"
 			error 111
 		}
 		matrix `b' = e(b)
@@ -64,7 +64,7 @@ program nwsaom_meta, rclass
 		}
 		else {
 			if `nb' != `nb0' | "`cn'" != "`names0'" {
-				di "{err}the fits must have the same effects in the same order; {bf:`nm'} differs from {bf:`: word 1 of `namelist''}."
+				di "{p 0 0 2}{err}the fits must have the same effects in the same order; {bf:`nm'} differs from {bf:`: word 1 of `namelist''}.{p_end}"
 				error 198
 			}
 			matrix `B' = `B' \ `b'

@@ -1,4 +1,4 @@
-*! version 1.5.14  10nov2026 nwcommands: Bayesian estimation of a SAOM (data augmentation, Metropolis-Hastings) after nwsaom
+*! version 1.5.15  11nov2026 nwcommands: Bayesian estimation of a SAOM (data augmentation, Metropolis-Hastings) after nwsaom
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -35,20 +35,20 @@ program nwsaom_bayes, eclass
 	}
 	mata: st_numscalar("__nwsaom_sflast", SaomStructLastOn())
 	if scalar(__nwsaom_sflast) == 1 {
-		di as err "nwsaom bayes is not yet available with structural zeros or ones (the codes 10 and 11 in the wave networks)."
+		di as err "{p 0 0 2}nwsaom bayes is not yet available with structural zeros or ones (the codes 10 and 11 in the wave networks).{p_end}"
 		exit 198
 	}
 	if e(twomode) == 1 | `"`e(symtype)'"' != "" | `"`e(ratecov)'"' != "" {
-		di as err "nwsaom bayes covers one directed one-mode network with at most one co-evolving behavior, without two-mode data, non-directed models or rate covariates."
+		di as err "{p 0 0 2}nwsaom bayes covers one directed one-mode network with at most one co-evolving behavior, without two-mode data, non-directed models or rate covariates.{p_end}"
 		exit 198
 	}
 	mata: st_numscalar("__nwsaom_by_bad", any(_SaomGofExt("__nwsaom_last_fntype", J(1, 0, 0)) :!= 0) | rows(_SaomGofExt("__nwsaom_last_present", J(0, 1, 0))) > 0 | rows(_SaomGofExt("__nwsaom_last_struct", J(0, 0, 0))) > 0)
 	if scalar(__nwsaom_by_bad) == 1 {
-		di as err "nwsaom bayes does not cover endowment/creation effects, present()/joinat()/leaveat(), structural() or missing-data options."
+		di as err "{p 0 0 2}nwsaom bayes does not cover endowment/creation effects, present()/joinat()/leaveat(), structural() or missing-data options.{p_end}"
 		exit 198
 	}
 	if `nprewarm' < 0 | `nwarm' < 0 | `nmain' < 1 | `nrunmh' < 1 | `nsampconst' < 0 | `nsamprates' < 0 | `nmh' < 0 | `nimprovemh' < 0 | `mult' <= 0 {
-		di as err "nprewarm(), nwarm(), nimprovemh() must be >= 0 and nmain(), nrunmh(), nsampconst(), mult() positive."
+		di as err "{p 0 0 2}nprewarm(), nwarm(), nimprovemh() must be >= 0 and nmain(), nrunmh(), nsampconst(), mult() positive.{p_end}"
 		exit 198
 	}
 	local nwaves = e(nwaves)
@@ -178,7 +178,7 @@ program nwsaom_bayes, eclass
 	mata: __nwsaom_by_rpm = strtoreal(tokens("`rpm'"))
 	mata: __nwsaom_by_rps = strtoreal(tokens("`rps'"))
 	mata: __nwsaom_by_rsd = strtoreal(tokens("`rsdl'"))
-	di as txt "Sampling: `nprewarm' pre-warming + `nwarm' warming + `nmain' main iterations of `nrunmh' batches ..."
+	di as txt "{p 0 0 2}Sampling: `nprewarm' pre-warming + `nwarm' warming + `nmain' main iterations of `nrunmh' batches ...{p_end}"
 	mata: st_numscalar("__nwsaom_by_n", SaomBayesRun(__nwsaom_by_Gs, `nper', __nwsaom_last_M, `coev', `mbs', __nwsaom_by_th, __nwsaom_by_V, __nwsaom_by_rho, __nwsaom_by_pm, __nwsaom_by_ps, __nwsaom_by_rpm, __nwsaom_by_rps, `pshape', `prate', __nwsaom_by_rsd, `nprewarm', `nwarm', `nmain', `nrunmh', `nimprovemh', `nmh', `nsampconst', `nsamprates', `seed', `mult', `targetmh', `ratemode', `mhgeom', "`frame'", __nwsaom_by_names))
 	capture mata: mata drop __nwsaom_by_Mb0 __nwsaom_by_Bw0 __nwsaom_by_Gs __nwsaom_by_names __nwsaom_by_th __nwsaom_by_V __nwsaom_by_rho __nwsaom_by_pm __nwsaom_by_ps __nwsaom_by_rpm __nwsaom_by_rps __nwsaom_by_rsd
 	local ndraw = scalar(__nwsaom_by_n)
@@ -232,7 +232,7 @@ program nwsaom_bayes, eclass
 	local cent_keep = e(centered)
 	ereturn post `bb' `Vb', obs(`nodes_keep')
 	ereturn local cmd "nwsaom_bayes"
-	ereturn local version "1.5.14"
+	ereturn local version "1.5.15"
 	ereturn local title "Stochastic actor-oriented model (Bayesian: data augmentation, Metropolis-Hastings)"
 	ereturn local waves `"`waves_keep'"'
 	ereturn local post_frame "`frame'"
@@ -289,7 +289,7 @@ program nwsaom_bayes, eclass
 		}
 		di as txt "{hline 13}{c BT}{hline 63}"
 		di as txt "Draws (one per main iteration) are in frame {bf:`frame'}:"
-		di as txt "  b1..b`K' (effects), " cond(`nper' > 1, "rate1..rate`nper'", "rate1") cond(`coev', cond(`nper' > 1, ", brate1..brate`nper'", ", brate1"), "") ", nchain, loglik."
+		di as txt "{p 2 2 2}b1..b`K' (effects), " cond(`nper' > 1, "rate1..rate`nper'", "rate1") cond(`coev', cond(`nper' > 1, ", brate1..brate`nper'", ", brate1"), "") ", nchain, loglik.{p_end}"
 		di as txt "Priors are flat unless priormean(), priorsd() or priorrate() are given."
 	}
 	mata: st_numscalar("__nwsaom_by_dummy", 0)
