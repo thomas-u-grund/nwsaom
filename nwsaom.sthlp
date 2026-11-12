@@ -143,7 +143,7 @@ actor and one column per event (in the node order of each mode), RSiena's bipart
 native attribute
 columns per matrix (Stata variable limit). Not combinable with {opt interact()}{p_end}
 {synopt:{opt dyadcovrecip(matnames)}}RSiena's {cmd:XRecip}: the same matrices, but the value counts only when the reverse tie j -> i exists{p_end}
-{synopt:{opth nodematch(varlist)}}Homophily on categorical node attributes (exact match), one effect per variable - RSiena alias {opt samex()}{p_end}
+{synopt:{opth nodematch(varlist)}}Homophily on categorical node attributes (exact match), one effect per variable - RSiena alias {opt samex()}. A string variable is accepted here and in the other effects that compare categories (the {it:same*}, {it:hom*}, {it:jump*} and {cmd:unequalx} effects and {opt groups()}): it is encoded for the fit and put back afterwards (needs nwcommands 3.20.1). Effects that use the values as numbers stop with an error for a string variable{p_end}
 {synopt:{opth nodecov(varlist)}}Continuous covariate main effect (sum over sender's and receiver's own values), one effect per variable{p_end}
 {synopt:{opth nodeicov(varlist)}}Alter (receiver) covariate effect - RSiena's own "altX", one effect per variable - RSiena alias {opt altx()}{p_end}
 {synopt:{opth nodeocov(varlist)}}Ego (sender) covariate effect - RSiena's own "egoX", one effect per variable - RSiena alias {opt egox()}{p_end}

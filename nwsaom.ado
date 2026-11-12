@@ -79,6 +79,16 @@ program nwsaom, eclass
 		exit
 	}
 	_nwsaom_libcheck
+	// string covariates (1.5.16), see _nwsaom_strcheck.ado
+	local __saom_w1 = subinstr(`"`1'"', ",", "", .)
+	if !inlist(`"`__saom_w1'"', "meta", "describe", "bayes", "refit", "simulate") {
+		local __saom_strcat
+		_nwsaom_strcheck `0'
+		if "`__saom_strcat'" != "" {
+			_nwstrcat `__saom_strcat' : nwsaom `0'
+			exit
+		}
+	}
 	if `"`1'"' == "multinet" | `"`1'"' == "multinet," {
 		gettoken __saom_sub 0 : 0
 		nwsaom_multinet , `0'

@@ -30,6 +30,7 @@ f _nwsaom_prevalid.ado
 f _nwsaom_postengine.ado
 f _nwsaom_rates.ado
 f _nwsaom_replay.ado
+f _nwsaom_strcheck.ado
 f _nwsaom_rsnotes.ado
 f _nwsaom_tconvtable.ado
 f _nwsaom_tconvfixed.ado
