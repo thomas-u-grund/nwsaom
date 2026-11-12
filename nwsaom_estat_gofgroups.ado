@@ -13,7 +13,11 @@ program define nwsaom_estat_gofgroups, rclass
 		di as err "group() must be between 1 and `G'."
 		exit 198
 	}
-	if "`stats'" == "" local stats "outdegree indegree geodesic"
+	// as for a fit without groups: behavior is a default statistic of a co-evolution fit
+	if "`stats'" == "" {
+		if e(has_behavior) == 1 local stats "outdegree indegree geodesic behavior"
+		else local stats "outdegree indegree geodesic"
+	}
 	local opts "nsim(`nsim') seed(`seed') stats(`stats') maxdeg(`maxdeg') maxdist(`maxdist') `twotailed'"
 	if "`join'" != "" local opts "`opts' join(`join')"
 	tempname gsz

@@ -218,8 +218,8 @@ parameter.
 
 {pstd}
 {opt crprod} adds a cross-network effect to the first network: a tie is more (or less) likely where
-the same pair is tied in the second network; its coefficient is {bf:net1_crprod}. {opt crprodb}
-adds the mirror effect to the second network ({bf:net2_crprod}); either or both may be given. A
+the same pair is tied in the second network; its coefficient is {bf:net1_x_crprod}. {opt crprodb}
+adds the mirror effect to the second network ({bf:net2_x_crprod}); either or both may be given. A
 ministep reads the other network's current state, but the statistic of a {opt crprod} effect is
 evaluated with the other network at the start of the period (targets and simulated statistics
 alike), as RSiena does for effects that link two dependent variables.

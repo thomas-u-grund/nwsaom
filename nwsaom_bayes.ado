@@ -236,7 +236,7 @@ program nwsaom_bayes, eclass
 	ereturn local title "Stochastic actor-oriented model (Bayesian: data augmentation, Metropolis-Hastings)"
 	ereturn local waves `"`waves_keep'"'
 	ereturn local post_frame "`frame'"
-	ereturn local priors "effects: flat or normal(priormean, priorsd); rates: gamma(shape, rate), flat by default"
+	ereturn local priors "effects: flat, or normal(priormeaneta, priorsigeta); rates: normal(ratepriormean, ratepriorsd), gamma(priorrate) with gibbsrates"
 	ereturn scalar nodes = `nodes_keep'
 	ereturn scalar nwaves = `nwaves'
 	ereturn scalar has_behavior = `coev'
@@ -290,7 +290,7 @@ program nwsaom_bayes, eclass
 		di as txt "{hline 13}{c BT}{hline 63}"
 		di as txt "Draws (one per main iteration) are in frame {bf:`frame'}:"
 		di as txt "{p 2 2 2}b1..b`K' (effects), " cond(`nper' > 1, "rate1..rate`nper'", "rate1") cond(`coev', cond(`nper' > 1, ", brate1..brate`nper'", ", brate1"), "") ", nchain, loglik.{p_end}"
-		di as txt "Priors are flat unless priormean(), priorsd() or priorrate() are given."
+		di as txt "{p 0 0 2}Priors: effects flat unless priorsigeta() (with priormeaneta()) is given; rates normal with ratepriormean() and ratepriorsd() (ratepriorsd(0): flat), or gamma with gibbsrates/priorrate().{p_end}"
 	}
 	mata: st_numscalar("__nwsaom_by_dummy", 0)
 	capture scalar drop __nwsaom_by_dummy __nwsaom_by_bad __nwsaom_by_n

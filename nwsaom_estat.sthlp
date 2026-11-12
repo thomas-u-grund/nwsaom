@@ -184,8 +184,10 @@ Co-evolution ({opt behavior()}) fits, fits with three or more waves, and {cmd:nw
 are rejected with a message (each adds real complexity in real {cmd:netmediate}'s own
 construction too, e.g. a genuine multi-period forward simulation chained through each period's own
 SIMULATED, not observed, end state - not chased here).
-A non-directed fit ({opt symmetric} or undirected waves) is not rejected, but it is simulated with the directed ministep at {cmd:e(rate)}, not with
-the fit's model type, and {opt macro()} receives the simulated network declared as directed; the results are therefore not those of the non-directed model. The VanderWeele E-value sensitivity bound
+A non-directed fit ({opt symmetric} or undirected waves) with {opt wave1()}/{opt wave2()} is simulated as in {cmd:estat gof} and {cmd:estat simulate}, with the fit's model type
+({cmd:e(symtype)}) and the per-actor rate {cmd:e(rate_actor)}, and {opt macro()} receives undirected networks. A non-directed fit with {opt waves()} does not store
+{cmd:e(symtype)}; it is simulated with directed ministeps (as by {cmd:estat gof} and {cmd:estat simulate}),
+so fit a non-directed model with {opt wave1()}/{opt wave2()} for {cmd:estat mems}. Two-mode fits are rejected with a message. The VanderWeele E-value sensitivity bound
 ({cmd:netmediate}'s own {cmd:sensitivity_ev} argument) is not implemented - real
 {cmd:netmediate}'s own bootstrap implementation of it has what looks like a genuine copy-paste bug
 (reusing its own lower confidence bound for the upper one too), not something worth faithfully
@@ -276,7 +278,7 @@ group test), returned in {cmd:r(group)} and {cmd:r(period)}. {cmd:estat score} w
 actors, waves, rates and covariate constants of one group ({opt group(#)}; by default all groups, one after the other). {cmd:estat gof} also reports the p-values of the groups combined by the
 inverse-normal method. They also work after a fit with one behavior, or with {opt ratecov()} and {opt present()}; {cmd:estat importance} stops after {opt ratecov()} or {opt present()}, and all
 stop after a fit that combines a behavior with {opt ratecov()}, {opt behratecov()} or {opt behrate()}.
-After a fit with a behavior and {opt groups()}, {cmd:estat gof} tests only the three network statistics by default ({bf:behavior} can be requested in {opt stats()}).
+After a fit with a behavior and {opt groups()}, {cmd:estat gof} tests the three network statistics and {bf:behavior} by default, as without groups.
 
 
 {marker estat_importance}{...}

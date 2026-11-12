@@ -490,8 +490,8 @@ parameter whose t-ratio is 0.1 or more in absolute value; the full information i
 {synopt:{opt netbwave1(netname)}}second network (B) at the first wave{p_end}
 {synopt:{opt netbwave2(netname)}}network B at the second wave{p_end}
 {syntab:Effects}
-{synopt:{opt crprod}}effect of a tie in B on the same tie in A (coefficient {bf:net1_x_crprod}; {bf:net1_crprod} with {opt theta01()}/{opt theta02()}){p_end}
-{synopt:{opt crprodb}}effect of a tie in A on the same tie in B (coefficient {bf:net2_x_crprod}; {bf:net2_crprod} with {opt theta01()}/{opt theta02()}){p_end}
+{synopt:{opt crprod}}effect of a tie in B on the same tie in A (coefficient {bf:net1_x_crprod}){p_end}
+{synopt:{opt crprodb}}effect of a tie in A on the same tie in B (coefficient {bf:net2_x_crprod}){p_end}
 {syntab:Estimation}
 {synopt:{opt theta01(numlist)}}starting values for network A's effects, in the order {bf:outdegree}, {bf:reciprocity}, {bf:crprod}; default 0{p_end}
 {synopt:{opt theta02(numlist)}}starting values for network B's effects, in the order {bf:outdegree}, {bf:reciprocity}, {bf:crprodb}; default 0{p_end}
@@ -499,7 +499,7 @@ parameter whose t-ratio is 0.1 or more in absolute value; the full information i
 {synopt:{opt k3(#)}}Phase 3 simulations; default 1,000{p_end}
 {synopt:{opt firstg(#)}}initial Robbins-Monro gain; default 0.2{p_end}
 {synopt:{opt seed(#)}}random-number seed{p_end}
-{synopt:{opt det:ail}}list the convergence t-ratio of every parameter (only together with {opt theta01()}/{opt theta02()}){p_end}
+{synopt:{opt det:ail}}list the convergence t-ratio of every parameter{p_end}
 {synoptline}
 {p2colreset}{...}
 
@@ -664,7 +664,7 @@ The build clears the data and the Mata objects in memory. See {help nwinstall##b
 
 {p 8 17 2}
 {cmd:nwsaom simulate,} {it:model options of nwsaom} {opt theta(numlist)} [{opt behtheta(numlist)}] {opt rates(numlist)}
-[{opt ratesbeh(numlist)} {opt nsim(int)} {opt seed(int)} {opt generate(stub)}]
+[{opt ratesbeh(numlist)} {opt nsim(int)} {opt seed(int)} {opt gen:erate(stub)}]
 
 {pstd}
 Simulates a model at coefficients chosen by you, without estimating anything (RSiena's {cmd:siena07} with
@@ -672,7 +672,7 @@ Simulates a model at coefficients chosen by you, without estimating anything (RS
 ...). {opt theta()} gives one coefficient per network effect in the order of the coefficient table of a fit of the same model (the order {cmd:nwsaom} lists the effects, not necessarily the order you
 typed them), {opt behtheta()} one
 per behavior effect, {opt rates()} the rate of every period and {opt ratesbeh()} the behavior rates; {opt nsim()} is the number of simulations (default 100).
-{opt generate()} must be typed in full. The result is that of
+{opt generate()} may be abbreviated to {opt gen()}. The result is that of
 {help nwsaom_estat##estat_simulate:estat simulate}. After a fit, {cmd:estat simulate} simulates the fitted model.
 
 
@@ -1017,8 +1017,7 @@ below 0.1 in absolute value indicates good convergence. Printed after the coeffi
 {synopt:{bf:e(cmd)}}{bf:nwsaom_multiplex}{p_end}
 {synopt:{bf:e(engine)}}{bf:native} or {bf:mata}{p_end}
 {p2col 5 26 30 2: Matrices}{p_end}
-{synopt:{bf:e(b)}}coefficients: {bf:net1_outdegree}, {bf:net1_reciprocity}, [{bf:net1_x_crprod}], {bf:net2_outdegree}, {bf:net2_reciprocity}, [{bf:net2_x_crprod}]
-(with {opt theta01()}/{opt theta02()} the cross effects are {bf:net1_crprod} and {bf:net2_crprod}){p_end}
+{synopt:{bf:e(b)}}coefficients: {bf:net1_outdegree}, {bf:net1_reciprocity}, [{bf:net1_x_crprod}], {bf:net2_outdegree}, {bf:net2_reciprocity}, [{bf:net2_x_crprod}]{p_end}
 {synopt:{bf:e(V)}}their covariance matrix{p_end}
 {synopt:{bf:e(tconv)}}convergence t-ratios of the coefficients and the two rates{p_end}
 {pstd}

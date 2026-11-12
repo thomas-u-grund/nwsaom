@@ -67,6 +67,7 @@ program define nwsaom_multiplex, eclass
 		ereturn scalar rate2_se = `__r'[4, 1]
 		ereturn local cmd "nwsaom_multiplex"
 		ereturn local version "1.5.16"
+		if "`detail'" != "" _nwsaom_tconvtable, detail
 		exit
 	}
 	if `seed' != -1 set seed `seed'
@@ -135,6 +136,9 @@ program define nwsaom_multiplex, eclass
 	// Mata return value directly.
 	local __mp_coefnames "$__NWSAOM_MP_COEFNAMES__"
 	macro drop __NWSAOM_MP_COEFNAMES__
+	// the cross effects carry the names of the default path (nwsaom multinet): net1_x_crprod, net2_x_crprod
+	local __mp_coefnames : subinstr local __mp_coefnames "net1_crprod" "net1_x_crprod", word
+	local __mp_coefnames : subinstr local __mp_coefnames "net2_crprod" "net2_x_crprod", word
 	matrix colnames `b' = `__mp_coefnames'
 	matrix colnames `V' = `__mp_coefnames'
 	matrix rownames `V' = `__mp_coefnames'

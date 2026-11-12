@@ -1134,12 +1134,13 @@ end
 //      leaves those cells as NA).
 //
 // v1 scope, disclosed: exactly-two-wave (`wave1()'/`wave2()'), network-only
-// fits - co-evolution (`behavior()'), multi-wave (`waves()'), `symmetric',
-// and multiplex are all rejected with a clear message rather than silently
+// fits - co-evolution (`behavior()'), multi-wave (`waves()' with three or
+// more waves) and multiplex are all rejected with a clear message rather than silently
 // mishandled (each adds real complexity in real RSiena's own MEMS
 // construction too - e.g. a genuine multi-period forward simulation chained
 // through each period's own simulated, not observed, end state - not
-// chased here). The VanderWeele E-value sensitivity bound (netmediate's own
+// chased here). Non-directed fits are simulated as estat gof/simulate do (per-actor rate and ministep of
+// e(symtype)), and macro() gets an undirected network; two-mode fits are refused, as by estat gof. The VanderWeele E-value sensitivity bound (netmediate's own
 // `sensitivity_ev' argument, default TRUE there) is NOT implemented - a
 // disclosed, deliberately narrower v1 (real netmediate's own bootstrap
 // implementation of it has what looks like a genuine copy-paste bug,
@@ -1166,6 +1167,10 @@ program define nwsaom_estat_mems, rclass
 		di as err "{p 0 0 2}no fitted nwsaom model available for simulation - re-run nwsaom before estat mems.{p_end}"
 		exit 498
 	}
+	if "`e(twomode)'" == "1" {
+		di as err "estat mems is not available after a two-mode (bipartite) fit."
+		exit 198
+	}
 	if e(has_behavior) {
 		di as err "{p 0 0 2}estat mems does not yet support co-evolution ({bf:behavior()}) fits - v1 scope, network-only (see this file's own header comment on why).{p_end}"
 		exit 498
@@ -1182,10 +1187,20 @@ program define nwsaom_estat_mems, rclass
 	else {
 		capture confirm scalar e(rate)
 		if _rc {
-			di as err "{p 0 0 2}estat mems requires an ordinary two-wave network-only nwsaom fit (no {bf:symmetric}, multiplex, or other v1-excluded combination).{p_end}"
+			di as err "{p 0 0 2}estat mems requires a two-wave network-only nwsaom fit (no co-evolution, multiplex or multinet fit).{p_end}"
 			exit 498
 		}
 		local __mems_rate = e(rate)
+	}
+	// as estat gof and estat simulate: a non-directed (symmetric) fit is simulated with the per-actor rate e(rate_actor) and the
+	// ministep of its model type e(symtype), and macro() receives undirected networks
+	local __mems_symtype = 0
+	local __mems_nettype "directed"
+	if "`e(symtype)'" != "" {
+		local __mems_rate = e(rate_actor)
+		local __mems_symtypes "joint force agree forcing confirmation"
+		local __mems_symtype : list posof "`e(symtype)'" in __mems_symtypes
+		local __mems_nettype "undirected"
 	}
 
 	if "`interval'" == "" local interval "0 1"
@@ -1225,7 +1240,7 @@ program define nwsaom_estat_mems, rclass
 	// front, with a clear message, rather than nsim calls deep into a
 	// long-running loop.
 	mata: __nwsaom_mems_trialmat = __nwsaom_last_G1.to_dense()
-	capture nwsaom_mems_callmacro __nwsaom_mems_trialmat "`macro'"
+	capture nwsaom_mems_callmacro __nwsaom_mems_trialmat "`macro'" `__mems_nettype'
 	if _rc {
 		di as err "{p 0 0 2}macro(`macro') failed on a trial call using the observed starting network (rc=`=_rc'). `macro' must be a defined Stata program taking ONE argument (a network name) and returning its own macro-level statistic in r(stat) - e.g. a program that runs args netname, then nwsummarize on that network name with the matonly option, then return scalar stat = r(density).{p_end}"
 		mata: mata drop __nwsaom_mems_trialmat
@@ -1261,9 +1276,9 @@ program define nwsaom_estat_mems, rclass
 			// the fitted model (endowment/creation, structural(),
 			// ratecov(), present()), native when the plugin covers it
 			// (2026-10-01; before, the plain model)
-			mata: __nwsaom_mems_eng = SaomGofSimNet(__nwsaom_mems_Gwork, __nwsaom_last_M, __nwsaom_mems_theta_s, `__mems_rate', 0, __nwsaom_mems_rcattr, __nwsaom_mems_rccoef)
+			mata: __nwsaom_mems_eng = SaomGofSimNet(__nwsaom_mems_Gwork, __nwsaom_last_M, __nwsaom_mems_theta_s, `__mems_rate', `__mems_symtype', __nwsaom_mems_rcattr, __nwsaom_mems_rccoef)
 			mata: __nwsaom_mems_densemat = __nwsaom_mems_Gwork.to_dense()
-			nwsaom_mems_callmacro __nwsaom_mems_densemat "`macro'"
+			nwsaom_mems_callmacro __nwsaom_mems_densemat "`macro'" `__mems_nettype'
 			mata: __nwsaom_mems_outdata[`__mems_s',`__mems_i'] = `r(stat)'
 			mata: mata drop __nwsaom_mems_densemat __nwsaom_mems_Gwork __nwsaom_mems_theta_s
 			if "`nodots'" == "" & mod(`__mems_s',50)==0 di as text "." _continue
@@ -1316,14 +1331,15 @@ end
    established above for calling nwtriads per simulated replicate. */
 capture program drop nwsaom_mems_callmacro
 program define nwsaom_mems_callmacro, rclass
-	args matname macroname
+	args matname macroname nettype
+	if "`nettype'" == "" local nettype "directed"
 
 	preserve
 	qui drop _all
 	mata: st_numscalar("__nwsaom_mems_n", rows(`matname'))
 	qui set obs `=__nwsaom_mems_n'
 	capture nwdrop __nwsaom_mems_tmpnet
-	qui nwset, mat(`matname') directed name(__nwsaom_mems_tmpnet) nooutput
+	qui nwset, mat(`matname') `nettype' name(__nwsaom_mems_tmpnet) nooutput
 	`macroname' __nwsaom_mems_tmpnet
 	return scalar stat = r(stat)
 	capture nwdrop __nwsaom_mems_tmpnet

@@ -54,6 +54,20 @@ program nwsaom_meta, rclass
 				}
 				local nb = colsof(`b')
 			}
+			else {
+				// a two-wave fit with wave1()/wave2() stores its one rate as the scalars e(rate) and e(rate_se): the same rate_period1 row
+				capture confirm scalar e(rate)
+				if !_rc {
+					local __rse = .
+					capture confirm scalar e(rate_se)
+					if !_rc local __rse = e(rate_se)
+					matrix `b' = `b', e(rate)
+					matrix `SE' = `SE', `__rse'
+					local cn "`cn' rate_period1"
+					local nb = colsof(`b')
+				}
+				else di as text "{p 0 0 2}note: {bf:`nm'} has no rate parameters (no e(rates) or e(rate)); it adds no rate rows.{p_end}"
+			}
 		}
 		if `first' {
 			matrix `B' = `b'

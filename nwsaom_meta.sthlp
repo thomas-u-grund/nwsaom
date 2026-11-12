@@ -44,8 +44,8 @@ The correlation between estimates and standard errors (a diagnostic for bias) is
 {phang}{opt alpha(#)} the level of the profile-likelihood intervals (default 0.05).{p_end}
 {phang}{opt maxit(#)} maximum number of IWLS iterations (default 20).{p_end}
 {phang}{opt rates} also combines the rate parameters ({cmd:e(rates)} with their standard errors {cmd:e(rates_se)}, one per period; RSiena's {cmd:siena08} does the same, so combine them only when the
-rates are comparable across the groups, for example the same time span between the waves). The fits must have the same number of periods. A fit without
-{cmd:e(rates)} (a fit with {opt wave1()}/{opt wave2()}, which stores the scalar {cmd:e(rate)}) adds no rate rows. The rows are named {cmd:rate_period1}, {cmd:rate_period2},
+rates are comparable across the groups, for example the same time span between the waves). The fits must have the same number of periods. A fit with
+{opt wave1()}/{opt wave2()} stores its one rate as the scalar {cmd:e(rate)} (standard error {cmd:e(rate_se)}); it is combined as {cmd:rate_period1}. The rows are named {cmd:rate_period1}, {cmd:rate_period2},
 ... in the table and in {cmd:r(theta)}, {cmd:r(se)} and {cmd:r(meta)}.{p_end}
 {phang}{opt notable} suppresses the output; the results are in {cmd:r()}.{p_end}
 

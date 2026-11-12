@@ -3,6 +3,16 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- **`estat mems` after a non-directed fit with `wave1()`/`wave2()`** (`symmetric` or undirected waves) simulates the fitted model: the model type of the fit (`e(symtype)`) at the per-actor rate `e(rate_actor)`, as `estat gof` and `estat simulate` do, and `macro()` receives undirected networks. Before, it simulated directed ministeps, so the simulated networks were not symmetric and the results were not those of the non-directed model. After a two-mode fit `estat mems` now stops with a message (as `estat gof`).
+- **`nwsaom bayes`** names its real prior options in the note under the table and in `e(priors)`: `priormeaneta()`, `priorsigeta()`, `ratepriormean()`, `ratepriorsd()`, `gibbsrates`/`priorrate()`.
+- **`nwsaom simulate`** accepts `generate()` abbreviated to `gen()`, as `estat simulate` does.
+- **`nwsaom multiplex`**: `detail` lists the convergence t-ratios also without `theta01()`/`theta02()`, and the cross effects are named `net1_x_crprod` and `net2_x_crprod` with and without `theta01()`/`theta02()` (with them they were `net1_crprod` and `net2_crprod`).
+- **`estat gof` after a fit with `groups()` and a behavior** tests `behavior` by default, as after a fit without groups.
+- **`nwsaom meta, rates`** combines the rate of fits with `wave1()`/`wave2()` (the scalar `e(rate)` with `e(rate_se)`) as `rate_period1`; before, these fits silently added no rate rows.
+
 ## [1.5.16] - 2026-11-12
 
 ### Fixed

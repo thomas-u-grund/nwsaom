@@ -32,11 +32,12 @@ program define nwsaom_simulate, rclass
 	local nsim 100
 	local seed -1
 	local gen ""
-	foreach o in behtheta ratesbeh theta rates nsim seed generate {
+	// generate() may be abbreviated to gen(), as in estat simulate
+	foreach o in behtheta ratesbeh theta rates nsim seed generate generat genera gener gene gen {
 		if regexm(`"`cmdline'"', "(^|[ ,])`o'\(([^)]*)\)") {
 			local v = regexs(2)
 			local cmdline = regexr(`"`cmdline'"', "(^|[ ,])`o'\([^)]*\)", " ")
-			if "`o'" == "generate" local gen "`v'"
+			if substr("`o'", 1, 3) == "gen" local gen "`v'"
 			else local `o' "`v'"
 		}
 	}
