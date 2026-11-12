@@ -3,7 +3,7 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.5.17] - 2026-11-12
 
 ### Fixed
 - **`estat mems` after a non-directed fit with `wave1()`/`wave2()`** (`symmetric` or undirected waves) simulates the fitted model: the model type of the fit (`e(symtype)`) at the per-actor rate `e(rate_actor)`, as `estat gof` and `estat simulate` do, and `macro()` receives undirected networks. Before, it simulated directed ministeps, so the simulated networks were not symmetric and the results were not those of the non-directed model. After a two-mode fit `estat mems` now stops with a message (as `estat gof`).
