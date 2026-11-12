@@ -1,4 +1,4 @@
-*! version 1.5.15  11nov2026 nwcommands: multi-group meta-analysis of separate nwsaom fits (RSiena's siena08)
+*! version 1.5.16  12nov2026 nwcommands: multi-group meta-analysis of separate nwsaom fits (RSiena's siena08)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General

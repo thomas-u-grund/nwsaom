@@ -1,11 +1,13 @@
 {smcl}
-{* *! version 1.5.15  11nov2026 author: Thomas Grund}{...}
+{* *! version 1.5.16  12nov2026 author: Thomas Grund}{...}
 {vieweralsosee "nwsaom" "help nwsaom"}{...}
 {vieweralsosee "nwsaom_estat" "help nwsaom_estat"}{...}
+
 {title:Title}
 
 {phang}
 {bf:nwsaom meta} {hline 2} Multi-group meta-analysis of separate {cmd:nwsaom} fits (RSiena's {cmd:siena08}){p_end}
+
 
 {title:Syntax}
 
@@ -15,18 +17,12 @@
 {pstd}
 {it:name1 name2 ...} are stored estimates ({cmd:estimates store}) of the {it:same} {cmd:nwsaom} model fitted to several networks (groups, for example school classes): same effects in the same order.
 
-{title:Options}
-
-{phang}{opt bound(#)} excludes group estimates with a standard error of at least # (default 10), as RSiena.{p_end}
-{phang}{opt alpha(#)} the level of the profile-likelihood intervals (default 0.05).{p_end}
-{phang}{opt maxit(#)} maximum number of IWLS iterations (default 20).{p_end}
-{phang}{opt rates} also combines the rate parameters ({cmd:e(rates)} with their standard errors {cmd:e(rates_se)}, one per period; RSiena's {cmd:siena08} does the same, so combine them only when the rates are comparable across the groups, for example the same time span between the waves). The fits must have the same number of periods. The rows are named {cmd:rate_period1}, {cmd:rate_period2}, ... in the table and in {cmd:r(theta)}, {cmd:r(se)} and {cmd:r(meta)}.{p_end}
-{phang}{opt notable} suppresses the output; the results are in {cmd:r()}.{p_end}
 
 {title:Dialog box}
 
 {pstd}
 {cmd:db nwsaom_meta} asks for the stored estimates and the options of the command and runs it.
+
 
 {title:Description}
 
@@ -34,17 +30,25 @@
 {cmd:nwsaom meta} is the name of the command; {cmd:nwsaom_meta} works as well and does the same.
 
 {pstd}
-For every effect {cmd:nwsaom_meta} combines the group estimates {it:theta_j} and standard errors {it:s_j} as {cmd:siena08} (Snijders and Baerveldt 2003): the robust IWLS random-effects mean with its t test and
-the estimated between-group standard deviation, the heterogeneity test Q, Fisher's combination of the one-sided tests, and the maximum likelihood estimates of the mean and the between-group standard deviation
+For every effect {cmd:nwsaom_meta} combines the group estimates {it:theta_j} and standard errors {it:s_j} as {cmd:siena08} (Snijders and Baerveldt 2003): the robust IWLS random-effects mean with its t
+test and
+the estimated between-group standard deviation, the heterogeneity test Q, Fisher's combination of the one-sided tests, and the maximum likelihood estimates of the mean and the between-group standard
+deviation
 under normality with profile-likelihood confidence intervals. The Mata port reproduces RSiena's numbers (checked on made-up estimates to five decimals).
 The correlation between estimates and standard errors (a diagnostic for bias) is Spearman's rho with the usual t approximation for its p value (RSiena uses the exact/Edgeworth p value).
 
-{title:Stored results}
 
-{synoptset 16 tabbed}{...}
-{synopt:{cmd:r(meta)}}effects x 24 matrix: n_used, corr, corr_p, iwls_mean, iwls_se, iwls_t, iwls_p, iwls_sd, Tsq, Tsq_p, Q, Q_p, ml_mean, ml_se, mu_lo, mu_hi, ml_sd, sd_lo, sd_hi, fisher_right, fisher_right_p, fisher_left, fisher_left_p, level{p_end}
-{synopt:{cmd:r(theta)}, {cmd:r(se)}}groups x effects estimates and standard errors{p_end}
-{synopt:{cmd:r(groups)}}number of groups{p_end}
+{title:Options}
+
+{phang}{opt bound(#)} excludes group estimates with a standard error of at least # (default 10), as RSiena.{p_end}
+{phang}{opt alpha(#)} the level of the profile-likelihood intervals (default 0.05).{p_end}
+{phang}{opt maxit(#)} maximum number of IWLS iterations (default 20).{p_end}
+{phang}{opt rates} also combines the rate parameters ({cmd:e(rates)} with their standard errors {cmd:e(rates_se)}, one per period; RSiena's {cmd:siena08} does the same, so combine them only when the
+rates are comparable across the groups, for example the same time span between the waves). The fits must have the same number of periods. A fit without
+{cmd:e(rates)} (a fit with {opt wave1()}/{opt wave2()}, which stores the scalar {cmd:e(rate)}) adds no rate rows. The rows are named {cmd:rate_period1}, {cmd:rate_period2},
+... in the table and in {cmd:r(theta)}, {cmd:r(se)} and {cmd:r(meta)}.{p_end}
+{phang}{opt notable} suppresses the output; the results are in {cmd:r()}.{p_end}
+
 
 {title:Examples}
 
@@ -72,12 +76,23 @@ each group is then fitted on its own, and the four fits are combined. The combin
 
 {pstd}
 The first table gives, for every effect, the combined mean (IWLS), its standard error and t test, the estimated standard deviation between the groups, and the
-heterogeneity test Q (a small p value means that the groups differ more than their standard errors allow). In the example the means are about -2.26 (outdegree), 1.87 (reciprocity) and 0.47 (transtrip) and no effect differs between groups
+heterogeneity test Q (a small p value means that the groups differ more than their standard errors allow). In the example the means are about -2.26 (outdegree), 1.87 (reciprocity) and 0.47 (transtrip)
+and no effect differs between groups
 (P>Q = 0.48, 0.80, 0.98), as it should be for groups simulated from the same model.
+
+
+{title:Stored results}
+
+{synoptset 17 tabbed}{...}
+{synopt:{cmd:r(meta)}}effects x 24 matrix: n_used, corr, corr_p, iwls_mean, iwls_se, iwls_t, iwls_p, iwls_sd, Tsq, Tsq_p, Q, Q_p, ml_mean, ml_se, mu_lo, mu_hi, ml_sd, sd_lo, sd_hi, fisher_right,
+fisher_right_p, fisher_left, fisher_left_p, level{p_end}
+{synopt:{cmd:r(theta)}, {cmd:r(se)}}groups x effects estimates and standard errors{p_end}
+{synopt:{cmd:r(groups)}}number of groups{p_end}
+
 
 {title:Reference}
 
 {pstd}Snijders, T.A.B. and Baerveldt, C. (2003). A multilevel network study of the effects of delinquent behavior on friendship evolution. {it:Journal of Mathematical Sociology} 27: 123-151.{p_end}
 
 {hline}
-{pstd}{it:nwsaom version 1.5.15, 11 November 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.5.16, 12 November 2026}{p_end}{* nwversion}

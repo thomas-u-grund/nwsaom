@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.5.15  11nov2026 author: Thomas Grund}{...}
+{* *! version 1.5.16  12nov2026 author: Thomas Grund}{...}
 
 {title:Title}
 
@@ -7,10 +7,12 @@
 {p2col :nwsaom postestimation {hline 2}}Postestimation tools for {cmd:nwsaom}{p_end}
 {p2colreset}{...}
 
+
 {title:Dialog box}
 
 {pstd}
 {cmd:db nwsaom_estat} sets the options of {cmd:estat gof}, {cmd:mems}, {cmd:score}, {cmd:timetest}, {cmd:importance} and {cmd:simulate} and runs the one you choose.
+
 
 {title:Description}
 
@@ -26,11 +28,11 @@ The following postestimation command is available after {helpb nwsaom}:
 {p2col: {cmd:estat importance}}Relative importance of the effects (RSiena's {cmd:sienaRI}){p_end}
 {p2colreset}{...}
 
-{title:Supported network types}
-
 {pstd}
-Not applicable - {cmd:estat gof} operates on the fitted model and the wave data left behind by
-{help nwsaom}, not on a network directly; see that command's own classification.
+All of them stop with an error after a fit with time-varying covariates ({opt tvcov()}), with several behaviors in {opt behavior()}, or with a behavior together with
+{opt ratecov()}, {opt behratecov()} or {opt behrate()}. After {cmd:nwsaom multinet} only {cmd:estat score} and {cmd:estat timetest} are available; after a fit with
+{opt groups()} all but {cmd:estat mems}.{p_end}
+
 
 {title:estat gof}
 
@@ -47,11 +49,13 @@ the three network distribution statistics, plus {bf:behavior} automatically when
 requires a co-evolution fit; {bf:triad} is never added by default, request it explicitly){p_end}
 {synopt:{opt maxdeg(int)}}Highest EXACT out-/in-degree category before the ("maxdeg+") overflow bin; default 15{p_end}
 {synopt:{opt maxdist(int)}}Highest EXACT geodesic-distance category before the ("NR", not reached) overflow bin; default 6{p_end}
-{synopt:{opt twotailed}}Report a two-tailed p-value instead of the one-tailed default (RSiena's own {cmd:twoTailed=FALSE} default: reject for a SMALL p only, i.e. the observed network is an outlier relative to what the fitted model simulates){p_end}
+{synopt:{opt twotailed}}Report a two-tailed p-value instead of the one-tailed default (RSiena's own {cmd:twoTailed=FALSE} default: reject for a SMALL p only, i.e. the observed network is an outlier
+relative to what the fitted model simulates){p_end}
 {synopt:{opt name(string)}}Stub for the violin-plot graph names; default {cmd:gof} (graphs are named {it:name}{cmd:_outdegree},
 {it:name}{cmd:_indegree}, {it:name}{cmd:_geodesic}, {it:name}{cmd:_triad}, and {it:name}{cmd:_behavior} for a co-evolution fit's fourth statistic;
 with {opt join(off)} each period gets its own graph instead, e.g. {it:name}{cmd:_outdegree_p1}/{it:name}{cmd:_outdegree_p2}){p_end}
-{synopt:{opt join(off)}}Run a SEPARATE Mahalanobis test (and violin) per wave-period instead of the default pooled/summed one - real RSiena's own {cmd:join=FALSE} (non-default); omit for the default pooled behavior ({cmd:join=TRUE}){p_end}
+{synopt:{opt join(off)}}Run a SEPARATE Mahalanobis test (and violin) per wave-period instead of the default pooled/summed one - real RSiena's own {cmd:join=FALSE} (non-default); omit for the default
+pooled behavior ({cmd:join=TRUE}){p_end}
 {synoptline}
 
 {pstd}
@@ -102,7 +106,8 @@ matching it exactly (not merely "similar in spirit"). All 16 categories are alwa
 waves) every dyad is mutual or null, so only the categories without asymmetric dyads can be non-zero.
 
 {pstd}
-{bf:Limits.} {cmd:estat gof} is not yet available after a two-mode (bipartite) fit (it stops with an error), and not after {cmd:nwsaom multinet} (only {cmd:estat score} and {cmd:estat timetest} are). It works after directed and non-directed one-mode fits with the native-only effects.
+{bf:Limits.} {cmd:estat gof} is not yet available after a two-mode (bipartite) fit (it stops with an error), and not after {cmd:nwsaom multinet} (only {cmd:estat score} and {cmd:estat timetest}
+are). It works after directed and non-directed one-mode fits with the native-only effects.
 
 {pstd}
 {bf:Co-evolution fits} (a {opt behavior()} model) add a fourth default auxiliary statistic,
@@ -123,6 +128,7 @@ red connected line - reproducing real RSiena's own {cmd:plot.sienaGOF()} panel l
 Stata's own graphics primitives allow, with the test's own p-value shown as the plot's x-axis
 title, matching RSiena's own {cmd:xlabel = paste("p:", round(x$p,3))} convention exactly.
 
+
 {title:estat mems}
 
 {p 8 17 2}
@@ -131,13 +137,15 @@ title, matching RSiena's own {cmd:xlabel = paste("p:", round(x$p,3))} convention
 {synoptset 20 tabbed}{...}
 {synopthdr}
 {synoptline}
-{synopt:{opt effect(string)}}Which fitted coefficient is the "micro process" under test - must be one of this fit's own {help nwsaom##estimation:e(b)} column names{p_end}
+{synopt:{opt effect(string)}}Which fitted coefficient is the "micro process" under test - must be one of this fit's own {cmd:e(b)} column names{p_end}
 {synopt:{opt macro(string)}}Name of a Stata program computing ONE macro-level network summary - takes a single argument (a network name) and must
 {cmd:return scalar stat} - your own choice of statistic (density, centralization, segregation, ...), matching real {cmd:netmediate}'s own
 user-supplied {cmd:macro_function}{p_end}
 {synopt:{opt nsim(int)}}Number of Monte Carlo theta draws; default 500 (matching real {cmd:netmediate}'s own default), minimum 20{p_end}
 {synopt:{opt seed(int)}}Set the random-number seed before simulating{p_end}
-{synopt:{opt interval(numlist)}}Multipliers applied to {opt effect()}'s own coefficient, in order; default {bf:0 1} (real {cmd:netmediate}'s own default: "as if the effect did not operate at all" vs "at its actual fitted strength"){p_end}
+{synopt:{opt interval(numlist)}}Multipliers applied to {opt effect()}'s own coefficient, sorted into ascending order;
+default {bf:0 1} (real {cmd:netmediate}'s own default: "as if the effect did not operate at all" vs
+"at its actual fitted strength"){p_end}
 {synopt:{opt nodots}}Suppress the per-interval progress dots{p_end}
 {synoptline}
 
@@ -171,11 +179,13 @@ macro value at the LAST interval - real {cmd:netmediate}'s own summary table rep
 estimate for this row, no SE/CI/p-value, and this command matches that exactly.
 
 {pstd}
-{bf:Scope}: exactly-two-wave ({opt wave1()}/{opt wave2()}), network-only fits -
-co-evolution ({opt behavior()}), multi-wave ({opt waves()}), {opt symmetric}, and multiplex fits
-are all rejected with a clear message (each adds real complexity in real {cmd:netmediate}'s own
+{bf:Scope}: two-wave ({opt wave1()}/{opt wave2()} or {opt waves()} with two networks), network-only fits.
+Co-evolution ({opt behavior()}) fits, fits with three or more waves, and {cmd:nwsaom multiplex}/{cmd:multinet} fits
+are rejected with a message (each adds real complexity in real {cmd:netmediate}'s own
 construction too, e.g. a genuine multi-period forward simulation chained through each period's own
-SIMULATED, not observed, end state - not chased here). The VanderWeele E-value sensitivity bound
+SIMULATED, not observed, end state - not chased here).
+A non-directed fit ({opt symmetric} or undirected waves) is not rejected, but it is simulated with the directed ministep at {cmd:e(rate)}, not with
+the fit's model type, and {opt macro()} receives the simulated network declared as directed; the results are therefore not those of the non-directed model. The VanderWeele E-value sensitivity bound
 ({cmd:netmediate}'s own {cmd:sensitivity_ev} argument) is not implemented - real
 {cmd:netmediate}'s own bootstrap implementation of it has what looks like a genuine copy-paste bug
 (reusing its own lower confidence bound for the upper one too), not something worth faithfully
@@ -183,6 +193,7 @@ reproducing. No
 common-random-numbers pairing between a draw's own interval simulations either - only the THETA
 draw itself is shared across a row's own interval values, each simulation call draws its own fresh
 randomness.
+
 
 {marker estat_simulate}{...}
 {title:estat simulate}
@@ -212,6 +223,7 @@ transitive triples, mean behavior), {cmd:r(obs)} (the same for the observed end 
 To simulate without a prior fit, give the model options of {cmd:nwsaom} and the coefficients to
 {cmd:nwsaom simulate} ({help nwsaom##simulate:see the nwsaom help}).
 
+
 {marker estat_score}{...}
 {title:estat score}
 
@@ -230,7 +242,9 @@ test to some of the fixed effects. Returns {cmd:r(chi2)}, {cmd:r(df)}, {cmd:r(p)
 {cmd:r(onestep)}.
 
 {pstd}
-After {cmd:nwsaom multinet} the restricted model is fitted with {cmd:theta0()} and {cmd:fix()} of that command (coefficient names such as {cmd:net1_x_crprod}); the rates of all networks and of the behavior are estimated along.
+After {cmd:nwsaom multinet} the restricted model is fitted with {cmd:theta0()} and {cmd:fix()} of that command (coefficient names such as {cmd:net1_x_crprod}); the rates of all networks and of the
+behavior are estimated along.
+
 
 {marker estat_timetest}{...}
 {title:estat timetest}
@@ -258,7 +272,12 @@ Also available after {cmd:nwsaom multinet}, for the effects of all networks and 
 {pstd}
 After a fit with {opt groups()} the periods are the periods of all groups (RSiena's numbering) and the output has two more tables: a test per group (the dummies of the periods of the
 group; for the first group the sum of the dummies of each effect, as RSiena's group test) and a test per period (all effects at once; RSiena 1.6.14 reports this one under the name
-group test), returned in {cmd:r(group)} and {cmd:r(period)}. {cmd:estat score} works after such a fit; {cmd:estat gof}, {cmd:estat simulate} and {cmd:estat importance} run per group: they use the actors, waves, rates and covariate constants of one group ({opt group(#)}; by default all groups, one after the other). {cmd:estat gof} also reports the p-values of the groups combined by the inverse-normal method. They also work after a fit with a behavior (one behavior), {opt ratecov()} and {opt present()}; {cmd:estat importance} stops after {opt present()}, and all stop after a fit with {opt behratecov()}/{opt behrate()} together with a behavior.
+group test), returned in {cmd:r(group)} and {cmd:r(period)}. {cmd:estat score} works after such a fit; {cmd:estat gof}, {cmd:estat simulate} and {cmd:estat importance} run per group: they use the
+actors, waves, rates and covariate constants of one group ({opt group(#)}; by default all groups, one after the other). {cmd:estat gof} also reports the p-values of the groups combined by the
+inverse-normal method. They also work after a fit with one behavior, or with {opt ratecov()} and {opt present()}; {cmd:estat importance} stops after {opt ratecov()} or {opt present()}, and all
+stop after a fit that combines a behavior with {opt ratecov()}, {opt behratecov()} or {opt behrate()}.
+After a fit with a behavior and {opt groups()}, {cmd:estat gof} tests only the three network statistics by default ({bf:behavior} can be requested in {opt stats()}).
+
 
 {marker estat_importance}{...}
 {title:estat importance}
@@ -273,34 +292,18 @@ L1 distance between the actor's choice probabilities with and without the effect
 among all effects, averaged over the actors. Also reported: sigma (the within-actor standard deviation of the
 contributions), the semi-standardised estimate (estimate times sigma) and the certainty R_H of the choices.
 Available after fits of a one-mode (directed or non-directed) or two-mode network, with or without one co-evolving behavior, without endowment/creation effects,
-{opt present()} or missing-data options (as in RSiena). After a co-evolution fit a second table gives the behavior effects (the options of an actor are changing by -1, 0 or +1) and the results {cmd:r(ri_beh)}, {cmd:r(importance_beh)}, {cmd:r(sigma_beh)}, {cmd:r(sigma_period_beh)} and {cmd:r(certainty_beh)}. For a non-directed network the sizes are those of the forcing model, as in RSiena. Returns {cmd:r(ri)}, {cmd:r(importance)}, {cmd:r(sigma)},
+{opt present()} or missing-data options (as in RSiena). After a co-evolution fit a second table gives the behavior effects (the options of an actor are changing by -1, 0 or +1) and the results
+{cmd:r(ri_beh)}, {cmd:r(importance_beh)}, {cmd:r(sigma_beh)}, {cmd:r(sigma_period_beh)} and {cmd:r(certainty_beh)}. For a non-directed network the sizes are those of the forcing model, as in
+RSiena. Returns {cmd:r(ri)}, {cmd:r(importance)}, {cmd:r(sigma)},
 {cmd:r(sigma_period)} and {cmd:r(certainty)}. Needs the native plugin.
 
-{title:Stored results}
+
+{title:Network types}
 
 {pstd}
-{cmd:estat gof} stores the following in {cmd:r()}, one pair per requested statistic (default
-{bf:outdegree}/{bf:indegree}/{bf:geodesic}, plus {bf:behavior} for a co-evolution fit; {bf:triad}
-only if requested via {opt stats()}). With {opt join(off)}, each period gets its own pair instead,
-suffixed {cmd:_p{it:#}} (e.g. {cmd:r(p_outdegree_p1)}, {cmd:r(p_outdegree_p2)}):
+The {cmd:estat} commands use the waves of the last fit. {bf:Directed:} directed and non-directed fits. {bf:Valued:} not applicable ({cmd:nwsaom} fits 0/1 ties).
+{bf:Two-mode:} {cmd:estat gof} stops with an error; {cmd:estat simulate} and {cmd:estat importance} work. {bf:Signed:} not applicable. See {help nwnetworktypes}.{p_end}
 
-		Scalars
-		  {bf:r(p_{it:stat})}		empirical Mahalanobis-distance test p-value for that statistic
-		  {bf:r(mhd_{it:stat})}		observed vector's own Mahalanobis distance from the simulated mean
-
-{pstd}
-{cmd:estat mems} stores the following in {cmd:r()}:
-
-		Scalars
-		  {bf:r(mems)}			MEMS point estimate (mean paired difference in the macro statistic)
-		  {bf:r(mems_sd)}		Monte Carlo standard deviation of the paired difference
-		  {bf:r(mems_lb)}/{bf:r(mems_ub)}	95% percentile interval
-		  {bf:r(mems_p)}		Monte Carlo p-value
-		  {bf:r(propchange)}		"Prop. Change in M" point estimate
-
-		Macros
-		  {bf:r(effect)}		the {opt effect()} requested
-		  {bf:r(macro)}			the {opt macro()} program name requested
 
 {title:Examples}
 
@@ -324,6 +327,41 @@ suffixed {cmd:_p{it:#}} (e.g. {cmd:r(p_outdegree_p1)}, {cmd:r(p_outdegree_p2)}):
 		{cmd:. end}
 		{cmd:. estat mems, effect(reciprocity) macro(myDensity) nsim(500) seed(42)}
 
+
+{title:Stored results}
+
+{pstd}
+{cmd:estat gof} stores the following in {cmd:r()}, one pair per requested statistic (default
+{bf:outdegree}/{bf:indegree}/{bf:geodesic}, plus {bf:behavior} for a co-evolution fit; {bf:triad}
+only if requested via {opt stats()}). With {opt join(off)}, each period gets its own pair instead,
+suffixed {cmd:_p{it:#}} (e.g. {cmd:r(p_outdegree_p1)}, {cmd:r(p_outdegree_p2)}):
+
+{synoptset 23 tabbed}{...}
+{p2col 5 23 27 2: Scalars}{p_end}
+{synopt:{bf:r(p_{it:stat})}}empirical Mahalanobis-distance test p-value for that statistic{p_end}
+{synopt:{bf:r(mhd_{it:stat})}}observed vector's own Mahalanobis distance from the simulated mean{p_end}
+
+{pstd}
+After a fit with {opt groups()}, {cmd:estat gof} stores {cmd:r(p_}{it:stat}{cmd:_g}{it:#}{cmd:)} and {cmd:r(mhd_}{it:stat}{cmd:_g}{it:#}{cmd:)} for every group {it:#} and,
+when all groups are tested, {cmd:r(p_}{it:stat}{cmd:)}, the p-value of the groups combined; with {opt join(off)} none of these is stored.
+{cmd:estat simulate} stores {cmd:r(sim_g}{it:#}{cmd:)} and {cmd:r(obs_g}{it:#}{cmd:)}, {cmd:estat importance} {cmd:r(ri_g}{it:#}{cmd:)} and {cmd:r(sigma_period_g}{it:#}{cmd:)}.{p_end}
+
+{pstd}
+{cmd:estat mems} stores the following in {cmd:r()}:
+
+{synoptset 23 tabbed}{...}
+{p2col 5 23 27 2: Scalars}{p_end}
+{synopt:{bf:r(mems)}}MEMS point estimate (mean paired difference in the macro statistic){p_end}
+{synopt:{bf:r(mems_sd)}}Monte Carlo standard deviation of the paired difference{p_end}
+{synopt:{bf:r(mems_lb)}/{bf:r(mems_ub)}}95% percentile interval{p_end}
+{synopt:{bf:r(mems_p)}}Monte Carlo p-value{p_end}
+{synopt:{bf:r(propchange)}}"Prop. Change in M" point estimate{p_end}
+
+{p2col 5 23 27 2: Macros}{p_end}
+{synopt:{bf:r(effect)}}the {opt effect()} requested{p_end}
+{synopt:{bf:r(macro)}}the {opt macro()} program name requested{p_end}
+
+
 {title:References}
 
 {pstd}
@@ -340,9 +378,10 @@ Duxbury, S.W. (2023). Micro Effects on Macro Structure. {it:Sociological Methodo
 {pstd}
 Duxbury, S.W., Zhao, X. {cmd:netmediate}: Micro-Macro Analysis for Social Networks (R package).
 
+
 {title:See also}
 
 	{help nwsaom}
 
 {hline}
-{pstd}{it:nwsaom version 1.5.15, 11 November 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.5.16, 12 November 2026}{p_end}{* nwversion}

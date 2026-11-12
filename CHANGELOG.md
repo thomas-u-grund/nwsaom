@@ -3,6 +3,17 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.5.16] - 2026-11-12
+
+### Fixed
+- **Help files checked against the code.** Abbreviations (`unconditional`, `detail`, `actormode()`), `nwsaom simulate, generate()` (must be typed in full) and `nsim()` (default 100); stored results completed for `nwsaom`, `nwsaom multinet`, `nwsaom bayes` and `estat` after `groups()`. The help of `estat` says which commands stop after `tvcov()`, several behaviors or `groups()`; `estat mems` is described as it runs (two waves via `wave1()`/`wave2()` or `waves()`; after an undirected fit it simulates directed ministeps). One "Network types" section and the common section order.
+- **Help file layout.** Stored results are a proper table that wraps at the window width; the options of `nwsaom refit` have one row each; very long source lines, which lost words in the help Viewer, are broken up.
+- **Messages printed by the Mata library wrap at word boundaries** (for example the error of `groups()` about ties between groups), like the notes and warnings of 1.5.15. The wording is unchanged.
+- Console Stata on macOS finds the macOS plugin.
+- **Help files describe the current behaviour only**: references to earlier versions and development notes are removed; deprecated commands that still work (`nwsaom multiplex`, `structural()`) are described by what they do. The help file showed the option `uncentered()` inside the text of `nocenter`.
+
+Results do not change. The Mata libraries are rebuilt (with Stata 17); the core requirement is unchanged.
+
 ## [1.5.15] - 2026-11-11
 
 ### Fixed

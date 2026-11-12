@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.5.15  11nov2026 author: Thomas Grund}{...}
+{* *! version 1.5.16  12nov2026 author: Thomas Grund}{...}
 
 {title:Title}
 
@@ -342,7 +342,8 @@ density, reciprocity, transTrip, simX(drinking); behavior: linear, quad, avAlt. 
 {pstd}
 {bf:Syntax.} The roles are chosen with two lists, {opt endow(effects)} and {opt creation(effects)}
 (RSiena's {cmd:includeEffects(type = "endow")} / {cmd:type = "creation"}); the effects available are
-{bf:outdegree}, {bf:reciprocity}, {bf:transties}, {bf:cycle4}, {bf:gwesp}, {bf:balance}, {bf:transtrip}, {bf:cycle3}, {bf:transmedtrip}, {bf:transrectrip} on the network and {bf:linear}, {bf:quadratic},
+{bf:outdegree}, {bf:reciprocity}, {bf:transties}, {bf:cycle4}, {bf:gwesp}, {bf:balance}, {bf:transtrip}, {bf:cycle3}, {bf:transmedtrip}, {bf:transrectrip} on the network and {bf:linear},
+{bf:quadratic},
 {bf:avalt}, {bf:avsim} on the behavior. {cmd:endow(transties) creation(transties)} is the same as
 the option pair {cmd:transtiesendow transtiescreation}, which also works; so do
 {opt outdegreeendow}/{opt outdegreecreation}, {opt reciprocityendow}/{opt reciprocitycreation} and
@@ -508,23 +509,30 @@ and {opt unconditional} estimation both work. To let a parameter differ between 
 
 {pstd}
 {bf:Constants that RSiena keeps per group} are computed per group here too: the similarity mean of a covariate ({cmd:simx()}, with the covariate's range of the group), the balance mean
-({cmd:balance}), the average degree of the centred degree effects ({cmd:inpopc}, {cmd:outpopc}, {cmd:outactc}, {cmd:inactc}), the average degrees and the structural-equivalence mean of the {cmd:ownx()} effects, the mean of a dependent behavior (its centring), its similarity mean and variance, and the centring of a dyadic covariate (by the mean of its off-diagonal cells within the group).
+({cmd:balance}), the average degree of the centred degree effects ({cmd:inpopc}, {cmd:outpopc}, {cmd:outactc}, {cmd:inactc}), the average degrees and the structural-equivalence mean of the
+{cmd:ownx()} effects, the mean of a dependent behavior (its centring), its similarity mean and variance, and the centring of a dyadic covariate (by the mean of its off-diagonal cells within the
+group).
 Actor covariates are centred at their mean over all actors of all groups, so a variable that is constant within a group (group size, a group indicator) can be used with {cmd:egox()}.
 
 {pstd}
-{bf:Composition change and missing data} ({cmd:present()}, {cmd:missnet()}, {cmd:missbeh()}) are given for all actors; a group uses the waves it has; leavers and joiners follow RSiena's rule (see {help nwsaom_remarks##compchange:Composition change}). As in a single group, an actor that is
+{bf:Composition change and missing data} ({cmd:present()}, {cmd:missnet()}, {cmd:missbeh()}) are given for all actors; a group uses the waves it has; leavers and joiners follow RSiena's rule (see
+{help nwsaom_remarks##compchange:Composition change}). As in a single group, an actor that is
 absent at a wave must carry the ties (and behavior value) of the nearest wave where it is present, and conditional estimation is then not used. A changing covariate ({cmd:tvcov()}) is
 given for the waves of {cmd:waves()}; each group uses the values of its own periods.
 
 {pstd}
 {bf:After the fit.} {cmd:estat timetest} gives, besides the joint and effect-wise tests, a test per group and per period (RSiena's sienaTimeTest with its group test), and
-{cmd:estat score} works for a model with {cmd:fix()}. Not yet available with {opt groups()}: {cmd:nwsaom bayes}, {opt ml}, {opt structural()} and the structural codes 10/11, two-mode networks, {cmd:nwsaom multinet}/{cmd:multiplex}, {cmd:estat} after a fit with several behaviors, and {cmd:tvdyadcov()} and the other time-varying dyadic covariates. {cmd:estat gof}, {cmd:estat simulate}, {cmd:nwsaom simulate} and {cmd:estat importance} work per group. {opt joinat()}/{opt leaveat()} (times on the scale of the waves of the actor's group), {opt behrate()}, non-directed networks and the effects with data constants (the centred degree effects, {cmd:ownx()}) work. The command stops with a message for each of them.
+{cmd:estat score} works for a model with {cmd:fix()}. Not yet available with {opt groups()}: {cmd:nwsaom bayes}, {opt ml}, {opt structural()} and the structural codes 10/11, two-mode networks,
+{cmd:nwsaom multinet}/{cmd:multiplex}, {cmd:estat} after a fit with several behaviors, and {cmd:tvdyadcov()} and the other time-varying dyadic covariates. {cmd:estat gof}, {cmd:estat simulate},
+{cmd:nwsaom simulate} and {cmd:estat importance} work per group. {opt joinat()}/{opt leaveat()} (times on the scale of the waves of the actor's group), {opt behrate()}, non-directed networks and the
+effects with data constants (the centred degree effects, {cmd:ownx()}) work. The command stops with a message for each of them.
 
 {pstd}
 {bf:Validation.} Against RSiena 1.6.14 (three groups of 15, 20 and 15 actors cut out of the s50 data, ten runs of each program, conditional and unconditional estimation) the estimates,
 standard errors and rates agree within the simulation error for: density, reciprocity, transitive triplets, 3-cycles, egoX, altX, simX, balance, a changing covariate, a rate covariate, an
 interaction, a dyadic covariate, joiners (composition change), missing ties, and a co-evolving behavior (linear and quadratic shape, average alter, average similarity, egoX/altX/simX
-of the behavior, a behavior rate covariate, composition change, joiners and leavers, missing behavior values). RSiena 1.6.14 itself stops with an error for groups with different numbers of waves; that case was checked against the
+of the behavior, a behavior rate covariate, composition change, joiners and leavers, missing behavior values). RSiena 1.6.14 itself stops with an error for groups with different numbers of waves; that
+case was checked against the
 equivalent object made of two-wave groups.
 
 {marker tvcov}{...}
@@ -533,7 +541,7 @@ equivalent object made of two-wave groups.
 waves, as RSiena's {cmd:varCovar}: the simulation of period {it:p} and its observed statistics use the covariate of wave {it:p}. The
 effects are the ordinary covariate effects, called with the covariate's name (the first variable without trailing digits). The values are
 centred by the mean of all periods' values (simX: the range and the similarity mean pool all periods). The plugin receives the
-period's values through the batch frame. Validation against RSiena 1.6.6 (s50, alcohol waves 1-2 as the changing covariate;
+period's values through the batch frame. The {cmd:estat} commands are not available after a fit with {opt tvcov()}. Validation against RSiena 1.6.6 (s50, alcohol waves 1-2 as the changing covariate;
 density, reciprocity, transitive triplets, altX, egoX, simX, sameX): the observed statistics are identical to RSiena's targets (238, 160 [80
 mutual dyads], 225, 12.38, 20.38, 21.996, 80) and the estimates agree: density -2.69 (-2.70), reciprocity 2.41-2.44 (2.41-2.44),
 transTrip 0.63 (0.63), altX -0.03 (-0.03 to -0.04), egoX 0.034-0.037 (0.036-0.042), simX 1.02-1.05 (0.96-1.04), sameX -0.16 (-0.11 to -0.15).
@@ -550,7 +558,8 @@ unchanged; the rate is the per-actor rate. Available effects: {opt outdegree} (d
 totindist2 simegoindist2 sameegoindist2 crossxoutact samexcycle4 sameinxcycle4 homxoutact2 avgroupegox totgroupegox); {opt tvcov()} covariates work in all of them. The covariates
 are variables on the {it:node} rows of the dataset after {cmd:nwset} (one row per node, {cmd:_nwmode} tells the mode), centred within their mode. A co-evolving {opt behavior()} of
 the actors is possible (the events are generated as absent actors); its network effects are {opt behegox} and
-{cmd:netbeh(egosqx altindist2 totindist2 simegoindist2 sameegoindist2 samexcycle4 crossxoutact avgroupegox totgroupegox)}. A dyadic covariate ({opt dyadcov()}, a matrix with one row per actor and one column per event)
+{cmd:netbeh(egosqx altindist2 totindist2 simegoindist2 sameegoindist2 samexcycle4 crossxoutact avgroupegox totgroupegox)}. A dyadic covariate ({opt dyadcov()}, a matrix with one row per actor and one
+column per event)
 and {opt interact()} of the effects above are available too. Several waves ({opt waves()}) are supported. Not available: reciprocity, triads, balance,
 gwesp, structural rate effects, {opt missnet()}, endowment/creation; RSiena's sameXOutAct/diffXOutAct cannot be evaluated by siena07 in a
 two-mode network and are not offered. Validation against RSiena 1.6.6 on a simulated 40 x 20, 3-wave network
@@ -564,16 +573,20 @@ rates 4.49 and 3.03 (4.52, 3.05).
 same actors of the two-mode network (the same number; at least 12 nodes in all). The actors of the two-mode network are the nodes of the mode {opt actormode()} (default 2, the rows
 of the affiliation matrix of {cmd:nwset, bipartite}); they change their ties to the events, at a rate of their own per period, together with the one-mode network. The effects of the two-mode
 network itself are {cmd:outdegree indegpop outact cycle4} (default {cmd:outdegree}); the one-mode network has the effects of any {cmd:multinet} fit. The cross-network effects are those of
-RSiena for such a pair: for a two-mode network that depends on a one-mode network {cmd:inactintn outactintn divoutegointn divinegointn divinaltintn avdegintn outoutactintn outoutavintn
-dist2outinactintn outoutdist2actintn avalt2mtot to toback torecip sharedto avalt2mtie inpopoutw ndist2actintn toany joutmix gwespfbmix} and the covariate effect {cmd:samewxclosure:}{it:var};
-for a one-mode network that depends on a two-mode one {cmd:outpopintn outactintn divoutegointn divoutaltintn avdegintn outoutactintn outoutavintn dist2outinactintn absoutdiffintn from fromany sharedto
-avalt2mtie inpopoutw ndist2actintn joutmix gwespmix}; and, with a dyadic covariate (actors by actors for a one-mode other network, actors by events for a two-mode one),
+RSiena for such a pair: for a two-mode network that depends on a one-mode network {cmd:inactintn outactintn divoutegointn divinegointn divinaltintn avdegintn outoutactintn outoutavintn}
+{cmd:dist2outinactintn outoutdist2actintn avalt2mtot to toback torecip sharedto avalt2mtie inpopoutw ndist2actintn toany joutmix gwespfbmix} and the covariate effect {cmd:samewxclosure:}{it:var};
+for a one-mode network that depends on a two-mode one
+{cmd:outpopintn outactintn divoutegointn divoutaltintn avdegintn outoutactintn outoutavintn dist2outinactintn absoutdiffintn from fromany sharedto}
+{cmd:avalt2mtie inpopoutw ndist2actintn joutmix gwespmix}; and, with a dyadic covariate (actors by actors for a one-mode other network, actors by events for a two-mode one),
 {cmd:tou sharedtou avaltutie} and {cmd:fromwindoo} (a two-mode other network for both roles). 
-For a one-mode network that depends on a two-mode one, a covariate of the events (a variable of the node data that is missing for the actors) is available for {cmd:altdist2w totdist2w simdist2w} and, with at least as many events as actors, {cmd:outactintnx outpopintnx};
-for a two-mode network that depends on a one-mode one, {cmd:diffwxclosure inactintnx outactintnx samexinactintn samexoutactintn altdist2w totdist2w simdist2w} are available with a covariate of the actors
+For a one-mode network that depends on a two-mode one, a covariate of the events (a variable of the node data that is missing for the actors) is available for {cmd:altdist2w totdist2w simdist2w} and,
+with at least as many events as actors, {cmd:outactintnx outpopintnx};
+for a two-mode network that depends on a one-mode one, {cmd:diffwxclosure inactintnx outactintnx samexinactintn samexoutactintn altdist2w totdist2w simdist2w} are available with a covariate of the
+actors
 (the dist-2 effects with at most as many events as actors). A covariate of the actors is read from the first observations of the dataset (one per actor) or from the
 node rows of the two-mode network ({cmd:_nwmode}). Some effects of RSiena index both networks by the same node number (the alters of the two-mode network are events, not actors):
-divinaltintn, joutmix and gwespfbmix of a two-mode network, and outoutactintn and outoutavintn of a one-mode network that depends on a two-mode one; they are available if there are not more events than actors,
+divinaltintn, joutmix and gwespfbmix of a two-mode network, and outoutactintn and outoutavintn of a one-mode network that depends on a two-mode one; they are available if there are not more events
+than actors,
 as in RSiena. avalt2mtie needs the parameter 1 or 2 (RSiena refuses the centred versions); give it as {cmd:avalt2mtie:2}. A co-evolving {opt behavior()} is not available with a two-mode network.
 The observed statistics of these effects equal siena07's, and the estimates agree within the Monte Carlo error of both programs.
 {marker multinetbeh}{...}
@@ -583,41 +596,57 @@ The observed statistics of these effects equal siena07's, and the estimates agre
 {cmd:nwsaom multinet} with {opt behavior()} (see {help nwsaom##multinet:nwsaom multinet}) accepts the following further specifications of the behavior. All of them are native-plugin effects of RSiena.
 
 {p 4 4 2}
-{bf:Behavior effects of both networks.} {opt beheff12()} lists effects that use the first network as RSiena's first network and the second as its second network, {opt beheff21()} the same with the networks
-exchanged. For the actor {it:i} with behavior {it:z_i} (centred by the overall mean) they add {it:z_i} times a count over {it:i}'s alters in the first network: {cmd:ffdeg} (the alters {it:j} that {it:i} nominates
-in both networks), {cmd:bbdeg} (in-alters in the first and the second network), {cmd:fbdeg} (out-alter in the first, in-alter in the second), {cmd:bfdeg} (in-alter in the first, out-alter in the second),
+{bf:Behavior effects of both networks.} {opt beheff12()} lists effects that use the first network as RSiena's first network and the second as its second network, {opt beheff21()} the same with the
+networks
+exchanged. For the actor {it:i} with behavior {it:z_i} (centred by the overall mean) they add {it:z_i} times a count over {it:i}'s alters in the first network: {cmd:ffdeg} (the alters {it:j} that
+{it:i} nominates
+in both networks), {cmd:bbdeg} (in-alters in the first and the second network), {cmd:fbdeg} (out-alter in the first, in-alter in the second), {cmd:bfdeg} (in-alter in the first, out-alter in the
+second),
 {cmd:frdeg} and {cmd:brdeg} (out- / in-alters of the first network that are reciprocated in the second), {cmd:indegmixedpop} and {cmd:outdegmixedpop} (the sum of the second network's in-degrees of the
-first network's in- / out-alters). {cmd:ffdeg:2}, {cmd:bbdeg:2}, ... subtract the degree in the first network (RSiena's parameter 2). Coefficients are named {cmd:beh12_}{it:effect} and {cmd:beh21_}{it:effect}.
+first network's in- / out-alters). {cmd:ffdeg:2}, {cmd:bbdeg:2}, ... subtract the degree in the first network (RSiena's parameter 2). Coefficients are named {cmd:beh12_}{it:effect} and
+{cmd:beh21_}{it:effect}.
 
 {p 4 4 2}
-{bf:Covariate, shape and network effects in beheff1() and beheff2().} A token {it:family}{cmd::}{it:varname} names a covariate effect of the behavior (the covariate is a numeric variable, constant over time, at most 8
-different ones): {cmd:from:}{it:x} (the covariate's main effect, RSiena effFrom), {cmd:avxalt:}{it:x} {cmd:avsamexalt:}{it:x} {cmd:totxalt:}{it:x} {cmd:totsamexalt:}{it:x}, and the families of {opt behx()}
+{bf:Covariate, shape and network effects in beheff1() and beheff2().} A token {it:family}{cmd::}{it:varname} names a covariate effect of the behavior (the covariate is a numeric variable, constant
+over time, at most 8
+different ones): {cmd:from:}{it:x} (the covariate's main effect, RSiena effFrom), {cmd:avxalt:}{it:x} {cmd:avsamexalt:}{it:x} {cmd:totxalt:}{it:x} {cmd:totsamexalt:}{it:x}, and the families of
+{opt behx()}
 ({cmd:avxinalt:}{it:x} {cmd:totxinalt:}{it:x} {cmd:avsimaltx:}{it:x} {cmd:degabscontrx:}{it:x} ...). The shape effects {cmd:quad_cc quad_nc constant threshold:}{it:#} {cmd:simallnear:}{it:#}
-{cmd:simallfar:}{it:#} {cmd:avgroup}[{cmd::}{it:#}] {cmd:totgroup}[{cmd::}{it:#}] and the further network effects of {opt behnet2()} ({cmd:indegavgroup avaltcc totaltcc avinsimdist2 varalt} ...) are written the
+{cmd:simallfar:}{it:#} {cmd:avgroup}[{cmd::}{it:#}] {cmd:totgroup}[{cmd::}{it:#}] and the further network effects of {opt behnet2()} ({cmd:indegavgroup avaltcc totaltcc avinsimdist2 varalt} ...) are
+written the
 same way. As for all effects of {opt beheff1()} the first network drives the effect, in {opt beheff2()} the second. RSiena's {cmd:constant} effect is the negative number of behavior changes and
 is confounded with the behavior rate, so a fit that includes it stops with a message about the covariance matrix.
 
 {p 4 4 2}
-{bf:The behavior as a covariate of the network effects.} In {opt eff1()} / {opt eff2()}, {cmd:netbeh:}{it:effect} adds the effect of the (centred) behavior of the actors on the formation of ties in that network,
-for example {cmd:eff2(outdegree reciprocity netbeh:absdiffx netbeh:avgroupegox)}. Available: {cmd:samex diffx higher egosqx altsqx samexrecip absdiffx egoxaltx samextranstrip diffxtranstrip homxtranstrip
-samexoutact diffxoutact samexreciact diffxreciact homxoutact altxoutact inpopx outpopx inactx outactx samexinpop diffxinpop egoplusaltsqx diffsqx egodiffx althigheregox unequalx egolthresholdx egorthresholdx
-altlthresholdx altrthresholdx degabsdiffx degposdiffx degnegdiffx crossxoutact outxmore transtripx jumpxtranstrip altdist2 totdist2 sameegodist2 altindist2 totindist2 sameegoindist2 simdist2 simegodist2
-simegoindist2 simrecipx simxtranstrip homxtransrectrip samextransrectrip diffxtransrectrip egoxaltxrecip samexcycle4 sameinxcycle4 avgroupegox totgroupegox}; the threshold effects take their threshold
+{bf:The behavior as a covariate of the network effects.} In {opt eff1()} / {opt eff2()}, {cmd:netbeh:}{it:effect} adds the effect of the (centred) behavior of the actors on the formation of ties in
+that network,
+for example {cmd:eff2(outdegree reciprocity netbeh:absdiffx netbeh:avgroupegox)}. Available:
+{cmd:samex diffx higher egosqx altsqx samexrecip absdiffx egoxaltx samextranstrip diffxtranstrip homxtranstrip}
+{cmd:samexoutact diffxoutact samexreciact diffxreciact homxoutact altxoutact inpopx outpopx inactx outactx samexinpop diffxinpop egoplusaltsqx diffsqx egodiffx althigheregox unequalx egolthresholdx}
+{cmd:egorthresholdx}
+{cmd:altlthresholdx altrthresholdx degabsdiffx degposdiffx degnegdiffx crossxoutact outxmore transtripx jumpxtranstrip altdist2 totdist2 sameegodist2 altindist2 totindist2 sameegoindist2 simdist2}
+{cmd:simegodist2}
+{cmd:simegoindist2 simrecipx simxtranstrip homxtransrectrip samextransrectrip diffxtransrectrip egoxaltxrecip samexcycle4 sameinxcycle4 avgroupegox totgroupegox};
+the threshold effects take their threshold
 after a colon.
 
 {p 4 4 2}
-{bf:Endowment and creation.} In {opt beheff1()} / {opt beheff2()}, {cmd:linearendow quadraticendow avaltendow avsimendow} replace the evaluation effect by the pair of an endowment effect (the effect counts
+{bf:Endowment and creation.} In {opt beheff1()} / {opt beheff2()}, {cmd:linearendow quadraticendow avaltendow avsimendow} replace the evaluation effect by the pair of an endowment effect (the effect
+counts
 when the behavior decreases) and a creation effect (it counts when the behavior increases); the coefficients are {cmd:beh_}{it:effect}{cmd:_endow} and {cmd:beh_}{it:effect}{cmd:_creation}.
 
 {p 4 4 2}
-{bf:Interactions of behavior effects.} {opt behint(}{it:effect1#effect2}[{it:#effect3}] ...{opt )} adds the product of two or three behavior effects of the model (RSiena: {cmd:includeInteraction()} of behavior effects),
+{bf:Interactions of behavior effects.} {cmd:behint(}{it:effect1#effect2}[{it:#effect3}] ...{cmd:)} adds the product of two or three behavior effects of the model (RSiena: {cmd:includeInteraction()} of
+behavior effects),
 each written by its coefficient name, e.g. {cmd:beheff1(linear quadratic avalt avsim) behint(beh_quadratic#beh_avalt beh_avalt#beh_avsim)}. The components must be {cmd:linear}, {cmd:quadratic},
 {cmd:avalt} or {cmd:avsim} (of the first network: {cmd:beh_}{it:effect}, of the second: {cmd:beh2_}{it:effect}); the interaction is a further coefficient, shown as {cmd:beh_}{it:a}{cmd:_x_}{it:b}.
 The change contribution is the product of the components' contributions divided by the size of the change, the statistic the product of the actors' statistics divided by the centred behavior.
 
 {p 4 4 2}
-{bf:Missing behavior values.} {opt missbeh(}{it:m1 m2 ...}{opt )} names one 0/1 variable per wave (1 = the value of {opt behavior()} is missing). Missing values are replaced by the actor's previous observation, else the
-next, else the wave's most frequent value, as in the single-network fit, and they do not enter the statistics. Missing ties and composition change are not available with a behavior in {cmd:nwsaom multinet}.
+{bf:Missing behavior values.} {cmd:missbeh(}{it:m1 m2 ...}{cmd:)} names one 0/1 variable per wave (1 = the value of {opt behavior()} is missing). Missing values are replaced by the actor's previous
+observation, else the
+next, else the wave's most frequent value, as in the single-network fit, and they do not enter the statistics. Missing ties and composition change are not available with a behavior in
+{cmd:nwsaom multinet}.
 
 {marker multibeh}{...}
 {pstd}
@@ -629,8 +658,8 @@ step the acting variable is drawn in proportion to its rate and then the actor u
 behaviors interact only through the network (avAlt and avSim read it; {opt behsim} selects ties on the first behavior).
 Coefficients are named {cmd:beh_}{it:name}{cmd:_}{it:effect}, {it:name} being the first variable without its trailing
 digits; {cmd:e(rates_beh)} has one row per behavior. Not yet combinable with {opt symmetric}, {opt ratecov()},
-{opt present()}, {opt missnet()}/{opt missbeh()}, {opt structural()}, network {opt endow()}/{opt creation()}, or
-{cmd:estat gof}/{cmd:mems}. Validation against RSiena 1.6.6 (s501-s503, alcohol and smoking from s50a/s50s; outdegree,
+{opt present()}, {opt missnet()}/{opt missbeh()}, {opt structural()}, network {opt endow()}/{opt creation()}; the {cmd:estat}
+commands are not available after such a fit. Validation against RSiena 1.6.6 (s501-s503, alcohol and smoking from s50a/s50s; outdegree,
 reciprocity, transitive triplets; linear, quadratic and avAlt for each behavior): outdegree -2.65 against -2.65,
 reciprocity 2.42 against 2.43, transitive triplets 0.61 against 0.61; alcohol linear 0.42 (0.43), quadratic -0.54 (-0.54),
 avAlt 1.28-1.30 (1.26-1.31); smoking linear -1.91 to -1.94 (-1.92 to -1.94), quadratic 2.02-2.03 (2.03-2.05), avAlt
@@ -807,8 +836,8 @@ aliases) are available.
 {pstd}
 {opt waves()}, {opt present()}, {opt missnet()}, and {opt ratecov()} (network-only) can each be
 combined with {opt symmetric}, and so can {opt behavior()}: an undirected relation co-evolving with a behavior
-(native plugin with the threaded batch path required; {cmd:nwsaom, ... symmetric symtype(joint) outdegree
-behavior(b1 b2) linear avalt}). The network rates are reported on RSiena's scale, as for network-only fits.
+(native plugin with the threaded batch path required; {cmd:nwsaom, ... symmetric symtype(joint) outdegree}
+{cmd:behavior(b1 b2) linear avalt}). The network rates are reported on RSiena's scale, as for network-only fits.
 Checked only partly against RSiena: its own estimation of this model (symmetrized s501/s502, alcohol
 behavior, BJOINT) is unstable - three of four seeds stop at {cmd:thetaBound} and the finished one fixes
 avAlt at 0 - but where RSiena produced numbers they agree with {cmd:nwsaom} (behavior linear 0.32 against
@@ -876,8 +905,10 @@ covariate arrays; Stata/BE has 2,048 variables altogether). Bring larger network
 {pstd}
 {bf:Check which engine ran.} If the compiled plugin cannot be used, {cmd:nwsaom} runs the slow Mata engine instead and says so: one warning line is printed before the estimation starts
 ({cmd:(Warning: the compiled plugin is not used for this fit (...); the Mata fallback is much slower, possibly hours.)}), and a note follows the output. The reason in the brackets is one of:
-the plugin file for your platform was not found (reinstall with {cmd:net install nwsaom, replace}); the installed plugin is older than the model needs (update the same way); the model contains an effect or
-option that the plugin does not cover (it lies outside the capacity of the plugin); or the global macro {cmd:NWSAOM_NONATIVE} is set to 1 (a testing switch). The fit then gives the same results but is orders of magnitude slower.
+the plugin file for your platform was not found (reinstall with {cmd:net install nwsaom, replace}); the installed plugin is older than the model needs (update the same way); the model contains an
+effect or
+option that the plugin does not cover (it lies outside the capacity of the plugin); or the global macro {cmd:NWSAOM_NONATIVE} is set to 1 (a testing switch). The fit then gives the same results but is
+orders of magnitude slower.
 The warning is shown once per fit and, like all output, is suppressed by {cmd:quietly}; {cmd:e(engine)} ({cmd:native} or {cmd:mata}) and {cmd:e(engine_why)} are always set.
 
 {marker compchange}{...}
@@ -923,7 +954,8 @@ deviations from the targets as {cmd:siena07}, and s50 with 10 joiners/leavers gi
 reciprocity, transitive triplets, both rates, and a rate covariate). The same rules apply to {opt present()}: an
 absent actor stays among the alters of an active actor, as in RSiena. As in RSiena (option 1), the ties an absent actor has in the
 data are used as given - code them 0 for the waves in which the actor is absent - and the distance (the rate target) counts them.
-Works with co-evolving {opt behavior()} (one or several behaviors; not with behsim or endowment/creation effects); works with {opt symmetric} (not together with {opt ratecov()}); not yet combined with {opt endow()}/{opt creation()}.
+Works with co-evolving {opt behavior()} (one or several behaviors; not with behsim or endowment/creation effects); works with {opt symmetric} (not together with {opt ratecov()}); not yet combined with
+{opt endow()}/{opt creation()}.
 
 {pstd}
 {bf:Genuinely out of scope}: RSiena's composition-change options 2-4 (other treatments of the data of absent actors), several
@@ -983,6 +1015,7 @@ values missing: density, reciprocity, altX, egoX and simX agree to within sampli
 against RSiena's 0.78). An {opt interact()} that names a
 {opt samex()} or {opt simx()} effect whose variable has missing values is rejected.
 
+{pstd}
 RSiena's own "structural zeros/ones" mechanism - dyads whose value is fixed by design
 rather than merely unobserved, coded 10 and 11 in the wave networks - IS implemented; see {help nwsaom_remarks##structural:Structural zeros/ones}
 below.
@@ -1024,13 +1057,17 @@ dyads change from wave to wave.{p_end}
 {pstd}
 {bf:Scope.} One directed one-mode or two-mode network, any number of waves, method of moments (conditional or unconditional),
 with or without missing data, composition change, covariates, interactions, endowment/creation and rate covariates, and with co-evolving
-behaviors (one or several). In a non-directed ({opt symmetric}) relation the codes must be given for both directions of a dyad, with the same value; all model types work. {cmd:nwsaom multinet} takes the codes in its one-mode directed networks (not with a two-mode or non-directed network or {opt behavior()}). Not yet with {cmd:groups()}, {cmd:nwsaom multiplex}, {cmd:ml}, {cmd:nwsaom bayes}. {cmd:nwsaom describe} counts the structural zeros and ones of each wave and leaves them out of the distance (RSiena's data report);
-{cmd:estat gof}, {cmd:simulate}/{cmd:nwsaom simulate}, {cmd:mems}, {cmd:importance}, {cmd:score} and {cmd:timetest} work after a fit with codes: the observed end network has the start-structural dyads at their start value,
+behaviors (one or several). In a non-directed ({opt symmetric}) relation the codes must be given for both directions of a dyad, with the same value; all model types work. {cmd:nwsaom multinet} takes
+the codes in its one-mode directed networks (not with a two-mode or non-directed network or {opt behavior()}). Not yet with {cmd:groups()}, {cmd:nwsaom multiplex}, {cmd:ml},
+{cmd:nwsaom bayes}. {cmd:nwsaom describe} counts the structural zeros and ones of each wave and leaves them out of the distance (RSiena's data report);
+{cmd:estat gof}, {cmd:simulate}/{cmd:nwsaom simulate}, {cmd:mems}, {cmd:importance}, {cmd:score} and {cmd:timetest} work after a fit with codes: the observed end network has the start-structural dyads
+at their start value,
 the simulated networks have the end-structural dyads at their end value (RSiena's gof), the choices of structural dyads are left out of the importance.
 
 {pstd}
 {bf:The option} {opt structural(matname)} marks dyads by a 0/1 matrix that is the same in all periods and needs the same observed value at every wave. It
-is deprecated; use the codes 10 and 11 in the wave networks instead. The matrix is converted to the codes of every wave (a note is printed), so it works with {opt waves()} and the other options too; the value of a marked dyad is its value in the data, which must be the same at every wave.
+is deprecated; use the codes 10 and 11 in the wave networks instead. The matrix is converted to the codes of every wave (a note is printed), so it works with {opt waves()} and the other options too;
+the value of a marked dyad is its value in the data, which must be the same at every wave.
 
 {marker estimation}{...}
 {title:Estimation}
@@ -1121,17 +1158,23 @@ e(rate)/e(rate_se)/e(rate_tratio) of the two-wave {opt wave1()}/{opt wave2()} pa
 {title:Maximum likelihood}
 
 {pstd}
-With the option {opt ml} {cmd:nwsaom} first runs the method of moments (its estimates are the starting values) and then estimates the model by maximum likelihood, as RSiena's {cmd:siena07} with {cmd:maxlike = TRUE} (Snijders, Koskinen and Schweinberger 2010).
+With the option {opt ml} {cmd:nwsaom} first runs the method of moments (its estimates are the starting values) and then estimates the model by maximum likelihood, as RSiena's {cmd:siena07} with
+{cmd:maxlike = TRUE} (Snijders, Koskinen and Schweinberger 2010).
 The unobserved sequence of ministeps between the waves is simulated by Metropolis-Hastings steps; the complete-data score of the effects and rates is averaged by a Robbins-Monro algorithm.
-{cmd:e(b)}, {cmd:e(V)} and the rates {cmd:e(rates)} are replaced by the maximum likelihood estimates, their standard errors (mean complete-data information minus the covariance matrix of the scores) and the rates with their standard errors;
+{cmd:e(b)}, {cmd:e(V)} and the rates {cmd:e(rates)} are replaced by the maximum likelihood estimates, their standard errors (mean complete-data information minus the covariance matrix of the scores)
+and the rates with their standard errors;
 {cmd:e(rates_ml)} also has the convergence t-ratio of every rate and {cmd:e(tconv_max_ml)} the largest t-ratio of all scores (below 0.1 is good).
 
 {pstd}
-Controls in {opt mloptions()}: {opt n1(#)} iterations of phase 1 (default 50), {opt nsub(#)} subphases of phase 2 (4) with {opt nstart2(#)} iterations in the first (100, then times 2.52 each), {opt n3(#)} iterations of phase 3 (1000), {opt mult(#)}
+Controls in {opt mloptions()}: {opt n1(#)} iterations of phase 1 (default 50), {opt nsub(#)} subphases of phase 2 (4) with {opt nstart2(#)} iterations in the first (100, then times 2.52 each),
+{opt n3(#)} iterations of phase 3 (1000), {opt mult(#)}
 Metropolis-Hastings steps per iteration as a multiple of the number of tie changes (5), {opt gain(#)} the initial gain (0.2), {opt seed(#)}.
-The estimator covers one directed one-mode network, with or without one co-evolving behavior (behavior ministeps and their rates are part of the augmented data; {cmd:e(rates_beh)}, {cmd:e(rates_beh_ml)}), without endowment/creation effects, rate covariates, structural zeros,
+The estimator covers one directed one-mode network, with or without one co-evolving behavior (behavior ministeps and their rates are part of the augmented data; {cmd:e(rates_beh)},
+{cmd:e(rates_beh_ml)}), without endowment/creation effects, rate covariates, structural zeros,
 missing data or composition change. It takes several minutes for the default controls.
-The point estimates come from phase 2; {opt n3()} only sets how many iterations of phase 3 are used for the standard errors and the convergence check (as in RSiena), so a larger {opt n3()} leaves the estimates unchanged and changes the standard errors and the t-ratio of the scores. If the check ends {it:poor} or {it:acceptable}, raise {opt n3()} (and {opt nstart2()}); the estimates stay the same unless phase 2 changes.
+The point estimates come from phase 2; {opt n3()} only sets how many iterations of phase 3 are used for the standard errors and the convergence check (as in RSiena), so a larger {opt n3()} leaves the
+estimates unchanged and changes the standard errors and the t-ratio of the scores. If the check ends {it:poor} or {it:acceptable}, raise {opt n3()} (and {opt nstart2()}); the estimates stay the same
+unless phase 2 changes.
 The same estimates are available as {cmd:nwsaom_ml} after an {cmd:nwsaom} fit. The Bayesian estimator of the same model is {helpb nwsaom_bayes:nwsaom bayes}.
 
 {title:See also}
@@ -1139,4 +1182,4 @@ The same estimates are available as {cmd:nwsaom_ml} after an {cmd:nwsaom} fit. T
     {help nwsaom}, {help nwsaom_estat}, {help nwergm}
 
 {hline}
-{pstd}{it:nwsaom version 1.5.15, 11 November 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.5.16, 12 November 2026}{p_end}{* nwversion}
