@@ -290,9 +290,15 @@ gen byte p3 = _n != 40
 * two waves (wave1/wave2): actor 1 is absent in the period and has no ties at its start, so it has none in any simulation
 nwsaom, wave1(pn1) wave2(pn2) outdegree reciprocity present(p1 p2) k0(10) k3(60) seed(1)
 estat simulate, nsim(5) seed(1) generate(ps)
+// CONFIRMED BUG S2 (triage): even on the wave1()/wave2() path the absent actor gets ties in estat simulate
+global XT_SFAILS ""
 forvalues s = 1/5 {
 	xt_rowcol ps_`s'_p1 1
-	assert r(deg) == 0
+	if r(deg) != 0 {
+		di as error "FAIL present(): absent actor 1 has degree " r(deg) " in simulation `s' (wave1/wave2 path)"
+		global XT_SFAILS "$XT_SFAILS S2-wave1wave2"
+		continue, break
+	}
 }
 nwdrop ps_*
 estat gof, nsim(10) seed(1)
@@ -383,4 +389,8 @@ nwsaom simulate, waves(dn1 dn2 dn3) outdegree reciprocity behavior(z1 z2 z3) lin
 assert rowsof(r(sim)) == 4
 di "PASS co-evolution"
 
+if "$XT_SFAILS" != "" {
+	di as error "failures:$XT_SFAILS"
+	exit 9
+}
 di "ALL PASS"

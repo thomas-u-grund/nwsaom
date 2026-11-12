@@ -37,7 +37,8 @@ nwsaom describe, waves(rt1 rt2 rt3)
 matrix W = r(waves)
 matrix P = r(periods)
 matrix WX = (9, 0.3, 1.5 \ 10, 10/30, 10/6 \ 11, 11/30, 11/6)
-assert mreldif(W[1..3, 1..3], WX) < 1e-12
+matrix W3 = W[1..3, 1..3]
+assert mreldif(W3, WX) < 1e-12
 assert W[1, 4] == 0 & W[1, 5] == 0
 matrix PX = (6, 4, 3, 6/13, 7, 6/9 \ 8, 3, 2, 8/13, 5, 8/10)
 assert mreldif(P, PX) < 1e-12

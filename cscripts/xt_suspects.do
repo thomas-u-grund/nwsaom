@@ -21,6 +21,12 @@ global XT_NOTES 0
 capture program drop xt_verdict
 program define xt_verdict
 	args id rc conf text
+	di as text "  (current frame after probe `id': `c(frame)')"
+	if "`c(frame)'" != "default" {
+		di as error "  probe `id' left the user in frame `c(frame)': changing back and dropping it"
+		frame change default
+		capture frame drop __saom_native
+	}
 	if `rc' != 0 {
 		di as error "PROBE `id' FAILED rc=`rc' (`text')"
 		global XT_FAIL = $XT_FAIL + 1
@@ -34,6 +40,11 @@ end
 capture program drop xt_note
 program define xt_note
 	args id rc conf text
+	di as text "  (current frame after probe `id': `c(frame)')"
+	if "`c(frame)'" != "default" {
+		frame change default
+		capture frame drop __saom_native
+	}
 	if `rc' != 0 di as text "NOTE `id': probe failed rc=`rc' (`text')"
 	else di as text "NOTE `id' " cond(`conf' == 1, "HOLDS", "DOES NOT HOLD") ": `text'"
 	global XT_NOTES = $XT_NOTES + 1
@@ -127,8 +138,9 @@ capture noisily {
 	}
 	nwdrop sj_*
 }
+local rcp = _rc
 capture drop jn
-xt_verdict S2d `=_rc' `c' "joinat(): actor 1 gets ties before it joins in estat simulate"
+xt_verdict S2d `rcp' `c' "joinat(): actor 1 gets ties before it joins in estat simulate"
 
 * ---------------------------------------------------------------------------------------------------------------------------
 * S1: e(present) is read by the groups postestimation (nwsaom_estat.ado:537, nwsaom_estat_simulate.ado:209,
@@ -137,19 +149,26 @@ xt_verdict S2d `=_rc' `c' "joinat(): actor 1 gets ties before it joins in estat 
 local c = 0
 capture noisily {
 	gen byte grp = 1 + (_n > 20)
-	nwsaom, waves(pn1 pn2 pn3) groups(grp) outdegree reciprocity present(p1 p2 p3) k0(10) k3(60) seed(1) cores(1)
+	* groups() needs waves without ties between groups: the P matrices with the between-group blocks set to 0
+	mata: for (w=1; w<=3; w++) { M = st_matrix("P" + strofreal(w)); M[1..20, 21..40] = J(20, 20, 0); M[21..40, 1..20] = J(20, 20, 0); st_matrix("Q" + strofreal(w), M); }
+	forvalues w = 1/3 {
+		nwset, mat(Q`w') directed name(qn`w') nooutput
+	}
+	nwsaom, waves(qn1 qn2 qn3) groups(grp) outdegree reciprocity present(p1 p2 p3) k0(10) k3(60) seed(1) cores(1)
 	di "e(present) = `e(present)'"
 	estat simulate, nsim(4) seed(1) generate(sg)
 	forvalues s = 1/4 {
 		xt_rowcol sg_g1_`s'_p1 1
+		di "  S1 simulation `s': degree of absent actor 1 in period 1 = " r(deg)
 		if r(deg) > 0 local c = 1
 	}
 	nwdrop sg_*
 	capture noisily estat importance
 	if _rc == 0 local c = 1
 }
+local rcp = _rc
 capture drop grp
-xt_verdict S1 `=_rc' `c' "groups() + present(): absent actor gets ties, or estat importance runs (e(present) not posted)"
+xt_verdict S1 `rcp' `c' "groups() + present(): absent actor gets ties, or estat importance runs (e(present) not posted)"
 
 * ---------------------------------------------------------------------------------------------------------------------------
 * S3: estat importance after missnet() (help: not available with missing-data options); the guard checks only endowment
@@ -212,11 +231,15 @@ capture noisily {
 	nwsaom, waves(dn1 dn2 dn3) outdegree reciprocity egox(x) k0(10) k3(60) seed(1)
 	estimates restore xa
 	capture noisily estat simulate, nsim(3) seed(5)
-	if _rc == 0 {
+	local rcs = _rc
+	if `rcs' == 0 {
 		matrix __B = r(sim)
 		if mreldif(__A, __B) != 0 local c = 1
 	}
-	* (a clean refusal with an error is acceptable)
+	* (a clean refusal with an error is acceptable; a raw Mata error or a frame left behind is not)
+	* CONFIRMED BUG S7b (triage): r(3301) in SaomSimulateIntervalNative and the user is left in frame __saom_native
+	if `rcs' >= 3000 & `rcs' <= 3999 local c = 1
+	if "`c(frame)'" != "default" local c = 1
 	estimates drop xa
 }
 xt_verdict S7b `=_rc' `c' "estat simulate after estimates restore simulates the latest fit, not the restored one"
@@ -294,6 +317,14 @@ capture noisily {
 	}
 }
 xt_verdict S11b `=_rc' `c' "a long generate() stub leaves partial or truncated networks"
+* CONFIRMED BUG S11b (triage): the failed call leaves a 0-node network with a 33-character name as the current network;
+* afterwards nwds says "Network _all not found", dn1 is "not found" and nwsaom stops with "invalid varname". The
+* network set has to be rebuilt for the probes below.
+nwclear
+forvalues w = 1/3 {
+	nwset, mat(D`w') directed name(dn`w') nooutput
+	nwset, mat(P`w') directed name(pn`w') nooutput
+}
 
 * ---------------------------------------------------------------------------------------------------------------------------
 * S14: estat mems with a macro() that fails: the trial call (nwsaom_estat.ado:1253) may leave its temporary network
@@ -309,6 +340,7 @@ capture noisily {
 	capture noisily estat mems, effect(outdegree) macro(nosuchprogram) nsim(20) seed(1) nodots
 	assert _rc == 498
 	xt_nnet
+	di "  S14: networks before `n0' after `r(n)'; current before `cur0' after `r(cur)'"
 	if r(n) != `n0' | "`r(cur)'" != "`cur0'" local c = 1
 	capture nwdrop __nwsaom_mems_tmpnet
 }
@@ -331,7 +363,7 @@ mata: xt_beh("z", 50, 3, 5, 77)
 gen byte grp = 1 + (_n > 15) + (_n > 35)
 local c = 0
 capture noisily {
-	nwsaom, waves(g1 g2 g3) groups(grp) outdegree reciprocity behavior(z1 z2 z3) linear k0(10) k3(60) seed(1) cores(1)
+	nwsaom, waves(g1 g2 g3) groups(grp) outdegree reciprocity behavior(z1 z2 z3) linear k0(10) k3(200) seed(2) cores(1)
 	xt_rclist
 	local rl "`r(list)'"
 	local bl "`r(behlist)'"
@@ -339,6 +371,8 @@ capture noisily {
 	capture noisily estat simulate, nsim(2) seed(1) rates(`rl') ratesbeh(`bl')
 	local c = (_rc != 0)
 }
+* S5 by code reading: nwsaom_estat_simgroups.ado:10 has no RATESBEH() option (CONFIRMED in triage). The runtime probe
+* is blocked: this groups() + behavior() fit stops with r(505) (phase-3 covariance singular) on this random behavior.
 xt_verdict S5 `=_rc' `c' "estat simulate ratesbeh() after groups() + behavior() is refused"
 local c = 0
 capture noisily {

@@ -19,6 +19,7 @@ do cscripts/xt_common.do
 * ---------------------------------------------------------------------------------------------------------------------------
 * 1. a 120 x 40 two-mode network, 3 waves (about 120 * 40 free and 160^2 - 4,800 structural dyads)
 * ---------------------------------------------------------------------------------------------------------------------------
+global XT_LFAILS ""
 nwclear
 clear
 mata: xt_tm("TB", 120, 40, 3, 0.06, 0.04, 31)
@@ -52,7 +53,7 @@ mata: xt_grp("SB", (50, 50), 3, 0.10, 0.04, 32, 0)
 mata: xt_grp("SU", (50, 50), 3, 0.10, 0.04, 33, 1)
 mata:
 cls = (J(50, 1, 1) \ J(50, 1, 2))
-SZ = (cls :!= cls')
+SZ = (cls * J(1, rows(cls), 1) :!= J(rows(cls), 1, 1) * cls')
 SO = J(100, 100, 0)
 for (k=1; k<=10; k++) {
 	SO[2 * k, 2 * k + 1] = 1
@@ -160,8 +161,20 @@ capture noisily nwsaom, waves(dl1 dl2 dl3) outdegree reciprocity ratecov(`rl16')
 assert inlist(_rc, 0, 498)
 if _rc == 0 {
 	assert colsof(e(ratecoefs)) == 16
-	estat simulate, nsim(2) seed(1)
-	estat gof, nsim(10) seed(1) stats(outdegree)
+	// CONFIRMED BUG N8: estat simulate after ratecov() with 16 covariates -> "too many options", r(3598)
+	// (the K x n covariate values go into the plugin argument string, unw_saom.do:14971-14997)
+	capture noisily estat simulate, nsim(2) seed(1)
+	if _rc {
+		di as error "FAIL CONFIRMED BUG N8: estat simulate after ratecov(16 covariates) -> r(" _rc "), frame `c(frame)'"
+		global XT_LFAILS "$XT_LFAILS N8"
+		if "`c(frame)'" != "default" frame change default
+	}
+	capture noisily estat gof, nsim(10) seed(1) stats(outdegree)
+	if _rc {
+		di as error "FAIL CONFIRMED BUG N8: estat gof after ratecov(16 covariates) -> r(" _rc ")"
+		global XT_LFAILS "$XT_LFAILS N8-gof"
+		if "`c(frame)'" != "default" frame change default
+	}
 }
 local rl17 "`rl16' `: word 17 of `vl''"
 capture noisily nwsaom, waves(dl1 dl2 dl3) outdegree reciprocity ratecov(`rl17') k3(40)
@@ -174,11 +187,23 @@ di "PASS many covariates, interactions and rate covariates"
 forvalues w = 1/2 {
 	nwset, mat(DL`w') directed name(a_rather_long_network_name_w`w') nooutput
 }
-nwsaom, waves(a_rather_long_network_name_w1 a_rather_long_network_name_w2) outdegree reciprocity k0(10) k3(60) seed(1)
-assert "`e(waves)'" == "a_rather_long_network_name_w1 a_rather_long_network_name_w2"
-estat simulate, nsim(2) seed(1) generate(stub_of_twenty_two_ch)
-xt_simcheck stub_of_twenty_two_ch 2 1, nodes(100)
-nwdrop stub_of_twenty_two_ch_*
-di "PASS long network names"
+// CONFIRMED BUG N10: two waves with 29-character names -> the results table fails ("<w1>_to_<w2> invalid name", r(3598))
+capture noisily nwsaom, waves(a_rather_long_network_name_w1 a_rather_long_network_name_w2) outdegree reciprocity k0(10) k3(60) seed(1)
+if _rc {
+	di as error "FAIL CONFIRMED BUG N10: 2 waves with long names -> r(" _rc "), e(cmd) now `e(cmd)', e(waves) `e(waves)', frame `c(frame)'"
+	global XT_LFAILS "$XT_LFAILS N10"
+	if "`c(frame)'" != "default" frame change default
+}
+else {
+	assert "`e(waves)'" == "a_rather_long_network_name_w1 a_rather_long_network_name_w2"
+	estat simulate, nsim(2) seed(1) generate(stub_of_twenty_two_ch)
+	xt_simcheck stub_of_twenty_two_ch 2 1, nodes(100)
+	nwdrop stub_of_twenty_two_ch_*
+	di "PASS long network names"
+}
 
+if "$XT_LFAILS" != "" {
+	di as error "failures: $XT_LFAILS"
+	exit 9
+}
 di "ALL PASS"

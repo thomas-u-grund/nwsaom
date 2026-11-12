@@ -20,24 +20,47 @@ do cscripts/xt_common.do
 * the same estat simulate numbers as the snapshot matrix __XT_SIM0
 capture program drop xt_err
 program define xt_err
+	* records failures in $XT_EFAILS and goes on (prints what changed)
 	gettoken code 0 : 0
 	gettoken colon 0 : 0, parse(":")
 	capture noisily `0'
 	local rc = _rc
 	if `rc' != `code' {
-		di as error "expected r(`code'), got r(`rc'): `0'"
-		exit 9
+		di as error "FAIL expected r(`code'), got r(`rc'): `0'"
+		global XT_EFAILS `"$XT_EFAILS | r(`rc')!=`code': `0'"'
 	}
-	xt_esame
-	xt_dsame
+	capture xt_esame
+	if _rc {
+		di as error "FAIL e() changed after: `0' (e(cmdline) now: `e(cmdline)')"
+		global XT_EFAILS `"$XT_EFAILS | e() changed: `0'"'
+	}
+	quietly datasignature
+	local dsig "`r(datasignature)'"
+	quietly nwcurrent
+	local nn = r(networks)
+	local cur "`r(current)'"
+	if "`dsig'" != "$XT_DSIG" | c(N) != $XT_DN | c(k) != $XT_DK | `nn' != $XT_NNET | "`cur'" != "$XT_CURNET" {
+		di as error "FAIL data/networks changed after: `0' (networks $XT_NNET -> `nn', current $XT_CURNET -> `cur', N $XT_DN -> `c(N)', k $XT_DK -> `c(k)')"
+		global XT_EFAILS `"$XT_EFAILS | data/networks changed: `0'"'
+	}
+	if "`c(frame)'" != "default" {
+		di as error "FAIL left in frame `c(frame)' after: `0'"
+		global XT_EFAILS `"$XT_EFAILS | frame `c(frame)': `0'"'
+		frame change default
+	}
 	if "$XT_SIMCHK" == "1" {
-		quietly estat simulate, nsim(2) seed(5)
+		capture quietly estat simulate, nsim(2) seed(5)
+		local src = _rc
 		tempname S
-		matrix `S' = r(sim)
-		assert mreldif(`S', __XT_SIM0) == 0
+		if `src' == 0 matrix `S' = r(sim)
+		if `src' != 0 | mreldif(`S', __XT_SIM0) != 0 {
+			di as error "FAIL baseline estat simulate changed (rc `src') after: `0'"
+			global XT_EFAILS `"$XT_EFAILS | estat simulate changed: `0'"'
+		}
 	}
-	di as text "  ok r(`code'): `0'"
+	di as text "  done r(`code'): `0'"
 end
+global XT_EFAILS ""
 
 nwclear
 clear
@@ -105,12 +128,15 @@ xt_err 198 : nwsaom, waves(dn1 dn2 dn3) outdegree symmetric k3(60)
 * nwsaom.ado:565 undirected waves mixed with asymmetric directed ones
 xt_err 198 : nwsaom, waves(sn1 dn2) outdegree k3(60)
 * _nwsaom_symcheck.ado:56 symtype() not a model type
+// CONFIRMED BUG N7: the refused call overwrites the stored wave graphs (nwsaom.ado:834) -> estat simulate changed
 xt_err 198 : nwsaom, waves(sn1 sn2) outdegree symtype(bogus) k3(60)
 * _nwsaom_symcheck.ado:103 symtype() for a directed relation
 xt_err 198 : nwsaom, waves(dn1 dn2 dn3) outdegree reciprocity symtype(joint) k3(60)
 * _nwsaom_symcheck.ado:19 reciprocity in a non-directed model (undirected waves: symmetric is set automatically)
+// CONFIRMED BUG N7: the refused call overwrites the stored wave graphs (nwsaom.ado:834) -> estat simulate changed
 xt_err 198 : nwsaom, waves(sn1 sn2) outdegree reciprocity k3(60)
 * _nwsaom_symcheck.ado:16 transtrip under symmetric (symbad)
+// CONFIRMED BUG N7: the refused call overwrites the stored wave graphs (nwsaom.ado:834) -> estat simulate changed
 xt_err 198 : nwsaom, waves(sn1 sn2) outdegree transtrip k3(60)
 * nwsaom.ado:1467 transtriads for a directed relation (fails after the Mata model was rebuilt with another effect list:
 * no simulation check here, see xt_suspects.do)
@@ -276,4 +302,8 @@ assert _rc == 301
 xt_dsame
 di "PASS errors that depend on the fit in memory"
 
+if `"$XT_EFAILS"' != "" {
+	di as error `"failures: $XT_EFAILS"'
+	exit 9
+}
 di "ALL PASS"
