@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.5.17  12nov2026 author: Thomas Grund}{...}
+{* *! version 1.5.18  12nov2026 author: Thomas Grund}{...}
 {vieweralsosee "nwsaom" "help nwsaom"}{...}
 {vieweralsosee "nwsaom_estat" "help nwsaom_estat"}{...}
 {vieweralsosee "nwsaom_meta" "help nwsaom_meta"}{...}
@@ -138,4 +138,4 @@ The estimates of {cmd:nwsaom} are replaced; use {cmd:estimates store} first to k
 {phang}Snijders, T. A. B., J. H. Koskinen, and M. Schweinberger (2010). Maximum likelihood estimation for social network dynamics. Annals of Applied Statistics 4: 567-588.{p_end}
 
 {hline}
-{pstd}{it:nwsaom version 1.5.17, 12 November 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.5.18, 12 November 2026}{p_end}{* nwversion}
