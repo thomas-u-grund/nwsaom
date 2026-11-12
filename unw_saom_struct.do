@@ -380,7 +380,7 @@ void SaomStructCoevPd(struct SaomCoevCtx scalar C, class SaomModel scalar M, rea
 void SaomStructNeedBatch(real scalar use_batch) {
 	if (!SaomStructOn()) return
 	if (!use_batch | SaomNativePluginVersion() < 150) {
-		errprintf("nwsaom: structural zeros and ones (the codes 10 and 11) need the native plugin of this release (update nwsaom: net install ... replace); there is no Mata implementation.\n")
+		errprintf("{p 0 2 2}nwsaom: structural zeros and ones (the codes 10 and 11) need the native plugin of this release (update nwsaom: net install ... replace); there is no Mata implementation.{p_end}\n")
 		exit(198)
 	}
 }
@@ -479,7 +479,7 @@ void SaomStructSend1(real scalar n) {
 	pd = SaomStructPeriodGet()
 	if (pd < 1) return
 	if (SaomNativePluginVersion() < 150) {
-		errprintf("nwsaom: structural zeros and ones need the native plugin of this release (update nwsaom: net install ... replace).\n")
+		errprintf("{p 0 2 2}nwsaom: structural zeros and ones need the native plugin of this release (update nwsaom: net install ... replace).{p_end}\n")
 		exit(198)
 	}
 	raw = SaomStructRaw()
@@ -563,15 +563,15 @@ void SaomStructFromMask(string scalar name, pointer(class SaomGraph scalar) rowv
 
 	S = st_matrix(name)
 	if (rows(S) != n | cols(S) != n) {
-		errprintf("option structural() matrix must be %g x %g (one row/column per actor) - %s is not.\n", n, n, name)
+		errprintf("{p 0 2 2}option structural() matrix must be %g x %g (one row/column per actor) - %s is not.{p_end}\n", n, n, name)
 		exit(198)
 	}
 	if (any((S :!= 0) :& (S :!= 1))) {
-		errprintf("option structural() matrix must be coded 0/1 (1 = dyad fixed) - %s has a value outside {0,1}.\n", name)
+		errprintf("{p 0 2 2}option structural() matrix must be coded 0/1 (1 = dyad fixed) - %s has a value outside 0 and 1.{p_end}\n", name)
 		exit(198)
 	}
 	if (sum(diagonal(S)) != 0) {
-		errprintf("option structural() matrix must have an all-zero diagonal (no self-ties).\n")
+		errprintf("{p 0 2 2}option structural() matrix must have an all-zero diagonal (no self-ties).{p_end}\n")
 		exit(198)
 	}
 	W = cols(Gw)
@@ -585,7 +585,7 @@ void SaomStructFromMask(string scalar name, pointer(class SaomGraph scalar) rowv
 				v = (*Gw[w]).has_edge(i, j)
 				if (w == 1) first[i,j] = v
 				else if (first[i,j] != v) {
-					errprintf("option structural() marks a dyad as fixed whose observed value differs between the waves - a structural dyad given by the matrix must hold the SAME value at every wave (use the codes 10 and 11 in the wave networks for values that change).\n")
+					errprintf("{p 0 2 2}option structural() marks a dyad as fixed whose observed value differs between the waves - a structural dyad given by the matrix must hold the SAME value at every wave (use the codes 10 and 11 in the wave networks for values that change).{p_end}\n")
 					exit(198)
 				}
 				add = add \ (w, i, j, v)
@@ -684,7 +684,7 @@ void SaomStructSendMN(real scalar P, real scalar n) {
 
 	if (!SaomStructOn()) return
 	if (SaomNativePluginVersion() < 150) {
-		errprintf("nwsaom: structural zeros and ones need the native plugin of this release (update nwsaom: net install ... replace).\n")
+		errprintf("{p 0 2 2}nwsaom: structural zeros and ones need the native plugin of this release (update nwsaom: net install ... replace).{p_end}\n")
 		exit(198)
 	}
 	names = ("s_pd", "s_i", "s_j", "s_k")

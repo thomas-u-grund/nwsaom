@@ -259,7 +259,7 @@ void SaomGraph::set_dyadmask(real matrix freemat){
 	has_dyadmask = 1
 	freedyadmat = freemat
 	if (sum(freemat) == 0) {
-		errprintf("freedyads()/blockdiag(): the given dyad-eligibility mask leaves no free dyad at all (freedyads(): an all-untied network; blockdiag(): every node in its own singleton block) - every dyad would be fixed, leaving no dyad for the MCMC proposal to ever toggle.\n")
+		errprintf("{p 0 2 2}freedyads()/blockdiag(): the given dyad-eligibility mask leaves no free dyad at all (freedyads(): an all-untied network; blockdiag(): every node in its own singleton block) - every dyad would be fixed, leaving no dyad for the MCMC proposal to ever toggle.{p_end}\n")
 		exit(error(198))
 	}
 
@@ -5778,7 +5778,7 @@ real rowvector stat_saom_nat(class SaomGraph scalar G, class SaomTermData scalar
 	return(SaomNativeNetStat(G, td.levels[1] + (dyn ? 1000 : 0), td.decay, a))
 }
 real rowvector change_saom_nat(class SaomGraph scalar G, real scalar i, real scalar j, class SaomTermData scalar td) {
-	errprintf("nwsaom: this network effect needs a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation of its simulation.\n")
+	errprintf("{p 0 2 2}nwsaom: this network effect needs a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation of its simulation.{p_end}\n")
 	exit(198)
 	return(0)
 }
@@ -6706,7 +6706,7 @@ real rowvector stat_saom_balance(class SaomGraph scalar G, class SaomTermData sc
 void SaomCheckThetaBound(real rowvector theta, real scalar thetaBound) {
 	if (cols(theta) == 0) return
 	if (max(abs(theta)) > thetaBound) {
-		errprintf("SAOM estimation diverged during phase 2: a coefficient's own magnitude exceeded thetaBound (" + strofreal(thetaBound) + ") after a Robbins-Monro update step - matching real RSiena's own safeguard (R/phase2.r), which halts under the identical condition rather than let an update run away. This usually signals a genuine identification problem for this specific model/data combination (a real, diagnosed example: a co-evolution behavior effect's own joint parameter direction turning out to be an unidentified saturation ridge), not a software defect. Try a narrower effect specification, a larger/different dataset, or different starting values (theta0()/theta0beh()).\n")
+		errprintf("{p 0 2 2}SAOM estimation diverged during phase 2: a coefficient's own magnitude exceeded thetaBound (" + strofreal(thetaBound) + ") after a Robbins-Monro update step - matching real RSiena's own safeguard (R/phase2.r), which halts under the identical condition rather than let an update run away. This usually signals a genuine identification problem for this specific model/data combination (a real, diagnosed example: a co-evolution behavior effect's own joint parameter direction turning out to be an unidentified saturation ridge), not a software defect. Try a narrower effect specification, a larger/different dataset, or different starting values (theta0()/theta0beh()).{p_end}\n")
 		exit(498)
 	}
 }
@@ -6749,7 +6749,7 @@ void SaomSlowWarn(string scalar reason) {
 	else if (strpos(reason, "too old") > 0) why = "the installed plugin is older than this model needs; update it with {bf:net install nwsaom, replace}"
 	else why = "the model is outside the capacity of the plugin: " + reason
 	displayas("txt")
-	printf("(Warning: the compiled plugin is not used for this fit (%s); the Mata fallback is much slower, possibly hours. See {help nwsaom_remarks##engine:Check which engine ran}. If the plugin of your platform does not work, compile it on this computer: {cmd:nwinstall, buildplugin(nwsaom)}.)\n", why)
+	printf("{p 0 2 2}(Warning: the compiled plugin is not used for this fit (%s); the Mata fallback is much slower, possibly hours. See {help nwsaom_remarks##engine:Check which engine ran}. If the plugin of your platform does not work, compile it on this computer: {cmd:nwinstall, buildplugin(nwsaom)}.){p_end}\n", why)
 }
 
 void SaomSetEngine(real scalar native, string scalar reason) {
@@ -6761,14 +6761,14 @@ void SaomSetEngine(real scalar native, string scalar reason) {
 
 void SaomCondTimeCheck(real matrix T) {
 	if (hasmissing(T)) {
-		errprintf("SAOM simulation: a simulated period did not reach the observed distance within 1000000 ministeps (RSiena: Unlikely to terminate this epoch: more than 1000000 steps). The estimates probably diverged (e.g. a phase-1 derivative estimated from too few simulations, k0()); try the default k0(), other starting values (theta0()), or a narrower model.\n")
+		errprintf("{p 0 2 2}SAOM simulation: a simulated period did not reach the observed distance within 1000000 ministeps (RSiena: Unlikely to terminate this epoch: more than 1000000 steps). The estimates probably diverged (e.g. a phase-1 derivative estimated from too few simulations, k0()); try the default k0(), other starting values (theta0()), or a narrower model.{p_end}\n")
 		exit(498)
 	}
 }
 
 void SaomCheckCovarianceFinite(real matrix V) {
 	if (hasmissing(V)) {
-		errprintf("SAOM estimation's own phase-3 covariance matrix (e(V)) contains missing values - the phase-3 Jacobian was too close to singular to invert reliably. This is a further symptom of the SAME kind of weak identification thetaBound exists to catch - theta itself stayed within thetaBound's own limit, but the separate phase-3 covariance computation still broke down, which usually signals a genuine identification problem for this specific model/data combination, not a software defect. Try a narrower effect specification, a larger/different dataset, or different starting values (theta0()/theta0beh()).\n")
+		errprintf("{p 0 2 2}SAOM estimation's own phase-3 covariance matrix (e(V)) contains missing values - the phase-3 Jacobian was too close to singular to invert reliably. This is a further symptom of the SAME kind of weak identification thetaBound exists to catch - theta itself stayed within thetaBound's own limit, but the separate phase-3 covariance computation still broke down, which usually signals a genuine identification problem for this specific model/data combination, not a software defect. Try a narrower effect specification, a larger/different dataset, or different starting values (theta0()/theta0beh()).{p_end}\n")
 		exit(505)
 	}
 }
@@ -7155,13 +7155,13 @@ void SaomBuildInteractTd(class SaomModel scalar M, real scalar n,
 	tdA = *M.td[subA]
 	tdB = *M.td[subB]
 	if (_saom_cov_masked(tdA, tA, n) | _saom_cov_masked(tdB, tB, n)) {
-		errprintf("nwsaom: interact() does not support a covariate effect whose variable has missing values (its statistic skips the missing actors, which an interaction's per-tie product cannot represent).\n")
+		errprintf("{p 0 2 2}nwsaom: interact() does not support a covariate effect whose variable has missing values (its statistic skips the missing actors, which an interaction's per-tie product cannot represent).{p_end}\n")
 		exit(error(198))
 	}
 	if (threeway) {
 		tdC = *M.td[subC]
 		if (_saom_cov_masked(tdC, tC, n)) {
-			errprintf("nwsaom: interact() does not support a covariate effect whose variable has missing values.\n")
+			errprintf("{p 0 2 2}nwsaom: interact() does not support a covariate effect whose variable has missing values.{p_end}\n")
 			exit(error(198))
 		}
 	}
@@ -8007,11 +8007,11 @@ void SaomTimedFromVars(real scalar n, real scalar W, string scalar jv, string sc
 		if (join[i] >= .) join[i] = 1
 		if (leave[i] >= .) leave[i] = W
 		if (join[i] < 1 | leave[i] > W | join[i] > leave[i]) {
-			errprintf("joinat()/leaveat(): actor %g has the times %g and %g; they must satisfy 1 <= joinat <= leaveat <= %g (the number of waves)\n", i, join[i], leave[i], W)
+			errprintf("{p 0 2 2}joinat()/leaveat(): actor %g has the times %g and %g; they must satisfy 1 <= joinat <= leaveat <= %g (the number of waves){p_end}\n", i, join[i], leave[i], W)
 			exit(198)
 		}
 		if (ceil(join[i]) > trunc(leave[i])) {
-			errprintf("joinat()/leaveat(): actor %g (times %g and %g) is not active at any observation; RSiena requires every interval to contain a wave\n", i, join[i], leave[i])
+			errprintf("{p 0 2 2}joinat()/leaveat(): actor %g (times %g and %g) is not active at any observation; RSiena requires every interval to contain a wave{p_end}\n", i, join[i], leave[i])
 			exit(198)
 		}
 	}
@@ -8066,7 +8066,7 @@ real scalar SaomTimedLoad(real scalar n, real scalar P, real matrix presentPd, p
 	ps = findexternal("__nwsaom_compstart")
 	if (ps == NULL) return(0)
 	if (rows(*ps) != n | cols(*ps) != P) {
-		errprintf("internal error: the composition-change start matrix must be n x P\n")
+		errprintf("{p 0 2 2}internal error: the composition-change start matrix must be n x P{p_end}\n")
 		exit(498)
 	}
 	presentPd = *ps
@@ -8338,7 +8338,7 @@ void SaomNetCtxInit(struct SaomNetCtx scalar C, pointer(class SaomGraph scalar) 
 	else why = "native plugin too old for this model"
 	SaomSetEngine(C.use_native, why)
 	if (SaomStructOn() & ver < 150) {
-		errprintf("nwsaom: structural zeros and ones (the codes 10 and 11) need the native plugin of this release (update nwsaom: net install ... replace, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation.\n")
+		errprintf("{p 0 2 2}nwsaom: structural zeros and ones (the codes 10 and 11) need the native plugin of this release (update nwsaom: net install ... replace, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation.{p_end}\n")
 		exit(198)
 	}
 	C.native_netdist = (ver >= 5)
@@ -8347,32 +8347,32 @@ void SaomNetCtxInit(struct SaomNetCtx scalar C, pointer(class SaomGraph scalar) 
 	C.use_batch = C.use_native & (!C.hastimed | ver >= 27) & (ver >= 5) & ((!C.hasratecov & C.symtype == 0 & !C.hasnetgate & !C.hasstructural) | ver >= 11)
 	if (SaomGroupsMode()) {
 		if (!C.use_batch | ver < 151) {
-			errprintf("nwsaom: groups() needs the native plugin of this release (update nwsaom: net install ... replace, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation.\n")
+			errprintf("{p 0 2 2}nwsaom: groups() needs the native plugin of this release (update nwsaom: net install ... replace, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation.{p_end}\n")
 			exit(198)
 		}
 	}
 	if (SaomRateTVCount() > 0) {
 		if (!C.use_batch | ver < 71) {
-			errprintf("nwsaom: a changing covariate in ratecov() needs a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation.\n")
+			errprintf("{p 0 2 2}nwsaom: a changing covariate in ratecov() needs a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation.{p_end}\n")
 			exit(198)
 		}
 	}
 	if (C.hasratecov & C.hasstructural & ver < 70) {
-		errprintf("nwsaom: rate effects of a two-mode network need a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation.\n")
+		errprintf("{p 0 2 2}nwsaom: rate effects of a two-mode network need a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation.{p_end}\n")
 		exit(198)
 	}
 	if (cols(SaomSRTypes()) > 0) {
 		if (C.symtype != 0 & ver < 70) {
-			errprintf("nwsaom: the structural rate effects of a non-directed network need a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation.\n")
+			errprintf("{p 0 2 2}nwsaom: the structural rate effects of a non-directed network need a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation.{p_end}\n")
 			exit(198)
 		}
 		if (!C.use_batch | ver < 42) {
-			errprintf("nwsaom: the structural rate effects (outrate, inrate, ...) need a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation.\n")
+			errprintf("{p 0 2 2}nwsaom: the structural rate effects (outrate, inrate, ...) need a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation.{p_end}\n")
 			exit(198)
 		}
 	}
 	if (C.symtype != 0 & !C.use_native) {
-		errprintf("SAOM estimation of a non-directed relation (symmetric, symtype()) requires the native (C) backend (a newer native plugin may be needed: update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)) for symtype(forcing)/(confirmation); it is not available for this model/platform (there is no Mata fallback for these ministeps).\n")
+		errprintf("{p 0 2 2}SAOM estimation of a non-directed relation (symmetric, symtype()) requires the native (C) backend (a newer native plugin may be needed: update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)) for symtype(forcing)/(confirmation); it is not available for this model/platform (there is no Mata fallback for these ministeps).{p_end}\n")
 		exit(198)
 	}
 	C.missDyadsPd = J(0, 3, 0)
@@ -8382,7 +8382,7 @@ void SaomNetCtxInit(struct SaomNetCtx scalar C, pointer(class SaomGraph scalar) 
 			if (rows(mdt) > 0) C.missDyadsPd = C.missDyadsPd \ (J(rows(mdt), 1, pd), mdt)
 		}
 	}
-	if (strtoreal(st_global("NWSAOM_TRACE")) == 4) printf("TRACE ctx: ver %g native %g batch %g timed %g\n", ver, C.use_native, C.use_batch, C.hastimed)
+	if (strtoreal(st_global("NWSAOM_TRACE")) == 4) printf("{p 0 2 2}TRACE ctx: ver %g native %g batch %g timed %g{p_end}\n", ver, C.use_native, C.use_batch, C.hastimed)
 	if (C.use_batch) {
 		SaomBatchSetup(Gwaves, C.P, C.cfg, J(1, 0, 0), J(1, 0, NULL), 0, 0, 0, 0,
 			C.hasmiss, C.missDyadsPd, J(C.n, C.P, 0), C.haspresent, C.presentPd,
@@ -8390,7 +8390,7 @@ void SaomNetCtxInit(struct SaomNetCtx scalar C, pointer(class SaomGraph scalar) 
 		if (SaomStructOn()) SaomStructSend(C.P, C.n)
 	}
 	else if (SaomStructOn()) {
-		errprintf("nwsaom: structural zeros and ones (the codes 10 and 11) need the native plugin of this release (update nwsaom: net install ... replace, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation.\n")
+		errprintf("{p 0 2 2}nwsaom: structural zeros and ones (the codes 10 and 11) need the native plugin of this release (update nwsaom: net install ... replace, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation.{p_end}\n")
 		exit(198)
 	}
 }
@@ -8897,7 +8897,7 @@ real matrix SaomPhase1FD(real scalar coev, transmorphic C, pointer(function) sca
 					again = 1
 				}
 				if (trace & again) {
-					printf("TRACE phase 1, finite differences: epsilon enlarged (%f)\n", rep + 1)
+					printf("{p 0 2 2}TRACE phase 1, finite differences: epsilon enlarged (%f){p_end}\n", rep + 1)
 					eps
 				}
 				if (again & rep < 4) break
@@ -9004,7 +9004,7 @@ struct SaomNetFit scalar SaomRMCore(transmorphic C, pointer(function) scalar sim
 				continue
 			}
 			findiff = 1
-			printf("{txt}note: the derivative estimate of phase 1 had a non-positive diagonal element after %f simulations; phase 1 was run again with finite differences, as RSiena does.\n", kp1)
+			printf("{txt}{p 0 2 2}note: the derivative estimate of phase 1 had a non-positive diagonal element after %f simulations; phase 1 was run again with finite differences, as RSiena does.{p_end}\n", kp1)
 			Dhat = SaomPhase1FD(0, C, simfn, ., ., par0, kp1, israte, userfix, Zdev, trace)
 		}
 		break
@@ -9338,7 +9338,7 @@ void SaomModelSubsetBegin(class SaomModel scalar M, real scalar h) {
 		if (rows((*tdp).levels) == N & cols((*tdp).levels) == 1) (*tdp).levels = (*tdp).levels[idx, .]
 		if (rows((*tdp).edgecovmat) == N & cols((*tdp).edgecovmat) == N) (*tdp).edgecovmat = (*tdp).edgecovmat[idx, idx]
 		if (rows((*tdp).edgecovpd) > 0 | rows((*tdp).attrpd) > 0) {
-			errprintf("nwsaom: estat after a fit with groups is not available together with changing covariates.\n")
+			errprintf("{p 0 2 2}nwsaom: estat after a fit with groups is not available together with changing covariates.{p_end}\n")
 			exit(198)
 		}
 	}
@@ -9493,13 +9493,13 @@ real matrix SaomGroupsParseWaves(string scalar spec, real colvector grp, real sc
 		if (parts[i] == "|") continue
 		kv = tokens(parts[i], ":")
 		if (cols(kv) != 3 | kv[2] != ":") {
-			errprintf("nwsaom: gwaves(): each group is given as value: wave numbers, e.g. gwaves(1: 1 2 3 | 2: 1 2).\n")
+			errprintf("{p 0 2 2}nwsaom: gwaves(): each group is given as value: wave numbers, e.g. gwaves(1: 1 2 3 | 2: 1 2).{p_end}\n")
 			exit(198)
 		}
 		v = strtoreal(strtrim(kv[1]))
 		h = selectindex(lv :== v)
 		if (rows(h) == 0) {
-			errprintf("nwsaom: gwaves(): %s is not a value of the group variable.\n", strtrim(kv[1]))
+			errprintf("{p 0 2 2}nwsaom: gwaves(): %s is not a value of the group variable.{p_end}\n", strtrim(kv[1]))
 			exit(198)
 		}
 		ws = tokens(strtrim(kv[3]))
@@ -9507,7 +9507,7 @@ real matrix SaomGroupsParseWaves(string scalar spec, real colvector grp, real sc
 		for (j=1; j<=cols(ws); j++) {
 			w = strtoreal(ws[j])
 			if (w >= . | w < 1 | w > W | w != trunc(w)) {
-				errprintf("nwsaom: gwaves(): wave numbers must be integers between 1 and %g.\n", W)
+				errprintf("{p 0 2 2}nwsaom: gwaves(): wave numbers must be integers between 1 and %g.{p_end}\n", W)
 				exit(198)
 			}
 			wl[h, j] = w
@@ -9535,7 +9535,7 @@ string scalar SaomGroupsTvExpand(string scalar tv) {
 		one = ""
 		for (pd=1; pd<=P; pd++) {
 			if (wl[pg[pd], pi[pd]] > cols(vars)) {
-				errprintf("nwsaom: tvcov() has too few variables for the waves of the groups.\n")
+				errprintf("{p 0 2 2}nwsaom: tvcov() has too few variables for the waves of the groups.{p_end}\n")
 				exit(198)
 			}
 			one = one + (pd > 1 ? " " : "") + vars[wl[pg[pd], pi[pd]]]
@@ -9560,7 +9560,7 @@ real scalar SaomGroupsSet(pointer(class SaomGraph scalar) rowvector Gw, real col
 
 	n = rows(grp)
 	if (n != (*Gw[1]).n) {
-		errprintf("nwsaom: groups(): the group variable has %g observations but the networks have %g actors.\n", n, (*Gw[1]).n)
+		errprintf("{p 0 2 2}nwsaom: groups(): the group variable has %g observations but the networks have %g actors.{p_end}\n", n, (*Gw[1]).n)
 		exit(198)
 	}
 	if (any(grp :>= .)) {
@@ -9570,39 +9570,39 @@ real scalar SaomGroupsSet(pointer(class SaomGraph scalar) rowvector Gw, real col
 	lv = uniqrows(grp)
 	G = rows(lv)
 	if (G < 2) {
-		errprintf("nwsaom: groups(): the group variable takes only one value; fit a single group without groups().\n")
+		errprintf("{p 0 2 2}nwsaom: groups(): the group variable takes only one value; fit a single group without groups().{p_end}\n")
 		exit(198)
 	}
 	if (rows(wl) != G) {
-		errprintf("nwsaom: groups(): internal error, wave table has %g rows for %g groups.\n", rows(wl), G)
+		errprintf("{p 0 2 2}nwsaom: groups(): internal error, wave table has %g rows for %g groups.{p_end}\n", rows(wl), G)
 		exit(198)
 	}
 	code = J(n, 1, .)
 	for (h=1; h<=G; h++) code[selectindex(grp :== lv[h])] = J(sum(grp :== lv[h]), 1, h)
 	for (h=1; h<=G; h++) {
 		if (sum(code :== h) < 3) {
-			errprintf("nwsaom: groups(): group %g (value %g) has fewer than 3 actors.\n", h, lv[h])
+			errprintf("{p 0 2 2}nwsaom: groups(): group %g (value %g) has fewer than 3 actors.{p_end}\n", h, lv[h])
 			exit(198)
 		}
 		nwh = sum(wl[h, .] :> 0)
 		if (nwh < 2) {
-			errprintf("nwsaom: groups(): group %g (value %g) has fewer than 2 waves.\n", h, lv[h])
+			errprintf("{p 0 2 2}nwsaom: groups(): group %g (value %g) has fewer than 2 waves.{p_end}\n", h, lv[h])
 			exit(198)
 		}
 		for (c=1; c<=nwh; c++) {
 			if (wl[h, c] < 1 | wl[h, c] > cols(Gw)) {
-				errprintf("nwsaom: groups(): wave %g of group %g is not in waves().\n", wl[h, c], h)
+				errprintf("{p 0 2 2}nwsaom: groups(): wave %g of group %g is not in waves().{p_end}\n", wl[h, c], h)
 				exit(198)
 			}
 			if (c > 1) if (wl[h, c] <= wl[h, c-1]) {
-				errprintf("nwsaom: gwaves(): the waves of group %g must be in increasing order.\n", h)
+				errprintf("{p 0 2 2}nwsaom: gwaves(): the waves of group %g must be in increasing order.{p_end}\n", h)
 				exit(198)
 			}
 			t = (*Gw[wl[h, c]]).all_ties()
 			if (rows(t) == 0) continue
 			bad = sum((code[t[., 1]] :== h) :& (code[t[., 2]] :!= h))
 			if (bad > 0) {
-				errprintf("nwsaom: groups(): wave %g has %g tie(s) from actors of group %g to actors of other groups; the networks of the waves must have no ties between groups (the groups are separate actor sets).\n", wl[h, c], bad, h)
+				errprintf("{p 0 2 2}nwsaom: groups(): wave %g has %g tie(s) from actors of group %g to actors of other groups; the networks of the waves must have no ties between groups (the groups are separate actor sets).{p_end}\n", wl[h, c], bad, h)
 				exit(198)
 			}
 		}
@@ -11776,7 +11776,7 @@ void SaomMNAddCrossCov(class SaomModel scalar M, string scalar eff, string scala
 	XE = (nact < n ? SaomMNEventData(vn, nact, n) : J(0, 1, .))
 	if (rows(XE) > 0) {
 		if (SaomNativePluginVersion() < 130) {
-			errprintf("nwsaom multinet: a covariate of the events needs a newer plugin; update it, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom).\n")
+			errprintf("{p 0 2 2}nwsaom multinet: a covariate of the events needs a newer plugin; update it, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom).{p_end}\n")
 			exit(198)
 		}
 		if (!anyof(("altdist2w", "totdist2w", "simdist2w", "outactintnx", "outpopintnx"), eff)) {
@@ -12287,7 +12287,7 @@ struct SaomMNFit scalar SaomEstimateMN(pointer(class SaomGraph scalar) rowvector
 	pointer(real matrix) rowvector noev
 	P = cols(G1) - 1
 	if (cols(G2) - 1 != P) {
-		errprintf("nwsaom multinet: both networks need the same number of waves\n")
+		errprintf("{p 0 2 2}nwsaom multinet: both networks need the same number of waves{p_end}\n")
 		exit(198)
 	}
 	n = (*G1[1]).n
@@ -12295,16 +12295,16 @@ struct SaomMNFit scalar SaomEstimateMN(pointer(class SaomGraph scalar) rowvector
 	p2 = M2.nparam()
 	C.P = P; C.n = n; C.p1 = p1; C.p2 = p2; C.p = p1 + p2
 	if (!SaomNativeAvailable()) {
-		errprintf("nwsaom multinet needs the native plugin (there is no Mata engine for several networks).\n")
+		errprintf("{p 0 2 2}nwsaom multinet needs the native plugin (there is no Mata engine for several networks).{p_end}\n")
 		exit(198)
 	}
 	ver = SaomNativePluginVersion()
 	if ((args() >= 10 ? (sym1 | sym2) : 0) & ver < 62) {
-		errprintf("nwsaom multinet with a non-directed network needs a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)).\n")
+		errprintf("{p 0 2 2}nwsaom multinet with a non-directed network needs a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)).{p_end}\n")
 		exit(198)
 	}
 	if (ver < 52) {
-		errprintf("nwsaom multinet needs a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)).\n")
+		errprintf("{p 0 2 2}nwsaom multinet needs a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)).{p_end}\n")
 		exit(198)
 	}
 	cfg1 = SaomNativeSetup(M1)
@@ -12314,7 +12314,7 @@ struct SaomMNFit scalar SaomEstimateMN(pointer(class SaomGraph scalar) rowvector
 		exit(198)
 	}
 	if ((any(cfg1.termcodes :== 3200) | any(cfg2.termcodes :== 3200)) & ver < 130) {
-		errprintf("nwsaom multinet: tou needs a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)).\n")
+		errprintf("{p 0 2 2}nwsaom multinet: tou needs a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)).{p_end}\n")
 		exit(198)
 	}
 	nfree1 = n * (n - 1)
@@ -12327,7 +12327,7 @@ struct SaomMNFit scalar SaomEstimateMN(pointer(class SaomGraph scalar) rowvector
 		tmf1 = *findexternal("__nwsaom_mn_tm1")
 		tmf2 = *findexternal("__nwsaom_mn_tm2")
 		if (ver < 90) {
-			errprintf("nwsaom multinet with a two-mode network needs a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)).\n")
+			errprintf("{p 0 2 2}nwsaom multinet with a two-mode network needs a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)).{p_end}\n")
 			exit(198)
 		}
 		Sm = SaomMNStructMask(n, nA, tmf1)
@@ -12473,7 +12473,7 @@ struct SaomMNBFit scalar SaomEstimateMNB(pointer(class SaomGraph scalar) rowvect
 	pointer(real matrix) rowvector noev
 	P = cols(G1) - 1
 	if (cols(G2) - 1 != P | cols(Behwaves) != P + 1) {
-		errprintf("nwsaom multinet: both networks and the behavior need the same number of waves\n")
+		errprintf("{p 0 2 2}nwsaom multinet: both networks and the behavior need the same number of waves{p_end}\n")
 		exit(198)
 	}
 	n = (*G1[1]).n
@@ -12482,31 +12482,31 @@ struct SaomMNBFit scalar SaomEstimateMNB(pointer(class SaomGraph scalar) rowvect
 	pb = Mbeh.nparam()
 	C.P = P; C.n = n; C.p1 = p1; C.p2 = p2; C.pb = pb; C.p = p1 + p2 + pb
 	if (!SaomNativeAvailable()) {
-		errprintf("nwsaom multinet needs the native plugin (there is no Mata engine for several networks).\n")
+		errprintf("{p 0 2 2}nwsaom multinet needs the native plugin (there is no Mata engine for several networks).{p_end}\n")
 		exit(198)
 	}
 	ver = SaomNativePluginVersion()
 	if (ver < 64) {
-		errprintf("nwsaom multinet with a behavior needs a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)).\n")
+		errprintf("{p 0 2 2}nwsaom multinet with a behavior needs a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)).{p_end}\n")
 		exit(198)
 	}
 	cfg1 = SaomNativeSetup(M1)
 	cfg2 = SaomNativeSetup(M2)
 	cfgB = SaomBehaviorNativeSetup(Mbeh)
 	if ((any(cfg1.termcodes :== 3200) | any(cfg2.termcodes :== 3200)) & ver < 130) {
-		errprintf("nwsaom multinet: tou needs a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)).\n")
+		errprintf("{p 0 2 2}nwsaom multinet: tou needs a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)).{p_end}\n")
 		exit(198)
 	}
 	if (cfgB.needv154 & ver < 154) {
-		errprintf("nwsaom multinet: the quadratic shape effect needs a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)).\n")
+		errprintf("{p 0 2 2}nwsaom multinet: the quadratic shape effect needs a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)).{p_end}\n")
 		exit(198)
 	}
 	if (any(cfgB.termcodes :>= 30000) & ver < 103) {
-		errprintf("nwsaom multinet: interactions of behavior effects need a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)).\n")
+		errprintf("{p 0 2 2}nwsaom multinet: interactions of behavior effects need a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)).{p_end}\n")
 		exit(198)
 	}
 	if (any(cfgB.termcodes :>= 20000) & ver < 100) {
-		errprintf("nwsaom multinet: the behavior effects of both networks need a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)).\n")
+		errprintf("{p 0 2 2}nwsaom multinet: the behavior effects of both networks need a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)).{p_end}\n")
 		exit(198)
 	}
 	if (!cfg1.eligible | !cfg2.eligible | !cfgB.eligible) {
@@ -12514,7 +12514,7 @@ struct SaomMNBFit scalar SaomEstimateMNB(pointer(class SaomGraph scalar) rowvect
 		exit(198)
 	}
 	if (any(cfgB.fntype :!= 0) & ver < 101) {
-		errprintf("nwsaom multinet: endowment/creation effects of the behavior need a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)).\n")
+		errprintf("{p 0 2 2}nwsaom multinet: endowment/creation effects of the behavior need a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)).{p_end}\n")
 		exit(198)
 	}
 	allb = *Behwaves[1]
@@ -12525,7 +12525,7 @@ struct SaomMNBFit scalar SaomEstimateMNB(pointer(class SaomGraph scalar) rowvect
 	if (findexternal("__nwsaom_mn_Miss") != NULL) {
 		if (cols(*findexternal("__nwsaom_mn_Miss")) == P + 1) {
 			if (ver < 102) {
-				errprintf("nwsaom multinet: missbeh() needs a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)).\n")
+				errprintf("{p 0 2 2}nwsaom multinet: missbeh() needs a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)).{p_end}\n")
 				exit(198)
 			}
 			for (pd=1; pd<=P; pd++) missPd[., pd] = ((*(*findexternal("__nwsaom_mn_Miss"))[pd] :| *(*findexternal("__nwsaom_mn_Miss"))[pd+1]) :!= 0)
@@ -12723,7 +12723,7 @@ void SaomMNAddBehInt(class SaomBehaviorModel scalar Mbeh, string scalar spec) {
 			nm = Mbeh.coefnames[a]
 			base = (substr(nm, 1, 5) == "beh2_" ? substr(nm, 6, .) : substr(nm, 5, .))
 			if (!anyof(("linear", "quadratic", "avalt", "avsim"), base) | a > 99) {
-				errprintf("nwsaom multinet: behint(): the effects of an interaction must be linear, quadratic, avalt or avsim (" + nm + ").\n")
+				errprintf("{p 0 2 2}nwsaom multinet: behint(): the effects of an interaction must be linear, quadratic, avalt or avsim (" + nm + ").{p_end}\n")
 				exit(198)
 			}
 			idx[q] = a
@@ -13241,7 +13241,7 @@ void SaomCoevSimMany(struct SaomCoevCtx scalar C, class SaomModel scalar M,
 				Zs = Zs + Zp[., ((pp-1)*C.ptot+1)..(pp*C.ptot)]
 				Ss = Ss + Sp[., ((pp-1)*C.ptot+1)..(pp*C.ptot)]
 			}
-			printf("PERCHECK coev: K=%f  max|sum_p Zp - Z| = %g  max|sum_p Sp - S| = %g\n", K, max(abs(Zs - Z)), max(abs(Ss - S)))
+			printf("{p 0 2 2}PERCHECK coev: K=%f  max|sum_p Zp - Z| = %g  max|sum_p Sp - S| = %g{p_end}\n", K, max(abs(Zs - Z)), max(abs(Ss - S)))
 		}
 		return
 	}
@@ -13434,16 +13434,16 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 	else why = "native plugin too old for this model"
 	SaomSetEngine(C.use_native, why)
 	if (C.symtype != 0 & !C.use_batch) {
-		errprintf("nwsaom: co-evolution of a non-directed (symmetric) relation needs the native (C) plugin with the threaded batch path (a newer native plugin may be needed: update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)), which is not available for this model/platform.\n")
+		errprintf("{p 0 2 2}nwsaom: co-evolution of a non-directed (symmetric) relation needs the native (C) plugin with the threaded batch path (a newer native plugin may be needed: update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)), which is not available for this model/platform.{p_end}\n")
 		exit(198)
 	}
 	if (nrcT > 0 | SaomRCBehCount() > 0) {
 		if (!C.use_batch) {
-			errprintf("nwsaom: rate effects in a model with a behavior need a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation.\n")
+			errprintf("{p 0 2 2}nwsaom: rate effects in a model with a behavior need a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation.{p_end}\n")
 			exit(198)
 		}
 		if (SaomNativePluginVersion() < 72) {
-			errprintf("nwsaom: rate effects in a model with a behavior need a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation.\n")
+			errprintf("{p 0 2 2}nwsaom: rate effects in a model with a behavior need a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation.{p_end}\n")
 			exit(198)
 		}
 	}
@@ -13566,7 +13566,7 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 				continue
 			}
 			findiff = 1
-			printf("{txt}note: the derivative estimate of phase 1 had a non-positive diagonal element after %f simulations; phase 1 was run again with finite differences, as RSiena does.\n", kp1)
+			printf("{txt}{p 0 2 2}note: the derivative estimate of phase 1 had a non-positive diagonal element after %f simulations; phase 1 was run again with finite differences, as RSiena does.{p_end}\n", kp1)
 			Dhat = SaomPhase1FD(1, C, NULL, M, Mbeh, theta0, kp1, israteC, userfixc, Zdev, (strtoreal(st_global("NWSAOM_TRACE")) == 1))
 		}
 		break
@@ -13577,7 +13577,7 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 			Dhat[k,.] = J(1, ptot, 0)
 			Dhat[.,k] = J(ptot, 1, 0)
 			Dhat[k,k] = 1
-			if (!userfixc[k]) printf("{txt}note: parameter %f has a non-positive derivative estimate and is kept fixed at its starting value, as RSiena does (R/phase1.r).\n", k)
+			if (!userfixc[k]) printf("{txt}{p 0 2 2}note: parameter %f has a non-positive derivative estimate and is kept fixed at its starting value, as RSiena does (R/phase1.r).{p_end}\n", k)
 		}
 	}
 	fit.fixed = coevfixed
@@ -13722,7 +13722,7 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 		gain = gain * reduceg
 	}
 	if (!restart) break
-	printf("{txt}note: during phase 2 the simulated behavior nearly stopped changing (the estimates had overshot); the estimation was started again from phase 1.\n")
+	printf("{txt}{p 0 2 2}note: during phase 2 the simulated behavior nearly stopped changing (the estimates had overshot); the estimation was started again from phase 1.{p_end}\n")
 	}
 
 	fit.thetaNet = theta[1..C.pNet]
@@ -15806,7 +15806,7 @@ void SaomImportanceCore(pointer(class SaomGraph scalar) rowvector Gstart, real s
 	st0 = _SaomGofExt("__nwsaom_last_struct", J(0, 0, 0))
 	K = cols(theta)
 	if (K != M.nterms) {
-		errprintf("estat importance: the coefficient vector does not match the model.\n")
+		errprintf("{p 0 2 2}estat importance: the coefficient vector does not match the model.{p_end}\n")
 		exit(198)
 	}
 	cfg = SaomNativeSetup(M)
@@ -15819,12 +15819,12 @@ void SaomImportanceCore(pointer(class SaomGraph scalar) rowvector Gstart, real s
 	if (coev) {
 		cfgB = SaomBehaviorNativeSetup(Mbeh)
 		if (!cfgB.eligible | any(cfgB.fntype :!= 0)) {
-			errprintf("estat importance is not available with a behavior effect that has no native implementation or with endowment/creation effects.\n")
+			errprintf("{p 0 2 2}estat importance is not available with a behavior effect that has no native implementation or with endowment/creation effects.{p_end}\n")
 			exit(198)
 		}
 		Kb = Mbeh.nterms
 		if (cols(thetab) != Kb) {
-			errprintf("estat importance: the behavior coefficients do not match the model.\n")
+			errprintf("{p 0 2 2}estat importance: the behavior coefficients do not match the model.{p_end}\n")
 			exit(198)
 		}
 		allb = *Behwaves[1]
@@ -15941,11 +15941,11 @@ real scalar SaomGofSimNet(class SaomGraph scalar G, class SaomModel scalar M,
 		return(1)
 	}
 	if (SaomStructOn()) {
-		errprintf("estat gof/simulate with structural zeros and ones needs the native plugin of this release (no Mata implementation).\n")
+		errprintf("{p 0 2 2}estat gof/simulate with structural zeros and ones needs the native plugin of this release (no Mata implementation).{p_end}\n")
 		exit(198)
 	}
 	if (symtype != 0) {
-		errprintf("estat gof needs the native (C) simulator for a non-directed fit.\n")
+		errprintf("{p 0 2 2}estat gof needs the native (C) simulator for a non-directed fit.{p_end}\n")
 		exit(498)
 	}
 	if (rows(rcattr) > 0) r = SaomSimIntCountedRateCov(G, M, theta, rate, rcattr, rccoef, (haspr ? pr : J(G.n, 1, 1)), fn)
@@ -15973,7 +15973,7 @@ real scalar SaomGofSimCoev(class SaomGraph scalar G, class SaomModel scalar M, r
 		return(1)
 	}
 	if (SaomStructOn()) {
-		errprintf("estat gof/simulate with structural zeros and ones needs the native plugin of this release (no Mata implementation).\n")
+		errprintf("{p 0 2 2}estat gof/simulate with structural zeros and ones needs the native plugin of this release (no Mata implementation).{p_end}\n")
 		exit(198)
 	}
 	rm = SaomSimulateIntervalCoev(G, M, thetaNet, Beh, Mbeh, thetaBeh, rateNet, rateBeh)
@@ -16544,7 +16544,7 @@ void SaomBatchSetupMB(pointer(class SaomGraph scalar) rowvector Gwaves, real sca
 void SaomStepCapCheck() {
 	if (st_numscalar("__saom_native_stepcap") == 1) {
 		st_numscalar("__saom_native_stepcap", 0)
-		errprintf("SAOM simulation: a simulated period needed more than 1000000 ministeps. A rate effect has sent the total rate towards infinity, so the estimates have diverged (RSiena stops such a fit with its thetaBound error). Try other starting values (theta0()), fewer rate effects, or a narrower model.\n")
+		errprintf("{p 0 2 2}SAOM simulation: a simulated period needed more than 1000000 ministeps. A rate effect has sent the total rate towards infinity, so the estimates have diverged (RSiena stops such a fit with its thetaBound error). Try other starting values (theta0()), fewer rate effects, or a narrower model.{p_end}\n")
 		exit(498)
 	}
 }
@@ -16891,7 +16891,7 @@ struct SaomMBCtx scalar SaomMBInit(
 	else why = "native plugin too old for several behaviors"
 	SaomSetEngine(C.use_native, why)
 	if (SaomGroupsMode() & !C.use_native) {
-		errprintf("nwsaom: several behaviors with groups() need the native plugin of this release (update nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation.\n")
+		errprintf("{p 0 2 2}nwsaom: several behaviors with groups() need the native plugin of this release (update nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation.{p_end}\n")
 		exit(198)
 	}
 
@@ -17582,7 +17582,7 @@ real rowvector stat_saom_bs(class SaomBehavior scalar Beh, class SaomGraph scala
 	return(tot)
 }
 real scalar change_saom_bs(class SaomBehavior scalar Beh, class SaomGraph scalar G, real scalar i, real scalar diff) {
-	errprintf("nwsaom: this behavior effect needs a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation of its simulation.\n")
+	errprintf("{p 0 2 2}nwsaom: this behavior effect needs a newer native plugin (update nwcommands and nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation of its simulation.{p_end}\n")
 	exit(198)
 	return(0)
 }
@@ -18694,7 +18694,7 @@ void SaomMBEngineCheck(pointer(class SaomGraph scalar) rowvector Gwaves, class S
 	C.use_native = 0
 	SaomMBSimManyCB(C, theta, K, 1, Zm, Sm)
 	tsum = colsum(C.target)
-	printf("engine check, K=%f replicates: mean (sd) of the statistic [native | Mata], mean of the score\n", K)
+	printf("{p 0 2 2}engine check, K=%f replicates: mean (sd) of the statistic [native | Mata], mean of the score{p_end}\n", K)
 	for (j=1; j<=C.ptot; j++) {
 		printf("  par %2.0f  stat %9.3f (%7.3f) | %9.3f (%7.3f)   score %9.3f | %9.3f   target %9.3f\n", j,
 			mean(Zn[.,j]), sqrt(variance(Zn[.,j])), mean(Zm[.,j]), sqrt(variance(Zm[.,j])), mean(Sn[.,j]), mean(Sm[.,j]), tsum[j])
@@ -18906,7 +18906,7 @@ void SaomChainPrepare(pointer(class SaomGraph scalar) rowvector Gall, real scala
 	n = (*Gall[1]).n
 	cfg = SaomNativeSetup(M)
 	if (!cfg.eligible | !SaomNativeAvailable() | SaomNativePluginVersion() < 140) {
-		errprintf("this estimator needs the native plugin (a current build) and a model the plugin covers.\n")
+		errprintf("{p 0 2 2}this estimator needs the native plugin (a current build) and a model the plugin covers.{p_end}\n")
 		exit(198)
 	}
 	Gstart = J(1, P, NULL)
@@ -18915,7 +18915,7 @@ void SaomChainPrepare(pointer(class SaomGraph scalar) rowvector Gall, real scala
 	if (coev) {
 		cfgB = SaomBehaviorNativeSetup(Mbeh)
 		if (!cfgB.eligible | any(cfgB.fntype :!= 0)) {
-			errprintf("the behavior effects of this model are not available here (no native implementation, or endowment/creation effects).\n")
+			errprintf("{p 0 2 2}the behavior effects of this model are not available here (no native implementation, or endowment/creation effects).{p_end}\n")
 			exit(198)
 		}
 		allb = *Behwaves[1]
@@ -18966,7 +18966,7 @@ real scalar SaomBayesRun(pointer(class SaomGraph scalar) rowvector Gall, real sc
 	Kb = (coev ? Mbeh.nparam() : 0)
 	K = KT - Kb
 	if (K != M.nparam()) {
-		errprintf("nwsaom bayes: the coefficient vector does not match the model.\n")
+		errprintf("{p 0 2 2}nwsaom bayes: the coefficient vector does not match the model.{p_end}\n")
 		exit(198)
 	}
 	nsave = nmain
@@ -19164,11 +19164,11 @@ void SaomGroupsTimed(real scalar W, string scalar jv, string scalar lv) {
 			j = (join[i] >= . ? 1 : join[i])
 			l = (leave[i] >= . ? Wh : leave[i])
 			if (j < 1 | l > Wh | j > l) {
-				errprintf("joinat()/leaveat(): actor %g has the times %g and %g; they must satisfy 1 <= joinat <= leaveat <= %g (the number of waves of its group)\n", i, j, l, Wh)
+				errprintf("{p 0 2 2}joinat()/leaveat(): actor %g has the times %g and %g; they must satisfy 1 <= joinat <= leaveat <= %g (the number of waves of its group){p_end}\n", i, j, l, Wh)
 				exit(198)
 			}
 			if (ceil(j) > trunc(l)) {
-				errprintf("joinat()/leaveat(): actor %g (times %g and %g) is not active at any observation of its group; RSiena requires every interval to contain a wave\n", i, j, l)
+				errprintf("{p 0 2 2}joinat()/leaveat(): actor %g (times %g and %g) is not active at any observation of its group; RSiena requires every interval to contain a wave{p_end}\n", i, j, l)
 				exit(198)
 			}
 			for (per=1; per<=Wh; per++) pmo[i, wl[h, per]] = (ceil(j) <= per & per <= trunc(l))
