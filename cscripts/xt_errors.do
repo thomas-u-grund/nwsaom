@@ -48,19 +48,42 @@ program define xt_err
 		global XT_EFAILS `"$XT_EFAILS | frame `c(frame)': `0'"'
 		frame change default
 	}
-	if "$XT_SIMCHK" == "1" {
-		capture quietly estat simulate, nsim(2) seed(5)
-		local src = _rc
+	* N7 (fixed): a refusal either leaves the model of the fit in memory unchanged (estat simulate gives the same numbers), or,
+	* when the call had already begun to replace that model, estat refuses cleanly with r(498) (never simulates another model);
+	* such late refusals are listed in $XT_ELATE and the base fit is rerun
+	capture quietly estat simulate, nsim(2) seed(5)
+	local src = _rc
+	if "`c(frame)'" != "default" {
+		di as error "FAIL estat simulate left the user in frame `c(frame)' after: `0'"
+		global XT_EFAILS `"$XT_EFAILS | estat frame: `0'"'
+		frame change default
+	}
+	if `src' == 0 & "$XT_SIMCHK" == "1" {
 		tempname S
-		if `src' == 0 matrix `S' = r(sim)
-		if `src' != 0 | mreldif(`S', __XT_SIM0) != 0 {
-			di as error "FAIL baseline estat simulate changed (rc `src') after: `0'"
+		matrix `S' = r(sim)
+		if mreldif(`S', __XT_SIM0) != 0 {
+			di as error "FAIL baseline estat simulate changed after: `0'"
 			global XT_EFAILS `"$XT_EFAILS | estat simulate changed: `0'"'
 		}
+	}
+	else if `src' == 498 {
+		di as text "  (late refusal: estat refuses with r(498); the base fit is rerun)"
+		global XT_ELATE `"$XT_ELATE | `0'"'
+		quietly nwsaom, waves(dn1 dn2 dn3) outdegree reciprocity k0(10) k3(60) seed(3)
+		capture xt_esame
+		if _rc {
+			di as error "FAIL the rerun base fit differs"
+			global XT_EFAILS `"$XT_EFAILS | base rerun differs"'
+		}
+	}
+	else if `src' != 0 {
+		di as error "FAIL estat simulate r(`src') after: `0'"
+		global XT_EFAILS `"$XT_EFAILS | estat simulate r(`src'): `0'"'
 	}
 	di as text "  done r(`code'): `0'"
 end
 global XT_EFAILS ""
+global XT_ELATE ""
 
 nwclear
 clear
@@ -128,15 +151,15 @@ xt_err 198 : nwsaom, waves(dn1 dn2 dn3) outdegree symmetric k3(60)
 * nwsaom.ado:565 undirected waves mixed with asymmetric directed ones
 xt_err 198 : nwsaom, waves(sn1 dn2) outdegree k3(60)
 * _nwsaom_symcheck.ado:56 symtype() not a model type
-// CONFIRMED BUG N7: the refused call overwrites the stored wave graphs (nwsaom.ado:834) -> estat simulate changed
+// N7 (fixed): refused before the model of the last fit is replaced, so estat simulate is unchanged
 xt_err 198 : nwsaom, waves(sn1 sn2) outdegree symtype(bogus) k3(60)
 * _nwsaom_symcheck.ado:103 symtype() for a directed relation
 xt_err 198 : nwsaom, waves(dn1 dn2 dn3) outdegree reciprocity symtype(joint) k3(60)
 * _nwsaom_symcheck.ado:19 reciprocity in a non-directed model (undirected waves: symmetric is set automatically)
-// CONFIRMED BUG N7: the refused call overwrites the stored wave graphs (nwsaom.ado:834) -> estat simulate changed
+// N7 (fixed): refused before the model of the last fit is replaced, so estat simulate is unchanged
 xt_err 198 : nwsaom, waves(sn1 sn2) outdegree reciprocity k3(60)
 * _nwsaom_symcheck.ado:16 transtrip under symmetric (symbad)
-// CONFIRMED BUG N7: the refused call overwrites the stored wave graphs (nwsaom.ado:834) -> estat simulate changed
+// N7 (fixed): refused before the model of the last fit is replaced, so estat simulate is unchanged
 xt_err 198 : nwsaom, waves(sn1 sn2) outdegree transtrip k3(60)
 * nwsaom.ado:1467 transtriads for a directed relation (fails after the Mata model was rebuilt with another effect list:
 * no simulation check here, see xt_suspects.do)
@@ -302,6 +325,7 @@ assert _rc == 301
 xt_dsame
 di "PASS errors that depend on the fit in memory"
 
+di as text `"late refusals (estat refuses cleanly afterwards): $XT_ELATE"'
 if `"$XT_EFAILS"' != "" {
 	di as error `"failures: $XT_EFAILS"'
 	exit 9

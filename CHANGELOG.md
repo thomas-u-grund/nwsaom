@@ -3,6 +3,34 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- **Replay.** `nwsaom` typed without options, or with display options only (`level()`, `detail`), redisplays the results of the last fit, and `estimates replay` works.
+- **`replace` option of `generate()`** in `estat simulate` and `nwsaom simulate`: networks (and, after a co-evolution fit, variables) of the generated names that already exist are overwritten. Without `replace` the command stops before anything is simulated, r(483) for a network, r(110) for a variable.
+- `e(present)`, `e(joinat)`, `e(leaveat)`, `e(missnet)`, `e(missbeh)` (the options as given), `e(actormode)` (two-mode fits) and `e(fitid)`.
+
+### Results that change
+- **Composition change in the simulations after a fit.** `estat simulate`, `estat gof` and `estat mems` after a fit with `present()` or `joinat()`/`leaveat()` with `waves()` (any number of waves), with a co-evolving behavior, or with `groups()` let only the actors that are active at the start of a period act in it, as the fit does. Before, these paths simulated every actor as present (only network-only fits with `wave1()`/`wave2()` used the presence, and only that of the first period). Joining and leaving inside a period (`joinat()`/`leaveat()` at fractional times) is not simulated: the actors active at the start of the period stay active to its end. As in RSiena, an active actor may still create a tie to an inactive one (directed and unilateral non-directed models).
+- **`estat simulate, generate()` after a two-mode fit with `actormode(1)`** saves the networks in the layout of the observed waves (the actors in mode 1), so they can be fitted with the same call; before, the actors were put in mode 2.
+
+### Fixed
+- **`estat` after `estimates restore` of an earlier fit, or after an `nwsaom` call that stopped with an error once it had begun to set up its model**, simulated the model of the later call (or stopped with a Mata error, r(3301), and left the user in the data frame `__saom_native`). The `estat` commands and `nwsaom bayes` now check that the model kept in memory belongs to the estimates in `e()` and stop with a message otherwise (r(498)). The checks of `symmetric`/`symtype()`, `cores()`, `gwaves()`, `present()` and `missnet()` now run before the model of the last fit is replaced, so a call refused by them leaves the last fit usable. After an error inside `estat` the user is returned to the original frame.
+- **`estat importance`** stops after a fit with `present()` on every path (it ran after fits with `waves()`) and after `missnet()`/`missbeh()`/`joinat()`/`leaveat()`, as the help says; `nwsaom bayes` and `ml` refuse the missing-data options, and `present()` together with a behavior, as their messages say.
+- **`estat simulate` and `estat gof` after `ratecov()` with many covariates** (for example 16 covariates and 100 actors) stopped with "too many options" r(3598); the covariate values are now passed to the plugin in the data.
+- **Two waves with long names** (together more than 32 characters with `_to_`): the results table failed with "invalid name" r(3598) after the results were posted; the equation name is now shortened to 32 characters.
+- **`estat simulate, generate()`** with a stub that makes names longer than 32 characters stopped half-way and left a broken network behind; the stub is now checked before anything is created.
+- **`estat simulate` after `groups()`**: `rates()` is checked against the periods of each group (it was compared with the number of periods of the whole fit, so `rates()` after `gwaves()` was refused), and `ratesbeh()` is accepted (one behavior rate per period of all groups).
+- **`estat simulate` with `nsim()` times the number of periods above `c(max_matdim)`** (800 in Stata/BE) stops with a message before simulating (it failed with r(915) after the simulations).
+- **`nwsaom simulate`** checks `nsim()`, `seed()` and the names of `generate()` before its set-up fit, so these errors leave `e()` unchanged.
+- **`estat mems` with a `macro()` that fails** left its temporary network behind and changed the current network.
+- `e(tvcov)` began with a blank.
+- **`nwsaom describe`** accepts undirected waves mixed with tie-symmetric directed waves, as `nwsaom` does.
+- **`estat` after `nwsaom multiplex`** stops with the same message and code (r(321)) on both paths; before, r(301) with a misleading message, or Stata's generic r(321) after `theta01()`/`theta02()`.
+- Help: the columns of `r(periods)` and `r(waves)` of `nwsaom describe` (including `persistence`); `nwsaom simulate` replaces `e()` by its set-up fit.
+
+The Mata libraries are rebuilt (with Stata 17) and the plugin is updated (the single simulation call reads the rate covariates from the data).
+
 ## [1.5.19] - 2026-11-12
 
 ### Results that change

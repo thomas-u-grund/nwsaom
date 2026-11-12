@@ -35,7 +35,7 @@ program define nwsaom_estat_gofgroups, rclass
 		}
 		capture mata: SaomModelSubsetEnd(__nwsaom_last_M)
 		if e(has_behavior) == 1 capture mata: SaomGroupsBehEnd()
-		if "`e(present)'" != "" capture mata: __nwsaom_last_present = J(0, 1, 0)
+		if "`e(present)'`e(joinat)'`e(leaveat)'" != "" capture mata: SaomSimPresReset()
 		if `rc' exit `rc'
 	}
 	if `group' == 0 & `G' > 1 & "`join'" != "off" {

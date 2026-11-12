@@ -9,7 +9,7 @@ capture program drop nwsaom_estat_impgroups
 program define nwsaom_estat_impgroups, rclass
 	syntax [, GROUP(integer 0)]
 	local G = e(ngroups)
-	if "`e(ratecov)'" != "" | "`e(present)'" != "" {
+	if "`e(ratecov)'" != "" | "`e(present)'`e(joinat)'`e(leaveat)'" != "" {
 		di as err "{p 0 0 2}estat importance after a fit with groups is not available together with {bf:ratecov()}/{bf:present()}.{p_end}"
 		exit 198
 	}

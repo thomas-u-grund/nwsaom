@@ -26,7 +26,7 @@
 capture program drop nwsaom_estat_simulate
 program define nwsaom_estat_simulate, rclass
 	_nwsaom_libcheck
-	syntax [, NSIM(integer 100) SEED(integer -1) THETA(name) RATES(numlist >0) RATESBEH(numlist >0) GENerate(name) GRP(integer 0)]
+	syntax [, NSIM(integer 100) SEED(integer -1) THETA(name) RATES(numlist >0) RATESBEH(numlist >0) GENerate(name) REPLACE GRP(integer 0)]
 
 	if `"`e(cmd)'"' != "nwsaom" {
 		di as err "last nwsaom estimates not found"
@@ -113,7 +113,8 @@ program define nwsaom_estat_simulate, rclass
 		}
 	}
 	else local ratebeh1 = e(rate_beh)
-	if "`rates'" != "" {
+	// after groups() the number of periods is that of the group (checked below)
+	if "`rates'" != "" & `grp' == 0 {
 		local nr : word count `rates'
 		if `nr' != `nperiods' & !(`nr' == 1 & `nperiods' == 1) {
 			di as err "rates() needs one rate per period (`nperiods')."
@@ -129,7 +130,12 @@ program define nwsaom_estat_simulate, rclass
 			di as err "ratesbeh() requires a co-evolution fit."
 			exit 198
 		}
-		forvalues pd = 1/`nperiods' {
+		local nr : word count `ratesbeh'
+		if `nr' != `nperiods' & `grp' == 0 {
+			di as err "ratesbeh() needs one behavior rate per period (`nperiods')."
+			exit 198
+		}
+		if `grp' == 0 forvalues pd = 1/`nperiods' {
 			local ratebeh`pd' : word `pd' of `ratesbeh'
 		}
 	}
@@ -151,15 +157,38 @@ program define nwsaom_estat_simulate, rclass
 		local nodes = r(nodes)
 		local nwaves = r(nwaves)
 		local nperiods = `nwaves' - 1
+		if "`rates'" != "" {
+			if `: word count `rates'' != `nperiods' {
+				di as err "rates() needs one rate per period of group `grp' (`nperiods')."
+				exit 198
+			}
+		}
+		if "`ratesbeh'" != "" {
+			if `: word count `ratesbeh'' != `nperiods' {
+				di as err "ratesbeh() needs one behavior rate per period of group `grp' (`nperiods')."
+				exit 198
+			}
+		}
 		forvalues pd = 1/`nperiods' {
 			local rate`pd' = r(rate`pd')
 			if `coev' local ratebeh`pd' = r(ratebeh`pd')
+			if `coev' & "`ratesbeh'" != "" local ratebeh`pd' : word `pd' of `ratesbeh'
 			if "`rates'" != "" {
 				local rate`pd' : word `pd' of `rates'
 				if `pairwise' local rate`pd' = cond(e(conditional) == 1, `rate`pd'' * r(rfac`pd'), `rate`pd''^2 * r(rfac`pd'))
 			}
 		}
 		local __sim_gname "__nwsaom_gofg_G"
+	}
+	// r(sim) has one row per simulation and period: a Stata matrix, limited to c(max_matdim) rows (800 in Stata/BE)
+	local maxmd = c(max_matdim)
+	if `nsim' * `nperiods' > `maxmd' {
+		di as err "{p 0 0 2}nsim() too large: r(sim) has one row per simulation and period, here `=`nsim' * `nperiods'' rows, and a matrix of this Stata has at most `maxmd' rows; use nsim() of at most `=floor(`maxmd' / `nperiods')'.{p_end}"
+		exit 198
+	}
+	// generate(): every name is checked before anything is simulated or created
+	if "`generate'" != "" {
+		_nwsaom_genstub `generate', nsim(`nsim') nperiods(`nperiods') coev(`coev') `replace'
 	}
 	mata: __nwsaom_sim_rcattr = J(0, 0, 0)
 	mata: __nwsaom_sim_rccoef = J(1, 0, 0)
@@ -198,6 +227,8 @@ program define nwsaom_estat_simulate, rclass
 			mata: __nwsaom_sim_G = SaomGraph()
 			mata: SaomCopyGraph(`__sim_gname'`pd', __nwsaom_sim_G)
 			mata: SaomStructPeriodSet(`pd')
+			// composition change: the actors active at the start of this period
+			if `grp' == 0 mata: SaomSimPresSet(`pd')
 			if `coev' {
 				mata: __nwsaom_sim_B = SaomBehavior()
 				mata: __nwsaom_sim_B.init(*__nwsaom_last_Behwaves[`pd'], __nwsaom_beh_minval, __nwsaom_beh_maxval, `behoverall', __nwsaom_last_Mbeh.simMean)
@@ -206,7 +237,7 @@ program define nwsaom_estat_simulate, rclass
 				mata: st_matrix("__nwsaom_sim_row", (`s', `pd', SaomSimSummary(__nwsaom_sim_G.to_dense(), `pd', mean(__nwsaom_sim_B.values))[3..6]))
 			}
 			else {
-				if `grp' > 0 & "`e(present)'" != "" mata: SaomGroupsPresSet(`grp', `pd')
+				if `grp' > 0 & "`e(present)'`e(joinat)'`e(leaveat)'" != "" mata: SaomGroupsPresSet(`grp', `pd')
 				mata: __nwsaom_sim_eng = SaomGofSimNet(__nwsaom_sim_G, __nwsaom_last_M, st_matrix("`bmat'"), `rate`pd'', `symtype', __nwsaom_sim_rcattr, __nwsaom_sim_rccoef)
 				mata: st_matrix("__nwsaom_sim_row", (`s', `pd', SaomSimSummary(__nwsaom_sim_G.to_dense(), `pd', .)[3..6]))
 			}
@@ -218,12 +249,14 @@ program define nwsaom_estat_simulate, rclass
 				if `tm' {
 					// the actors x events matrix, as a two-mode network (the rows are the actors, the columns the events, each in the order of the nodes)
 					mata: st_matrix("__nwsaom_sim_mat", __nwsaom_sim_G.to_dense()[selectindex(__nwsaom_tm_isactor), selectindex(1 :- __nwsaom_tm_isactor)])
-					nwset, mat(__nwsaom_sim_mat) bipartite name(`generate'_`s'_p`pd') nooutput
+					// the layout of the observed waves: the rows of a two-mode matrix are mode 2, so after actormode(1) the actors are the columns
+					if e(actormode) == 1 matrix __nwsaom_sim_mat = __nwsaom_sim_mat'
+					nwset, mat(__nwsaom_sim_mat) bipartite name(`generate'_`s'_p`pd') nooutput `replace'
 				}
 				else {
 				mata: st_matrix("__nwsaom_sim_mat", __nwsaom_sim_G.to_dense())
-				if `symtype' != 0 nwset, mat(__nwsaom_sim_mat) undirected name(`generate'_`s'_p`pd') nooutput
-				else nwset, mat(__nwsaom_sim_mat) directed name(`generate'_`s'_p`pd') nooutput
+				if `symtype' != 0 nwset, mat(__nwsaom_sim_mat) undirected name(`generate'_`s'_p`pd') nooutput `replace'
+				else nwset, mat(__nwsaom_sim_mat) directed name(`generate'_`s'_p`pd') nooutput `replace'
 				}
 				if `coev' {
 					capture drop `generate'_`s'_p`pd'
@@ -234,6 +267,7 @@ program define nwsaom_estat_simulate, rclass
 			}
 		}
 	}
+	if `grp' == 0 mata: SaomSimPresReset()
 	capture mata: mata drop __nwsaom_sim_G __nwsaom_sim_B __nwsaom_sim_eng __nwsaom_sim_rcattr __nwsaom_sim_rccoef
 	capture matrix drop __nwsaom_sim_row __nwsaom_sim_mat
 

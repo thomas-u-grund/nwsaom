@@ -124,6 +124,31 @@
 capture program drop nwsaom_estat
 program define nwsaom_estat, rclass
 	_nwsaom_libcheck
+	// the Mata model kept for postestimation must belong to the estimates in memory (not after estimates restore of an
+	// earlier fit, or after a later nwsaom call that was refused or failed after it had started to replace the model)
+	if `"`e(cmd)'"' == "nwsaom" & e(fitid) < . {
+		mata: st_numscalar("__nwsaom_fidok", SaomFitIdIs(st_numscalar("e(fitid)")))
+		if scalar(__nwsaom_fidok) != 1 {
+			scalar drop __nwsaom_fidok
+			di as err "{p 0 0 2}the model of the nwsaom estimates in memory is no longer available for postestimation: a later nwsaom call has replaced it (or these estimates were restored from an earlier fit). Rerun the fit; {bf:nwsaom refit} reruns it starting from these estimates.{p_end}"
+			exit 498
+		}
+		scalar drop __nwsaom_fidok
+	}
+	local __es_frame = c(frame)
+	capture noisily nwsaom_estat_run `0'
+	local __es_rc = _rc
+	// an error inside a simulation can leave the user in the plugin's data frame
+	if `"`c(frame)'"' != `"`__es_frame'"' {
+		frame change `__es_frame'
+		capture frame drop __saom_native
+	}
+	if `__es_rc' exit `__es_rc'
+	return add
+end
+
+capture program drop nwsaom_estat_run
+program define nwsaom_estat_run, rclass
 	gettoken subcmd rest : 0, parse(" ,")
 	local subcmd = lower(trim("`subcmd'"))
 	if `"`e(cmd)'"' == "nwsaom" & e(ngroups) < . & e(nbeh) < . {
@@ -150,6 +175,10 @@ program define nwsaom_estat, rclass
 	if `"`e(cmd)'"' == "nwsaom" & e(ngroups) < . & !inlist("`subcmd'", "timetest", "score", "gof", "simulate", "importance") {
 		di as err "estat `subcmd' is not yet available after a fit with groups()."
 		exit 198
+	}
+	if `"`e(cmd)'"' == "nwsaom_multiplex" {
+		di as err "{p 0 0 2}estat `subcmd' is not available after nwsaom multiplex; fit the model with {bf:nwsaom multinet}, after which {bf:estat score} and {bf:estat timetest} are available.{p_end}"
+		exit 321
 	}
 	if `"`e(cmd)'"' == "nwsaom_multinet" & !inlist("`subcmd'", "score", "timetest") {
 		di as err "{p 0 0 2}estat `subcmd' is not yet available after nwsaom multinet (available: {bf:score}, {bf:timetest}).{p_end}"
@@ -499,7 +528,7 @@ program define nwsaom_estat_gof, rclass
 		if !`__gof_coev' local __gof_rbl "J(1,0,0)"
 		local __gof_pn = cond(`__gof_coev', "`__nwsaom_gof_pnet'", "0")
 		local __gof_bm = cond(`__gof_coev', "`__gof_behoverallmean'", "0")
-		mata: saom_gof_simloop(tokens("`stats'"), `nsim', `nperiods', "`__gof_gname'", `__gof_coev', `__gof_join', st_matrix("`bmat'"), `__gof_pn', (`__gof_rl'), (`__gof_rbl'), `__gof_symtype', `grp', ("`e(present)'" != ""), `maxdeg', `maxdist', `__gof_bm')
+		mata: saom_gof_simloop(tokens("`stats'"), `nsim', `nperiods', "`__gof_gname'", `__gof_coev', `__gof_join', st_matrix("`bmat'"), `__gof_pn', (`__gof_rl'), (`__gof_rbl'), `__gof_symtype', `grp', ("`e(present)'`e(joinat)'`e(leaveat)'" != ""), `maxdeg', `maxdist', `__gof_bm')
 	}
 	else forvalues __s = 1/`nsim' {
 		foreach __gof_s of local stats {
@@ -509,6 +538,7 @@ program define nwsaom_estat_gof, rclass
 			mata: __nwsaom_gof_Gwork = SaomGraph()
 			mata: SaomCopyGraph(`__gof_gname'`__pd', __nwsaom_gof_Gwork)
 			mata: SaomStructPeriodSet(`__pd')
+			if `grp' == 0 mata: SaomSimPresSet(`__pd')
 			if `__gof_coev' {
 				// N-wave extension: seed THIS period's own simulation from
 				// THIS period's own starting wave
@@ -534,7 +564,7 @@ program define nwsaom_estat_gof, rclass
 				// the fitted model, native when the plugin covers it
 				// (endowment/creation, structural(), ratecov(), present(),
 				// non-directed types)
-				if `grp' > 0 & "`e(present)'" != "" mata: SaomGroupsPresSet(`grp', `__pd')
+				if `grp' > 0 & "`e(present)'`e(joinat)'`e(leaveat)'" != "" mata: SaomGroupsPresSet(`grp', `__pd')
 				mata: __nwsaom_gof_eng = SaomGofSimNet(__nwsaom_gof_Gwork, __nwsaom_last_M, st_matrix("`bmat'"), `__gof_rate`__pd'', `__gof_symtype', __nwsaom_gof_rcattr, __nwsaom_gof_rccoef)
 			}
 			// see the observed-side block above (harmonisation unit 26)
@@ -859,6 +889,7 @@ void saom_gof_simloop(string rowvector stats, real scalar nsim, real scalar nper
 			Gw = SaomGraph()
 			SaomCopyGraph(*pG[pd], Gw)
 			SaomStructPeriodSet(pd)
+			if (grp == 0) SaomSimPresSet(pd)
 			if (coev) {
 				Bw = SaomBehavior()
 				Bw.init(*(*pBw)[pd], minv, maxv, behmean, (*pMb).simMean)
@@ -1272,6 +1303,8 @@ program define nwsaom_estat_mems, rclass
 	}
 
 	mata: __nwsaom_mems_outdata = J(`nsim', `__mems_nint', .)
+	// composition change: the actors active at the start of the (one) period
+	mata: SaomSimPresSet(1)
 
 	local __mems_i = 0
 	foreach __mems_ival of local interval {
@@ -1344,16 +1377,25 @@ program define nwsaom_mems_callmacro, rclass
 	args matname macroname nettype
 	if "`nettype'" == "" local nettype "directed"
 
+	// the current network is restored and the temporary network dropped also when macro() fails
+	capture quietly nwcurrent
+	local cur ""
+	if _rc == 0 local cur "`r(current)'"
 	preserve
 	qui drop _all
 	mata: st_numscalar("__nwsaom_mems_n", rows(`matname'))
 	qui set obs `=__nwsaom_mems_n'
 	capture nwdrop __nwsaom_mems_tmpnet
 	qui nwset, mat(`matname') `nettype' name(__nwsaom_mems_tmpnet) nooutput
-	`macroname' __nwsaom_mems_tmpnet
-	return scalar stat = r(stat)
+	capture noisily `macroname' __nwsaom_mems_tmpnet
+	local rc = _rc
+	tempname st
+	if `rc' == 0 scalar `st' = r(stat)
 	capture nwdrop __nwsaom_mems_tmpnet
+	if "`cur'" != "" capture quietly nwcurrent `cur'
 	restore
+	if `rc' exit `rc'
+	return scalar stat = `st'
 	// same _rc-staleness class as nwsaom_estat_gof's/nwsaom_gof_triadvec's
 	// own fix - `restore' does not reset a stale _rc left by a failed
 	// `capture nwdrop' just above it.

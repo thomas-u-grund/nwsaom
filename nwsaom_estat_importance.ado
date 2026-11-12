@@ -35,8 +35,8 @@ program define nwsaom_estat_importance, rclass
 	}
 	local coev = (e(has_behavior) == 1)
 	mata: st_numscalar("__nwsaom_imp_bad", any(_SaomGofExt("__nwsaom_last_fntype", J(1, 0, 0)) :!= 0) | rows(_SaomGofExt("__nwsaom_last_present", J(0, 1, 0))) > 0)
-	if scalar(__nwsaom_imp_bad) == 1 {
-		di as err "{p 0 0 2}estat importance is not available with endowment/creation effects, present() or missing-data options (as in RSiena's sienaRI).{p_end}"
+	if scalar(__nwsaom_imp_bad) == 1 | `"`e(missnet)'`e(missbeh)'`e(present)'`e(joinat)'`e(leaveat)'"' != "" {
+		di as err "{p 0 0 2}estat importance is not available with endowment/creation effects, present(), joinat(), leaveat() or missing-data options (as in RSiena's sienaRI).{p_end}"
 		exit 198
 	}
 	local nwaves = e(nwaves)

@@ -161,17 +161,17 @@ capture noisily nwsaom, waves(dl1 dl2 dl3) outdegree reciprocity ratecov(`rl16')
 assert inlist(_rc, 0, 498)
 if _rc == 0 {
 	assert colsof(e(ratecoefs)) == 16
-	// CONFIRMED BUG N8: estat simulate after ratecov() with 16 covariates -> "too many options", r(3598)
-	// (the K x n covariate values go into the plugin argument string, unw_saom.do:14971-14997)
+	// N8 (fixed): estat simulate after ratecov() with 16 covariates (before: "too many options", r(3598); the K x n covariate
+	// values went into the plugin argument string; now they travel in the data)
 	capture noisily estat simulate, nsim(2) seed(1)
 	if _rc {
-		di as error "FAIL CONFIRMED BUG N8: estat simulate after ratecov(16 covariates) -> r(" _rc "), frame `c(frame)'"
+		di as error "FAIL N8: estat simulate after ratecov(16 covariates) -> r(" _rc "), frame `c(frame)'"
 		global XT_LFAILS "$XT_LFAILS N8"
 		if "`c(frame)'" != "default" frame change default
 	}
 	capture noisily estat gof, nsim(10) seed(1) stats(outdegree)
 	if _rc {
-		di as error "FAIL CONFIRMED BUG N8: estat gof after ratecov(16 covariates) -> r(" _rc ")"
+		di as error "FAIL N8: estat gof after ratecov(16 covariates) -> r(" _rc ")"
 		global XT_LFAILS "$XT_LFAILS N8-gof"
 		if "`c(frame)'" != "default" frame change default
 	}
@@ -187,10 +187,11 @@ di "PASS many covariates, interactions and rate covariates"
 forvalues w = 1/2 {
 	nwset, mat(DL`w') directed name(a_rather_long_network_name_w`w') nooutput
 }
-// CONFIRMED BUG N10: two waves with 29-character names -> the results table fails ("<w1>_to_<w2> invalid name", r(3598))
+// N10 (fixed): two waves with 29-character names (before: the results table failed, "<w1>_to_<w2> invalid name", r(3598); the
+// equation name is now cut to 32 characters)
 capture noisily nwsaom, waves(a_rather_long_network_name_w1 a_rather_long_network_name_w2) outdegree reciprocity k0(10) k3(60) seed(1)
 if _rc {
-	di as error "FAIL CONFIRMED BUG N10: 2 waves with long names -> r(" _rc "), e(cmd) now `e(cmd)', e(waves) `e(waves)', frame `c(frame)'"
+	di as error "FAIL N10: 2 waves with long names -> r(" _rc "), e(cmd) now `e(cmd)', e(waves) `e(waves)', frame `c(frame)'"
 	global XT_LFAILS "$XT_LFAILS N10"
 	if "`c(frame)'" != "default" frame change default
 }

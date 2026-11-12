@@ -43,10 +43,21 @@ program define nwsaom_describe, rclass
 			di as err "all waves need the same number of nodes."
 			exit 198
 		}
-		if `dir`w'' != `dir1' {
-			di as err "all waves must be directed or all undirected."
-			exit 198
+		if `dir`w'' != `dir1' local mixdir 1
+	}
+	// undirected waves mixed with directed ones: allowed, as in nwsaom, when every directed wave is tie-symmetric (a
+	// non-directed relation); the waves are then described as undirected
+	if "`mixdir'" == "1" {
+		forvalues w = 1/`nw' {
+			if !`dir`w'' continue
+			mata: st_local("issym", strofreal(issymmetric((*`obj`w''->get_matrix()) :!= 0)))
+			if !`issym' {
+				local nm : word `w' of `waves'
+				di as err "{p 0 0 2}some waves are undirected, but {bf:`nm'} is directed and not tie-symmetric: declare all waves directed, or all tie-symmetric.{p_end}"
+				exit 198
+			}
 		}
+		local dir1 0
 	}
 	// a two-mode network: the ties are the cells of the actors x events matrix (as nwsaom models them), not the cells within a mode
 	local tm 0

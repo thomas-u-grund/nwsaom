@@ -113,9 +113,13 @@ di "PASS two-mode: 2 and 3 waves, one and six effects"
 nwsaom, waves(tm1 tm2 tm3) outdegree indegpopularity actormode(1) k0(10) k3(60) seed(3)
 assert e(n_actors) == 10 & e(n_events) == 24
 estat simulate, nsim(2) seed(1) generate(am)
-* help: the generated networks have one row per actor (here the 10 actors of mode 1 become the rows, i.e. mode "2")
-xt_simcheck am 2 2, nodes(34) twomode nactors(10)
+* S13 (fixed): the generated networks have the layout of the observed waves (the 10 actors stay mode 1, the 24 others mode 2),
+* so the same actormode(1) call fits them
+xt_simcheck am 2 2, nodes(34) twomode nactors(24)
+nwsaom, waves(am_1_p1 am_1_p2) outdegree actormode(1) k0(10) k3(40) seed(3)
+assert e(n_actors) == 10 & e(n_events) == 24 & e(actormode) == 1
 nwdrop am_*
+nwsaom, waves(tm1 tm2 tm3) outdegree indegpopularity actormode(1) k0(10) k3(60) seed(3)
 estat importance
 xt_samerates
 di "PASS two-mode actormode(1)"

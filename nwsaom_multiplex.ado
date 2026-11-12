@@ -66,6 +66,7 @@ program define nwsaom_multiplex, eclass
 		ereturn scalar rate1_se = `__r'[3, 1]
 		ereturn scalar rate2_se = `__r'[4, 1]
 		ereturn local cmd "nwsaom_multiplex"
+		ereturn local estat_cmd "nwsaom_estat"
 		ereturn local version "1.5.19"
 		if "`detail'" != "" _nwsaom_tconvtable, detail
 		exit
@@ -154,6 +155,7 @@ program define nwsaom_multiplex, eclass
 	matrix rownames __nwsaom_mp_rate1_tconv = tconv
 	ereturn matrix tconv = __nwsaom_mp_rate1_tconv
 	ereturn local cmd "nwsaom_multiplex"
+	ereturn local estat_cmd "nwsaom_estat"
 	ereturn local version "1.5.19"
 	_nwsaom_postengine
 

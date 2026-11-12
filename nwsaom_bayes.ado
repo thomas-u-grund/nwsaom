@@ -33,6 +33,15 @@ program nwsaom_bayes, eclass
 		di as err "no fitted nwsaom model available - re-run nwsaom before nwsaom bayes."
 		exit 498
 	}
+	if `"`e(cmd)'"' == "nwsaom" & e(fitid) < . {
+		mata: st_numscalar("__nwsaom_fidok", SaomFitIdIs(st_numscalar("e(fitid)")))
+		if scalar(__nwsaom_fidok) != 1 {
+			scalar drop __nwsaom_fidok
+			di as err "{p 0 0 2}the model of the nwsaom estimates in memory is no longer available: a later nwsaom call has replaced it (or these estimates were restored from an earlier fit). Rerun the fit; {bf:nwsaom refit} reruns it starting from these estimates.{p_end}"
+			exit 498
+		}
+		scalar drop __nwsaom_fidok
+	}
 	mata: st_numscalar("__nwsaom_sflast", SaomStructLastOn())
 	if scalar(__nwsaom_sflast) == 1 {
 		di as err "{p 0 0 2}nwsaom bayes is not yet available with structural zeros or ones (the codes 10 and 11 in the wave networks).{p_end}"
@@ -43,7 +52,7 @@ program nwsaom_bayes, eclass
 		exit 198
 	}
 	mata: st_numscalar("__nwsaom_by_bad", any(_SaomGofExt("__nwsaom_last_fntype", J(1, 0, 0)) :!= 0) | rows(_SaomGofExt("__nwsaom_last_present", J(0, 1, 0))) > 0 | rows(_SaomGofExt("__nwsaom_last_struct", J(0, 0, 0))) > 0)
-	if scalar(__nwsaom_by_bad) == 1 {
+	if scalar(__nwsaom_by_bad) == 1 | `"`e(missnet)'`e(missbeh)'`e(present)'`e(joinat)'`e(leaveat)'"' != "" {
 		di as err "{p 0 0 2}nwsaom bayes does not cover endowment/creation effects, present()/joinat()/leaveat(), structural() or missing-data options.{p_end}"
 		exit 198
 	}

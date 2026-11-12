@@ -31,7 +31,10 @@ The following postestimation command is available after {helpb nwsaom}:
 {pstd}
 All of them stop with an error after a fit with time-varying covariates ({opt tvcov()}), with several behaviors in {opt behavior()}, or with a behavior together with
 {opt ratecov()}, {opt behratecov()} or {opt behrate()}. After {cmd:nwsaom multinet} only {cmd:estat score} and {cmd:estat timetest} are available; after a fit with
-{opt groups()} all but {cmd:estat mems}.{p_end}
+{opt groups()} all but {cmd:estat mems}; after {cmd:nwsaom multiplex} none (fit the model with {cmd:nwsaom multinet}).
+They also stop when the estimates in memory are not those of the last {cmd:nwsaom} fit (after {cmd:estimates restore} of an earlier fit, or after a later
+{cmd:nwsaom} call that stopped with an error once it had begun to set up its model): the model they simulate is kept in memory for the last fit only; rerun the fit
+({cmd:nwsaom refit} reruns it starting from the estimates).{p_end}
 
 
 {title:estat gof}
@@ -199,7 +202,7 @@ randomness.
 {title:estat simulate}
 
 {p 8 17 2}
-{cmd:estat simulate} [{cmd:,} {opt nsim(int)} {opt seed(int)} {opt theta(matname)} {opt rates(numlist)} {opt ratesbeh(numlist)} {opt gen:erate(stub)}]
+{cmd:estat simulate} [{cmd:,} {opt nsim(int)} {opt seed(int)} {opt theta(matname)} {opt rates(numlist)} {opt ratesbeh(numlist)} {opt gen:erate(stub)} {opt replace}]
 
 {pstd}
 Simulates the fitted model {opt nsim()} times (default 100). Every inter-wave period starts at the observed
@@ -210,10 +213,15 @@ of your choice, which is the simulation-only mode (RSiena's {cmd:siena07} with {
 {cmd:e(rate)} and {cmd:e(rates)}, RSiena's scale; after a non-directed fit of the pairwise types joint, force and agree they are
 converted to the per-actor rates the simulation uses as the fit does it (see {cmd:e(rate_actor)} in {help nwsaom##results:nwsaom}). {opt generate(stub)}
 saves the simulated networks as {cmd:nwcommands} networks named {it:stub}{cmd:_}{it:s}{cmd:_p}{it:period}; after a
-co-evolution fit the simulated behavior is saved as variables of the same names. After a two-mode fit the simulation
+co-evolution fit the simulated behavior is saved as variables of the same names. The names have at most 32 characters, so the
+stub must be short enough for the longest name; networks (and variables) of these names that already exist are overwritten only with
+{opt replace}. Both are checked before anything is simulated. After a two-mode fit the simulation
 runs on the actors-by-events network; the table shows the number of ties (attendances) only, {cmd:r(sim)} and
 {cmd:r(obs)} leave the mutual-dyad and transitive-triple columns missing, and {opt generate()} saves two-mode networks
-(one row per actor, one column per event).
+in the layout of the observed waves (the actors in the mode given by {opt actormode()}), so that they can be fitted with the same call.
+After a fit with {opt present()} or {opt joinat()}/{opt leaveat()} the actors that are not active at the start of a period do not
+act in that period (active actors may still create ties to them, as in RSiena); joining and leaving within a period is not simulated,
+the actors active at the start of the period stay active to its end.
 
 {pstd}
 The table has one block per period with the number of ties, mutual dyads and transitive triples (and the mean behavior
@@ -222,6 +230,7 @@ after a co-evolution fit): {cmd:Sim} is the mean over the replications and {cmd:
 {pstd}
 Returns {cmd:r(sim)} (one row per simulation and period: simulation, period, number of ties, mutual dyads,
 transitive triples, mean behavior), {cmd:r(obs)} (the same for the observed end waves) and {cmd:r(nsim)}.
+{cmd:r(sim)} is a Stata matrix, so {opt nsim()} times the number of periods may not exceed {cmd:c(max_matdim)} (800 in Stata/BE).
 To simulate without a prior fit, give the model options of {cmd:nwsaom} and the coefficients to
 {cmd:nwsaom simulate} ({help nwsaom##simulate:see the nwsaom help}).
 
@@ -275,7 +284,7 @@ Also available after {cmd:nwsaom multinet}, for the effects of all networks and 
 After a fit with {opt groups()} the periods are the periods of all groups (RSiena's numbering) and the output has two more tables: a test per group (the dummies of the periods of the
 group; for the first group the sum of the dummies of each effect, as RSiena's group test) and a test per period (all effects at once; RSiena 1.6.14 reports this one under the name
 group test), returned in {cmd:r(group)} and {cmd:r(period)}. {cmd:estat score} works after such a fit; {cmd:estat gof}, {cmd:estat simulate} and {cmd:estat importance} run per group: they use the
-actors, waves, rates and covariate constants of one group ({opt group(#)}; by default all groups, one after the other). {cmd:estat gof} also reports the p-values of the groups combined by the
+actors, waves, rates and covariate constants of one group ({opt group(#)}; by default all groups, one after the other); {opt rates()} and {opt ratesbeh()} of {cmd:estat simulate} then give one rate per period of all groups, in RSiena's numbering. {cmd:estat gof} also reports the p-values of the groups combined by the
 inverse-normal method. They also work after a fit with one behavior, or with {opt ratecov()} and {opt present()}; {cmd:estat importance} stops after {opt ratecov()} or {opt present()}, and all
 stop after a fit that combines a behavior with {opt ratecov()}, {opt behratecov()} or {opt behrate()}.
 After a fit with a behavior and {opt groups()}, {cmd:estat gof} tests the three network statistics and {bf:behavior} by default, as without groups.
@@ -294,7 +303,7 @@ L1 distance between the actor's choice probabilities with and without the effect
 among all effects, averaged over the actors. Also reported: sigma (the within-actor standard deviation of the
 contributions), the semi-standardised estimate (estimate times sigma) and the certainty R_H of the choices.
 Available after fits of a one-mode (directed or non-directed) or two-mode network, with or without one co-evolving behavior, without endowment/creation effects,
-{opt present()} or missing-data options (as in RSiena). After a co-evolution fit a second table gives the behavior effects (the options of an actor are changing by -1, 0 or +1) and the results
+{opt present()}, {opt joinat()}, {opt leaveat()} or the missing-data options {opt missnet()} and {opt missbeh()} (as in RSiena). After a co-evolution fit a second table gives the behavior effects (the options of an actor are changing by -1, 0 or +1) and the results
 {cmd:r(ri_beh)}, {cmd:r(importance_beh)}, {cmd:r(sigma_beh)}, {cmd:r(sigma_period_beh)} and {cmd:r(certainty_beh)}. For a non-directed network the sizes are those of the forcing model, as in
 RSiena. Returns {cmd:r(ri)}, {cmd:r(importance)}, {cmd:r(sigma)},
 {cmd:r(sigma_period)} and {cmd:r(certainty)}. Needs the native plugin.

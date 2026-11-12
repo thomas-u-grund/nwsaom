@@ -32,6 +32,12 @@
 {it:{help nwsaom##control_options:control_options}}]
 
 {pstd}
+Redisplay the results of the last fit (also {cmd:estimates replay}):
+
+{p 8 17 2}
+{cmd:nwsaom} [{cmd:,} {opt level(#)} {opt det:ail}]
+
+{pstd}
 Two networks that change together ({help nwsaom##multiplex:nwsaom multiplex}):
 
 {p 8 17 2}
@@ -561,7 +567,10 @@ index and the Hamming distance; and, with {opt behavior()}, the mean of the beha
 A period with a Jaccard index below about 0.3 has few stable ties and carries little information about the change process.
 For a two-mode network the ties are the attendances (cells of the actors-by-events matrix), the density is taken over those cells and the average degree is the mean number of events per actor;
 {opt actormode(#)} names the mode of the actors (default 2, as in {cmd:nwsaom}).
-Results are in {cmd:r(periods)}, {cmd:r(waves)}, {cmd:r(twomode)} (1 for a two-mode network), {cmd:r(behchange)} (with {opt behavior()}) and, for a two-mode network,
+Undirected waves may be mixed with directed waves that are tie-symmetric (as in {cmd:nwsaom}); they are then described as undirected.
+Results are in {cmd:r(periods)} (one row per period; columns {cmd:kept}, {cmd:created}, {cmd:dissolved}, {cmd:jaccard}, {cmd:hamming} and {cmd:persistence},
+the share of the ties at the start of the period that are kept, kept / (kept + dissolved)), {cmd:r(waves)} (one row per wave; columns {cmd:ties}, {cmd:density},
+{cmd:avgdegree}, {cmd:structural0} and {cmd:structural1}), {cmd:r(twomode)} (1 for a two-mode network), {cmd:r(behchange)} (with {opt behavior()}) and, for a two-mode network,
 {cmd:r(n_actors)} and {cmd:r(n_events)}.
 
 
@@ -664,7 +673,7 @@ The build clears the data and the Mata objects in memory. See {help nwinstall##b
 
 {p 8 17 2}
 {cmd:nwsaom simulate,} {it:model options of nwsaom} {opt theta(numlist)} [{opt behtheta(numlist)}] {opt rates(numlist)}
-[{opt ratesbeh(numlist)} {opt nsim(int)} {opt seed(int)} {opt gen:erate(stub)}]
+[{opt ratesbeh(numlist)} {opt nsim(int)} {opt seed(int)} {opt gen:erate(stub)} {opt replace}]
 
 {pstd}
 Simulates a model at coefficients chosen by you, without estimating anything (RSiena's {cmd:siena07} with
@@ -672,8 +681,11 @@ Simulates a model at coefficients chosen by you, without estimating anything (RS
 ...). {opt theta()} gives one coefficient per network effect in the order of the coefficient table of a fit of the same model (the order {cmd:nwsaom} lists the effects, not necessarily the order you
 typed them), {opt behtheta()} one
 per behavior effect, {opt rates()} the rate of every period (on the scale of {cmd:e(rates)}, RSiena's scale) and {opt ratesbeh()} the behavior rates; {opt nsim()} is the number of simulations (default 100).
-{opt generate()} may be abbreviated to {opt gen()}. The result is that of
+{opt generate()} may be abbreviated to {opt gen()}; {opt replace} overwrites networks of the generated names that already exist. The result is that of
 {help nwsaom_estat##estat_simulate:estat simulate}. After a fit, {cmd:estat simulate} simulates the fitted model.
+{cmd:nwsaom simulate} sets the model up with a fit of the same model in which every coefficient is fixed, so it replaces the estimation results in
+{cmd:e()} by that set-up fit (store earlier results with {cmd:estimates store} first). {opt nsim()}, {opt seed()} and the names of {opt generate()} are
+checked before the set-up fit; an error after it leaves the set-up fit in {cmd:e()}.
 
 
 {marker refit}{...}
@@ -945,6 +957,8 @@ nwsaom_remarks){p_end}
 {synopt:{bf:e(tconv_max)}}RSiena's overall maximum convergence ratio; one of the two criteria of good convergence (below 0.25; the other: every t-ratio in e(tconv) below 0.1 in absolute value){p_end}
 {synopt:{bf:e(twomode)}}1 for a two-mode network, 0 otherwise{p_end}
 {synopt:{bf:e(n_actors)}, {bf:e(n_events)}}two-mode fits: the numbers of actors and events{p_end}
+{synopt:{bf:e(actormode)}}two-mode fits: the mode of the actors ({opt actormode()}){p_end}
+{synopt:{bf:e(fitid)}}identifies the fit; the {cmd:estat} commands and {cmd:nwsaom bayes} check that the model kept in memory belongs to the estimates in {cmd:e()}{p_end}
 {synopt:{bf:e(behmean)}}co-evolution fits: the centring value of the behavior{p_end}
 {synopt:{bf:e(nbeh)}}fits with several behaviors: the number of behaviors{p_end}
 {synopt:{bf:e(ngroups)}}{opt groups()} fits: the number of groups ({bf:e(nwaves)} is then the number of waves of {opt waves()}){p_end}
@@ -972,6 +986,7 @@ nwsaom_remarks){p_end}
 {synopt:{bf:e(ratecov)}}{opt ratecov()} fits: the rate covariates{p_end}
 {synopt:{bf:e(behratecov)}, {bf:e(behrate)}}{opt behratecov()}/{opt behrate()} fits: the options as given{p_end}
 {synopt:{bf:e(groupvar)}}{opt groups()} fits: the group variable{p_end}
+{synopt:{bf:e(present)}, {bf:e(joinat)}, {bf:e(leaveat)}, {bf:e(missnet)}, {bf:e(missbeh)}}the composition-change and missing-data options as given (empty without){p_end}
 {synopt:{bf:e(estimator)}}{bf:ml} after a fit with {opt ml}{p_end}
 
 {p2col 5 26 30 2: Matrices}{p_end}

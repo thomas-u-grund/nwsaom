@@ -290,12 +290,12 @@ gen byte p3 = _n != 40
 * two waves (wave1/wave2): actor 1 is absent in the period and has no ties at its start, so it has none in any simulation
 nwsaom, wave1(pn1) wave2(pn2) outdegree reciprocity present(p1 p2) k0(10) k3(60) seed(1)
 estat simulate, nsim(5) seed(1) generate(ps)
-// CONFIRMED BUG S2 (triage): even on the wave1()/wave2() path the absent actor gets ties in estat simulate
+// S2 (fixed): the absent actor sends no tie in any simulation (it may receive ties, as in RSiena)
 global XT_SFAILS ""
 forvalues s = 1/5 {
-	xt_rowcol ps_`s'_p1 1
+	xt_outdeg ps_`s'_p1 1
 	if r(deg) != 0 {
-		di as error "FAIL present(): absent actor 1 has degree " r(deg) " in simulation `s' (wave1/wave2 path)"
+		di as error "FAIL present(): absent actor 1 sends " r(deg) " ties in simulation `s' (wave1/wave2 path)"
 		global XT_SFAILS "$XT_SFAILS S2-wave1wave2"
 		continue, break
 	}
@@ -303,8 +303,17 @@ forvalues s = 1/5 {
 nwdrop ps_*
 estat gof, nsim(10) seed(1)
 estat mems, effect(reciprocity) macro(xt_mties) nsim(20) seed(1) nodots
-* three waves: runs (the property for three waves is probed in xt_suspects.do)
+* three waves: actor 1 (absent at waves 1-2) sends no tie in period 1, actor 40 (absent at wave 3) acts in period 2 (activeStart)
 nwsaom, waves(pn1 pn2 pn3) outdegree reciprocity present(p1 p2 p3) k0(10) k3(60) seed(1)
+estat simulate, nsim(3) seed(1) generate(p3w)
+forvalues s = 1/3 {
+	xt_outdeg p3w_`s'_p1 1
+	if r(deg) != 0 {
+		di as error "FAIL present(): absent actor 1 sends " r(deg) " ties in period 1 of simulation `s' (3 waves)"
+		global XT_SFAILS "$XT_SFAILS S2-3waves"
+	}
+}
+nwdrop p3w_*
 estat simulate, nsim(3) seed(1)
 estat gof, nsim(10) seed(1)
 estat timetest

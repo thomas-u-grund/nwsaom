@@ -34,7 +34,7 @@ program nwsaom_ml, eclass
 		exit 198
 	}
 	mata: st_numscalar("__nwsaom_ml_bad", any(_SaomGofExt("__nwsaom_last_fntype", J(1, 0, 0)) :!= 0) | rows(_SaomGofExt("__nwsaom_last_present", J(0, 1, 0))) > 0 | rows(_SaomGofExt("__nwsaom_last_struct", J(0, 0, 0))) > 0)
-	if scalar(__nwsaom_ml_bad) == 1 {
+	if scalar(__nwsaom_ml_bad) == 1 | `"`e(missnet)'`e(missbeh)'`e(present)'`e(joinat)'`e(leaveat)'"' != "" {
 		di as err "{p 0 0 2}maximum likelihood estimation does not cover endowment/creation effects, present()/joinat()/leaveat(), structural() or missing-data options.{p_end}"
 		exit 198
 	}

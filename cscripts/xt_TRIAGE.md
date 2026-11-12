@@ -72,3 +72,15 @@ same data without groups() fit fine.
 | xt_longopts.do | r(9): CONFIRMED BUG N8 (simulate and gof), N10 only |
 | xt_errors.do | r(9): CONFIRMED BUG N7 only (3 refusals on undirected waves change estat simulate); all other rc/e()/data/frame checks pass |
 | xt_suspects.do | ends r(9) by design: S1, S2a-d, S3, S6, S7b, S10, S11b, S14 confirmed; S8, S9, S11a notes hold; S4, S7a not confirmed; S5 probe blocked (r(505)) |
+
+## Fix status (2026-11-12, branch tests-extended)
+
+Fixed in nwsaom: S1, S2 (a, b, d; the wave1/wave2 "confirmed" was a test artefact: the missing diagonal of `nwtomata`
+counted as ties, and RSiena lets an inactive actor receive ties from active egos in directed and unilateral models, so
+the tests now count out-ties), S2c, S3, S5, S6, S7b (fit id guard, frame restored), S7a/N7 (early option checks; late
+refusals invalidate the stored fit and estat refuses with r(498) until a refit), S8, S9, S10, S11a (`replace`), S11b
+(stub length checked before anything is created), S12 (r(321) on both paths), S13 (generated networks in the observed
+layout), S14, persistence (help), N1 (replay), N8 (rate covariates through data variables), N10 (equation name
+shortened), and `e(tvcov)` with a leading blank (xt_shapes_directed).
+Not fixed: N9 (core `nwset`), S4 (not a bug). Joins and leaves within a period are not simulated (documented).
+All xt_*.do files: ALL PASS.

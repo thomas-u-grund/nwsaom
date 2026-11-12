@@ -14769,7 +14769,7 @@ struct SaomBehaviorNativeConfig scalar SaomBehaviorNativeSetup(class SaomBehavio
    [vbeh] [mv1 mv2 missbeh] [present]. The names are compared, not only
    the count: a coev frame and a network frame can have the same number
    of variables. */
-real scalar _SaomFrameLayoutOK(real scalar nattr, real scalar beh, real scalar hasmiss, real scalar haspres, | real scalar hasst) {
+real scalar _SaomFrameLayoutOK(real scalar nattr, real scalar beh, real scalar hasmiss, real scalar haspres, | real scalar hasst, real scalar nrc) {
 	string rowvector want
 	real scalar i
 	want = ("v1", "v2")
@@ -14778,6 +14778,7 @@ real scalar _SaomFrameLayoutOK(real scalar nattr, real scalar beh, real scalar h
 	if (hasmiss) want = want, ("mv1", "mv2", "missbeh")
 	if (haspres) want = want, "present"
 	if (args() >= 5) if (hasst) want = want, ("st_i", "st_j")
+	if (args() >= 6) for (i=1; i<=nrc; i++) want = want, "rc" + strofreal(i)
 	if (st_nvar() != cols(want)) return(0)
 	for (i=1; i<=cols(want); i++) if (st_varname(i) != want[i]) return(0)
 	return(1)
@@ -14819,7 +14820,7 @@ struct SaomCountedResult scalar SaomSimulateIntervalNative(class SaomGraph scala
 
 	struct SaomCountedResult scalar res
 	real matrix ties, newties
-	real scalar n, nties, nattr, i, k, rngseed, nties_out, __junk, neededrows, neededvars, hasmiss, nmissdyads, haspresentNet, symtypearg, hasratecov, iscondnat, hasst
+	real scalar n, nties, nattr, i, k, rngseed, nties_out, __junk, neededrows, neededvars, hasmiss, nmissdyads, haspresentNet, symtypearg, hasratecov, iscondnat, hasst, rcdata
 	string scalar origframe, argstr, cmd, attrvarlist
 	string rowvector attrvarnames
 
@@ -14890,7 +14891,10 @@ struct SaomCountedResult scalar SaomSimulateIntervalNative(class SaomGraph scala
 	hasst = (rows(cfg.structpairs) > 40)
 	if (hasst) hasst = (SaomNativePluginVersion() >= 155)
 	neededrows = max((n, nties, n*(n-1), rows(cfg.structpairs), 1))
-	neededvars = 2 + nattr + (hasmiss ? 3 : 0) + (haspresentNet ? 1 : 0) + (hasst ? 2 : 0)
+	// many ratecov() values travel in K variables after the structural dyads, not in the option string, which Stata limits
+	rcdata = 0
+	if (hasratecov > 0 & n * hasratecov > 200) rcdata = (SaomNativePluginVersion() >= 156)
+	neededvars = 2 + nattr + (hasmiss ? 3 : 0) + (haspresentNet ? 1 : 0) + (hasst ? 2 : 0) + (rcdata ? hasratecov : 0)
 
 	origframe = st_framecurrent()
 	stata("capture frame create __saom_native")
@@ -14913,7 +14917,7 @@ struct SaomCountedResult scalar SaomSimulateIntervalNative(class SaomGraph scala
 	// silently reused with a stale/mismatched layout. SaomEstimateRM()
 	// drops this frame once, via SaomNativeCleanupFrame(), after its own
 	// last native call - not here, not per call.
-	if (st_nvar() > 0 & !_SaomFrameLayoutOK(nattr, 0, hasmiss, haspresentNet, hasst)) {
+	if (st_nvar() > 0 & !_SaomFrameLayoutOK(nattr, 0, hasmiss, haspresentNet, hasst, (rcdata ? hasratecov : 0))) {
 		st_framecurrent(origframe)
 		stata("frame drop __saom_native")
 		stata("frame create __saom_native")
@@ -14935,6 +14939,7 @@ struct SaomCountedResult scalar SaomSimulateIntervalNative(class SaomGraph scala
 		}
 		if (haspresentNet) __junk = st_addvar("double", "present")
 		if (hasst) __junk = st_addvar("double", ("st_i", "st_j"))
+		for (k=1; k<=(rcdata ? hasratecov : 0); k++) __junk = st_addvar("double", "rc" + strofreal(k))
 	}
 	for (i=1; i<=nattr; i++) attrvarlist = attrvarlist + " " + attrvarnames[i]
 
@@ -14955,6 +14960,7 @@ struct SaomCountedResult scalar SaomSimulateIntervalNative(class SaomGraph scala
 	// native/saom_sim.c's own "COMPOSITION CHANGE" header section.
 	if (haspresentNet) st_store((1::n), "present", present)
 	if (hasst) st_store((1::rows(cfg.structpairs)), ("st_i", "st_j"), cfg.structpairs)
+	for (k=1; k<=(rcdata ? hasratecov : 0); k++) st_store((1::n), "rc" + strofreal(k), ratecovattr[., k])
 
 	rngseed = floor(runiform(1,1) * 2147483647)
 
@@ -14976,11 +14982,11 @@ struct SaomCountedResult scalar SaomSimulateIntervalNative(class SaomGraph scala
 	argstr = argstr + " " + strofreal(hasmiss) + " " + strofreal(nmissdyads)		// harmonisation unit 35 - see native/saom_sim.c's own "MISSING DATA" header section
 	argstr = argstr + " " + strofreal(haspresentNet)		// harmonisation unit 33 (native port) - see native/saom_sim.c's own "COMPOSITION CHANGE" header section
 	argstr = argstr + " " + strofreal(symtypearg)		// undirected/symmetric relations (native-first) - see native/saom_sim.c's own header comment on this field
-	argstr = argstr + " " + strofreal(hasratecov)		// ratecov (native-first) - see native/saom_sim.c's own header comment on this field
+	argstr = argstr + " " + strofreal(rcdata ? -hasratecov : hasratecov)		// ratecov (native-first) - see native/saom_sim.c's own header comment on this field; -K: the values are in the data
 	if (hasratecov) {
 		// K covariates: K x n values (variable by variable), then K
 		// coefficients; K = 1 is the protocol-7 layout unchanged
-		for (k=1; k<=hasratecov; k++) {
+		if (!rcdata) for (k=1; k<=hasratecov; k++) {
 			for (i=1; i<=n; i++) argstr = argstr + " " + strofreal(ratecovattr[i,k], "%25.17g")
 		}
 		for (k=1; k<=hasratecov; k++) argstr = argstr + " " + strofreal(ratecoef[k], "%25.17g")
@@ -14993,7 +14999,9 @@ struct SaomCountedResult scalar SaomSimulateIntervalNative(class SaomGraph scala
 	// failure - a bad path/corrupt plugin still surfaces at `plugin call`.
 	stata("capture program saomnativesim, plugin using(" + char(34) + SaomNativePluginPath() + char(34) + ")")
 
-	cmd = "plugin call saomnativesim v1 v2" + attrvarlist + (hasmiss ? " mv1 mv2 missbeh" : "") + (haspresentNet ? " present" : "") + (hasst ? " st_i st_j" : "") + ", " + char(34) + argstr + char(34)
+	cmd = "plugin call saomnativesim v1 v2" + attrvarlist + (hasmiss ? " mv1 mv2 missbeh" : "") + (haspresentNet ? " present" : "") + (hasst ? " st_i st_j" : "")
+	for (k=1; k<=(rcdata ? hasratecov : 0); k++) cmd = cmd + " rc" + strofreal(k)
+	cmd = cmd + ", " + char(34) + argstr + char(34)
 	stata(cmd)
 
 	nties_out = st_numscalar("__saom_native_nties_out")
@@ -15562,6 +15570,75 @@ transmorphic _SaomGofExt(string scalar nm, transmorphic dflt) {
 	return(*p)
 }
 
+/* Presence in the simulations after the fit (estat simulate, gof, mems): __nwsaom_last_presmat (n x periods) holds the actors
+   active at the START of every period (RSiena's activeStart rule of the fit; with joinat()/leaveat() the start-of-period
+   activity); __nwsaom_last_present is the column of the period being simulated, read by SaomGofSimNet()/SaomGofSimCoev().
+   Both are empty when the fit had no composition change. */
+void SaomSimPresSet(real scalar pd) {
+	external real matrix __nwsaom_last_present
+	real matrix pm
+	pm = _SaomGofExt("__nwsaom_last_presmat", J(0, 0, 0))
+	if (rows(pm) == 0) return
+	if (pd < 1 | pd > cols(pm)) return
+	__nwsaom_last_present = pm[., pd]
+}
+/* nwsaom, after the fit's data are set up: haspres = the fit has composition change (present(), joinat()/leaveat(); after groups() only
+   when given by the user), timed = joinat()/leaveat() without groups() (start-of-period activity __nwsaom_compstart); otherwise the
+   activity at the waves where the periods start (__nwsaom_presentmat, n x waves) */
+void SaomLastPresSet(real scalar haspres, real scalar timed) {
+	external real matrix __nwsaom_last_presmat, __nwsaom_last_present
+	real matrix pm
+	if (!haspres) {
+		__nwsaom_last_presmat = J(0, 0, 0)
+		__nwsaom_last_present = J(0, 1, 0)
+		return
+	}
+	if (timed) __nwsaom_last_presmat = *findexternal("__nwsaom_compstart")
+	else {
+		pm = *findexternal("__nwsaom_presentmat")
+		__nwsaom_last_presmat = pm[., 1..(cols(pm) - 1)]
+	}
+	__nwsaom_last_present = __nwsaom_last_presmat[., 1]
+}
+/* the equation name <first wave>_to_<last wave>; Stata names have at most 32 characters, so long wave names are cut to 14 each */
+string scalar SaomDepName(string scalar a, string scalar b) {
+	if (ustrlen(a + "_to_" + b) <= 32) return(a + "_to_" + b)
+	return(usubstr(a, 1, 14) + "_to_" + usubstr(b, 1, 14))
+}
+/* back to period 1 (after group postestimation, which subsets the presence to one group) */
+void SaomSimPresReset() {
+	external real matrix __nwsaom_last_present
+	real matrix pm
+	pm = _SaomGofExt("__nwsaom_last_presmat", J(0, 0, 0))
+	if (rows(pm) == 0) __nwsaom_last_present = J(0, 1, 0)
+	else __nwsaom_last_present = pm[., 1]
+}
+
+/* The fit identifier: nwsaom posts e(fitid) and keeps the same number here; a later nwsaom call invalidates it as soon as
+   it starts to replace the Mata model of the last fit. estat (and nwsaom bayes) refuse when e(fitid) and the number kept here
+   differ, for example after estimates restore of an earlier fit or after a refused nwsaom call. The identifier is the clock
+   time in milliseconds plus a counter, so that estimates saved in another session never match by chance; no random numbers. */
+real scalar SaomFitIdNew() {
+	external real scalar __nwsaom_fitid, __nwsaom_fitseq
+	if (rows(__nwsaom_fitseq) == 0) __nwsaom_fitseq = 0
+	if (__nwsaom_fitseq >= .) __nwsaom_fitseq = 0
+	__nwsaom_fitseq = mod(__nwsaom_fitseq + 1, 1000)
+	__nwsaom_fitid = clock(c("current_date") + " " + c("current_time"), "DMYhms") + __nwsaom_fitseq
+	return(__nwsaom_fitid)
+}
+void SaomFitIdInvalidate() {
+	external real scalar __nwsaom_fitid
+	__nwsaom_fitid = .
+}
+real scalar SaomFitIdIs(real scalar id) {
+	pointer scalar p
+	p = findexternal("__nwsaom_fitid")
+	if (p == NULL) return(0)
+	if (rows(*p) != 1 | cols(*p) != 1) return(0)
+	if (*p >= .) return(0)
+	return(*p == id)
+}
+
 /* Score-type tests (estat score): the phase-3 inputs of RSiena's ScoreTest(): the derivative matrix dfra, the covariance msf and the
    mean deviation fra of the statistics at the final estimate, with the flags of the parameters fixed by the user (the tested ones). */
 void SaomStoreScoreInputs(real matrix D, real matrix S, real rowvector m, real rowvector fixedflag, real rowvector par, real matrix Zp, real matrix Sp) {
@@ -15961,6 +16038,7 @@ real scalar SaomGofSimNet(class SaomGraph scalar G, class SaomModel scalar M,
 	fn = _SaomGofExt("__nwsaom_last_fntype", J(1, 0, 0))
 	st = _SaomGofExt("__nwsaom_last_struct", J(0, 0, 0))
 	pr = _SaomGofExt("__nwsaom_last_present", J(0, 1, 0))
+	if (rows(pr) != G.n) pr = J(0, 1, 0)
 	if (cols(fn) != M.nterms) fn = J(1, M.nterms, 0)
 	hasfn = any(fn :!= 0)
 	hasst = (rows(st) > 0)
@@ -15997,17 +16075,23 @@ real scalar SaomGofSimCoev(class SaomGraph scalar G, class SaomModel scalar M, r
 	struct SaomBehaviorNativeConfig scalar cfgBeh
 	struct SaomCoevScoredResult scalar r
 	struct SaomCoevResult scalar rm
-	real scalar native
+	real scalar native, st
+	real colvector pr
 
 	cfg = SaomNativeSetup(M)
 	cfgBeh = SaomBehaviorNativeSetup(Mbeh)
 	native = cfg.eligible & cfgBeh.eligible & SaomNativeAvailable()
 	if (native) native = (SaomNativePluginVersion() >= (cfgBeh.needv154 ? 154 : (any(cfgBeh.fntype :!= 0) ? 12 : 3)))
+	// composition change: the actors active at the start of the simulated period (SaomSimPresSet())
+	pr = _SaomGofExt("__nwsaom_last_present", J(0, 1, 0))
+	if (rows(pr) != G.n) pr = J(0, 1, 0)
 	if (native) {
 		SaomStructSend1(G.n)
-		// a non-directed relation: the model type of the fit (placeholders for the missing-data and composition arguments)
-		if (args() >= 9) if (symtype != 0) {
-			r = SaomSimulateIntervalCoevNative(G, M, cfg, thetaNet, Beh, Mbeh, cfgBeh, thetaBeh, rateNet, rateBeh, 1, J(0, 2, 0), J(G.n, 1, 0), J(0, 1, 0), symtype)
+		// a non-directed relation: the model type of the fit (placeholders for the missing-data arguments)
+		st = 0
+		if (args() >= 9) st = symtype
+		if (st != 0 | rows(pr) > 0) {
+			r = SaomSimulateIntervalCoevNative(G, M, cfg, thetaNet, Beh, Mbeh, cfgBeh, thetaBeh, rateNet, rateBeh, 1, J(0, 2, 0), J(G.n, 1, 0), pr, st)
 			return(1)
 		}
 		r = SaomSimulateIntervalCoevNative(G, M, cfg, thetaNet, Beh, Mbeh, cfgBeh, thetaBeh, rateNet, rateBeh, 1)

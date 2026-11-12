@@ -249,20 +249,31 @@ gen byte p3 = 1
 nwsaom, wave1(sp1) wave2(sp2) outdegree present(p1 p2) k0(10) k3(60) seed(3)
 estat simulate, nsim(4) seed(1) generate(pp)
 xt_simcheck pp 4 1, nodes(40) undirected
-// CONFIRMED BUG S2 (non-directed too): estat simulate ignores present() on the wave1/wave2 path
+nwdrop pp_*
+estat gof, nsim(10) seed(1)
+// S2 (fixed): the pairwise model types draw the alter among the active actors only (RSiena), so the absent actor stays isolated;
+// in the default unilateral type (forcing) an active actor may still impose a tie on it, as in RSiena
 global XT_UFAILS ""
+nwsaom, wave1(sp1) wave2(sp2) outdegree present(p1 p2) symtype(joint) k0(10) k3(60) seed(3)
+estat simulate, nsim(4) seed(1) generate(pj)
 forvalues s = 1/4 {
-	xt_rowcol pp_`s'_p1 1
+	xt_rowcol pj_`s'_p1 1
 	if r(deg) != 0 {
-		di as error "FAIL CONFIRMED BUG S2: absent actor 1 has degree " r(deg) " in simulation `s' (undirected, wave1/wave2)"
+		di as error "FAIL present(): absent actor 1 has degree " r(deg) " in simulation `s' (undirected joint, wave1/wave2)"
 		global XT_UFAILS "S2-undirected"
 	}
 }
-nwdrop pp_*
-estat gof, nsim(10) seed(1)
+nwdrop pj_*
 nwsaom, waves(sp1 sp2 sp3) outdegree present(p1 p2 p3) symtype(joint) k0(10) k3(60) seed(3)
 estat simulate, nsim(2) seed(1) generate(pq)
 xt_simcheck pq 2 2, nodes(40) undirected
+forvalues s = 1/2 {
+	xt_rowcol pq_`s'_p1 1
+	if r(deg) != 0 {
+		di as error "FAIL present(): absent actor 1 has degree " r(deg) " in period 1 of simulation `s' (undirected joint, 3 waves)"
+		global XT_UFAILS "$XT_UFAILS S2-undirected-3w"
+	}
+}
 nwdrop pq_*
 nwsaom, waves(sn1 sn2 sn3) outdegree ratecov(xr) k0(10) k3(60) seed(3)
 estat simulate, nsim(2) seed(1) generate(rc)

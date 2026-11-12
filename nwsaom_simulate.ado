@@ -41,6 +41,12 @@ program define nwsaom_simulate, rclass
 			else local `o' "`v'"
 		}
 	}
+	// replace: overwrite the networks of generate()
+	local replace ""
+	if regexm(`"`cmdline'"', "(^|[ ,])replace([ ,]|$)") {
+		local replace "replace"
+		local cmdline = regexr(`"`cmdline'"', "(^|[ ,])replace([ ,]|$)", " ")
+	}
 	if "`theta'" == "" & "`behtheta'" == "" {
 		di as err "{p 0 0 2}nwsaom simulate needs theta() (and behtheta() with behavior effects): the coefficients to simulate at.{p_end}"
 		exit 198
@@ -48,6 +54,30 @@ program define nwsaom_simulate, rclass
 	if "`rates'" == "" {
 		di as err "nwsaom simulate needs rates(): one rate per inter-wave period."
 		exit 198
+	}
+	// nsim(), seed() and the names of generate() are checked before the model is set up (which replaces e())
+	capture confirm integer number `nsim'
+	if _rc | real("`nsim'") < 1 {
+		di as err "nsim() must be a positive integer."
+		exit 198
+	}
+	local nper : word count `rates'
+	if `nsim' * `nper' > c(max_matdim) {
+		di as err "{p 0 0 2}nsim() too large: r(sim) has one row per simulation and period, here `=`nsim' * `nper'' rows, and a matrix of this Stata has at most `c(max_matdim)' rows; use nsim() of at most `=floor(c(max_matdim) / `nper')'.{p_end}"
+		exit 198
+	}
+	capture confirm integer number `seed'
+	if _rc {
+		di as err "seed() must be an integer."
+		exit 198
+	}
+	if "`gen'" != "" {
+		capture confirm name `gen'
+		if _rc {
+			di as err "generate(): `gen' is not a valid name."
+			exit 198
+		}
+		_nwsaom_genstub `gen', nsim(`nsim') nperiods(`: word count `rates'') `replace'
 	}
 	local thopt ""
 	if "`theta'" != "" local thopt "theta0(`theta')"
@@ -72,7 +102,7 @@ program define nwsaom_simulate, rclass
 	local ropt "rates(`rates')"
 	if "`ratesbeh'" != "" local ropt "`ropt' ratesbeh(`ratesbeh')"
 	local gopt ""
-	if "`gen'" != "" local gopt "generate(`gen')"
+	if "`gen'" != "" local gopt "generate(`gen') `replace'"
 	estat simulate, nsim(`nsim') seed(`seed') theta(`tm') `ropt' `gopt'
 	return add
 end

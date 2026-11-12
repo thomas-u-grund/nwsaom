@@ -97,7 +97,7 @@ capture noisily {
 	nwsaom, waves(pn1 pn2) outdegree reciprocity present(p1 p2) k0(10) k3(60) seed(1)
 	estat simulate, nsim(5) seed(1) generate(sa)
 	forvalues s = 1/5 {
-		xt_rowcol sa_`s'_p1 1
+		xt_outdeg sa_`s'_p1 1
 		if r(deg) > 0 local c = 1
 	}
 	nwdrop sa_*
@@ -110,7 +110,7 @@ capture noisily {
 	nwsaom, waves(pn1 pn2 pn3) outdegree reciprocity present(p1 p2 p3) k0(10) k3(60) seed(1)
 	estat simulate, nsim(5) seed(1) generate(sb)
 	forvalues s = 1/5 {
-		xt_rowcol sb_`s'_p1 1
+		xt_outdeg sb_`s'_p1 1
 		if r(deg) > 0 local c = 1
 	}
 	nwdrop sb_*
@@ -133,7 +133,7 @@ capture noisily {
 	nwsaom, waves(pn1 pn2 pn3) outdegree reciprocity joinat(jn) k0(10) k3(60) seed(1)
 	estat simulate, nsim(5) seed(1) generate(sj)
 	forvalues s = 1/5 {
-		xt_rowcol sj_`s'_p1 1
+		xt_outdeg sj_`s'_p1 1
 		if r(deg) > 0 local c = 1
 	}
 	nwdrop sj_*
@@ -157,9 +157,10 @@ capture noisily {
 	nwsaom, waves(qn1 qn2 qn3) groups(grp) outdegree reciprocity present(p1 p2 p3) k0(10) k3(60) seed(1) cores(1)
 	di "e(present) = `e(present)'"
 	estat simulate, nsim(4) seed(1) generate(sg)
+	if "`e(present)'" != "p1 p2 p3" local c = 1
 	forvalues s = 1/4 {
-		xt_rowcol sg_g1_`s'_p1 1
-		di "  S1 simulation `s': degree of absent actor 1 in period 1 = " r(deg)
+		xt_outdeg sg_g1_`s'_p1 1
+		di "  S1 simulation `s': ties sent by absent actor 1 in period 1 = " r(deg)
 		if r(deg) > 0 local c = 1
 	}
 	nwdrop sg_*
@@ -212,12 +213,14 @@ capture noisily {
 	* transtriads is refused for a directed relation only after the Mata model was rebuilt (nwsaom.ado:1467)
 	capture noisily nwsaom, waves(dn1 dn2 dn3) outdegree reciprocity transtrip transtriads k3(60)
 	assert _rc != 0
+	* (since the fix, a call that fails after it has begun to replace the model makes estat refuse cleanly, r(498))
 	capture noisily estat simulate, nsim(3) seed(5)
-	if _rc local c = 1
-	else {
+	if _rc != 0 & _rc != 498 local c = 1
+	else if _rc == 0 {
 		matrix __B = r(sim)
 		if mreldif(__A, __B) != 0 local c = 1
 	}
+	if "`c(frame)'" != "default" local c = 1
 }
 xt_verdict S7a `=_rc' `c' "estat simulate after a late nwsaom error differs from before it"
 
@@ -237,8 +240,8 @@ capture noisily {
 		if mreldif(__A, __B) != 0 local c = 1
 	}
 	* (a clean refusal with an error is acceptable; a raw Mata error or a frame left behind is not)
-	* CONFIRMED BUG S7b (triage): r(3301) in SaomSimulateIntervalNative and the user is left in frame __saom_native
-	if `rcs' >= 3000 & `rcs' <= 3999 local c = 1
+	* S7b (fixed): estat refuses with r(498) (the model in memory belongs to the later fit); before, r(3301) and a frame left behind
+	if `rcs' != 0 & `rcs' != 498 local c = 1
 	if "`c(frame)'" != "default" local c = 1
 	estimates drop xa
 }
@@ -288,19 +291,29 @@ capture noisily {
 xt_verdict S10 `=_rc' `c' "nwsaom accepts the mixed waves, nwsaom describe refuses them"
 
 * ---------------------------------------------------------------------------------------------------------------------------
-* S11: generate() names. (a, NOTE) an existing stub stops with an nwset name clash, there is no replace option; (b) a stub of
-*      28 characters makes names of 33 characters: a refusal must come before any network is created
+* S11: generate() names. (a) an existing stub stops cleanly with r(483) before anything is simulated, and replace overwrites
+*      (owner decision 2026-11-12: add replace); (b) a stub of 28 characters makes names of 33 characters: a refusal must come
+*      before any network is created
 * ---------------------------------------------------------------------------------------------------------------------------
 local c = 0
 capture noisily {
 	nwsaom, waves(dn1 dn2 dn3) outdegree reciprocity k0(10) k3(60) seed(1)
 	estat simulate, nsim(1) seed(1) generate(dup)
+	xt_nnet
+	local n0 = r(n)
 	capture noisily estat simulate, nsim(1) seed(1) generate(dup)
-	local c = (_rc != 0)
 	di "second generate(dup): rc = `=_rc'"
+	if _rc != 483 local c = 1
+	xt_nnet
+	if r(n) != `n0' local c = 1
+	capture noisily estat simulate, nsim(1) seed(2) generate(dup) replace
+	di "second generate(dup) replace: rc = `=_rc'"
+	if _rc local c = 1
+	xt_nnet
+	if r(n) != `n0' local c = 1
 	capture nwdrop dup_*
 }
-xt_note S11a `=_rc' `c' "generate() with an existing stub stops"
+xt_verdict S11a `=_rc' `c' "generate() of an existing stub: no clean r(483), or replace does not overwrite"
 local c = 0
 capture noisily {
 	xt_nnet
@@ -317,9 +330,8 @@ capture noisily {
 	}
 }
 xt_verdict S11b `=_rc' `c' "a long generate() stub leaves partial or truncated networks"
-* CONFIRMED BUG S11b (triage): the failed call leaves a 0-node network with a 33-character name as the current network;
-* afterwards nwds says "Network _all not found", dn1 is "not found" and nwsaom stops with "invalid varname". The
-* network set has to be rebuilt for the probes below.
+* S11b (fixed in nwsaom): the stub is refused before any network is created (before the fix the failed call left a
+* 0-node network with a 33-character name, the core nwset accepting it, N9). The network set is rebuilt anyway.
 nwclear
 forvalues w = 1/3 {
 	nwset, mat(D`w') directed name(dn`w') nooutput
@@ -359,8 +371,19 @@ forvalues w = 1/3 {
 	nwset, mat(G`w') directed name(g`w') nooutput
 	gen double z`w' = .
 }
-mata: xt_beh("z", 50, 3, 5, 77)
 gen byte grp = 1 + (_n > 15) + (_n > 35)
+* a behavior that changes in every group and period (with seed 77, group 3 had no change in period 1: the rate is not identified)
+mata:
+for (sd=77; sd<=400; sd++) {
+	xt_beh("z", 50, 3, 5, sd)
+	Z = st_data(., ("z1", "z2", "z3"))
+	gg = st_data(., "grp")
+	ok = 1
+	for (h=1; h<=3; h++) for (w=1; w<=2; w++) if (sum(select(Z[., w+1] :!= Z[., w], gg :== h)) < 3) ok = 0
+	if (ok) break
+}
+printf("behavior seed %g\n", sd)
+end
 local c = 0
 capture noisily {
 	nwsaom, waves(g1 g2 g3) groups(grp) outdegree reciprocity behavior(z1 z2 z3) linear k0(10) k3(200) seed(2) cores(1)
@@ -371,8 +394,7 @@ capture noisily {
 	capture noisily estat simulate, nsim(2) seed(1) rates(`rl') ratesbeh(`bl')
 	local c = (_rc != 0)
 }
-* S5 by code reading: nwsaom_estat_simgroups.ado:10 has no RATESBEH() option (CONFIRMED in triage). The runtime probe
-* is blocked: this groups() + behavior() fit stops with r(505) (phase-3 covariance singular) on this random behavior.
+* S5 (fixed): estat simulate after groups() accepts ratesbeh(), one behavior rate per period of all groups
 xt_verdict S5 `=_rc' `c' "estat simulate ratesbeh() after groups() + behavior() is refused"
 local c = 0
 capture noisily {
@@ -382,6 +404,49 @@ capture noisily {
 	local c = (_rc != 0)
 }
 xt_verdict S6 `=_rc' `c' "estat simulate rates() after gwaves() is refused"
+
+* ---------------------------------------------------------------------------------------------------------------------------
+* N1 replay (owner decision 2026-11-12): nwsaom without options (or with level()) and estimates replay redisplay the last fit;
+* e() is unchanged; without nwsaom results r(301)
+* ---------------------------------------------------------------------------------------------------------------------------
+local c = 0
+capture noisily {
+	nwsaom, waves(g1 g2 g3) outdegree reciprocity k0(10) k3(60) seed(1)
+	xt_esnap
+	nwsaom
+	xt_esame
+	nwsaom, level(90) detail
+	xt_esame
+	estimates replay
+	xt_esame
+	estimates store rp
+	ereturn clear
+	capture noisily nwsaom
+	if _rc != 301 local c = 1
+	estimates restore rp
+	estimates drop rp
+	* a fit whose options are all given still fits (replay only for display options)
+	nwsaom, waves(g1 g2) outdegree k0(10) k3(40) seed(1)
+	if "`e(waves)'" != "g1 g2" local c = 1
+}
+xt_verdict N1 `=_rc' `c' "replay of nwsaom results"
+
+* ---------------------------------------------------------------------------------------------------------------------------
+* S12: estat after nwsaom multiplex: the same clean refusal, r(321), on both paths (before: 301 on the default path, Stata's
+* generic 321 with theta01())
+* ---------------------------------------------------------------------------------------------------------------------------
+local c = 0
+capture noisily {
+	nwsaom multiplex, netawave1(g1) netawave2(g2) netbwave1(g2) netbwave2(g3) k0(10) k3(40) seed(1)
+	capture noisily estat gof, nsim(10)
+	di "multiplex (default path): estat gof rc = `=_rc'"
+	if _rc != 321 local c = 1
+	nwsaom multiplex, netawave1(g1) netawave2(g2) netbwave1(g2) netbwave2(g3) theta01(-1 0) theta02(-1 0) k0(10) k3(40) seed(1)
+	capture noisily estat gof, nsim(10)
+	di "multiplex (theta01() path): estat gof rc = `=_rc'"
+	if _rc != 321 local c = 1
+}
+xt_verdict S12 `=_rc' `c' "estat after nwsaom multiplex: different or unclear error codes"
 
 di as text "suspects confirmed or probes failed: $XT_FAIL; notes printed: $XT_NOTES"
 assert $XT_FAIL == 0

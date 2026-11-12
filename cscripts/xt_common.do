@@ -231,13 +231,29 @@ program define xt_simcheck
 	}
 end
 
-* xt_rowcol netname k: r(deg) = number of ties in row k plus column k of the nwtomata matrix (0 = actor k is isolated)
+* xt_rowcol netname k: r(deg) = number of ties in row k plus column k of the nwtomata matrix, the diagonal left out (nwtomata
+* returns a missing diagonal) (0 = actor k is isolated)
 capture program drop xt_rowcol
 program define xt_rowcol, rclass
 	args netname k
 	capture mata: mata drop __xtm
 	nwtomata `netname', mat(__xtm)
+	mata: _diag(__xtm, 0)
 	mata: st_numscalar("__xt_d", sum(__xtm[`k', .] :!= 0) + sum(__xtm[., `k'] :!= 0))
+	return scalar deg = scalar(__xt_d)
+	scalar drop __xt_d
+end
+
+* xt_outdeg netname k: r(deg) = number of ties sent by actor k (row k, diagonal left out). An actor that is not active in a
+* period does not act, so it sends no tie; active actors may still create ties TO it (RSiena: an inactive actor stays among
+* the alters of an active ego in directed and unilateral models), so its in-ties are not checked
+capture program drop xt_outdeg
+program define xt_outdeg, rclass
+	args netname k
+	capture mata: mata drop __xtm
+	nwtomata `netname', mat(__xtm)
+	mata: _diag(__xtm, 0)
+	mata: st_numscalar("__xt_d", sum(__xtm[`k', .] :!= 0))
 	return scalar deg = scalar(__xt_d)
 	scalar drop __xt_d
 end

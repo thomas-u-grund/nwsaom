@@ -48,7 +48,7 @@ matrix __bp = e(b)
 nwsaom, waves(tv1 tv2 tv3) outdegree reciprocity tvcov(xc1 xc2 xc3) nodeocov(xc) nodeicov(xc) k0(30) k3(150) seed(5)
 matrix __bt = e(b)
 assert mreldif(__bp, __bt) < 1e-9
-assert "`e(tvcov)'" == " xc"
+assert "`e(tvcov)'" == "xc"
 di as text "constant covariate through tvcov() PASS"
 
 * a really changing covariate gives another model than its first wave's values

@@ -7,7 +7,19 @@
 * or FITNESS FOR A PARTICULAR PURPOSE. See the file LICENSE for the full text.
 capture program drop _nwsaom_symcheck
 program define _nwsaom_symcheck, rclass
-	syntax , HASNETGATE(integer) SYMBAD(integer) [SYMMETRIC(string) RECIPROCITY(string) SYMTYPE(string)]
+	syntax , HASNETGATE(integer) SYMBAD(integer) [SYMMETRIC(string) RECIPROCITY(string) SYMTYPE(string) DATA]
+	// nwsaom calls this twice: the option checks before the wave graphs of the last fit are replaced (so that a refused call
+	// leaves the last fit usable for estat), and with data the check of the new wave graphs once they are built
+	if "`data'" != "" {
+		if "`symmetric'" == "" exit
+		mata: st_numscalar("__ns_symchk1", max(abs(__nwsaom_last_G1.to_dense() - __nwsaom_last_G1.to_dense()')))
+		mata: st_numscalar("__ns_symchk2", max(abs(__nwsaom_last_G2.to_dense() - __nwsaom_last_G2.to_dense()')))
+		if __ns_symchk1 > 0 | __ns_symchk2 > 0 {
+			di "{p 0 0 2}{err}{bf:symmetric} requires both wave networks to be tie-symmetric (x_ij == x_ji for every dyad); it selects a non-directed ministep, it does not symmetrize the data.{p_end}"
+			error 198
+		}
+		exit
+	}
 	local symmetric "`symmetric'"
 	local __ns_symtypeval = 4
 	if "`symmetric'" != "" {
@@ -89,15 +101,8 @@ program define _nwsaom_symcheck, rclass
 			di "{p 0 0 2}{err}under {bf:symmetric}, {bf:cycle3}/{bf:inactivity}/{bf:outpopularity}/{bf:ininass}/{bf:inoutass}/{bf:outoutass}/{bf:antiiso}/{bf:isolatepop}/{bf:transrectrip}/{bf:transtrip} are each either a constant, an exact duplicate of an already-available effect, or an effect real RSiena itself does not offer for a non-directed relation (confirmed against RSiena's own real {bf:getEffects()} output, not assumed) - {bf:outdegree}/{bf:indegpopularity}/{bf:outactivity}/{bf:cycle4}/{bf:isolatenet}/{bf:outiso}/{bf:antiiniso}/{bf:antiiniso2}/{bf:outinass}/{bf:gwesp}/{bf:transties}/{bf:balance} and every covariate effect remain available.{p_end}"
 			error 198
 		}
-		// data-level symmetry check - a real, disclosed requirement, not
-		// silently assumed: `symmetric' only changes the ministep
-		// MECHANISM, it never symmetrizes the input data itself.
-		mata: st_numscalar("__ns_symchk1", max(abs(__nwsaom_last_G1.to_dense() - __nwsaom_last_G1.to_dense()')))
-		mata: st_numscalar("__ns_symchk2", max(abs(__nwsaom_last_G2.to_dense() - __nwsaom_last_G2.to_dense()')))
-		if __ns_symchk1 > 0 | __ns_symchk2 > 0 {
-			di "{p 0 0 2}{err}{bf:symmetric} requires both wave networks to be tie-symmetric (x_ij == x_ji for every dyad); it selects a non-directed ministep, it does not symmetrize the data.{p_end}"
-			error 198
-		}
+		// the data-level symmetry check (symmetric only changes the ministep mechanism, it never symmetrizes the data) runs
+		// in the call with data, after the wave graphs are built
 	}
 	else if "`symtype'" != "" {
 		di "{p 0 0 2}{err}{bf:symtype()} applies to a non-directed relation only (tie-symmetric or undirected waves, or {bf:symmetric}).{p_end}"
