@@ -4008,6 +4008,11 @@ static void build_masked_graph(graph_t *g, graph_t *gm, dyadht_t *missht, int ne
 
 	gm->n = g->n;
 	gm->need_adj = need_adj;
+	/* every field of the copy must be set: gm is a stack variable of the caller. grpn (protocol 142) and the two-mode
+	   sizes (protocol 90) were left uninitialised, so the balance statistic of a missing-data fit read a garbage
+	   pointer when the mask was not empty (Stata crashed in the batch workers) */
+	gm->grpn = g->grpn;
+	gm->nS = g->nS; gm->nR = g->nR; gm->off = g->off;
 	ht_alloc(&gm->ht, ht_next_pow2(g->nties * 2 + 16));
 	gm->elist_i = NULL; gm->elist_j = NULL; gm->ecap = 0; gm->nties = 0;
 	gm->dout = (long *)calloc((size_t)(g->n + 1), sizeof(long));
@@ -4168,7 +4173,7 @@ static ST_retcode nn_call(char *argv[]) {
 			}
 		}
 
-		g1.n = n1v; g1.need_adj = 0; g1.adjm = NULL;
+		g1.n = n1v; g1.need_adj = 0; g1.adjm = NULL; g1.grpn = NULL; g1.nS = n1v; g1.nR = n1v; g1.off = 0;
 		ht_alloc(&g1.ht, ht_next_pow2(nties1v * 2 + 16));
 		g1.elist_i = NULL; g1.elist_j = NULL; g1.ecap = 0; g1.nties = 0;
 		g1.dout = (long *)calloc((size_t)(n1v + 1), sizeof(long));
@@ -4184,7 +4189,7 @@ static ST_retcode nn_call(char *argv[]) {
 			s1i[ii - 1] = (long)vi; s1j[ii - 1] = (long)vj;
 		}
 
-		g2.n = n2v; g2.need_adj = 0; g2.adjm = NULL;
+		g2.n = n2v; g2.need_adj = 0; g2.adjm = NULL; g2.grpn = NULL; g2.nS = n2v; g2.nR = n2v; g2.off = 0;
 		ht_alloc(&g2.ht, ht_next_pow2(nties2v * 2 + 16));
 		g2.elist_i = NULL; g2.elist_j = NULL; g2.ecap = 0; g2.nties = 0;
 		g2.dout = (long *)calloc((size_t)(n2v + 1), sizeof(long));
@@ -4327,14 +4332,14 @@ static ST_retcode nn_call(char *argv[]) {
 		   it), while the ministeps above read its current state */
 		{
 			graph_t g1s, g2s;
-			g1s.n = n1v; g1s.need_adj = 0; g1s.adjm = NULL;
+			g1s.n = n1v; g1s.need_adj = 0; g1s.adjm = NULL; g1s.grpn = NULL; g1s.nS = n1v; g1s.nR = n1v; g1s.off = 0;
 			ht_alloc(&g1s.ht, ht_next_pow2(nties1v * 2 + 16));
 			g1s.elist_i = NULL; g1s.elist_j = NULL; g1s.ecap = 0; g1s.nties = 0;
 			g1s.dout = (long *)calloc((size_t)(n1v + 1), sizeof(long));
 			g1s.din  = (long *)calloc((size_t)(n1v + 1), sizeof(long));
 			g1s.outadj = NULL; g1s.inadj = NULL;
 			for (ii = 0; ii < nties1v; ii++) toggle(&g1s, s1i[ii], s1j[ii]);
-			g2s.n = n2v; g2s.need_adj = 0; g2s.adjm = NULL;
+			g2s.n = n2v; g2s.need_adj = 0; g2s.adjm = NULL; g2s.grpn = NULL; g2s.nS = n2v; g2s.nR = n2v; g2s.off = 0;
 			ht_alloc(&g2s.ht, ht_next_pow2(nties2v * 2 + 16));
 			g2s.elist_i = NULL; g2s.elist_j = NULL; g2s.ecap = 0; g2s.nties = 0;
 			g2s.dout = (long *)calloc((size_t)(n2v + 1), sizeof(long));
