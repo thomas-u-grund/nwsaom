@@ -80,7 +80,7 @@ A p-value printed as 0.000 means that none of the simulated distances reached th
 {pstd}
 {bf:Simulation source differs from real RSiena, disclosed.} Real RSiena's own {cmd:iterations}
 reuses networks already simulated and stored during the fit itself. {cmd:nwsaom} has no such
-storage today, so {cmd:estat gof} runs {opt nsim()} FRESH simulations instead, restarting from
+storage, so {cmd:estat gof} runs {opt nsim()} FRESH simulations instead, restarting from
 each period's own observed starting wave exactly as {cmd:nwsaom}'s own estimation does - this does
 not change the statistical construction (the Mahalanobis test is agnostic to how its reference
 draws were generated, only that they are genuine, independent draws at the fitted parameters).
@@ -111,9 +111,7 @@ JOINTLY for every replicate regardless of which {opt stats()} were actually requ
 coefficients were estimated jointly, so a network-only simulation would not be faithful to the
 fitted model even when only network statistics are being checked. GOF simulates the fitted model -
 endowment/creation, {opt structural()}, {opt ratecov()}, {opt present()} and non-directed model
-types included - in the native plugin when it covers the model (co-evolution too since 2026-10-01;
-before, co-evolution GOF ran in Mata, and network GOF ignored endowment/creation, {opt structural()},
-{opt ratecov()} and {opt present()}).
+types included - in the native plugin when it covers the model (co-evolution too).
 
 {pstd}
 {bf:The plot.} Each statistic's own result is additionally rendered as a violin plot: a
@@ -173,7 +171,7 @@ macro value at the LAST interval - real {cmd:netmediate}'s own summary table rep
 estimate for this row, no SE/CI/p-value, and this command matches that exactly.
 
 {pstd}
-{bf:v1 scope, disclosed}: exactly-two-wave ({opt wave1()}/{opt wave2()}), network-only fits -
+{bf:Scope}: exactly-two-wave ({opt wave1()}/{opt wave2()}), network-only fits -
 co-evolution ({opt behavior()}), multi-wave ({opt waves()}), {opt symmetric}, and multiplex fits
 are all rejected with a clear message (each adds real complexity in real {cmd:netmediate}'s own
 construction too, e.g. a genuine multi-period forward simulation chained through each period's own
@@ -181,7 +179,7 @@ SIMULATED, not observed, end state - not chased here). The VanderWeele E-value s
 ({cmd:netmediate}'s own {cmd:sensitivity_ev} argument) is not implemented - real
 {cmd:netmediate}'s own bootstrap implementation of it has what looks like a genuine copy-paste bug
 (reusing its own lower confidence bound for the upper one too), not something worth faithfully
-reproducing, and a corrected reimplementation was not this pass's own priority. No
+reproducing. No
 common-random-numbers pairing between a draw's own interval simulations either - only the THETA
 draw itself is shared across a row's own interval values, each simulation call draws its own fresh
 randomness.

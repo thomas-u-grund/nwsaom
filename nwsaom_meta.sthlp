@@ -31,7 +31,7 @@
 {title:Description}
 
 {pstd}
-{cmd:nwsaom meta} is the name of the command; {cmd:nwsaom_meta} (the name used by earlier versions) works as well and does the same.
+{cmd:nwsaom meta} is the name of the command; {cmd:nwsaom_meta} works as well and does the same.
 
 {pstd}
 For every effect {cmd:nwsaom_meta} combines the group estimates {it:theta_j} and standard errors {it:s_j} as {cmd:siena08} (Snijders and Baerveldt 2003): the robust IWLS random-effects mean with its t test and

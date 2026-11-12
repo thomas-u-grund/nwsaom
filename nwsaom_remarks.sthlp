@@ -187,12 +187,11 @@ the {bf:thetaBound} or phase-3 covariance checks. An interaction of two unrelate
 normally.
 
 {marker multiplex}{...}
-{title:Multiplex (two networks) - deprecated}
+{title:Multiplex (two networks)}
 
 {pstd}
 {bf:Deprecated:} {cmd:nwsaom multiplex} still works but prints a note; use {cmd:nwsaom multinet}, which
-covers everything described here and much more, and will be the only command for several networks
-in a later release.
+covers everything described here and much more.
 
 {pstd}
 {cmd:nwsaom multiplex} fits two networks co-evolving over the same two waves, each with its
@@ -345,7 +344,7 @@ density, reciprocity, transTrip, simX(drinking); behavior: linear, quad, avAlt. 
 (RSiena's {cmd:includeEffects(type = "endow")} / {cmd:type = "creation"}); the effects available are
 {bf:outdegree}, {bf:reciprocity}, {bf:transties}, {bf:cycle4}, {bf:gwesp}, {bf:balance}, {bf:transtrip}, {bf:cycle3}, {bf:transmedtrip}, {bf:transrectrip} on the network and {bf:linear}, {bf:quadratic},
 {bf:avalt}, {bf:avsim} on the behavior. {cmd:endow(transties) creation(transties)} is the same as
-the older option pair {cmd:transtiesendow transtiescreation}, which still works; so do
+the option pair {cmd:transtiesendow transtiescreation}, which also works; so do
 {opt outdegreeendow}/{opt outdegreecreation}, {opt reciprocityendow}/{opt reciprocitycreation} and
 {opt linearendow}/{opt linearcreation} (and likewise for the other behavior effects). Splitting an
 effect means naming it in both lists and not giving the plain effect; the plain effect and both of
@@ -363,7 +362,7 @@ endowment 0.11 against 0.09 and creation 0.64 against 0.66 (standard errors 0.55
 targets are identical to RSiena's (-74/94, -17.3/31, -74/93, -41/61) and the estimates agree. The split of a
 sparse effect such as {opt transrectrip} can need a longer first phase: with the default length (50 simulations for this model) two of ten
 seeds stopped (a divergence error, or a parameter kept at its starting value because its estimated derivative
-was not positive), while {opt k0(200)} gave RSiena's values. Since 2026-10-22 a non-positive derivative
+was not positive), while {opt k0(200)} gave RSiena's values. A non-positive derivative
 estimate first lengthens phase 1 (up to 200 replicates, RSiena's rule in phase1.r) before the parameter is fixed;
 about 4% of {opt transrectrip} split fits still stop with a divergence error (RSiena stops at its
 {cmd:thetaBound} too, less often); if a split fit stops, try another {opt seed()} or a larger {opt k0()}.
@@ -428,8 +427,8 @@ rate's statistic, and RSiena reports a singular covariance matrix for this model
 estimators - so {cmd:nwsaom} refuses it; use {opt outdegree} with {opt reciprocityendow}/
 {opt reciprocitycreation}. On s50 waves 1-2 that model gives (RSiena, unconditional estimation,
 mean of five seeds, in parentheses) outdegree -2.04 (-2.04), reciprocity endowment 0.77 (0.82, SE
-0.8), reciprocity creation 3.65 (3.60), rate 4.32 (4.34). These fits run in the native plugin since
-2026-10-01 (0.2 s on s50; before, in Mata, about a minute). Works with {opt waves()}, {opt present()} (composition change) and {opt missnet()} (real missing
+0.8), reciprocity creation 3.65 (3.60), rate 4.32 (4.34). These fits run in the native plugin
+(0.2 s on s50). Works with {opt waves()}, {opt present()} (composition change) and {opt missnet()} (real missing
 network data); combined with co-evolution it is rejected outright (error 198) rather than
 silently producing a partially-gated fit.
 
@@ -457,7 +456,7 @@ a model ever contains a term without native code, the whole fit runs in Mata, an
 a warning before the estimation, {cmd:e(engine)} and a note after the output say so.
 
 {pstd}
-{bf:Genuinely out of scope for co-evolution v1} (tracked, not silently dropped): cross-behavior effects (one behavior
+{bf:Not available for co-evolution}: cross-behavior effects (one behavior
 influencing another) and {opt behsim} on a behavior other than the first. The network-side endowment/creation split ({opt endow()}/{opt creation()})
 works together with {opt behavior()} (two or more waves, {opt present()}, {opt missnet()}; native plugin, with a slower
 Mata fallback that gives the same estimates): on s501/s502 with the alcohol behavior (reciprocity endowment/creation, linear, quadratic, avAlt)
@@ -859,12 +858,6 @@ these model types is on the per-actor scale (5.6 on these data); from it, uncond
 often fails ("Unlikely to terminate this epoch") or leaves the rate at its start, so the RSiena
 references start the rate at 0.5.
 
-{pstd}
-Before 2026-10-01 {cmd:e(rate)} of a symmetric model was the per-actor rate rho; {bf:agree} used a
-different alter probability, the scores behind the standard errors used only the initiating actor's
-side ({bf:joint} standard errors were twice RSiena's), and with {opt ratecov()} the actor and the
-alter were drawn uniformly, so the covariate could not affect who acts.
-
 {marker sizelimits}{...}
 {title:Size limits}
 
@@ -886,7 +879,6 @@ covariate arrays; Stata/BE has 2,048 variables altogether). Bring larger network
 the plugin file for your platform was not found (reinstall with {cmd:net install nwsaom, replace}); the installed plugin is older than the model needs (update the same way); the model contains an effect or
 option that the plugin does not cover (it lies outside the capacity of the plugin); or the global macro {cmd:NWSAOM_NONATIVE} is set to 1 (a testing switch). The fit then gives the same results but is orders of magnitude slower.
 The warning is shown once per fit and, like all output, is suppressed by {cmd:quietly}; {cmd:e(engine)} ({cmd:native} or {cmd:mata}) and {cmd:e(engine_why)} are always set.
-Until 22 October 2026 a dyadic covariate on 129 or more actors fell back to Mata by mistake.
 
 {marker compchange}{...}
 {title:Composition change (joiners and leavers)}
@@ -928,7 +920,7 @@ alters of an active actor - a tie made to it is removed again at the end of the 
 The rate parameter's compensator is the time-integral of the number of active actors. The simulation reproduces RSiena's:
 five scenarios (joiners/leavers in each period, actors absent for a whole period) give the same
 deviations from the targets as {cmd:siena07}, and s50 with 10 joiners/leavers gives estimates within noise of RSiena (density,
-reciprocity, transitive triplets, both rates, and a rate covariate). The same rules apply to {opt present()}: since 2026-10-22 an
+reciprocity, transitive triplets, both rates, and a rate covariate). The same rules apply to {opt present()}: an
 absent actor stays among the alters of an active actor, as in RSiena. As in RSiena (option 1), the ties an absent actor has in the
 data are used as given - code them 0 for the waves in which the actor is absent - and the distance (the rate target) counts them.
 Works with co-evolving {opt behavior()} (one or several behaviors; not with behsim or endowment/creation effects); works with {opt symmetric} (not together with {opt ratecov()}); not yet combined with {opt endow()}/{opt creation()}.
@@ -988,7 +980,7 @@ ego for {opt egox()}, either one for {opt samex()}/{opt simx()}). With the defau
 {opt nocenter} and for {opt samex()}/{opt simx()} it does, and {opt simx()}'s range and similarity
 mean use the observed values only. Checked against RSiena 1.6.6 on s501/s502 with 8 of 50 covariate
 values missing: density, reciprocity, altX, egoX and simX agree to within sampling noise (simX 0.79
-against RSiena's 0.78; before this was handled it was 1.02). An {opt interact()} that names a
+against RSiena's 0.78). An {opt interact()} that names a
 {opt samex()} or {opt simx()} effect whose variable has missing values is rejected.
 
 RSiena's own "structural zeros/ones" mechanism - dyads whose value is fixed by design
@@ -1037,8 +1029,8 @@ behaviors (one or several). In a non-directed ({opt symmetric}) relation the cod
 the simulated networks have the end-structural dyads at their end value (RSiena's gof), the choices of structural dyads are left out of the importance.
 
 {pstd}
-{bf:The older option} {opt structural(matname)} marks dyads by a 0/1 matrix that is the same in all periods and needs the same observed value at every wave. It
-is deprecated and replaced by the codes 10 and 11 in the wave networks: the matrix is converted to the codes of every wave (a note is printed), so it works with {opt waves()} and the other options too; the value of a marked dyad is its value in the data, which must be the same at every wave.
+{bf:The option} {opt structural(matname)} marks dyads by a 0/1 matrix that is the same in all periods and needs the same observed value at every wave. It
+is deprecated; use the codes 10 and 11 in the wave networks instead. The matrix is converted to the codes of every wave (a note is printed), so it works with {opt waves()} and the other options too; the value of a marked dyad is its value in the data, which must be the same at every wave.
 
 {marker estimation}{...}
 {title:Estimation}
@@ -1115,9 +1107,7 @@ s50 data RSiena's conditional and unconditional estimates differ by up to 0.3 st
 RSiena 1.6.6 (five models on s50, five seeds each): with the default (conditional) estimation every
 parameter, the rates included, is within 0.07 RSiena standard errors of RSiena's default output,
 and with {opt unconditional} within 0.06 of RSiena's {cmd:cond = FALSE} output; the co-evolution
-model agrees with RSiena's (unconditional) default within 0.05. Versions of {cmd:nwsaom} before
-1 October 2026 did not centre covariates and held the rates of co-evolution models fixed, so
-their estimates differ.
+model agrees with RSiena's (unconditional) default within 0.05.
 
 {pstd}
 {opt waves(namelist)} chains three or more waves into one pooled fit: the effects are shared

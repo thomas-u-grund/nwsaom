@@ -732,3 +732,21 @@ quadratic statistic with its score was 0.02 instead of RSiena's 0.9, and co-evol
 class of bug: for an effect whose statistic only depends on ego's own value (or on alters for an ego without in-ties), stat(z + d e_i) - stat(z)
 must equal the change statistic. The audit of all behavior effects (2026-11-09) found only quadratic; totSim, avSimPopAlt, totSimPopAlt,
 avAltPop, totAltPop and quad_cc fail it in RSiena's own source too, and nwsaom copies RSiena there.
+
+## Help file option text "wraps strangely": a new `{synopt:}` inserted inside another entry (2026-11-12)
+
+Looks like the Viewer size bug (see the help Viewer size-limit entry), but it is a content error and shows in `type ..., smcl` too. A multi-line `{synopt:}` entry runs until its `{p_end}`; a new option added "after the line of the previous option" lands in the middle of that entry when the entry spans several lines, and the Viewer then mixes the two texts. Found in `nwsaom.sthlp` (`uncentered()` inside `nocenter`) and the core's `nwkatz.sthlp` (`force` inside the `geodesic_options` entry). Insert a new option after the `{p_end}` of the previous entry, never after its first line. Check all help files with:
+
+```
+python3 - *.sthlp <<'PY'
+import sys
+for f in sys.argv[1:]:
+    o=None
+    for i,l in enumerate(open(f,encoding='utf-8',errors='replace'),1):
+        if l.startswith(('{synopt:','{p2col:')):
+            if o: print(f"{f}:{o}: entry not closed before line {i}")
+            o=i
+        elif l.startswith('{') and not l.startswith(('{opt','{cmd','{it','{bf','{help','{c ')): o=None
+        if o and ('{p_end}' in l or not l.strip()): o=None
+PY
+```

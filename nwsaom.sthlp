@@ -60,7 +60,7 @@ Two networks that change together ({help nwsaom##multiplex:nwsaom multiplex}):
 {syntab:Observed waves}
 {synopt:{opt wave1(netname)}}First observed wave; requires {opt wave2()}, exactly two waves. Not combinable with {opt waves()}{p_end}
 {synopt:{opt wave2(netname)}}Second (ending) observed wave; requires {opt wave1()}{p_end}
-{synopt:{opt waves(netlist)}}Two or more observed waves, in temporal order (e.g. {cmd:waves(w1 w2 w3)}) - chains {it:netlist}{cmd:-1} inter-wave periods into one pooled fit. A {help netlist} may use patterns ({cmd:waves(glasgow*)}, {cmd:waves(w1-w3)}), which expand in the order in which the networks were created; with two waves this is the form to use, {opt wave1()}/{opt wave2()} is the older spelling of the same thing{p_end}
+{synopt:{opt waves(netlist)}}Two or more observed waves, in temporal order (e.g. {cmd:waves(w1 w2 w3)}) - chains {it:netlist}{cmd:-1} inter-wave periods into one pooled fit. A {help netlist} may use patterns ({cmd:waves(glasgow*)}, {cmd:waves(w1-w3)}), which expand in the order in which the networks were created; with two waves this is the form to use, {opt wave1()}/{opt wave2()} is an equivalent spelling{p_end}
 {synopt:{opt groups(varname)}}Joint estimation of several groups (RSiena's {cmd:sienaGroupCreate()} + {cmd:siena07()}): the actors of all groups are the observations of the data set, {it:varname} gives the group of each actor, and every wave network has no ties between groups. The effects are shared by all groups, every period of every group has its own rate (also of a behavior). Works with actor and dyadic covariates, changing covariates, a behavior, composition change, missing data and interactions. See {help nwsaom_remarks##groups:Several groups}{p_end}
 {synopt:{opt gwaves(spec)}}With {opt groups()}: the waves of the groups when they differ, e.g. {cmd:gwaves(2: 1 2 | 3: 2 3)} (group value, colon, indices into {opt waves()}); a group not named has all waves{p_end}
 {synopt:{opt tvcov(groups)}}Time-varying covariates (RSiena's {cmd:varCovar}): {cmd:tvcov(a1 a2 a3 | s1 s2 s3)} declares covariates with one variable per wave ('|' separates
@@ -84,7 +84,7 @@ are not offered. See {help nwsaom_remarks##twomode:Two-mode networks}{p_end}
 the start-network degrees as RSiena does; {bf:gwesp} takes its decay from {opt gwesp(#)}, which with {opt endow()}/{opt creation()} gives the parameter and not an evaluation role)
 and {bf:linear quadratic avalt avsim} (behavior). An effect named in {it:both} {opt endow()} and {opt creation()} is split into its two roles and takes the place of the plain
 effect; naming it in only one list, or also giving the plain effect, is an error. The long option pairs below ({opt outdegreeendow}/{opt outdegreecreation},
-{opt reciprocityendow}/..., {opt transtiesendow}/..., {opt linearendow}/...) are the same thing and still work. Example:
+{opt reciprocityendow}/..., {opt transtiesendow}/..., {opt linearendow}/...) are the same thing. Example:
 {cmd:nwsaom, waves(w1 w2 w3) outdegree reciprocity endow(transties) creation(transties)}. See {help nwsaom_remarks##endowcreation:Endowment/creation functions} in
 nwsaom_remarks{p_end}
 {synopt:{opt endow(eff:var)}}Covariate effects are split per variable: {cmd:endow(altx:alc) creation(altx:alc)} (effect {cmd:egox}, {cmd:altx},
@@ -211,7 +211,7 @@ nwsaom_remarks{p_end}
 
 {marker alias_options}{...}
 {syntab:RSiena naming aliases}
-{synopt:{opth simcov(varlist)}}Covariate similarity effect, 1 - |x_i - x_j|/range minus its mean over all pairs (RSiena's simX; before 2026-10-01 not centred, which changed only the outdegree coefficient), one effect per variable - RSiena alias {opt simx()}{p_end}
+{synopt:{opth simcov(varlist)}}Covariate similarity effect, 1 - |x_i - x_j|/range minus its mean over all pairs (RSiena's simX), one effect per variable - RSiena alias {opt simx()}{p_end}
 {synopt:{opth egox(varlist)}}RSiena naming alias for {opt nodeocov()} - identical effect, coefficient label follows this spelling{p_end}
 {synopt:{opth altx(varlist)}}RSiena naming alias for {opt nodeicov()} - identical effect, coefficient label follows this spelling{p_end}
 {synopt:{opth samex(varlist)}}RSiena naming alias for {opt nodematch()} - identical effect, coefficient label follows this spelling{p_end}
@@ -364,7 +364,7 @@ to {opt leaveat()}; a missing value means from the first wave / to the last wave
 {synopt:{opth missbeh(varlist)}}Missing behavior data: one 0/1 variable per wave, same "one variable per wave" convention as {opt present()}, marking
 which actors' behavior value is missing at that wave. Requires {opt behavior()}. Optional - omitting it means every actor's value is fully observed.
 See {help nwsaom_remarks##missingdata:Missing data} in nwsaom_remarks{p_end}
-{synopt:{opt structural(matname)}}Deprecated way to mark structural zeros/ones: ONE 0/1 n x n MATRIX (zero diagonal) of dyads whose tie value is fixed in all periods (converted to the codes of every wave). Replaced by the codes
+{synopt:{opt structural(matname)}}Deprecated alternative for structural zeros/ones: ONE 0/1 n x n MATRIX (zero diagonal) of dyads whose tie value is fixed in all periods (converted to the codes of every wave). Use instead the codes
 10 (structural zero) and 11 (structural one) in the wave networks, which {cmd:nwsaom} detects without any option and which may change from wave to wave. See {help nwsaom_remarks##structural:Structural zeros/ones} in
 nwsaom_remarks{p_end}
 
@@ -397,7 +397,7 @@ Combinable with {opt waves()}, {opt present()}, {opt missnet()}, {opt ratecov()}
 {synopt:{opt symtype(string)}}Model type of a non-directed relation, by name or RSiena's modelType number: {bf:forcing} (2; default, RSiena's default for a symmetric network) - an
 actor chooses a tie to change and imposes it; {bf:confirmation} (3) - as forcing, but a new tie needs the alter's confirmation; {bf:force} (4), {bf:agree} (5), {bf:joint} (6) -
 pairwise: a random pair meets and the tie changes if the initiator wants it (force), if both want a new tie or either wants to end one (agree), or if their summed preferences favor
-it (joint). Before 2026-10-01 the default was {bf:joint} and types 2/3 were not available. See {help nwsaom_remarks##undirected:Remarks}{p_end}
+it (joint). See {help nwsaom_remarks##undirected:Remarks}{p_end}
 
 {synoptline}
 {p2colreset}{...}
@@ -589,7 +589,7 @@ parameter agrees with RSiena 1.6.6 within 0.06 standard errors (five seeds). See
 {pstd}
 {cmd:nwsaom} has a native (C) simulation backend, used automatically whenever the fitted model's
 effects all have native coverage (no option needed to opt in). See {help nwsaom_remarks:Remarks}
-for a comparison with RSiena and the performance-tuning history behind it.
+for a comparison with RSiena.
 
 {pstd}
 The C source of the plugin comes with the package: {cmd:net get nwsaom, from(https://raw.githubusercontent.com/thomas-u-grund/nwsaom/main)}
@@ -615,7 +615,7 @@ RSiena's non-directed model types): yes, see {opt symmetric}. Two-mode (bipartit
 events): yes, see {opt actormode()}. Several co-evolving networks: {help nwsaom##multinet:nwsaom multinet}.
 Signed: not applicable/not supported.
 
-{title:Limitations (v1 scope)}
+{title:Limitations}
 
 {pstd}
 {cmd:nwsaom} estimates {bf:binary} SAOMs (directed one-mode, non-directed and two-mode); remaining limits:
@@ -640,10 +640,8 @@ Each of {opt nodematch()}/{opt samex()}, {opt nodecov()}, {opt nodeicov()}/{opt 
 {opt nodeocov()}/{opt egox()}, {opt simcov()}/{opt simx()} and {opt ratecov()} takes a varlist:
 one effect, with its own coefficient, per variable (as RSiena allows any number). Coefficients are
 named {it:effect}_{it:variable}, using the spelling of the option given ({cmd:samex(smoke1 sport1)}
-gives {cmd:samex_smoke1} and {cmd:samex_sport1}); with one variable the name is the same as it
-always was. In e(b), and so in {opt theta0()}, the effect types come in their fixed order and,
-within a type, the variables in the order listed; {cmd:matrix list e(b)} shows it. (Before
-2026-10-01 each of these options took one variable.)
+gives {cmd:samex_smoke1} and {cmd:samex_sport1}). In e(b), and so in {opt theta0()}, the effect types come in their fixed order and,
+within a type, the variables in the order listed; {cmd:matrix list e(b)} shows it.
 
 {marker effects}{...}
 
@@ -684,8 +682,8 @@ Co-evolution models start their rates from the closed form, as with {opt theta0(
 {pstd}
 Besides the results of the new fit, {cmd:e(refit_runs)} holds the number of runs and {cmd:e(refit_converged)} whether the last one met both
 criteria. Example: {cmd:nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip k3(200) seed(12345)}, then
-{cmd:nwsaom refit, k3(1000) seed(12346)}. Also available after {cmd:nwsaom multinet} (since 1.5.13; {opt cores()} does not apply there); not
-available after {cmd:nwsaom multiplex}, nor for results of earlier releases that have no {cmd:e(cmdline)}.
+{cmd:nwsaom refit, k3(1000) seed(12346)}. Also available after {cmd:nwsaom multinet} ({opt cores()} does not apply there); not
+available after {cmd:nwsaom multiplex}.
 
 {pstd}
 {bf:Syntax rule.} A property of the data (two-mode, non-directed) is detected from the network; an option changes
@@ -702,9 +700,7 @@ effect-derivation library (every effect's own ministep
 formula and how it was verified against RSiena's real source), interaction/multiplex/co-evolution
 mechanics, composition-change/missing-data/structural-zero handling, the full performance
 benchmark, and the estimation-algorithm background (Method-of-Moments phase structure, rate
-estimation). That material was split into its own file purely to keep this file's own length
-within Stata's interactive Viewer's rendering limits - it is not optional/secondary content,
-just relocated.
+estimation).
 
 {title:Postestimation}
 
@@ -795,8 +791,7 @@ fits: on RSiena's scale for pairwise models (see {help nwsaom_remarks##undirecte
 		  {bf:e(rates_beh_se)}		1 x (nwaves-1) per-period standard errors of e(rates_beh) (co-evolution, waves() path only)
 		  {bf:e(covmeans)}		means of the covariates of {opt egox()}/{opt altx()}/{opt nodecov()}/{opt ratecov()}, columns named by the variables (subtracted unless {opt nocenter})
 		  {bf:e(tconv)}			RSiena-style convergence t-ratios (phase-3 mean deviation / its standard deviation), one per parameter including the rates; all
-below 0.1 in absolute value indicates good convergence. Printed after the coefficient table, followed by e(tconv_max). (Before 2026-10-01 e(tratio)
-and the rate t-ratios were mean / (sd/sqrt(k3)), about 31.6 times this scale with the default k3(1000))
+below 0.1 in absolute value indicates good convergence. Printed after the coefficient table, followed by e(tconv_max).
 
 {pstd}
 {cmd:estat gof} stores the following in {cmd:r()}, one pair per requested statistic (default
