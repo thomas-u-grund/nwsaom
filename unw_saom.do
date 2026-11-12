@@ -8956,6 +8956,19 @@ real matrix SaomJacobianPerPeriod(real matrix Zp, real matrix Sp, real scalar np
 	return(D)
 }
 
+/* SaomTconvMaxFree(): RSiena's overall maximum convergence ratio over the parameters that are not fixed,
+   sqrt(m' S^-1 m) on the free rows/columns. Index vectors, not select(): select() of a 1 x 1 matrix with a 1 x 1
+   mask cannot tell rows from columns, and a model with one parameter, fixed, failed with r(3200). 0 when every
+   parameter is fixed. */
+real scalar SaomTconvMaxFree(real rowvector m3, real matrix S3, real rowvector fixed) {
+	real rowvector idx
+	real scalar k
+	idx = J(1, 0, .)
+	for (k=1; k<=cols(fixed); k++) if (!fixed[k]) idx = idx, k
+	if (cols(idx) == 0) return(0)
+	return(sqrt(max((m3[idx] * invsym(S3[idx, idx]) * m3[idx]', 0))))
+}
+
 /* SaomRMCore: the three-phase Robbins-Monro algorithm (see the header
    comment above SaomNetCtx) over a parameter vector whose first `p'
    entries are effects. `simfn' simulates K replicates at a parameter
@@ -9183,7 +9196,7 @@ struct SaomNetFit scalar SaomRMCore(transmorphic C, pointer(function) scalar sim
 	for (k=1; k<=ptot; k++) if (S3[k,k] > 1e-10) fit.tconv[k] = m3[k] / sqrt(S3[k,k])
 	fit.tratio = fit.tconv
 	if (max(rmfixed) == 0) fit.tconvMax = sqrt(max((m3 * invsym(S3) * m3', 0)))
-	else fit.tconvMax = sqrt(max((select(m3, !rmfixed) * invsym(select(select(S3, !rmfixed'), !rmfixed)) * select(m3, !rmfixed)', 0)))
+	else fit.tconvMax = SaomTconvMaxFree(m3, S3, rmfixed)
 	Dhat3 = SaomJacobianPerPeriod(Zp3, Sp3, cols(Zp3) / ptot, ptot)
 	SaomStoreScoreInputs(Dhat3, S3, m3, userfix, par, Zp3, Sp3)
 	// a fixed parameter gets no standard error (0): decoupled Jacobian,
@@ -13745,7 +13758,7 @@ struct SaomCoevMultiFit scalar SaomEstimateRMCoevMulti(
 	fit.tconv = J(1, ptot, 0)
 	for (k=1; k<=ptot; k++) if (S3[k,k] > 1e-10) fit.tconv[k] = m3[k] / sqrt(S3[k,k])
 	if (max(coevfixed) == 0) fit.tconvMax = sqrt(max((m3 * invsym(S3) * m3', 0)))
-	else fit.tconvMax = sqrt(max((select(m3, !coevfixed) * invsym(select(select(S3, !coevfixed'), !coevfixed)) * select(m3, !coevfixed)', 0)))
+	else fit.tconvMax = SaomTconvMaxFree(m3, S3, coevfixed)
 
 	// t-ratios on RSiena's scale (the matching entries of tconv)
 	fit.tratioNet = fit.tconv[1..C.pNet]

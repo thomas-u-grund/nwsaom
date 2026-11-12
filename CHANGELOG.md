@@ -3,6 +3,16 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- **`nwsaom simulate` and fits that fix every parameter of a model with one parameter** (for example two-mode `nwsaom simulate ... outdegree theta(-1)`, or a fit with only `outdegree` and `fix(outdegree)`) no longer stop with a conformability error, r(3200). `e(tconv_max)` is 0 when every parameter is fixed.
+
+### Results that change
+- **`rates()` of `estat simulate` and `nwsaom simulate` after non-directed fits of the pairwise types (joint, force, agree) is on the scale of `e(rates)` and `e(rate)`, RSiena's scale**, and is converted to the per-actor rates of the simulation as the fit does it. Before, the values were taken as per-actor rates, so giving the fit's own rates simulated at a different rate. `rates()` given as the fit's `e(rates)` now gives the same simulations as no `rates()` (same seed). Other model types are unchanged.
+
+The Mata libraries are rebuilt (with Stata 17).
+
 ## [1.5.18] - 2026-11-12
 
 ### Results that change

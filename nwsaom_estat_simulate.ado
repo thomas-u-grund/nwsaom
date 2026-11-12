@@ -79,6 +79,7 @@ program define nwsaom_estat_simulate, rclass
 	}
 	else local rate1 = e(rate)
 	local symtype = 0
+	local pairwise = 0
 	if "`e(symtype)'" != "" {
 		// the per-actor rates of a non-directed fit (e(rates) is on RSiena's scale)
 		capture confirm matrix e(rates_actor)
@@ -86,12 +87,22 @@ program define nwsaom_estat_simulate, rclass
 			tempname ramat
 			matrix `ramat' = e(rates_actor)
 			forvalues pd = 1/`nperiods' {
+				local rrs`pd' = `rate`pd''
 				local rate`pd' = `ramat'[1,`pd']
 			}
 		}
-		else local rate1 = e(rate_actor)
+		else {
+			local rrs1 = `rate1'
+			local rate1 = e(rate_actor)
+		}
 		local symtypes "joint force agree forcing confirmation"
 		local symtype : list posof "`e(symtype)'" in symtypes
+		// pairwise types: rates() is on RSiena's scale, as e(rates)/e(rate); the per-actor rate is rfac * rate (conditional
+		// estimation) or rfac * rate^2 (unconditional), rfac = actors - 1 as in the fit (SaomSymRateToRSiena())
+		local pairwise = inlist(`symtype', 1, 2, 3)
+		forvalues pd = 1/`nperiods' {
+			if "`rrs`pd''" != "" local rfac`pd' = cond(e(conditional) == 1, `rate`pd'' / `rrs`pd'', `rate`pd'' / `rrs`pd''^2)
+		}
 	}
 	capture confirm matrix e(rates_beh)
 	if _rc == 0 {
@@ -110,6 +121,7 @@ program define nwsaom_estat_simulate, rclass
 		}
 		forvalues pd = 1/`nperiods' {
 			local rate`pd' : word `pd' of `rates'
+			if `pairwise' local rate`pd' = cond(e(conditional) == 1, `rate`pd'' * `rfac`pd'', `rate`pd''^2 * `rfac`pd'')
 		}
 	}
 	if "`ratesbeh'" != "" {
@@ -142,7 +154,10 @@ program define nwsaom_estat_simulate, rclass
 		forvalues pd = 1/`nperiods' {
 			local rate`pd' = r(rate`pd')
 			if `coev' local ratebeh`pd' = r(ratebeh`pd')
-			if "`rates'" != "" local rate`pd' : word `pd' of `rates'
+			if "`rates'" != "" {
+				local rate`pd' : word `pd' of `rates'
+				if `pairwise' local rate`pd' = cond(e(conditional) == 1, `rate`pd'' * r(rfac`pd'), `rate`pd''^2 * r(rfac`pd'))
+			}
 		}
 		local __sim_gname "__nwsaom_gofg_G"
 	}

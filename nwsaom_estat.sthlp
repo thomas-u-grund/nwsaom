@@ -206,7 +206,9 @@ Simulates the fitted model {opt nsim()} times (default 100). Every inter-wave pe
 start wave of the period and runs for the period's length at the fitted coefficients and rates, the same
 simulation that {cmd:estat gof} uses. With {opt theta()} (a row vector in the order of {cmd:e(b)}) and
 {opt rates()} (one rate per period; {opt ratesbeh()} for the behavior) the model is simulated at coefficients
-of your choice, which is the simulation-only mode (RSiena's {cmd:siena07} with {cmd:simOnly}). {opt generate(stub)}
+of your choice, which is the simulation-only mode (RSiena's {cmd:siena07} with {cmd:simOnly}). The rates are on the scale of
+{cmd:e(rate)} and {cmd:e(rates)}, RSiena's scale; after a non-directed fit of the pairwise types joint, force and agree they are
+converted to the per-actor rates the simulation uses as the fit does it (see {cmd:e(rate_actor)} in {help nwsaom##results:nwsaom}). {opt generate(stub)}
 saves the simulated networks as {cmd:nwcommands} networks named {it:stub}{cmd:_}{it:s}{cmd:_p}{it:period}; after a
 co-evolution fit the simulated behavior is saved as variables of the same names. After a two-mode fit the simulation
 runs on the actors-by-events network; the table shows the number of ties (attendances) only, {cmd:r(sim)} and
