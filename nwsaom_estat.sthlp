@@ -184,10 +184,8 @@ Co-evolution ({opt behavior()}) fits, fits with three or more waves, and {cmd:nw
 are rejected with a message (each adds real complexity in real {cmd:netmediate}'s own
 construction too, e.g. a genuine multi-period forward simulation chained through each period's own
 SIMULATED, not observed, end state - not chased here).
-A non-directed fit ({opt symmetric} or undirected waves) with {opt wave1()}/{opt wave2()} is simulated as in {cmd:estat gof} and {cmd:estat simulate}, with the fit's model type
-({cmd:e(symtype)}) and the per-actor rate {cmd:e(rate_actor)}, and {opt macro()} receives undirected networks. A non-directed fit with {opt waves()} does not store
-{cmd:e(symtype)}; it is simulated with directed ministeps (as by {cmd:estat gof} and {cmd:estat simulate}),
-so fit a non-directed model with {opt wave1()}/{opt wave2()} for {cmd:estat mems}. Two-mode fits are rejected with a message. The VanderWeele E-value sensitivity bound
+A non-directed fit ({opt symmetric} or undirected waves) is simulated as in {cmd:estat gof} and {cmd:estat simulate}, with the fit's model type
+({cmd:e(symtype)}) and the per-actor rate ({cmd:e(rate_actor)} or {cmd:e(rates_actor)}), and {opt macro()} receives undirected networks. Two-mode fits are rejected with a message. The VanderWeele E-value sensitivity bound
 ({cmd:netmediate}'s own {cmd:sensitivity_ev} argument) is not implemented - real
 {cmd:netmediate}'s own bootstrap implementation of it has what looks like a genuine copy-paste bug
 (reusing its own lower confidence bound for the upper one too), not something worth faithfully

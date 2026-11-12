@@ -861,7 +861,7 @@ opportunity at rate rho (the per-actor rate of every other {cmd:nwsaom} model) a
 among the other n - 1 actors; RSiena gives each actor the basic rate lambda, draws the actor and then
 the alter by these rates, and runs at total rate n(n - 1)lambda^2, so each pair at rate lambda^2.
 The two are the same process with lambda^2 = rho/(n - 1) (n: actors present). {cmd:e(rate)} is
-reported on RSiena's scale, and {cmd:e(rate_actor)} keeps rho:
+reported on RSiena's scale, and {cmd:e(rate_actor)} keeps rho (with {opt waves()}: {cmd:e(rates)} and {cmd:e(rates_actor)}, one per period):
 
 {p 8 12 2}- unconditional estimation: {cmd:e(rate)} = lambda = sqrt(rho/(n - 1)), RSiena's basic rate
 parameter; its standard error by the delta method, se(rho)/(2 sqrt(rho(n - 1))).{p_end}

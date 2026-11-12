@@ -3,6 +3,14 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- **`estat simulate` and `nwsaom simulate` work after a two-mode fit of any size.** Beyond small networks (for example 24 actors and 10 events) they stopped with "options too long", r(3598). Results for networks that worked before are unchanged (same seed, same numbers).
+- **Non-directed fits with `waves()` or with a behavior are simulated as non-directed models after the fit.** They now store `e(symtype)` and `e(modeltype)` and the per-actor rates (`e(rates_actor)`, one per period, or `e(rate_actor)` for a co-evolution fit with `wave1()`/`wave2()`), and `estat gof`, `estat simulate` and `estat mems` simulate them with the fit's model type at these rates, so the simulated networks are symmetric. Before, these fits were simulated with directed ministeps, and the goodness-of-fit tests and simulations were not those of the fitted model. The estimates do not change; non-directed network-only fits with `wave1()`/`wave2()` give the same results as before.
+
+The Mata libraries are rebuilt (with Stata 17) and the plugin is updated.
+
 ## [1.5.17] - 2026-11-12
 
 ### Fixed

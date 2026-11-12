@@ -927,8 +927,8 @@ fits: on RSiena's scale for pairwise models (see {help nwsaom_remarks##undirecte
 {synopt:{bf:e(ratecoef)}}{opt ratecov()} fits with one variable: the covariate-rate coefficient; also {bf:e(ratecoef_se)}, {bf:e(ratecoef_tratio)} and (network-only fits)
 {bf:e(ratecoef_fixed)}{p_end}
 {synopt:{bf:e(behratecoef)}}{opt behratecov()}/{opt behrate()} fits with one effect: its coefficient; also {bf:e(behratecoef_se)} and {bf:e(behratecoef_tratio)}{p_end}
-{synopt:{bf:e(rate_actor)}}non-directed fits only: the rate at which an actor gets an opportunity to change, the scale of every other {cmd:nwsaom} rate (differs from e(rate), RSiena's rate, only for
-the pairwise types force/agree/joint){p_end}
+{synopt:{bf:e(rate_actor)}}non-directed fits with {opt wave1()}/{opt wave2()}: the rate at which an actor gets an opportunity to change, the scale of every other {cmd:nwsaom} rate
+(differs from e(rate), RSiena's rate, only for the pairwise types force/agree/joint); {cmd:estat gof}, {cmd:estat simulate} and {cmd:estat mems} simulate at this rate{p_end}
 {synopt:{bf:e(conditional)}}1 for conditional estimation, 0 for unconditional{p_end}
 {synopt:{bf:e(centered)}}1 if the covariates were centred (the default), 0 with {opt nocenter}{p_end}
 {synopt:{bf:e(rate_tratio)}}network rate parameter's convergence t-ratio on RSiena's scale, missing under conditional estimation (wave1()/wave2() path only - see
@@ -980,6 +980,7 @@ nwsaom_remarks){p_end}
 {synopt:{bf:e(rates)}}1 x (nwaves-1) per-period network rate parameters (waves() path only), as e(rate){p_end}
 {synopt:{bf:e(rate_tratios)}}1 x (nwaves-1) per-period network rate convergence t-ratios (waves() path only){p_end}
 {synopt:{bf:e(rates_se)}}1 x (nwaves-1) per-period standard errors of e(rates) (waves() path only){p_end}
+{synopt:{bf:e(rates_actor)}}non-directed fits with {opt waves()}: the per-actor network rate of every period, as e(rate_actor); {cmd:estat gof}, {cmd:estat simulate} and {cmd:estat mems} simulate at these rates{p_end}
 {synopt:{bf:e(rates_beh)}}1 x (nwaves-1) per-period estimated behavior rate parameters (co-evolution, waves() path only){p_end}
 {synopt:{bf:e(rate_beh_tratios)}}1 x (nwaves-1) per-period behavior rate convergence t-ratios (co-evolution, waves() path only){p_end}
 {synopt:{bf:e(rates_beh_se)}}1 x (nwaves-1) per-period standard errors of e(rates_beh) (co-evolution, waves() path only){p_end}

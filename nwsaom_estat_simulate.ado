@@ -80,7 +80,16 @@ program define nwsaom_estat_simulate, rclass
 	else local rate1 = e(rate)
 	local symtype = 0
 	if "`e(symtype)'" != "" {
-		local rate1 = e(rate_actor)
+		// the per-actor rates of a non-directed fit (e(rates) is on RSiena's scale)
+		capture confirm matrix e(rates_actor)
+		if _rc == 0 {
+			tempname ramat
+			matrix `ramat' = e(rates_actor)
+			forvalues pd = 1/`nperiods' {
+				local rate`pd' = `ramat'[1,`pd']
+			}
+		}
+		else local rate1 = e(rate_actor)
 		local symtypes "joint force agree forcing confirmation"
 		local symtype : list posof "`e(symtype)'" in symtypes
 	}
@@ -178,7 +187,7 @@ program define nwsaom_estat_simulate, rclass
 				mata: __nwsaom_sim_B = SaomBehavior()
 				mata: __nwsaom_sim_B.init(*__nwsaom_last_Behwaves[`pd'], __nwsaom_beh_minval, __nwsaom_beh_maxval, `behoverall', __nwsaom_last_Mbeh.simMean)
 				mata: __nwsaom_sim_eng = SaomGofSimCoev(__nwsaom_sim_G, __nwsaom_last_M, st_matrix("`bmat'")[1,1..`pnet'], ///
-					__nwsaom_sim_B, __nwsaom_last_Mbeh, st_matrix("`bmat'")[1,(`pnet'+1)..cols(st_matrix("`bmat'"))], `rate`pd'', `ratebeh`pd'')
+					__nwsaom_sim_B, __nwsaom_last_Mbeh, st_matrix("`bmat'")[1,(`pnet'+1)..cols(st_matrix("`bmat'"))], `rate`pd'', `ratebeh`pd'', `symtype')
 				mata: st_matrix("__nwsaom_sim_row", (`s', `pd', SaomSimSummary(__nwsaom_sim_G.to_dense(), `pd', mean(__nwsaom_sim_B.values))[3..6]))
 			}
 			else {

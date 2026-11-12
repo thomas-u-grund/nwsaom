@@ -299,12 +299,20 @@ program define nwsaom_estat_gof, rclass
 	else {
 		local __gof_rate1 = e(rate)
 	}
-	// symmetric (pairwise) fits report e(rate) on RSiena's scale; the
-	// simulation uses the per-actor rate e(rate_actor) and the pairwise
-	// ministep of e(symtype)
+	// non-directed fits report e(rate)/e(rates) on RSiena's scale; the
+	// simulation uses the per-actor rates e(rate_actor) (wave1()/wave2())
+	// or e(rates_actor) (one per period) and the ministep of e(symtype)
 	local __gof_symtype = 0
 	if "`e(symtype)'" != "" {
-		local __gof_rate1 = e(rate_actor)
+		capture confirm matrix e(rates_actor)
+		if _rc == 0 {
+			tempname __gof_ramat
+			matrix `__gof_ramat' = e(rates_actor)
+			forvalues __pd = 1/`nperiods' {
+				local __gof_rate`__pd' = `__gof_ramat'[1,`__pd']
+			}
+		}
+		else local __gof_rate1 = e(rate_actor)
 		local __gof_symtypes "joint force agree forcing confirmation"
 		local __gof_symtype : list posof "`e(symtype)'" in __gof_symtypes
 	}
@@ -515,7 +523,7 @@ program define nwsaom_estat_gof, rclass
 				mata: __nwsaom_gof_Behwork = SaomBehavior()
 				mata: __nwsaom_gof_Behwork.init(*__nwsaom_last_Behwaves[`__pd'], __nwsaom_beh_minval, __nwsaom_beh_maxval, `__gof_behoverallmean', __nwsaom_last_Mbeh.simMean)
 				mata: __nwsaom_gof_eng = SaomGofSimCoev(__nwsaom_gof_Gwork, __nwsaom_last_M, st_matrix("`bmat'")[1,1..`__nwsaom_gof_pnet'], ///
-					__nwsaom_gof_Behwork, __nwsaom_last_Mbeh, st_matrix("`bmat'")[1,(`__nwsaom_gof_pnet'+1)..cols(st_matrix("`bmat'"))], `__gof_rate`__pd'', `__gof_ratebeh`__pd'')
+					__nwsaom_gof_Behwork, __nwsaom_last_Mbeh, st_matrix("`bmat'")[1,(`__nwsaom_gof_pnet'+1)..cols(st_matrix("`bmat'"))], `__gof_rate`__pd'', `__gof_ratebeh`__pd'', `__gof_symtype')
 				if strpos(" `stats' ", " behavior ") {
 					mata: __nwsaom_gof_thisval = saom_gof_behdist(__nwsaom_gof_Behwork.values, __nwsaom_beh_minval, __nwsaom_beh_maxval)
 					mata: __nwsaom_gof_row_behavior = __nwsaom_gof_row_behavior + __nwsaom_gof_thisval
@@ -854,7 +862,7 @@ void saom_gof_simloop(string rowvector stats, real scalar nsim, real scalar nper
 			if (coev) {
 				Bw = SaomBehavior()
 				Bw.init(*(*pBw)[pd], minv, maxv, behmean, (*pMb).simMean)
-				eng = SaomGofSimCoev(Gw, *pM, theta[1..pnet], Bw, *pMb, theta[(pnet+1)..cols(theta)], rates[pd], ratesbeh[pd])
+				eng = SaomGofSimCoev(Gw, *pM, theta[1..pnet], Bw, *pMb, theta[(pnet+1)..cols(theta)], rates[pd], ratesbeh[pd], symtype)
 				for (q=1; q<=nst; q++) if (stats[q] == "behavior") {
 					v = saom_gof_behdist(Bw.values, minv, maxv)
 					*acc[q] = *acc[q] + v
@@ -1197,7 +1205,9 @@ program define nwsaom_estat_mems, rclass
 	local __mems_symtype = 0
 	local __mems_nettype "directed"
 	if "`e(symtype)'" != "" {
-		local __mems_rate = e(rate_actor)
+		capture confirm matrix e(rates_actor)
+		if _rc == 0 local __mems_rate = el(e(rates_actor), 1, 1)
+		else local __mems_rate = e(rate_actor)
 		local __mems_symtypes "joint force agree forcing confirmation"
 		local __mems_symtype : list posof "`e(symtype)'" in __mems_symtypes
 		local __mems_nettype "undirected"

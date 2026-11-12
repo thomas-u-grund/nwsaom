@@ -21,6 +21,7 @@ f nwsaom_gof_groupbegin.ado
 f nwsaom_estat_simgroups.ado
 f nwsaom_estat_impgroups.ado
 f _nwsaom_symcheck.ado
+f _nwsaom_sympost.ado
 f _nwsaom_groupspost.ado
 f _nwsaom_postengine.ado
 f _nwsaom_rates.ado

@@ -3689,6 +3689,7 @@ program nwsaom, eclass
 		ereturn scalar tconv_max = `__ns_tconvmax'
 		if `__ns_isgrp' _nwsaom_groupspost, groups(`groups') w(`__ns_gW')
 		if `__ns_hasratecov' | `__ns_hasbr' _nwsaom_rates post, hasratecov(`__ns_hasratecov') hasbr(`__ns_hasbr') ratecov(`ratecov') brnames(`__ns_brnames') behratecov(`behratecov') behrate(`behrate')
+		if "`symmetric'" != "" _nwsaom_sympost, val(`__ns_symtypeval') src(__nwsaom_fit_coevmulti.ratesNetActor)
 	}
 	else if `__nwsaom_coev' {
 		// harmonisation unit 26: TWO separate rate parameters, one per
@@ -3727,6 +3728,7 @@ program nwsaom, eclass
 		di as text "Behavior: " as result "`behavior'" _col(40) as text "Behavior rate: " as result %6.3f `__ns_ratebeh' as text " (" as result %5.3f `__ns_ratebehse' as text ")"
 		di
 		ereturn display
+		if "`symmetric'" != "" _nwsaom_sympost, val(`__ns_symtypeval') src(__nwsaom_fit_coev.rateNetActor) scalar
 	}
 	else if `__ns_multi' {
 		// harmonisation unit 17: multi-wave models report e(rates)/
@@ -3822,6 +3824,7 @@ program nwsaom, eclass
 				if `__rcshow'[3,`__k'] di as text " - not reliably estimated: non-positive derivative estimate (e(ratecoefs_fixed))"
 			}
 		}
+		if "`symmetric'" != "" _nwsaom_sympost, val(`__ns_symtypeval') src(__nwsaom_fit.rates_actor)
 	}
 	else {
 		mata: st_local("__ns_rate", strofreal(__nwsaom_fit.rate, "%21.0g"))

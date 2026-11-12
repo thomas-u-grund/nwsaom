@@ -12,6 +12,11 @@ program define nwsaom_gof_groupbegin, rclass
 	matrix `gw' = e(groupwaves)
 	matrix `rg' = e(rates_group)
 	matrix `rt' = e(rates)
+	// a non-directed fit: the simulation uses the per-actor rates (e(rates) is on RSiena's scale)
+	if "`e(symtype)'" != "" {
+		capture confirm matrix e(rates_actor)
+		if _rc == 0 matrix `rt' = e(rates_actor)
+	}
 	local nW = `gw'[1, `group']
 	local s 0
 	forvalues g = 1/`=`group'-1' {
