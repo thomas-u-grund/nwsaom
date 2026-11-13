@@ -276,11 +276,12 @@ instead; independent of whichever baseline role ({opt linear} or {opt linearendo
 {synopt:{opt behsim}}Network-side SELECTION effect on the co-evolving behavior (RSiena's {cmd:simX} with the dependent behavior, e.g. "drinking similarity"): actors prefer ties to
 others whose CURRENT behavior value is similar to their own. Tie-level contribution 1 - |z_i - z_j|/range - simMean, with range and simMean the behavior's own (the same constants
 {opt avsim} uses). Unlike {opt simcov()}, which reads a fixed covariate, the values change during the simulation as the behavior co-evolves. A network effect: its coefficient
-appears among the network coefficients, after the other network effects. Requires {opt behavior()}{p_end}
+appears among the network coefficients, after the other network effects. Requires {opt behavior()}; with several behaviors, {cmd:behsim} in the effect list of
+a behavior selects on that behavior (coefficient {cmd:behsim} for the first behavior, {cmd:behsim_}{it:name} for the others){p_end}
 {synopt:{opt behegox}, {opt behaltx}, {opt behegoplusalt}}Network-side SELECTION effects on the co-evolving behavior, RSiena's {cmd:egoX}, {cmd:altX} and {cmd:egoPlusAltX} with the
 dependent behavior as the covariate ("alcohol ego", "alcohol alter", "alcohol ego and alt"): the tie contribution is the sender's, the receiver's or the sum of both CURRENT
 behavior values minus the behavior's overall mean. As {opt behsim} the statistic uses the starting behavior and the simulation the live one. Network effects; require
-{opt behavior()} (the first behavior){p_end}
+{opt behavior()}; with several behaviors, in the effect list of the behavior that is the covariate (coefficients {cmd:behegox_}{it:name} ... for behaviors 2, 3, ...){p_end}
 {synopt:{opt beheff(tokens)}}Behavior effects of network position, alters and similarity (RSiena's behavior-section effects of the network). Tokens:
 {cmd:indeg outdeg recipdeg isolate outisolate} (ego's behavior times in-/out-/reciprocated degree, or indicator of being an in-/out-isolate),
 {cmd:totalt avaltpop totaltpop maxalt minalt avrecalt totrecalt} (sum, popularity-weighted average/sum, maximum, minimum of the alters' behavior; average/sum over reciprocated
@@ -309,8 +310,11 @@ the dependent behavior as the covariate{p_end}
 {synopt:{opt netbeh(effects)}}Network effects with the {it:dependent behavior} as the covariate (RSiena's "a behavior variable" contexts): any of
 {cmd:samex diffx higher egosqx altsqx samexrecip absdiffx egoxaltx samextranstrip diffxtranstrip homxtranstrip samexoutact diffxoutact samexreciact diffxreciact homxoutact altxoutact inpopx outpopx}
 {cmd:inactx outactx samexinpop diffxinpop egoplusaltsqx diffsqx egodiffx althigheregox unequalx egolthresholdx egorthresholdx altlthresholdx altrthresholdx degabsdiffx degposdiffx degnegdiffx}.
-The value is the behavior's current value minus its overall mean in the simulation and its value at the start of the period in the statistic (like {opt behsim}). First behavior
-only; in a two-mode network {cmd:crossxoutact}, {cmd:avgroupegox} and {cmd:totgroupegox} (the behavior of the actors, read at the event's index within its mode as RSiena does, so at least as many
+The value is the behavior's current value minus its overall mean in the simulation and its value at the start of the period in the statistic (like {opt behsim}).
+With several behaviors, {cmd:netbeh:}{it:effect} in the effect list of a behavior makes that behavior the covariate (for example
+{cmd:behavior(a1 a2 a3 : linear avalt | s1 s2 s3 : linear avalt behsim netbeh:higher)}; coefficients {cmd:bv_}{it:effect}{cmd:_}{it:name} or
+{cmd:natb_}{it:effect}{cmd:_}{it:name}); not with {opt groups()} for behaviors 2, 3, ...;
+in a two-mode network {cmd:crossxoutact}, {cmd:avgroupegox} and {cmd:totgroupegox} (the behavior of the actors, read at the event's index within its mode as RSiena does, so at least as many
 actors as events are needed) are available besides {cmd:egosqx altindist2 totindist2 simegoindist2 sameegoindist2 samexcycle4}; coefficients {cmd:bv_}{it:effect}. Estimates agree with
 siena07. {bf:Native plugin only}{p_end}
 {synopt:{opt behx(family:var ...)}}Behavior effects of the network x a covariate (RSiena's avXInAlt, totXInAlt, avXRecAlt, totXRecAlt, avSameXInAlt, totSameXInAlt, avSameXRecAlt,

@@ -1972,6 +1972,21 @@ UPDATES = [
       set=dict(status='IMPLEMENTED (as cross1(totdist2w:behavior))', nwsaom_option='cross1(totdist2w:behavior) / cross2(totdist2w:behavior)', nwsaom_roles='eval', validated='yes', notes='nwsaom multinet with behavior(): the co-evolving behavior is the covariate of the cross-network effect (plugin protocol 65). Observed statistic and estimates agree with siena07 (2026-10-23).')),
  dict(match=dict(shortName='totInDist2W', varType='one-mode network', context='another network + a behavior variable'),
       set=dict(status='IMPLEMENTED (as cross1(totindist2w:behavior))', nwsaom_option='cross1(totindist2w:behavior) / cross2(totindist2w:behavior)', nwsaom_roles='eval', validated='yes', notes='nwsaom multinet with behavior(): the co-evolving behavior is the covariate of the cross-network effect (plugin protocol 65). Observed statistic and estimates agree with siena07 (2026-10-23).')),
+ # 2026-11-13 protocol 157: the selection effects with ANY of several co-evolving behaviors as the covariate (behavior(a : ... | s : ... behsim behegox netbeh:<effect>))
+ dict(match=dict(shortName='simX', varType='one-mode network', context='a behavior variable'),
+      set=dict(notes='Selection on similarity of the CO-EVOLVING behavior (requires behavior()); constants range and simMean as avsim. With several behaviors any behavior: behsim in that behavior\'s effect list (coefficient behsim_<name>); refused with joinat/leaveat. Compared with RSiena in nwsaom_remarks (glasgow example); second behavior validated 2026-11-13 on s50 (smoking): targets equal siena07, estimates within noise.')),
+ dict(match=dict(shortName='simX', varType='non-directed network', context='a behavior variable'),
+      set=dict(notes='Selection on similarity of the CO-EVOLVING behavior (requires behavior()); constants range and simMean as avsim. With several behaviors any behavior (its effect list); refused with joinat/leaveat. Compared with RSiena in nwsaom_remarks (glasgow example). Validated 2026-10-23: observed statistic equals siena07 and estimates agree over 2 seeds')),
+ dict(match=dict(shortName='egoX', varType='one-mode network', context='a behavior variable'),
+      set=dict(notes='Dependent behavior as the covariate (value = current behavior - overall mean; statistic on the starting behavior as behsim). With several behaviors any behavior: behegox in its effect list (behegox_<name>); second behavior validated 2026-11-13 on s50. Estimates within noise of siena07 on s50 + alcohol (DECISIONS 56).')),
+ dict(match=dict(shortName='altX', varType='one-mode network', context='a behavior variable'),
+      set=dict(notes_append='With several behaviors any behavior (behaltx in its effect list); second behavior validated 2026-11-13 on s50.')),
+ dict(match=dict(shortName='egoPlusAltX', varType='one-mode network', context='a behavior variable'),
+      set=dict(notes_append='With several behaviors any behavior (behegoplusalt in its effect list); target of the second behavior equals siena07 (2026-11-13).')),
+ dict(match=dict(shortName='simRecipX', varType='one-mode network', context='a behavior variable'),
+      set=dict(notes_append='With several behaviors any behavior (netbeh:simrecipx in its effect list); second behavior validated 2026-11-13 on s50.')),
+ dict(match=dict(shortName='higher', varType='one-mode network', context='a behavior variable'),
+      set=dict(notes_append='With several behaviors any behavior (netbeh:higher in its effect list); target of the second behavior equals siena07 (2026-11-13).')),
 ]
 def main():
     global UPDATES

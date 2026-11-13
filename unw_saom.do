@@ -770,6 +770,7 @@ class SaomTermData {
 	real matrix levelpairs		// nodemix: distinct UNORDERED level-pairs present, one row (a,b), a<=b, per output statistic
 	string scalar sptype		// gwesp/gwdsp/gwnsp/esp/dsp: shared-partner definition on a DIRECTED network - "" (default) means the undirected/UTP definition (used as-is for undirected networks); one of "OTP"/"ITP"/"OSP"/"ISP"/"RTP" selects the corresponding directed definition (harmonisation unit 91 wave 5 added OTP; a later wave added ITP/OSP/ISP; RTP (reciprocated two-path) added last - all five of R ergm's own directed shared-partner types are now implemented).
 	real scalar center		// nwsaom behsim (unw_saom.do): the behavior variable's similarity mean, subtracted from every tie's similarity (RSiena's simX centering). Unused by every other term.
+	real scalar dynb		// nwsaom several behaviors: the behavior (2, 3, ...) a network term with the dependent behavior as covariate reads; missing = the first
 	pointer(class SaomGraph scalar) scalar xnet	// nwsaom multiplex's crprod (unw_saom.do): a LIVE pointer to the OTHER co-evolving network's own current SaomGraph, re-pointed by SaomEstimateRMCoevNetNet()/SaomSimulateIntervalCoevNetNet() every time a fresh working copy of that other network is created (a fresh G1work/G2work per Robbins-Monro replicate) - addterm() stores &td0 (a POINTER into the caller's own td0 storage, not a copy), so mutating td.xnet through that same pointer from inside the estimator is visible to the registered term instance immediately, no re-registration needed. NULL/unused by every other term (nwergm never sets or reads it).
 }
 
@@ -6325,8 +6326,46 @@ void SaomBehSimSync(class SaomModel scalar M, real colvector vals){
 	for (t=1; t<=M.nterms; t++) {
 		if (!_saom_isdynname(M.names[t])) continue
 		ptd = M.td[t]
+		if ((*ptd).dynb > 1 & (*ptd).dynb < .) continue
 		(*ptd).attr = vals
 	}
+}
+/* several behaviors: the network terms with behavior 2, 3, ... as the covariate read the values of that behavior at wave w */
+void SaomBehSimSyncMB(class SaomModel scalar M, pointer(real colvector) matrix Bw, real scalar w){
+	real scalar t
+	pointer(class SaomTermData scalar) scalar ptd
+
+	for (t=1; t<=M.nterms; t++) {
+		if (!_saom_isdynname(M.names[t])) continue
+		ptd = M.td[t]
+		if ((*ptd).dynb > 1 & (*ptd).dynb < .) (*ptd).attr = *Bw[(*ptd).dynb, w]
+	}
+}
+real scalar SaomHasDynB(class SaomModel scalar M){
+	real scalar t
+	pointer(class SaomTermData scalar) scalar ptd
+	for (t=1; t<=M.nterms; t++) {
+		if (!_saom_isdynname(M.names[t])) continue
+		ptd = M.td[t]
+		if ((*ptd).dynb > 1 & (*ptd).dynb < .) return(1)
+	}
+	return(0)
+}
+/* protocol 157: the slot selector of a network term with behavior 2, 3, ... as the covariate (0: none; see dynb_decode() in native/saom_sim.c) */
+real scalar _saom_dynsel(class SaomModel scalar M, real scalar t){
+	pointer(class SaomTermData scalar) scalar ptd
+	real scalar b, kind
+	string scalar nm
+	nm = M.names[t]
+	if (!_saom_isdynname(nm)) return(0)
+	ptd = M.td[t]
+	b = (*ptd).dynb
+	if (b >= . | b <= 1) return(0)
+	if (nm == "behsim") kind = 1
+	else if (nm == "behegox" | nm == "behaltx" | nm == "behegoplusalt") kind = 0
+	else if (anyof(("natb_simdist2", "natb_simegodist2", "natb_simegoindist2", "natb_simrecipx", "natb_simxtranstrip"), nm)) kind = 3
+	else kind = 2
+	return(4 * (b - 2) + kind + 1)
 }
 void SaomBehSimSetValue(class SaomModel scalar M, real scalar i, real scalar v){
 	real scalar t
@@ -6336,6 +6375,7 @@ void SaomBehSimSetValue(class SaomModel scalar M, real scalar i, real scalar v){
 	for (t=1; t<=M.nterms; t++) {
 		if (!_saom_isdynname(M.names[t])) continue
 		ptd = M.td[t]
+		if ((*ptd).dynb > 1 & (*ptd).dynb < .) continue
 		a = (*ptd).attr		// (*ptd).attr[i] = v is not a valid lvalue in Mata
 		a[i] = v
 		(*ptd).attr = a
@@ -14669,6 +14709,17 @@ struct SaomNativeConfig scalar SaomNativeSetup(class SaomModel scalar M){
 			if (cfg.whynot == "") cfg.whynot = "plugin older than protocol 9 (simx(), antiiso, isolatepop, or more than 16 effects)"
 		}
 	}
+	// protocol 157: network effects with behavior 2, 3, ... as the covariate (term code + 100000 times the slot selector)
+	for (t=1; t<=M.nterms; t++) {
+		nextattr = _saom_dynsel(M, t)
+		if (nextattr > 0) {
+			cfg.termcodes[t] = cfg.termcodes[t] + 100000 * nextattr
+			if (cfg.eligible & SaomNativePluginVersion() < 157) {
+				cfg.eligible = 0
+				if (cfg.whynot == "") cfg.whynot = "plugin older than protocol 157 (network effects of a later behavior)"
+			}
+		}
+	}
 	return(cfg)
 }
 
@@ -16977,6 +17028,10 @@ struct SaomMBCtx scalar SaomMBInit(
 	C.hastv = SaomModelHasTV(M)
 	C.overallMeanPd = overallMean' * J(1, C.P, 1)
 	C.simMeanPd = simMean' * J(1, C.P, 1)
+	if (SaomGroupsMode() & SaomHasDynB(M)) {
+		errprintf("{p 0 2 2}nwsaom: network effects of a later behavior (behsim, behegox, behaltx, behegoplusalt, netbeh: in the effect list of behavior 2, 3, ...) are not available with groups().{p_end}\n")
+		exit(198)
+	}
 	if (SaomGroupsMode()) {
 		// several groups: the actors of the group of the period are present, the others rest; the constants of every behavior are those of the group of the period
 		if (!C.hastimed) {
@@ -17019,6 +17074,10 @@ struct SaomMBCtx scalar SaomMBInit(
 	else if (!why_ok) why = "a behavior effect without a native implementation"
 	else why = "native plugin too old for several behaviors"
 	SaomSetEngine(C.use_native, why)
+	if (!C.use_native & SaomHasDynB(M)) {
+		errprintf("{p 0 2 2}nwsaom: network effects of a later behavior need the native plugin of this release (update nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation.{p_end}\n")
+		exit(198)
+	}
 	if (SaomGroupsMode() & !C.use_native) {
 		errprintf("{p 0 2 2}nwsaom: several behaviors with groups() need the native plugin of this release (update nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation.{p_end}\n")
 		exit(198)
@@ -17036,7 +17095,10 @@ struct SaomMBCtx scalar SaomMBInit(
 		if (C.hastv) SaomTVSync(M, pd)
 		SaomGroupsSync(M, pd)
 		SaomBehCovPd(pd)
-		if (SaomHasBehSim(M)) SaomBehSimSync(M, *Behwaves[1,pd])		// lagged: starting behavior
+		if (SaomHasBehSim(M)) {
+			SaomBehSimSync(M, *Behwaves[1,pd])		// lagged: starting behavior
+			SaomBehSimSyncMB(M, Behwaves, pd)
+		}
 		C.target[pd, 1..C.pNet] = M.full_statistic(Gend)
 		for (b=1; b<=C.nb; b++) {
 			Bend = SaomBehavior()
@@ -18774,6 +18836,145 @@ string scalar SaomMBCoefNames(pointer(class SaomBehaviorModel scalar) rowvector 
 	return(out)
 }
 
+/* several behaviors: the labels of the network effects of behaviors 2, 3, ... (RSiena: "smk similarity", "smk ego", "absDiffX smk") */
+string scalar SaomMBNetLabels(class SaomModel scalar M, string scalar lab, string rowvector names) {
+	string rowvector l
+	real scalar t, ci, b
+	string scalar nm
+	pointer(class SaomTermData scalar) scalar ptd
+	l = tokens(lab, "|")
+	l = select(l, l :!= "|")
+	ci = 0
+	for (t=1; t<=M.nterms; t++) {
+		nm = M.names[t]
+		if (_saom_isdynname(nm) & ci + 1 <= cols(l)) {
+			ptd = M.td[t]
+			b = (*ptd).dynb
+			if (b > 1 & b < . & b <= cols(names)) {
+				if (nm == "behsim") l[ci + 1] = names[b] + " similarity"
+				else if (nm == "behegox") l[ci + 1] = names[b] + " ego"
+				else if (nm == "behaltx") l[ci + 1] = names[b] + " alter"
+				else if (nm == "behegoplusalt") l[ci + 1] = names[b] + " ego + alter"
+				else l[ci + 1] = substr(nm, strpos(nm, "_") + 1, .) + " " + names[b]
+			}
+		}
+		ci = ci + M.npar[t]
+	}
+	return(invtokens(l, "|"))
+}
+/* the statistic (ch = 0) or change (ch = 1) function of the netbeh effect e with the behavior as covariate */
+pointer(real rowvector function) scalar _saom_bvfn(string scalar e, real scalar ch) {
+	if (e == "samex") return(ch ? &change_saom_bv_samex() : &stat_saom_bv_samex())
+	if (e == "diffx") return(ch ? &change_saom_bv_diffx() : &stat_saom_bv_diffx())
+	if (e == "higher") return(ch ? &change_saom_bv_higher() : &stat_saom_bv_higher())
+	if (e == "egosqx") return(ch ? &change_saom_bv_egosqx() : &stat_saom_bv_egosqx())
+	if (e == "altsqx") return(ch ? &change_saom_bv_altsqx() : &stat_saom_bv_altsqx())
+	if (e == "samexrecip") return(ch ? &change_saom_bv_samexrecip() : &stat_saom_bv_samexrecip())
+	if (e == "absdiffx") return(ch ? &change_saom_bv_absdiffx() : &stat_saom_bv_absdiffx())
+	if (e == "egoxaltx") return(ch ? &change_saom_bv_egoxaltx() : &stat_saom_bv_egoxaltx())
+	if (e == "samextranstrip") return(ch ? &change_saom_bv_samextranstrip() : &stat_saom_bv_samextranstrip())
+	if (e == "diffxtranstrip") return(ch ? &change_saom_bv_diffxtranstrip() : &stat_saom_bv_diffxtranstrip())
+	if (e == "homxtranstrip") return(ch ? &change_saom_bv_homxtranstrip() : &stat_saom_bv_homxtranstrip())
+	if (e == "samexoutact") return(ch ? &change_saom_bv_samexoutact() : &stat_saom_bv_samexoutact())
+	if (e == "diffxoutact") return(ch ? &change_saom_bv_diffxoutact() : &stat_saom_bv_diffxoutact())
+	if (e == "samexreciact") return(ch ? &change_saom_bv_samexreciact() : &stat_saom_bv_samexreciact())
+	if (e == "diffxreciact") return(ch ? &change_saom_bv_diffxreciact() : &stat_saom_bv_diffxreciact())
+	if (e == "homxoutact") return(ch ? &change_saom_bv_homxoutact() : &stat_saom_bv_homxoutact())
+	if (e == "altxoutact") return(ch ? &change_saom_bv_altxoutact() : &stat_saom_bv_altxoutact())
+	if (e == "inpopx") return(ch ? &change_saom_bv_inpopx() : &stat_saom_bv_inpopx())
+	if (e == "outpopx") return(ch ? &change_saom_bv_outpopx() : &stat_saom_bv_outpopx())
+	if (e == "inactx") return(ch ? &change_saom_bv_inactx() : &stat_saom_bv_inactx())
+	if (e == "outactx") return(ch ? &change_saom_bv_outactx() : &stat_saom_bv_outactx())
+	if (e == "samexinpop") return(ch ? &change_saom_bv_samexinpop() : &stat_saom_bv_samexinpop())
+	if (e == "diffxinpop") return(ch ? &change_saom_bv_diffxinpop() : &stat_saom_bv_diffxinpop())
+	if (e == "egoplusaltsqx") return(ch ? &change_saom_bv_egoplusaltsqx() : &stat_saom_bv_egoplusaltsqx())
+	if (e == "diffsqx") return(ch ? &change_saom_bv_diffsqx() : &stat_saom_bv_diffsqx())
+	if (e == "egodiffx") return(ch ? &change_saom_bv_egodiffx() : &stat_saom_bv_egodiffx())
+	if (e == "althigheregox") return(ch ? &change_saom_bv_althigheregox() : &stat_saom_bv_althigheregox())
+	if (e == "unequalx") return(ch ? &change_saom_bv_unequalx() : &stat_saom_bv_unequalx())
+	if (e == "egolthresholdx") return(ch ? &change_saom_bv_egolthresholdx() : &stat_saom_bv_egolthresholdx())
+	if (e == "egorthresholdx") return(ch ? &change_saom_bv_egorthresholdx() : &stat_saom_bv_egorthresholdx())
+	if (e == "altlthresholdx") return(ch ? &change_saom_bv_altlthresholdx() : &stat_saom_bv_altlthresholdx())
+	if (e == "altrthresholdx") return(ch ? &change_saom_bv_altrthresholdx() : &stat_saom_bv_altrthresholdx())
+	if (e == "degabsdiffx") return(ch ? &change_saom_bv_degabsdiffx() : &stat_saom_bv_degabsdiffx())
+	if (e == "degposdiffx") return(ch ? &change_saom_bv_degposdiffx() : &stat_saom_bv_degposdiffx())
+	if (e == "degnegdiffx") return(ch ? &change_saom_bv_degnegdiffx() : &stat_saom_bv_degnegdiffx())
+	return(NULL)
+}
+/* one network term with behavior b (>= 2) as the covariate; each call has its own term data */
+void _SaomMBNetAdd(class SaomModel scalar M, string scalar nm, string scalar coef, real colvector attr, real scalar center, real scalar decay,
+	real scalar b, | real colvector levels) {
+	class SaomTermData scalar td
+	td = SaomTermData()
+	td.attr = attr
+	td.center = center
+	td.decay = decay
+	td.dynb = b
+	if (args() >= 8) {
+		td.levels = levels
+		M.addterm(nm, 1, &stat_saom_nat(), &change_saom_nat(), td, coef)
+	}
+	else if (nm == "behsim") M.addterm(nm, 1, &stat_saom_behsim(), &change_saom_behsim(), td, coef)
+	else if (nm == "behegox") M.addterm(nm, 1, &stat_saom_behegox(), &change_saom_behegox(), td, coef)
+	else if (nm == "behaltx") M.addterm(nm, 1, &stat_saom_behaltx(), &change_saom_behaltx(), td, coef)
+	else if (nm == "behegoplusalt") M.addterm(nm, 1, &stat_saom_behegoplusalt(), &change_saom_behegoplusalt(), td, coef)
+	else M.addterm(nm, 1, _saom_bvfn(substr(nm, 4, .), 0), _saom_bvfn(substr(nm, 4, .), 1), td, coef)
+}
+/* several behaviors: the network effects of behavior b (>= 2) given in its effect list (behsim behegox behaltx behegoplusalt netbeh:<effect>);
+   Bw its wave vectors, ovm its overall mean (the centring of the behavior effects), xparam/covthr the options xparam() and covthreshold().
+   Returns the coefficient names. */
+string scalar SaomMBNetTerms(class SaomModel scalar M, real scalar b, string scalar name, string scalar effects,
+	pointer(real colvector) rowvector Bw, class SaomBehaviorModel scalar Mb, real scalar ovm, real scalar xparam, real scalar covthr) {
+	string rowvector tk, nbn, nbok
+	real rowvector nbc, ps
+	string scalar e, out, coef
+	real scalar i, rng, k
+
+	nbok = ("samex", "diffx", "higher", "egosqx", "altsqx", "samexrecip", "absdiffx", "egoxaltx", "samextranstrip", "diffxtranstrip", "homxtranstrip", "samexoutact", "diffxoutact", "samexreciact", "diffxreciact", "homxoutact", "altxoutact", "inpopx", "outpopx", "inactx", "outactx", "samexinpop", "diffxinpop", "egoplusaltsqx", "diffsqx", "egodiffx", "althigheregox", "unequalx", "egolthresholdx", "egorthresholdx", "altlthresholdx", "altrthresholdx", "degabsdiffx", "degposdiffx", "degnegdiffx")
+	nbn = ("crossxoutact", "outxmore", "indties", "transtripx", "jumpxtranstrip", "altdist2", "totdist2", "sameegodist2", "altindist2", "totindist2", "sameegoindist2", "homxtransrectrip", "samextransrectrip", "diffxtransrectrip", "egoxaltxrecip", "samexcycle4", "sameinxcycle4", "avgroupegox", "totgroupegox", "simdist2", "simegodist2", "simegoindist2", "simrecipx", "simxtranstrip")
+	nbc = (220, 222, 223, 224, 225, 226, 227, 230, 231, 232, 234, 235, 236, 237, 238, 239, 240, 241, 242, 228, 229, 233, 53, 167)
+	tk = tokens(effects)
+	out = ""
+	rng = max(SaomMBPooled(Bw)) - min(SaomMBPooled(Bw))
+	for (i=1; i<=cols(tk); i++) {
+		e = tk[i]
+		if (substr(e, 1, 7) == "netbeh:") e = substr(e, 8, .)
+		if (rng <= 0) {
+			errprintf("{p 0 2 2}nwsaom: behavior %s of behavior(): %s needs a behavior that varies.{p_end}\n", name, tk[i])
+			exit(198)
+		}
+		if (e == "behsim") {
+			coef = "behsim_" + name
+			_SaomMBNetAdd(M, e, coef, *Bw[1], saom_similarity_mean(Bw, rng), rng, b)
+		}
+		else if (anyof(("behegox", "behaltx", "behegoplusalt"), e)) {
+			coef = e + "_" + name
+			_SaomMBNetAdd(M, e, coef, *Bw[1], ovm, 0, b)
+		}
+		else if (anyof(nbok, e)) {
+			coef = "bv_" + e + "_" + name
+			_SaomMBNetAdd(M, "bv_" + e, coef, *Bw[1], ovm, covthr, b)
+		}
+		else if (anyof(nbn, e)) {
+			if (findexternal("__nwsaom_tm_isactor") != NULL) {
+				errprintf("{p 0 2 2}nwsaom: netbeh:%s of a later behavior is not available for a two-mode network.{p_end}\n", e)
+				exit(198)
+			}
+			k = selectindex(nbn :== e)
+			ps = SaomNbSim(e, xparam, Mb, Bw, rng)
+			coef = "natb_" + e + "_" + name
+			_SaomMBNetAdd(M, "natb_" + e, coef, *Bw[1], ovm, ps[1], b, (nbc[k] \ 1 \ ps[2]))
+		}
+		else {
+			errprintf("{p 0 2 2}nwsaom: behavior %s of behavior(): %s is not a network effect of a behavior; available: behsim behegox behaltx behegoplusalt netbeh:{it:effect} with {it:effect} one of %s %s.{p_end}\n", name, tk[i], invtokens(nbok), invtokens(nbn))
+			exit(198)
+		}
+		out = out + (out == "" ? "" : " ") + coef
+	}
+	st_local("__ns_p", strofreal(M.nparam()))		// the caller (nwsaom.ado) counts the network parameters in this local
+	return(out)
+}
+
 string scalar SaomMBLabels(class SaomModel scalar M, real scalar symmetric, string scalar namestr,
 	pointer(class SaomBehaviorModel scalar) rowvector Mbehs) {
 	string scalar out, nm, base, l
@@ -18781,7 +18982,7 @@ string scalar SaomMBLabels(class SaomModel scalar M, real scalar symmetric, stri
 	real scalar b, t
 
 	names = tokens(namestr)
-	out = SaomRSienaLabels(M, symmetric, names[1])
+	out = SaomMBNetLabels(M, SaomRSienaLabels(M, symmetric, names[1]), names)
 	for (b=1; b<=cols(Mbehs); b++) {
 		for (t=1; t<=(*Mbehs[b]).nterms; t++) {
 			nm = (*Mbehs[b]).names[t]

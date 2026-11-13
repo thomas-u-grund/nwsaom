@@ -1,0 +1,26 @@
+# Selection effects of a SECOND co-evolving behavior (smoking as the covariate of simX / egoX / altX / simRecipX / higher) besides those of the first
+# (alcohol): RSiena 1.6.14 reference for nwsaom behavior(a1 a2 a3 : ... behsim | s1 s2 s3 : ... behsim behegox behaltx netbeh:simrecipx)
+# Run from the repository root: Rscript dev/saom_rsiena_mbsel.R   (Stata side: dev/saom_rsiena_mbsel.do)
+library(RSiena)
+data(s501); data(s502); data(s503); data(s50a); data(s50s)
+net <- sienaDependent(array(c(s501, s502, s503), dim = c(50, 50, 3)))
+alc <- sienaDependent(s50a, type = "behavior")
+smk <- sienaDependent(s50s, type = "behavior")
+d <- sienaDataCreate(net, alc, smk)
+e0 <- getEffects(d)
+e0 <- includeEffects(e0, recip, transTrip)
+e0 <- includeEffects(e0, simX, interaction1 = "alc")
+e0 <- includeEffects(e0, quad, name = "alc")
+e0 <- includeEffects(e0, avAlt, name = "alc", interaction1 = "net")
+e0 <- includeEffects(e0, avAlt, name = "smk", interaction1 = "net")
+# targets of all the effects (higher: poorly identified with three categories, so in the targets only)
+eT <- includeEffects(e0, simX, egoX, altX, simRecipX, higher, egoPlusAltX, interaction1 = "smk")
+ansT <- siena07(sienaAlgorithmCreate(projname = NULL, seed = 1, n3 = 10, nsub = 0), data = d, effects = eT, batch = TRUE, silent = TRUE)
+cat("RSIENA targets:", paste(round(ansT$targets, 4), collapse = " "), "\n  names:", paste(ansT$effects$effectName, collapse = " | "), "\n")
+e <- includeEffects(e0, simX, egoX, altX, simRecipX, interaction1 = "smk")
+for (sd in 1:3) {
+	alg <- sienaAlgorithmCreate(projname = NULL, seed = sd, n3 = 1000, nsub = 4)
+	ans <- siena07(alg, data = d, effects = e, batch = TRUE, silent = TRUE)
+	cat(sprintf("RSIENA seed %d tconv %.3f\n  est: %s\n  se: %s\n  names: %s\n", sd, ans$tconv.max, paste(round(c(ans$rate, ans$theta), 3), collapse = " "),
+		paste(round(c(ans$vrate, sqrt(diag(ans$covtheta))), 3), collapse = " "), paste(ans$effects$effectName, collapse = " | ")))
+}

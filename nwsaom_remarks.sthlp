@@ -652,10 +652,13 @@ next, else the wave's most frequent value, as in the single-network fit, and the
 {pstd}
 {bf:Several behaviors.} {cmd:behavior(}{it:vars}{cmd: : }{it:effects}{cmd: | }{it:vars}{cmd: : }{it:effects}{cmd:)}: '|' separates
 the behaviors, each given as one variable per wave, optionally followed by ':' and that behavior's own effects
-({opt linear quadratic avalt avsim}, their {opt endow}/{opt creation} variants, and {opt behsim} for the first behavior);
+({opt linear quadratic avalt avsim}, their {opt endow}/{opt creation} variants, the {opt beheff()} tokens, and the network effects with that behavior as the
+covariate: {cmd:behsim behegox behaltx behegoplusalt} and {cmd:netbeh:}{it:effect} with the effects of {opt netbeh()});
 without ':' the global effect options apply to every behavior. Every behavior has its own rate per period; at each
 step the acting variable is drawn in proportion to its rate and then the actor uniformly (RSiena's mechanism). The
-behaviors interact only through the network (avAlt and avSim read it; {opt behsim} selects ties on the first behavior).
+behaviors interact only through the network (avAlt and avSim read it; {cmd:behsim}, {cmd:behegox} ... in the list of a behavior select ties on that behavior,
+as RSiena's simX, egoX ... with that behavior as interaction1). The network coefficients of behaviors 2, 3, ... end in {cmd:_}{it:name} ({cmd:behsim_s},
+{cmd:bv_higher_s}). These network effects of behaviors 2, 3, ... need the native plugin and are not available with {opt groups()}.
 Coefficients are named {cmd:beh_}{it:name}{cmd:_}{it:effect}, {it:name} being the first variable without its trailing
 digits; {cmd:e(rates_beh)} has one row per behavior. Not yet combinable with {opt symmetric}, {opt ratecov()},
 {opt present()}, {opt missnet()}/{opt missbeh()}, {opt structural()}, network {opt endow()}/{opt creation()}; the {cmd:estat}
@@ -664,6 +667,9 @@ reciprocity, transitive triplets; linear, quadratic and avAlt for each behavior)
 reciprocity 2.42 against 2.43, transitive triplets 0.61 against 0.61; alcohol linear 0.42 (0.43), quadratic -0.54 (-0.54),
 avAlt 1.28-1.30 (1.26-1.31); smoking linear -1.91 to -1.94 (-1.92 to -1.94), quadratic 2.02-2.03 (2.03-2.05), avAlt
 1.92-1.97 (2.01-2.06); network rates 6.5 and 5.3 (6.5, 5.3), alcohol 1.25 and 1.68 (1.25, 1.66), smoking 2.8 and 2.6 (2.7, 2.6).
+Selection on both behaviors against RSiena 1.6.14 (simX of alcohol; simX, egoX, altX and simRecipX of smoking; three seeds each, RSiena's in
+parentheses): the observed statistics are equal; alcohol similarity 1.16-1.17 (1.17-1.18), smoking similarity 1.01-1.06 (1.03-1.11), smoking
+similarity x reciprocity -1.03 to -1.18 (-1.09 to -1.26), smoking alter 0.09-0.10 (0.09-0.11), smoking ego 0.03-0.04 (0.03-0.04).
 
 {pstd}
 {opt transtiesendow}/{opt transtiescreation} split {opt transties} the same way. RSiena's rule, which

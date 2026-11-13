@@ -10,6 +10,7 @@ f _nwsaom_chkbin.ado
 f _nwsaom_dlgprep.ado
 f _nwsaom_getrates.ado
 f _nwsaom_libcheck.ado
+f _nwsaom_mbparse.ado
 f _nwsaom_mnbeh.ado
 f _nwsaom_nx.ado
 f _nwsaom_precheck.ado

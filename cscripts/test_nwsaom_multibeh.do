@@ -77,12 +77,12 @@ if _rc == 0 assert e(nbeh) == 2 & "`e(engine)'" == "mata"
 global NWSAOM_NONATIVE
 di as text "two behaviors, Mata engine PASS"
 
-* refusals: wrong number of variables, unknown effect, behsim on a second behavior, unsupported combinations
+* refusals: wrong number of variables, unknown effect, unknown network effect of a second behavior, unsupported combinations
 capture nwsaom, waves(mb1 mb2 mb3) outdegree behavior(a1 a2 a3 : linear | s1 s2 : linear)
 assert _rc == 198
 capture nwsaom, waves(mb1 mb2 mb3) outdegree behavior(a1 a2 a3 : linear | s1 s2 s3 : bogus)
 assert _rc == 198
-capture nwsaom, waves(mb1 mb2 mb3) outdegree behavior(a1 a2 a3 : linear | s1 s2 s3 : linear behsim)
+capture nwsaom, waves(mb1 mb2 mb3) outdegree behavior(a1 a2 a3 : linear | s1 s2 s3 : linear netbeh:nosuch)
 assert _rc == 198
 capture nwsaom, waves(mb1 mb2 mb3) outdegree symmetric behavior(a1 a2 a3 : linear | s1 s2 s3 : linear)
 assert _rc == 198

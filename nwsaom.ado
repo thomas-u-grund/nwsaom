@@ -329,63 +329,22 @@ program nwsaom, eclass
 	local __ns_mb = 0
 	local __ns_nbehv = 1
 	if `"`behavior'"' != "" & (strpos(`"`behavior'"', "|") | strpos(`"`behavior'"', ":")) {
-		// RSiena's behavior effects of the network position / the alters / the similarity family (protocol 35), also valid as beheff() tokens
-		local __ns_newbeh "indeg outdeg recipdeg isolate outisolate totalt avaltpop totaltpop maxalt minalt avrecalt totrecalt totsim avatthigher avattlower totatthigher totattlower avsimpopalt totsimpopalt avsimpopego avinsim totinsim avinsimpopalt totinsimpopalt avsimrecip totsimrecip avsimrecpop totsimrecpop popalt totpopalt avinalt totinalt avaltdist2 totaltdist2 avtaltdist2 totaaltdist2 avinaltdist2 totinaltdist2 avtinaltdist2 totainaltdist2"
-		local __ns_mbeffnames "linear quadratic avalt avsim linearendow linearcreation quadraticendow quadraticcreation avaltendow avaltcreation avsimendow avsimcreation behsim `__ns_newbeh'"
-		local __ns_gl ""
-		foreach __e in linear quadratic avalt avsim linearendow linearcreation quadraticendow quadraticcreation avaltendow avaltcreation avsimendow avsimcreation {
-			if "``__e''" != "" local __ns_gl "`__ns_gl' `__e'"
+		_nwsaom_mbparse, behavior(`"`behavior'"') nwaves(`__ns_nwaves') gl(`linear' `quadratic' `avalt' `avsim' `linearendow' `linearcreation' `quadraticendow' `quadraticcreation' `avaltendow' `avaltcreation' `avsimendow' `avsimcreation') `behsim'
+		local __ns_nbehv = r(nb)
+		forvalues __b = 1/`__ns_nbehv' {
+			local __ns_mbv`__b' "`r(v`__b')'"
+			local __ns_mbe`__b' "`r(e`__b')'"
+			local __ns_mbn`__b' "`r(n`__b')'"
 		}
-		local __rest `"`behavior'"'
-		local __nb 0
-		while `"`__rest'"' != "" {
-			local __bar = strpos(`"`__rest'"', "|")
-			if `__bar' > 0 {
-				local __grp = strtrim(substr(`"`__rest'"', 1, `__bar' - 1))
-				local __rest = strtrim(substr(`"`__rest'"', `__bar' + 1, .))
-			}
-			else {
-				local __grp = strtrim(`"`__rest'"')
-				local __rest ""
-			}
-			local ++__nb
-			local __col = strpos(`"`__grp'"', ":")
-			if `__col' > 0 {
-				local __ns_mbv`__nb' = strtrim(substr(`"`__grp'"', 1, `__col' - 1))
-				local __ns_mbe`__nb' = strtrim(substr(`"`__grp'"', `__col' + 1, .))
-			}
-			else {
-				local __ns_mbv`__nb' = strtrim(`"`__grp'"')
-				local __ns_mbe`__nb' ""
-			}
-			if "`__ns_mbe`__nb''" == "" local __ns_mbe`__nb' "`__ns_gl'"
-			local __nwc : word count `__ns_mbv`__nb''
-			if `__nwc' != `__ns_nwaves' {
-				di "{p 0 0 2}{err}each behavior in {bf:behavior()} must supply exactly `__ns_nwaves' variable name(s), one per wave, in the same temporal order; behavior `__nb' has `__nwc'.{p_end}"
-				error 198
-			}
-			foreach __e of local __ns_mbe`__nb' {
-				if !`: list __e in __ns_mbeffnames' {
-					di "{p 0 0 2}{err}behavior `__nb' of {bf:behavior()}: unknown effect {bf:`__e'}; the effects are linear quadratic avalt avsim, their endow/creation variants (linearendow ...) and behsim.{p_end}"
-					error 198
-				}
-				if "`__e'" == "behsim" & `__nb' > 1 {
-					di "{p 0 0 2}{err}{bf:behsim} (network similarity on a behavior) is available for the first behavior only.{p_end}"
-					error 198
-				}
-			}
-		}
-		local __ns_nbehv = `__nb'
-		// the option behsim (selection on the behavior) belongs to the first behavior, as behsim in its own list
-		if "`behsim'" != "" & !`: list posof "behsim" in __ns_mbe1' local __ns_mbe1 "`__ns_mbe1' behsim"
 		// the global behavior-effect options are replaced by the first behavior's own list (the single-behavior code reads them)
 		foreach __e in linear quadratic avalt avsim linearendow linearcreation quadraticendow quadraticcreation avaltendow avaltcreation avsimendow avsimcreation behsim {
 			local `__e' ""
 		}
 		foreach __e of local __ns_mbe1 {
-			if `: list __e in __ns_newbeh' local beheff "`beheff' `__e'"
-			else local `__e' "`__e'"
+			local `__e' "`__e'"
 		}
+		local beheff `beheff' `r(beheff1)'
+		local netbeh `netbeh' `r(netbeh1)'
 		local behavior "`__ns_mbv1'"
 		if `__ns_nbehv' >= 2 local __ns_mb = 1
 	}
@@ -2872,7 +2831,7 @@ program nwsaom, eclass
 		}
 		if `__ns_hastimed' {
 			forvalues __b = 1/`__ns_nbehv' {
-				foreach __e of local __ns_mbe`__b' {
+				foreach __e in `__ns_mbe`__b'' `__ns_mbn`__b'' {
 					if inlist("`__e'", "behsim", "linearendow", "linearcreation", "quadraticendow", "quadraticcreation") | inlist("`__e'", "avaltendow", "avaltcreation", "avsimendow", "avsimcreation") {
 						di "{err}{bf:joinat()}/{bf:leaveat()} cannot yet be combined with the behavior effect {bf:`__e'}."
 						error 198
@@ -2929,6 +2888,10 @@ program nwsaom, eclass
 				mata: __ns_mbM`__b'.setsimmean(saom_similarity_mean(__ns_mbBp`__b', max(SaomMBPooled(__ns_mbBp`__b')) - min(SaomMBPooled(__ns_mbBp`__b'))))
 			}
 			mata: __ns_mbsim = (__ns_mbsim, __ns_mbM`__b'.simMean)
+			if "`__ns_mbn`__b''" != "" {
+				mata: st_local("__ns_x", SaomMBNetTerms(__nwsaom_last_M, `__b', "`__ns_mbname`__b''", "`__ns_mbn`__b''", __ns_mbBp`__b', __ns_mbM`__b', __ns_mbover[`__b'], `xparam', `covthreshold'))
+				local __ns_efflist : subinstr local __ns_efflist " [behavior:" " `__ns_x' [behavior:"
+			}
 			local __ns_mbptrM "`__ns_mbptrM', &__ns_mbM`__b'"
 			local __ns_mbtotal = `__ns_mbtotal' + `__ns_mbp`__b''
 			local __ns_efflist "`__ns_efflist' [behavior `__ns_mbname`__b'': `__ns_mbeff`__b'']"
