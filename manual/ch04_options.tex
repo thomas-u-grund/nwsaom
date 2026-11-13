@@ -208,7 +208,7 @@ Two networks on the same actors evolve together (RSiena's two dependent network 
 The following list collects the restrictions that the program enforces and that the help file states; a combination that is not allowed stops with an error message and never gives a silently different model.
 \begin{itemize}[nosep]
   \item {\sloppy \opt{wave1()}/\opt{wave2()} together with \opt{waves()}; \opt{outdegree} together with \opt{outdegreeendow}/\opt{outdegreecreation}, or any plain effect together with its own endowment/creation split.\par}
-  \item \opt{structural()} (deprecated, converted to the codes 10 and 11): no longer restricted; see Section~\ref{sec:structural}. The codes 10 and 11: not yet with \opt{groups()}, \opt{ml}, \texttt{nwsaom multinet}; the postestimation commands know them (Section~\ref{sec:structural}).
+  \item \opt{structural()} (deprecated, converted to the codes 10 and 11): not restricted; see Section~\ref{sec:structural}. The codes 10 and 11: not yet with \opt{groups()}, \opt{ml}, \texttt{nwsaom multinet}; the postestimation commands know them (Section~\ref{sec:structural}).
   \item \opt{ratecov()}: not with co-evolution; with \opt{symmetric} not together with \opt{present()}, \opt{joinat()} or \opt{leaveat()}, and not with co-evolution.
   \item \opt{tvcov()}: no missing values; not with \opt{interact()} or \opt{symmetric}; no \texttt{estat} command afterwards.
   \item \opt{groups()}: not with \opt{ml}, \texttt{nwsaom bayes}, two-mode networks, \texttt{nwsaom multinet}/\texttt{multiplex}, several behaviors, \opt{structural()} or the structural codes 10 and 11, or the time-varying dyadic covariates; \opt{gwaves()} needs \opt{groups()} (Section~\ref{sec:groups-limits}).
