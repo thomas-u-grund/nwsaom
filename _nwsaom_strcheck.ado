@@ -1,4 +1,4 @@
-*! version 1.5.15  11nov2026 _nwsaom_strcheck: string variables in an nwsaom command (added in 1.5.16)
+*! version 1.7.0  13nov2026 _nwsaom_strcheck: string variables in an nwsaom command (added in 1.5.16)
 * Copyright (C) 2026 Thomas U. Grund
 * Called by nwsaom with the command as typed. Every word that names a string
 * variable is placed in its effect: the option around it, or the effect before

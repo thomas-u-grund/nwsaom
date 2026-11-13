@@ -3,7 +3,7 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.7.0] - 2026-11-13
 
 ### Added
 - **Selection effects of every behavior in a model with several behaviors.** `behsim`, `behegox`, `behaltx`, `behegoplusalt` and the `netbeh()` effects, written `netbeh:`*effect*, can be given in the effect list of any behavior of `behavior(a1 a2 a3 : ... | s1 s2 s3 : ... behsim netbeh:higher)`; that behavior is then the covariate (RSiena's simX, egoX, ... with that behavior as `interaction1`). The coefficients of behaviors 2, 3, ... end in `_`*name* (`behsim_s`, `bv_higher_s`, `natb_simrecipx_s`). Observed statistics equal siena07's targets and the estimates agree with RSiena 1.6.14 on s50 (alcohol and smoking). Native plugin only; not with `groups()`.
@@ -18,6 +18,11 @@ project uses [Semantic Versioning](https://semver.org/).
 - **A model with several behaviors after a fit with several behaviors and `behfrom()`** stopped with a Mata error, r(3301) in `SaomBehCovFillDyn()`: the behavior covariates of the earlier fit were not cleared completely.
 - **`behsim` given as an option with several behaviors** was ignored without a message; it is the `behsim` of the first behavior, as `behsim` in the effect list of that behavior (same estimates).
 - **`ml`** refuses the options it does not cover (`present()`, `joinat()`, `leaveat()`, `missnet()`, `missbeh()`, `structural()`, endowment/creation effects, non-directed models, rate covariates, two-mode data, several behaviors) before the method-of-moments fit it starts from; before, the whole fit ran and was printed before the refusal.
+
+### Changed
+- Rebuilt for nwcommands 3.23.0; requires core 3.23.0 or later.
+
+Tested on: TO BE FILLED
 
 ## [1.6.0] - 2026-11-13
 

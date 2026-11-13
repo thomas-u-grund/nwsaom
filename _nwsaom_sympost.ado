@@ -1,4 +1,4 @@
-*! version 1.6.0  13nov2026 _nwsaom_sympost (stored results of a non-directed fit with waves() or a behavior, split out because nwsaom.ado is at the size limit of one ado program)
+*! version 1.7.0  13nov2026 _nwsaom_sympost (stored results of a non-directed fit with waves() or a behavior, split out because nwsaom.ado is at the size limit of one ado program)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General

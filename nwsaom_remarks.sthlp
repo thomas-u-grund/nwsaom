@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.6.0  13nov2026 author: Thomas Grund}{...}
+{* *! version 1.7.0  13nov2026 author: Thomas Grund}{...}
 
 {title:Title}
 
@@ -1193,4 +1193,4 @@ The same estimates are available as {cmd:nwsaom_ml} after an {cmd:nwsaom} fit. T
     {help nwsaom}, {help nwsaom_estat}, {help nwergm}
 
 {hline}
-{pstd}{it:nwsaom version 1.6.0, 13 November 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.7.0, 13 November 2026}{p_end}{* nwversion}
