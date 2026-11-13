@@ -100,8 +100,11 @@ program nwsaom_refit, eclass
 		// convergence: every |t| below tconv() and the overall maximum below tmax()
 		tempname tc
 		matrix `tc' = e(tconv)
+		// fixed parameters are not judged (RSiena: the largest |t| over the estimated parameters)
+		_nwsaom_tconvfixed fx
 		local tworst 0
 		forvalues j = 1/`=colsof(`tc')' {
+			if "`: word `j' of `fx''" == "1" continue
 			if abs(`tc'[1,`j']) < . local tworst = max(`tworst', abs(`tc'[1,`j']))
 		}
 		local conv = (`tworst' < `tconv') & (e(tconv_max) < `tmax')

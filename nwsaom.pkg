@@ -32,6 +32,7 @@ f _nwsaom_rates.ado
 f _nwsaom_replay.ado
 f _nwsaom_rsnotes.ado
 f _nwsaom_tconvtable.ado
+f _nwsaom_tconvfixed.ado
 f nwsaom.ado
 f nwsaom_version.ado
 f nwsaom_bayes.ado

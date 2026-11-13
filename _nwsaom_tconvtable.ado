@@ -8,7 +8,10 @@
 /* Convergence t-ratios on RSiena's scale (phase-3 mean deviation / its
    standard deviation, e(tconv)) for every parameter including the rates,
    two per line within 80 columns, then RSiena's overall maximum
-   convergence ratio e(tconv_max). */
+   convergence ratio e(tconv_max). As in RSiena, the criteria apply to the
+   estimated parameters only: a fixed parameter (fix(), or kept at its
+   starting value) is listed with detail but never reported as "not met"
+   (e(tconv_max) leaves the fixed parameters out already). */
 capture program drop _nwsaom_tconvtable
 program define _nwsaom_tconvtable
 	syntax [, DETail]
@@ -18,9 +21,18 @@ program define _nwsaom_tconvtable
 	local k = colsof(`m')
 	// RSiena's two criteria, used by both layouts for the refit hint below
 	local ok = e(tconv_max) < 0.25
+	_nwsaom_tconvfixed fx
+	local nfx 0
+	local fxnames ""
 	local anybad 0
 	forvalues j = 1/`k' {
-		if abs(`m'[1,`j']) >= 0.1 local anybad 1
+		local f`j' : word `j' of `fx'
+		if "`f`j''" == "" local f`j' 0
+		if `f`j'' {
+			local ++nfx
+			local fxnames `fxnames' `: word `j' of `names''
+		}
+		else if abs(`m'[1,`j']) >= 0.1 local anybad 1
 	}
 	if "`detail'" != "" {
 		di as text "{p 0 0 2}Convergence t-ratios (criterion: every |t| below 0.1; the overall maximum ratio below 0.25 is a separate criterion):{p_end}"
@@ -31,13 +43,14 @@ program define _nwsaom_tconvtable
 			else di as text "      " %-24s "`nm'" as result %8.3f `m'[1,`j']
 		}
 		if mod(`k', 2) == 1 di ""
+		if `nfx' di as text "{p 0 2 2}Fixed, not part of the criteria: `fxnames'{p_end}"
 		di as text "Overall maximum convergence ratio: " as result %6.3f e(tconv_max)
 	}
 	else {
 		local bad ""
 		local nbad 0
 		forvalues j = 1/`k' {
-			if abs(`m'[1,`j']) >= 0.1 {
+			if !`f`j'' & abs(`m'[1,`j']) >= 0.1 {
 				local nm : word `j' of `names'
 				local bad "`bad' `nm' (`: di %5.3f `m'[1,`j']')"
 				local ++nbad

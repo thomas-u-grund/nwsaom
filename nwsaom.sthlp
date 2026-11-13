@@ -422,7 +422,8 @@ nwsaom_remarks{p_end}
 {marker ratecov_options}{...}
 {syntab:Covariate-dependent rate}
 {synopt:{opt fix(namelist)}}Hold the named effects fixed at their {opt theta0()} values (RSiena's {cmd:fix = TRUE}): they are not estimated and have
-no standard error; {cmd:fix(_all)} fixes every effect. Used to fit a restricted model for {help nwsaom_estat##estat_score:estat score}, to simulate at
+no standard error; {cmd:fix(_all)} fixes every effect. As in RSiena, the convergence criteria apply to the estimated parameters only: a fixed
+effect's t-ratio is kept in {bf:e(tconv)} and listed by {opt detail}, but it is never reported as "not met" and is left out of {bf:e(tconv_max)}. Used to fit a restricted model for {help nwsaom_estat##estat_score:estat score}, to simulate at
 chosen coefficients ({cmd:nwsaom simulate}) and to profile models. Works with {opt behavior()}; not with {cmd:nwsaom multinet}{p_end}
 {synopt:{opth ratecov(varlist)}}Let node covariates raise or lower each actor's own opportunity to make a network change, instead of every actor sharing one constant rate for the
 period - actor i's own rate becomes {it:rate}*exp(sum of {it:b_k}*{it:x_k}[i]) over the variables, one coefficient each (RSiena's RateX effects). The coefficient is estimated
@@ -485,7 +486,7 @@ simulation draws from its own random stream derived from the seed and its positi
 number of threads. Applies to fits with the native backend; see {help nwsaom_remarks##estimation:Estimation} in nwsaom_remarks{p_end}
 {synopt:{opt det:ail}}Also display RSiena's names of the covariate, interaction and behavior effects, the covariates' centring means, an explanation of
 the conditional rate, and the convergence t-ratio of every parameter. By default only the overall maximum convergence ratio is shown, with any
-parameter whose t-ratio is 0.1 or more in absolute value; the full information is always stored in {bf:e(rsiena_labels)}, {bf:e(covmeans)} and
+estimated parameter whose t-ratio is 0.1 or more in absolute value (fixed parameters are not judged, as in RSiena); the full information is always stored in {bf:e(rsiena_labels)}, {bf:e(covmeans)} and
 {bf:e(tconv)}{p_end}
 {synoptline}
 {p2colreset}{...}
@@ -958,7 +959,7 @@ own, prefixed {cmd:beh_}){p_end}
 nwsaom_remarks){p_end}
 {synopt:{bf:e(rate_beh_se)}}standard error of e(rate_beh) (co-evolution, wave1()/wave2() path only){p_end}
 {synopt:{bf:e(rate_beh_tratio)}}behavior rate parameter's convergence t-ratio on RSiena's scale (co-evolution, wave1()/wave2() path only){p_end}
-{synopt:{bf:e(tconv_max)}}RSiena's overall maximum convergence ratio; one of the two criteria of good convergence (below 0.25; the other: every t-ratio in e(tconv) below 0.1 in absolute value){p_end}
+{synopt:{bf:e(tconv_max)}}RSiena's overall maximum convergence ratio; one of the two criteria of good convergence (below 0.25; the other: every t-ratio in e(tconv) of an estimated parameter below 0.1 in absolute value); computed over the estimated parameters, fixed ones left out, as in RSiena{p_end}
 {synopt:{bf:e(twomode)}}1 for a two-mode network, 0 otherwise{p_end}
 {synopt:{bf:e(n_actors)}, {bf:e(n_events)}}two-mode fits: the numbers of actors and events{p_end}
 {synopt:{bf:e(actormode)}}two-mode fits: the mode of the actors ({opt actormode()}){p_end}
@@ -1014,7 +1015,7 @@ covariate rate effects){p_end}
 {synopt:{bf:e(ml_score)}}{opt ml} fits: the mean score of phase 3 of every parameter (effects, then rates){p_end}
 {synopt:{bf:e(covmeans)}}means of the covariates of {opt egox()}/{opt altx()}/{opt nodecov()}/{opt ratecov()}, columns named by the variables (subtracted unless {opt nocenter}){p_end}
 {synopt:{bf:e(tconv)}}RSiena-style convergence t-ratios (phase-3 mean deviation / its standard deviation), one per parameter including the rates; all
-below 0.1 in absolute value indicates good convergence. Printed after the coefficient table, followed by e(tconv_max).{p_end}
+below 0.1 in absolute value indicates good convergence. Only the estimated parameters count: the t-ratio of a parameter held fixed (with {opt fix()}, or kept at its starting value because its derivative was not positive) is stored but not judged, and e(tconv_max) leaves the fixed parameters out. Printed after the coefficient table, followed by e(tconv_max).{p_end}
 
 {pstd}
 {cmd:estat gof} stores the following in {cmd:r()}, one pair per requested statistic (default

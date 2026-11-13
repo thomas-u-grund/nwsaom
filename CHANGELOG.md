@@ -90,6 +90,8 @@ The Mata libraries are rebuilt (with Stata 17) and the plugin is updated.
 
 Results do not change. The Mata libraries are rebuilt (with Stata 17); the core requirement is unchanged.
 
+- **Fixed effects are no longer judged by the convergence criterion.** After a fit with `fix()`, the line on the convergence t-ratios could say "not met for indegpopularity (0.319)" although `indegpopularity` was fixed, and `nwsaom refit, maxruns()` counted that t-ratio too. As in RSiena (phase3.r: the largest |t| over the estimated parameters only), a parameter held fixed, by `fix()` or because its phase-1 derivative was not positive, is no longer reported as "not met"; `detail` still lists its t-ratio and names the fixed parameters, and `e(tconv)` keeps it. `e(tconv_max)` already left the fixed parameters out, as RSiena's `tconv.max` does. Estimates are unchanged. New test `test_nwsaom_fixconv`.
+
 ## [1.5.15] - 2026-11-11
 
 ### Fixed

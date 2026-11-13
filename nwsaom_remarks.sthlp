@@ -1112,11 +1112,13 @@ option does; Phase 3 runs {opt k3()} further replicates at the estimates to comp
 standard errors (e(V), RSiena's sandwich formula), the convergence t-ratios {cmd:e(tconv)} (mean
 deviation / its standard deviation, one per parameter including the rates) and RSiena's overall
 maximum convergence ratio {cmd:e(tconv_max)}. As in RSiena, a fit is considered converged when
-every |t| is below 0.1 and the overall ratio below 0.25; otherwise, run the model again from the
+every |t| is below 0.1 and the overall ratio below 0.25, both over the estimated parameters only (a parameter
+held fixed, with {opt fix()} or because its derivative was not positive, is not judged; its t-ratio is still
+stored in {cmd:e(tconv)}); otherwise, run the model again from the
 estimates: {help nwsaom##refit:nwsaom refit} (or {opt theta0()} and {opt rate0()} by hand). If after one or two restarts the overall ratio stays
 near 0.25 while the estimates hardly change, restart once more with a longer phase 3, for example {opt k3(3000)}. Below the coefficient
 table, every fit prints the two criteria on separate lines, each with the statement "met" or "not met": the overall ratio (criterion: below 0.25)
-and the individual t-ratios (criterion: every |t| below 0.1, with the parameters that fail named); the
+and the individual t-ratios (criterion: every |t| of an estimated parameter below 0.1, with the parameters that fail named); the
 {opt detail} option lists the t-ratios of all parameters, rates included, and {cmd:e(tratio)}
 holds the ones of the coefficients in e(b), on the same scale.
 
