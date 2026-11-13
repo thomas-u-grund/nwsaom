@@ -1,4 +1,4 @@
-*! version 1.7.0  13nov2026 nwcommands: check the names that generate() of estat simulate / nwsaom simulate will create
+*! version 1.7.1  13nov2026 nwcommands: check the names that generate() of estat simulate / nwsaom simulate will create
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General

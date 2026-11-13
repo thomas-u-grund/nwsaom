@@ -3,6 +3,13 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.7.1] - 2026-11-13
+
+### Changed
+- Rebuilt for nwcommands 3.24.0; requires core 3.24.0 or later. No other change.
+
+Tested on: TO BE FILLED
+
 ## [1.7.0] - 2026-11-13
 
 ### Added
