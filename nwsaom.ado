@@ -158,6 +158,9 @@ program nwsaom, eclass
 	set more off
 	mata: SaomRatesReset()
 
+	// ml: refuse the options it does not cover before the method-of-moments fit it starts from
+	if "`ml'" != "" _nwsaom_precheck ml, opts(`=cond("`present'`joinat'`leaveat'" != "", "present()/joinat()/leaveat() ", "")'`=cond("`missnet'`missbeh'" != "", "missnet()/missbeh() ", "")'`=cond("`structural'" != "", "structural() ", "")'`=cond("`endow'`creation'`outdegreeendow'`outdegreecreation'`reciprocityendow'`reciprocitycreation'`transtiesendow'`transtiescreation'`linearendow'`linearcreation'`quadraticendow'`quadraticcreation'`avaltendow'`avaltcreation'`avsimendow'`avsimcreation'" != "", "endow/creation", "")') other(`=("`symmetric'`symtype'`ratecov'" != "") | (`actormode' != 0) | (strpos(`"`behavior'"', "|") > 0)')
+
 	// --- endow(effects) creation(effects): RSiena's effect "types" (includeEffects(type = "endow" /
 	// "creation")) as two role lists instead of a pair of options per effect. An effect named in
 	// BOTH lists is split into its endowment and creation roles and takes the place of the plain
@@ -373,6 +376,8 @@ program nwsaom, eclass
 			}
 		}
 		local __ns_nbehv = `__nb'
+		// the option behsim (selection on the behavior) belongs to the first behavior, as behsim in its own list
+		if "`behsim'" != "" & !`: list posof "behsim" in __ns_mbe1' local __ns_mbe1 "`__ns_mbe1' behsim"
 		// the global behavior-effect options are replaced by the first behavior's own list (the single-behavior code reads them)
 		foreach __e in linear quadratic avalt avsim linearendow linearcreation quadraticendow quadraticcreation avaltendow avaltcreation avsimendow avsimcreation behsim {
 			local `__e' ""
@@ -2400,7 +2405,7 @@ program nwsaom, eclass
 			local __ns_endowcreation = 1
 		}
 		// RSiena's behavior effects of the network position, the alters and the similarity family (protocol 35), behavior 1
-		capture mata: mata drop __saom_behcov __saom_behcovnames __saom_behcovoff __saom_behcovper __saom_behcov_pd
+		capture mata: mata drop __saom_behcov __saom_behcovnames __saom_behcovoff __saom_behcovper __saom_behcov_pd __saom_behcovmean __saom_behcovdyn
 		// behx(family:var ...): the 20 RSiena behavior effects of the network x a covariate of protocol 43 (avxinalt ... degnegcontrx)
 		local __bxfam "avxinalt totxinalt avxrecalt totxrecalt avsamexinalt totsamexinalt avsamexrecalt totsamexrecalt avaltsamex totaltsamex avrecaltsamex totrecaltsamex avaltaltx avsimaltx totsimaltx minxalt maxxalt degabscontrx degposcontrx degnegcontrx avxaltdist2 totxaltdist2 avtxaltdist2 totaxaltdist2 avxinaltdist2 totxinaltdist2 avtxinaltdist2 totaxinaltdist2 avsimegox totsimegox avaltegox totaltegox"
 		local __bxvars ""

@@ -3,6 +3,13 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- **A model with several behaviors after a fit with several behaviors and `behfrom()`** stopped with a Mata error, r(3301) in `SaomBehCovFillDyn()`: the behavior covariates of the earlier fit were not cleared completely.
+- **`behsim` given as an option with several behaviors** was ignored without a message; it is the `behsim` of the first behavior, as `behsim` in the effect list of that behavior (same estimates).
+- **`ml`** refuses the options it does not cover (`present()`, `joinat()`, `leaveat()`, `missnet()`, `missbeh()`, `structural()`, endowment/creation effects, non-directed models, rate covariates, two-mode data, several behaviors) before the method-of-moments fit it starts from; before, the whole fit ran and was printed before the refusal.
+
 ## [1.6.0] - 2026-11-13
 
 ### Results that change (read before you re-run old analyses)

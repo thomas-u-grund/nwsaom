@@ -12,6 +12,8 @@
 *       checks joinat()/leaveat(); opts() lists the names of the other options that were given (they are not combinable)
 *   _nwsaom_precheck miss, nwaves() coev() [missnet() missbeh()]
 *       checks missnet()/missbeh(); sets in the caller: __ns_hasmissnet, __ns_hasmissbeh, __ns_hasmiss
+*   _nwsaom_precheck ml, [opts() other()]
+*       refuses ml before the fit: opts() names the given options ml does not cover, other() is 1 for a model outside its scope
 * nwsaom is a large program and Stata refuses to load an ado program above a fixed size, so checks that only read option values live here.
 capture program drop _nwsaom_precheck
 program define _nwsaom_precheck
@@ -33,6 +35,10 @@ program define _nwsaom_precheck
 		c_local __ns_hasmissnet "`__ns_hasmissnet'"
 		c_local __ns_hasmissbeh "`__ns_hasmissbeh'"
 		c_local __ns_hasmiss "`__ns_hasmiss'"
+		exit
+	}
+	if "`sub'" == "ml" {
+		_nwsaom_precheck_ml `0'
 		exit
 	}
 	di "{err}_nwsaom_precheck: unknown subcommand `sub'"
@@ -144,4 +150,18 @@ program define _nwsaom_precheck_miss
 	c_local __ns_hasmissbeh "`hasmissbeh'"
 	local hasmiss = (`hasmissnet' | `hasmissbeh')
 	c_local __ns_hasmiss "`hasmiss'"
+end
+
+capture program drop _nwsaom_precheck_ml
+program define _nwsaom_precheck_ml
+	version 14
+	syntax , [OPTS(string) OTHER(integer 0)]
+	if `"`opts'"' != "" {
+		di as err "{p 0 0 2}maximum likelihood estimation does not cover endowment/creation effects, present()/joinat()/leaveat(), structural() or missing-data options (here: `=strtrim(`"`opts'"')').{p_end}"
+		exit 198
+	}
+	if `other' {
+		di as err "{p 0 0 2}maximum likelihood estimation covers one directed one-mode network with at most one co-evolving behavior, without two-mode data, non-directed models or rate covariates.{p_end}"
+		exit 198
+	}
 end
