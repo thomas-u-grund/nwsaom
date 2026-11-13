@@ -8,7 +8,7 @@ project uses [Semantic Versioning](https://semver.org/).
 ### Changed
 - Rebuilt for nwcommands 3.24.0; requires core 3.24.0 or later. No other change.
 
-Tested on: TO BE FILLED
+Tested on macOS with Stata 17 BE, Stata 18 BE and StataNow 19.5 MP (the full test suite), on Windows 11 with StataNow 19.5 MP and on Linux (Ubuntu 22.04) with StataNow 19.5 MP.
 
 ## [1.7.0] - 2026-11-13
 
