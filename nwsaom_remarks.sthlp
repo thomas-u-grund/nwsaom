@@ -661,8 +661,9 @@ as RSiena's simX, egoX ... with that behavior as interaction1). The network coef
 {cmd:bv_higher_s}). These network effects of behaviors 2, 3, ... need the native plugin and are not available with {opt groups()}.
 Coefficients are named {cmd:beh_}{it:name}{cmd:_}{it:effect}, {it:name} being the first variable without its trailing
 digits; {cmd:e(rates_beh)} has one row per behavior. Not yet combinable with {opt symmetric}, {opt ratecov()},
-{opt present()}, {opt missnet()}/{opt missbeh()}, {opt structural()}, network {opt endow()}/{opt creation()}; the {cmd:estat}
-commands are not available after such a fit. Validation against RSiena 1.6.6 (s501-s503, alcohol and smoking from s50a/s50s; outdegree,
+{opt present()}, {opt missnet()}/{opt missbeh()}, {opt structural()}, network {opt endow()}/{opt creation()}. After such a fit
+{cmd:estat gof} (one behavior distribution per behavior), {cmd:estat simulate}, {cmd:estat importance}, {cmd:estat timetest} and
+{cmd:estat score} are available, as in RSiena (native plugin; not with {opt groups()}); {cmd:estat mems} is network-only. Validation against RSiena 1.6.6 (s501-s503, alcohol and smoking from s50a/s50s; outdegree,
 reciprocity, transitive triplets; linear, quadratic and avAlt for each behavior): outdegree -2.65 against -2.65,
 reciprocity 2.42 against 2.43, transitive triplets 0.61 against 0.61; alcohol linear 0.42 (0.43), quadratic -0.54 (-0.54),
 avAlt 1.28-1.30 (1.26-1.31); smoking linear -1.91 to -1.94 (-1.92 to -1.94), quadratic 2.02-2.03 (2.03-2.05), avAlt

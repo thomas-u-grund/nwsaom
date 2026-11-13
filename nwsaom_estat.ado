@@ -202,12 +202,6 @@ program define nwsaom_estat_run, rclass
 		di as err "{p 0 0 2}estat `subcmd' is not yet available after a fit with a behavior and covariate rate effects ({bf:ratecov()}, {bf:behratecov()}, {bf:behrate()}).{p_end}"
 		exit 198
 	}
-	if e(nbeh) < . {
-		if e(nbeh) > 1 {
-			di as err "{p 0 0 2}estat `subcmd' is not yet available after a fit with several behaviors in {bf:behavior()}.{p_end}"
-			exit 198
-		}
-	}
 	if "`subcmd'" == "gof" {
 		nwsaom_estat_gof `rest'
 		// see nwergm_estat.ado's own identical `return add' - without
@@ -263,6 +257,11 @@ program define nwsaom_estat_gof, rclass
 	if `"`e(cmd)'"' != "nwsaom" {
 		di as err "last nwsaom estimates not found"
 		exit 301
+	}
+	if e(nbeh) > 1 & e(nbeh) < . {
+		nwsaom_estat_gofmb `0'
+		return add
+		exit
 	}
 
 	if "`e(twomode)'" == "1" {
@@ -696,6 +695,121 @@ program define nwsaom_estat_gof, rclass
 	capture qui local __nwsaom_gof_donothing = 0
 end
 
+// estat gof after a fit with several behaviors: the network statistics and one behavior distribution per behavior (RSiena's
+// sienaGOF(..., BehaviorDistribution, varName = <behavior>)); the simulations are the plugin's (no Mata implementation)
+capture program drop nwsaom_estat_gofmb
+program define nwsaom_estat_gofmb, rclass
+	syntax [, NSIM(integer 50) SEED(integer -1) STATS(string) MAXDEG(integer 15) ///
+		MAXDIST(integer 6) TWOTAILED NAME(string) JOIN(string) GRP(integer 0)]
+	if !inlist("`join'", "", "off") {
+		di as err "{p 0 0 2}join() only accepts {bf:off}.{p_end}"
+		exit 198
+	}
+	local jn = ("`join'" != "off")
+	if `nsim' < 5 {
+		di as err "{p 0 0 2}nsim() must be at least 5 - the Mahalanobis test needs a genuine reference distribution, not a handful of draws.{p_end}"
+		exit 198
+	}
+	if `seed' != -1 set seed `seed'
+	local nb = e(nbeh)
+	local bnames `e(behavior_names)'
+	local nper = e(nwaves) - 1
+	if "`stats'" == "" local stats "outdegree indegree geodesic behavior"
+	// the keys of the statistics: behavior is one statistic per behavior (key beh<b>)
+	local keys ""
+	foreach s of local stats {
+		if !inlist("`s'", "outdegree", "indegree", "geodesic", "behavior", "triad") {
+			di as err "{p 0 0 2}stats() only supports {bf:outdegree}, {bf:indegree}, {bf:geodesic}, {bf:behavior}, {bf:triad} (got `s').{p_end}"
+			exit 198
+		}
+		if "`s'" == "behavior" forvalues b = 1/`nb' {
+			local keys `keys' beh`b'
+		}
+		else local keys `keys' `s'
+	}
+	local keys : list uniq keys
+	tempname par
+	matrix `par' = e(rates_beh)
+	mata: __nwsaom_gofmb_par = (st_matrix("e(b)"), st_matrix("e(rates)"), vec(st_matrix("`par'")')')
+	foreach k of local keys {
+		if "`k'" == "geodesic" local K`k' = `maxdist' + 1
+		else if "`k'" == "triad" local K`k' = 16
+		else if substr("`k'", 1, 3) == "beh" mata: st_local("K`k'", strofreal(__ns_mbmax[`=substr("`k'", 4, .)'] - __ns_mbmin[`=substr("`k'", 4, .)'] + 1))
+		else local K`k' = `maxdeg' + 2
+		mata: __nwsaom_gof_sim_`k' = J(`nsim', `K`k'', 0)
+		mata: __nwsaom_gof_obs_`k' = J(1, `K`k'', 0)
+		forvalues pd = 1/`nper' {
+			mata: __nwsaom_gof_simP`pd'_`k' = J(`nsim', `K`k'', 0)
+		}
+	}
+	mata: saom_gof_simloopmb(tokens("`keys'"), `nsim', `nper', __nwsaom_gofmb_par, `maxdeg', `maxdist')
+
+	local tt = ("`twotailed'" != "")
+	di
+	di as txt "Goodness of fit: Mahalanobis distance test"
+	di as res `nsim' as txt " simulations at the estimates" _continue
+	if `jn' {
+		if `nper' > 1 di as txt ", " as res `nper' as txt " periods pooled"
+		else di ""
+	}
+	else di as txt ", one test per period"
+	local graphs ""
+	di
+	di as txt "{hline 21}{c TT}{hline 32}"
+	di as txt %20s "Statistic" " {c |}" %14s "Mahalanobis" %9s "P-value" %9s "Fit"
+	di as txt "{hline 21}{c +}{hline 32}"
+	foreach k of local keys {
+		local st "`k'"
+		local lab = proper("`k'")
+		local bmin = 0
+		if substr("`k'", 1, 3) == "beh" {
+			local b = substr("`k'", 4, .)
+			local bn : word `b' of `bnames'
+			local st "behavior"
+			local lab "Behavior `bn'"
+			mata: st_local("bmin", strofreal(__ns_mbmin[`b']))
+			local k2 = substr("behavior_`bn'", 1, 26)
+		}
+		else local k2 "`k'"
+		local pds = cond(`jn', "0", "1/`nper'")
+		foreach pd of numlist `pds' {
+			local sfx = cond(`pd' == 0, "", "P`pd'")
+			local psfx = cond(`pd' == 0, "", "_p`pd'")
+			mata: st_numscalar("__nwsaom_gof_p", .)
+			mata: st_numscalar("__nwsaom_gof_obsmhd", .)
+			mata: saom_gof_mhdtest(__nwsaom_gof_sim`sfx'_`k', __nwsaom_gof_obs`sfx'_`k', `tt', "__nwsaom_gof_p", "__nwsaom_gof_obsmhd")
+			local pval = __nwsaom_gof_p
+			local mhd = __nwsaom_gof_obsmhd
+			local lab2 = "`lab'" + cond(`pd' == 0, "", " (period `pd')")
+			di as txt %20s abbrev("`lab2'", 20) " {c |}" as res %14.3f `mhd' %9.3f `pval' as txt %9s cond(`pval' < 0.05, "rejected", "ok")
+			local gn = cond("`name'" == "", "gof_`k2'`psfx'", "`name'_`k2'`psfx'")
+			local graphs "`graphs' `gn'"
+			nwsaom_estat_gofviolin __nwsaom_gof_sim`sfx'_`k' __nwsaom_gof_obs`sfx'_`k' "`lab2' distribution" "`gn'" `K`k'' `pval' "`st'" `maxdeg' `maxdist' `bmin'
+			return scalar p_`k2'`psfx' = `pval'
+			return scalar mhd_`k2'`psfx' = `mhd'
+		}
+	}
+	di as txt "{hline 21}{c BT}{hline 32}"
+	di as txt "{p 0 0 2}rejected: P < 0.05 (" cond(`tt', "two", "one") "-tailed); the model does not reproduce this statistic{p_end}"
+	local line "Violin plots:"
+	foreach g of local graphs {
+		if strlen("`line' `g'") > 78 {
+			di as txt "`line'"
+			local line " "
+		}
+		local line "`line' `g'"
+	}
+	di as txt "`line'"
+	foreach k of local keys {
+		capture mata: mata drop __nwsaom_gof_obs_`k' __nwsaom_gof_sim_`k'
+		forvalues pd = 1/`nper' {
+			capture mata: mata drop __nwsaom_gof_obsP`pd'_`k' __nwsaom_gof_simP`pd'_`k'
+		}
+	}
+	capture mata: mata drop __nwsaom_gofmb_par
+	capture qui local __nwsaom_gof_donothing = 0
+end
+
 // Full 16-category MAN triad census (harmonisation unit 162), matching
 // real RSiena's own TriadCensus() auxiliary statistic EXACTLY: RAW
 // counts, NOT normalized to proportions the way outdegree/indegree/
@@ -916,6 +1030,74 @@ void saom_gof_simloop(string rowvector stats, real scalar nsim, real scalar nper
 		}
 		for (q=1; q<=nst; q++) (*sim[q])[s, .] = *acc[q]
 	}
+}
+
+// estat gof after a fit with several behaviors: observed and simulated statistics (keys outdegree, indegree, geodesic, triad,
+// beh<b>); every period starts at its observed wave and is simulated once per replicate by the plugin (SaomMBSimFinal())
+void saom_gof_simloopmb(string rowvector keys, real scalar nsim, real scalar nper, real rowvector par, real scalar maxdeg, real scalar maxdist) {
+	struct SaomMBCtx scalar C
+	real scalar s, pd, q, nst, b
+	real matrix ties, behs, D
+	real rowvector v
+	pointer(real matrix) rowvector sim, obs, acc
+	pointer(real matrix) matrix simP, obsP
+	pointer(real matrix) scalar pD
+
+	nst = cols(keys)
+	C = SaomMBLastCtx()
+	sim = obs = acc = J(1, nst, NULL)
+	simP = obsP = J(nper, nst, NULL)
+	for (q=1; q<=nst; q++) {
+		sim[q] = findexternal("__nwsaom_gof_sim_" + keys[q])
+		obs[q] = findexternal("__nwsaom_gof_obs_" + keys[q])
+		for (pd=1; pd<=nper; pd++) {
+			simP[pd, q] = findexternal("__nwsaom_gof_simP" + strofreal(pd) + "_" + keys[q])
+			obsP[pd, q] = crexternal("__nwsaom_gof_obsP" + strofreal(pd) + "_" + keys[q])
+			if (obsP[pd, q] == NULL) obsP[pd, q] = findexternal("__nwsaom_gof_obsP" + strofreal(pd) + "_" + keys[q])
+		}
+	}
+	pD = crexternal("__nwsaom_gof_densemat")
+	if (pD == NULL) pD = findexternal("__nwsaom_gof_densemat")
+	for (pd=1; pd<=nper; pd++) {
+		D = (*C.Gwaves[pd+1]).to_dense()
+		behs = J(C.n, C.nb, .)
+		for (b=1; b<=C.nb; b++) behs[., b] = *C.Behwaves[b, pd+1]
+		for (q=1; q<=nst; q++) {
+			v = saom_gof_mbstat(keys[q], D, behs, C, maxdeg, maxdist, pD)
+			*obsP[pd, q] = v
+			*obs[q] = *obs[q] + v
+		}
+	}
+	for (s=1; s<=nsim; s++) {
+		for (q=1; q<=nst; q++) acc[q] = &(J(1, cols(*sim[q]), 0))
+		for (pd=1; pd<=nper; pd++) {
+			SaomMBSimFinal(C, par, pd, ties, behs)
+			D = SaomTiesDense(ties, C.n)
+			for (q=1; q<=nst; q++) {
+				v = saom_gof_mbstat(keys[q], D, behs, C, maxdeg, maxdist, pD)
+				*acc[q] = *acc[q] + v
+				(*simP[pd, q])[s, .] = v
+			}
+		}
+		for (q=1; q<=nst; q++) (*sim[q])[s, .] = *acc[q]
+	}
+	if (C.use_native) SaomBatchCleanup()
+	rmexternal("__nwsaom_gof_densemat")
+	rmexternal("__nwsaom_gof_mbtv")
+}
+real rowvector saom_gof_mbstat(string scalar key, real matrix D, real matrix behs, struct SaomMBCtx scalar C, real scalar maxdeg,
+	real scalar maxdist, pointer(real matrix) scalar pD) {
+	real scalar b
+	if (key == "outdegree") return(saom_gof_degdist(D, maxdeg))
+	if (key == "indegree") return(saom_gof_indegdist(D, maxdeg))
+	if (key == "geodesic") return(saom_gof_geodist(D, maxdist))
+	if (key == "triad") {
+		*pD = D
+		stata("nwsaom_gof_triadvec __nwsaom_gof_densemat __nwsaom_gof_mbtv")
+		return(*findexternal("__nwsaom_gof_mbtv"))
+	}
+	b = strtoreal(substr(key, 4, .))
+	return(saom_gof_behdist(behs[., b], C.behmin[b], C.behmax[b]))
 }
 
 // Behavior-value distribution (harmonisation unit 26, co-evolution) -
@@ -1211,7 +1393,7 @@ program define nwsaom_estat_mems, rclass
 		exit 198
 	}
 	if e(has_behavior) {
-		di as err "{p 0 0 2}estat mems does not yet support co-evolution ({bf:behavior()}) fits - v1 scope, network-only (see this file's own header comment on why).{p_end}"
+		di as err "{p 0 0 2}estat mems is available after network-only fits; it is not available after a fit with {bf:behavior()}.{p_end}"
 		exit 498
 	}
 	local __mems_rate = .

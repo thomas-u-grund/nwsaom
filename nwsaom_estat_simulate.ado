@@ -32,6 +32,11 @@ program define nwsaom_estat_simulate, rclass
 		di as err "last nwsaom estimates not found"
 		exit 301
 	}
+	if e(nbeh) > 1 & e(nbeh) < . {
+		nwsaom_estat_simmb `0'
+		return add
+		exit
+	}
 	// a two-mode fit is simulated on its embedding (actors choose among events; every other dyad is structurally zero)
 	local tm = ("`e(twomode)'" == "1")
 	capture mata: __nwsaom_last_M.nparam()

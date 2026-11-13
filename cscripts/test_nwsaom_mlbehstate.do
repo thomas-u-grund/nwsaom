@@ -8,6 +8,8 @@ if `"`nwcore'"' == "" {
 }
 adopath ++ `"`nwcore'"'
 adopath ++ `"`c(pwd)'"'
+quietly do `"`nwcore'/unw_core.do"'
+do unw_saom.do
 set linesize 120
 nwwebuse glasgow, nwclear
 

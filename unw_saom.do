@@ -17162,6 +17162,201 @@ struct SaomCoevMBFit scalar SaomEstimateRMCoevMB(
 	fit.theta_path = nf.theta_path
 	return(fit)
 }
+/* postestimation of a fit with several behaviors (estat gof, estat simulate): the context of the last fit (the batch is set up with its model) */
+struct SaomMBCtx scalar SaomMBLastCtx() {
+	external pointer(class SaomGraph scalar) rowvector __ns_mbGw
+	external pointer(real colvector) matrix __ns_mbBw
+	external real rowvector __ns_mbmin, __ns_mbmax, __ns_mbsim, __ns_mbover
+	external pointer(class SaomBehaviorModel scalar) rowvector __ns_mbMb
+	external class SaomModel scalar __nwsaom_last_M
+	real rowvector r0, rb0
+	return(SaomMBInit(__ns_mbGw, __nwsaom_last_M, __ns_mbBw, __ns_mbmin, __ns_mbmax, __ns_mbsim, __ns_mbover, __ns_mbMb, r0, rb0))
+}
+/* one simulation of period pd of a model with several behaviors (native only; the batch set up by SaomMBInit()) at par = (thetaNet, thetaBeh,
+   ratesNet (1 x P), ratesBeh (nb x P, by rows)); returns the ties of the final network (m x 2) and the final behaviors (n x nb) */
+void SaomMBSimFinal(struct SaomMBCtx scalar C, real rowvector par, real scalar pd, real matrix ties, real matrix behs) {
+	real scalar i, b, p, P, nb, seed, junk, W, nt
+	real rowvector thetaBeh, ratesNet
+	real matrix ratesBeh
+	string rowvector names
+	string scalar origframe, argstr
+
+	if (!C.use_native) {
+		errprintf("{p 0 2 2}nwsaom: the postestimation of a fit with several behaviors needs the native plugin of this release (update nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation.{p_end}\n")
+		exit(198)
+	}
+	if (SaomNativePluginVersion() < 158) {
+		errprintf("{p 0 2 2}nwsaom: the postestimation of a fit with several behaviors needs a newer native plugin (update nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)).{p_end}\n")
+		exit(198)
+	}
+	p = C.p
+	P = C.P
+	nb = C.nb
+	thetaBeh = par[(C.pNet+1)..p]
+	ratesNet = par[(p+1)..(p+P)]
+	ratesBeh = rowshape(par[(p+P+1)..C.ptot], nb)
+	W = 2 + nb
+	names = J(1, W, "")
+	for (i=1; i<=W; i++) names[i] = "f" + strofreal(i)
+	origframe = st_framecurrent()
+	if (!st_frameexists("__saom_batch_fin")) stata("frame create __saom_batch_fin")
+	st_framecurrent("__saom_batch_fin")
+	if (st_nvar() < W) for (i=st_nvar()+1; i<=W; i++) junk = st_addvar("double", names[i])
+	if (st_nobs() < max((C.n * (C.n - 1), C.n, 1))) st_addobs(max((C.n * (C.n - 1), C.n, 1)) - st_nobs())
+	seed = floor(runiform(1,1) * 2147483647)
+	argstr = "BATCHRUN|1 " + strofreal(seed, "%12.0f") + " 1 0 0"
+	for (i=1; i<=C.pNet; i++) argstr = argstr + " " + strofreal(par[i], "%25.17g")
+	for (i=1; i<=C.pB[1]; i++) argstr = argstr + " " + strofreal(thetaBeh[i], "%25.17g")
+	for (i=1; i<=P; i++) argstr = argstr + " " + strofreal(ratesNet[i], "%25.17g")
+	for (i=1; i<=P; i++) argstr = argstr + " " + strofreal(ratesBeh[1,i], "%25.17g")
+	for (i=1; i<=P; i++) argstr = argstr + " 0"
+	argstr = argstr + " 0"
+	if (nb > 1) {
+		for (i=C.pB[1]+1; i<=C.pBehTot; i++) argstr = argstr + " " + strofreal(thetaBeh[i], "%25.17g")
+		for (b=2; b<=nb; b++) for (i=1; i<=P; i++) argstr = argstr + " " + strofreal(ratesBeh[b,i], "%25.17g")
+	}
+	argstr = argstr + " 0 " + strofreal(pd)
+	stata("plugin call saomnativesim " + invtokens(names) + ", " + char(34) + argstr + char(34))
+	nt = st_numscalar("__saom_native_finalties")
+	ties = (nt > 0 ? st_data((1::nt), names[1..2]) : J(0, 2, 0))
+	behs = st_data((1::C.n), names[3..W])
+	st_framecurrent(origframe)
+	SaomStepCapCheck()
+}
+/* estat importance after a fit with several behaviors (RSiena's sienaRI() for every dependent variable): the network effects and the
+   effects of each behavior, on the start network and start behaviors of every period. theta = e(b). Results in the Stata matrices
+   __nwsaom_imp_* (network) and __nwsaom_impb_* (the behavior effects of all behaviors stacked; certainty: one row per behavior) */
+void SaomImportanceMB(real rowvector theta) {
+	struct SaomMBCtx scalar C
+	pointer(real matrix) rowvector Cm
+	real matrix expRI, expI, sigmas, X0, expRIb, expIb, sigmasb, RHb
+	real rowvector RH, thb
+	real colvector eRI, eI, sg
+	real scalar n, K, P, w, k, b, junk, rh, o
+	string scalar origframe
+
+	C = SaomMBLastCtx()
+	if (!C.use_native | SaomNativePluginVersion() < 159) {
+		if (C.use_native) SaomBatchCleanup()
+		errprintf("{p 0 2 2}estat importance after a fit with several behaviors needs the native plugin of this release (update nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)).{p_end}\n")
+		exit(198)
+	}
+	if (any(C.fnt :!= 0) | any(_SaomGofExt("__nwsaom_last_fntype", J(1, 0, 0)) :!= 0)) {
+		SaomBatchCleanup()
+		errprintf("{p 0 2 2}estat importance is not available with endowment/creation effects (as in RSiena's sienaRI).{p_end}\n")
+		exit(198)
+	}
+	n = C.n
+	K = C.pNet
+	P = C.P
+	origframe = st_framecurrent()
+	stata("capture frame drop __saom_contrib")
+	stata("frame create __saom_contrib")
+	st_framecurrent("__saom_contrib")
+	st_addobs(n)
+	junk = st_addvar("double", "c" :+ strofreal(1..n))
+	expRI = expI = sigmas = J(K, P, .)
+	RH = J(1, P, .)
+	expRIb = expIb = sigmasb = J(C.pBehTot, P, .)
+	RHb = J(C.nb, P, .)
+	for (w=1; w<=P; w++) {
+		Cm = J(1, K, NULL)
+		for (k=1; k<=K; k++) {
+			stata("plugin call saomnativesim " + invtokens("c" :+ strofreal(1..n)) + ", " + char(34) + "CONTRIBK|" + strofreal(w) + " " + strofreal(k) + char(34))
+			X0 = st_data((1::n), (1..n))
+			Cm[k] = &(X0 :+ 0)
+		}
+		SaomImpPeriod(Cm, theta[1..K], eRI, eI, sg, rh)
+		expRI[., w] = eRI
+		expI[., w] = eI
+		sigmas[., w] = sg
+		RH[w] = rh
+		for (b=1; b<=C.nb; b++) {
+			Cm = J(1, C.pB[b], NULL)
+			o = C.off[b] - 1
+			for (k=1; k<=C.pB[b]; k++) {
+				stata("plugin call saomnativesim c1 c2, " + char(34) + "CONTRIBB|" + strofreal(w) + " " + strofreal(k) + " " + strofreal(b) + char(34))
+				X0 = st_data((1::n), (1, 2))
+				X0 = (X0[., 1], J(n, 1, 0), X0[., 2])
+				Cm[k] = &(X0 :+ 0)
+			}
+			thb = theta[(K + o + 1)..(K + o + C.pB[b])]
+			SaomImpPeriod(Cm, thb, eRI, eI, sg, rh)
+			expRIb[(o+1)..(o+C.pB[b]), w] = eRI
+			expIb[(o+1)..(o+C.pB[b]), w] = eI
+			sigmasb[(o+1)..(o+C.pB[b]), w] = sg
+			RHb[b, w] = rh
+		}
+	}
+	st_framecurrent(origframe)
+	stata("capture frame drop __saom_contrib")
+	SaomBatchCleanup()
+	st_matrix("__nwsaom_imp_RI", expRI)
+	st_matrix("__nwsaom_imp_I", expI)
+	st_matrix("__nwsaom_imp_sigmas", sigmas)
+	st_matrix("__nwsaom_imp_sigma", sqrt(rowsum(sigmas :^ 2) / P))
+	st_matrix("__nwsaom_imp_RH", RH)
+	st_matrix("__nwsaom_impb_RI", expRIb)
+	st_matrix("__nwsaom_impb_I", expIb)
+	st_matrix("__nwsaom_impb_sigmas", sigmasb)
+	st_matrix("__nwsaom_impb_sigma", sqrt(rowsum(sigmasb :^ 2) / P))
+	st_matrix("__nwsaom_impb_RH", RHb)
+	st_matrix("__nwsaom_impb_pb", C.pB)
+}
+
+/* the dense adjacency matrix of n actors from a tie list */
+real matrix SaomTiesDense(real matrix ties, real scalar n) {
+	real matrix A
+	real scalar k
+	A = J(n, n, 0)
+	for (k=1; k<=rows(ties); k++) A[ties[k,1], ties[k,2]] = 1
+	return(A)
+}
+/* estat simulate after a fit with several behaviors: nsim replicates of every period (each from its observed start wave);
+   the Stata matrices simname (nsim*P rows: sim, period, ties, mutual, transitive, the behavior means) and obsname (P rows);
+   with stub: the networks stub_<s>_p<pd> and the behavior variables stub_<s>_p<pd>_<name> (names checked by the caller) */
+void SaomMBSimStudy(real scalar nsim, real scalar P, real rowvector par, string scalar simname, string scalar obsname,
+	string scalar stub, string scalar bnames, string scalar repl) {
+	struct SaomMBCtx scalar C
+	real matrix S, O, ties, behs, D
+	real scalar s, pd, row, b, vi
+	string rowvector bn
+	string scalar nm
+
+	C = SaomMBLastCtx()
+	bn = tokens(bnames)
+	S = J(nsim * P, 5 + C.nb, .)
+	O = J(P, 5 + C.nb, .)
+	for (pd=1; pd<=P; pd++) {
+		behs = J(1, C.nb, .)
+		for (b=1; b<=C.nb; b++) behs[b] = mean(*C.Behwaves[b, pd+1])
+		O[pd, .] = (SaomSimSummary((*C.Gwaves[pd+1]).to_dense(), pd, .)[1..5], behs)
+	}
+	row = 0
+	for (s=1; s<=nsim; s++) {
+		for (pd=1; pd<=P; pd++) {
+			row++
+			SaomMBSimFinal(C, par, pd, ties, behs)
+			D = SaomTiesDense(ties, C.n)
+			S[row, .] = (s, SaomSimSummary(D, pd, .)[2..5], mean(behs))
+			if (stub != "") {
+				nm = stub + "_" + strofreal(s) + "_p" + strofreal(pd)
+				st_matrix("__nwsaom_sim_mat", D)
+				stata("nwset, mat(__nwsaom_sim_mat) directed name(" + nm + ") nooutput " + repl)
+				for (b=1; b<=C.nb; b++) {
+					vi = _st_varindex(nm + "_" + bn[b])
+					if (vi >= .) vi = st_addvar("double", nm + "_" + bn[b])
+					st_store(., vi, J(st_nobs(), 1, .))
+					st_store((1::C.n), vi, behs[., b])
+				}
+			}
+		}
+	}
+	if (C.use_native) SaomBatchCleanup()
+	st_matrix(simname, S)
+	st_matrix(obsname, O)
+	stata("capture matrix drop __nwsaom_sim_mat")
+}
 
 
 /* ===================================================================

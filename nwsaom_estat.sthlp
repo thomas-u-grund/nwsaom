@@ -29,8 +29,9 @@ The following postestimation command is available after {helpb nwsaom}:
 {p2colreset}{...}
 
 {pstd}
-All of them stop with an error after a fit with time-varying covariates ({opt tvcov()}), with several behaviors in {opt behavior()}, or with a behavior together with
-{opt ratecov()}, {opt behratecov()} or {opt behrate()}. After {cmd:nwsaom multinet} only {cmd:estat score} and {cmd:estat timetest} are available; after a fit with
+All of them stop with an error after a fit with time-varying covariates ({opt tvcov()}), or with a behavior together with
+{opt ratecov()}, {opt behratecov()} or {opt behrate()}. After a fit with several behaviors in {opt behavior()} all but {cmd:estat mems}
+are available (not together with {opt groups()}); they need the native plugin. After {cmd:nwsaom multinet} only {cmd:estat score} and {cmd:estat timetest} are available; after a fit with
 {opt groups()} all but {cmd:estat mems}; after {cmd:nwsaom multiplex} none (fit the model with {cmd:nwsaom multinet}).
 They also stop when the estimates in memory are not those of the last {cmd:nwsaom} fit (after {cmd:estimates restore} of an earlier fit, or after a later
 {cmd:nwsaom} call that stopped with an error once it had begun to set up its model): the model they simulate is kept in memory for the last fit only; rerun the fit
@@ -117,7 +118,10 @@ are). It works after directed and non-directed one-mode fits with the native-onl
 {bf:behavior} (real RSiena's own {cmd:BehaviorDistribution()}), and simulate network and behavior
 JOINTLY for every replicate regardless of which {opt stats()} were actually requested - the fitted
 coefficients were estimated jointly, so a network-only simulation would not be faithful to the
-fitted model even when only network statistics are being checked. GOF simulates the fitted model -
+fitted model even when only network statistics are being checked. After a fit with several behaviors
+{bf:behavior} stands for one statistic per behavior, {bf:behavior_}{it:name} (RSiena's {cmd:sienaGOF()} with
+{cmd:BehaviorDistribution} and {cmd:varName}), with the results {cmd:r(p_behavior_}{it:name}{cmd:)} and
+{cmd:r(mhd_behavior_}{it:name}{cmd:)} and the plots {cmd:gof_behavior_}{it:name}. GOF simulates the fitted model -
 endowment/creation, {opt structural()}, {opt ratecov()}, {opt present()} and non-directed model
 types included - in the native plugin when it covers the model (co-evolution too).
 
@@ -213,7 +217,10 @@ of your choice, which is the simulation-only mode (RSiena's {cmd:siena07} with {
 {cmd:e(rate)} and {cmd:e(rates)}, RSiena's scale; after a non-directed fit of the pairwise types joint, force and agree they are
 converted to the per-actor rates the simulation uses as the fit does it (see {cmd:e(rate_actor)} in {help nwsaom##results:nwsaom}). {opt generate(stub)}
 saves the simulated networks as {cmd:nwcommands} networks named {it:stub}{cmd:_}{it:s}{cmd:_p}{it:period}; after a
-co-evolution fit the simulated behavior is saved as variables of the same names. The names have at most 32 characters, so the
+co-evolution fit the simulated behavior is saved as variables of the same names. After a fit with several behaviors
+{cmd:r(sim)} and {cmd:r(obs)} have one column of means per behavior ({cmd:behmean_}{it:name}), the behaviors are saved as
+variables {it:stub}{cmd:_}{it:s}{cmd:_p}{it:period}{cmd:_}{it:name}, and {opt ratesbeh()} gives one rate per behavior and period
+(the rates of the first behavior for every period, then those of the second, and so on). The names have at most 32 characters, so the
 stub must be short enough for the longest name; networks (and variables) of these names that already exist are overwritten only with
 {opt replace}. Both are checked before anything is simulated. After a two-mode fit the simulation
 runs on the actors-by-events network; the table shows the number of ties (attendances) only, {cmd:r(sim)} and
@@ -302,9 +309,11 @@ contribution of each actor's every possible tie change is computed; the importan
 L1 distance between the actor's choice probabilities with and without the effect, its relative importance the share
 among all effects, averaged over the actors. Also reported: sigma (the within-actor standard deviation of the
 contributions), the semi-standardised estimate (estimate times sigma) and the certainty R_H of the choices.
-Available after fits of a one-mode (directed or non-directed) or two-mode network, with or without one co-evolving behavior, without endowment/creation effects,
+Available after fits of a one-mode (directed or non-directed) or two-mode network, with or without co-evolving behaviors, without endowment/creation effects,
 {opt present()}, {opt joinat()}, {opt leaveat()} or the missing-data options {opt missnet()} and {opt missbeh()} (as in RSiena). After a co-evolution fit a second table gives the behavior effects (the options of an actor are changing by -1, 0 or +1) and the results
-{cmd:r(ri_beh)}, {cmd:r(importance_beh)}, {cmd:r(sigma_beh)}, {cmd:r(sigma_period_beh)} and {cmd:r(certainty_beh)}. For a non-directed network the sizes are those of the forcing model, as in
+{cmd:r(ri_beh)}, {cmd:r(importance_beh)}, {cmd:r(sigma_beh)}, {cmd:r(sigma_period_beh)} and {cmd:r(certainty_beh)}. After a fit
+with several behaviors there is one table per behavior; the {cmd:_beh} results stack the effects of all behaviors and {cmd:r(certainty_beh)} has
+one row per behavior. For a non-directed network the sizes are those of the forcing model, as in
 RSiena. Returns {cmd:r(ri)}, {cmd:r(importance)}, {cmd:r(sigma)},
 {cmd:r(sigma_period)} and {cmd:r(certainty)}. Needs the native plugin.
 
@@ -343,7 +352,7 @@ The {cmd:estat} commands use the waves of the last fit. {bf:Directed:} directed 
 
 {pstd}
 {cmd:estat gof} stores the following in {cmd:r()}, one pair per requested statistic (default
-{bf:outdegree}/{bf:indegree}/{bf:geodesic}, plus {bf:behavior} for a co-evolution fit; {bf:triad}
+{bf:outdegree}/{bf:indegree}/{bf:geodesic}, plus {bf:behavior} for a co-evolution fit, {bf:behavior_}{it:name} per behavior after several behaviors; {bf:triad}
 only if requested via {opt stats()}). With {opt join(off)}, each period gets its own pair instead,
 suffixed {cmd:_p{it:#}} (e.g. {cmd:r(p_outdegree_p1)}, {cmd:r(p_outdegree_p2)}):
 

@@ -12,12 +12,22 @@
 	stub_g<group>_<sim>_p<period>. Every name must be a Stata name of at most 32 characters, and without replace no network
 	(or variable) of these names may exist. Checked before anything is simulated or created. With check, only the length is
 	checked (the names of the groups are checked group by group when they are created).
+	behnames(names): a fit with several behaviors; the behavior variables are stub_<sim>_p<period>_<name>.
 */
 capture program drop _nwsaom_genstub
 program define _nwsaom_genstub
-	syntax name(name=stub), NSIM(integer) NPERiods(integer) [COEV(integer 0) GROUPS(integer 0) REPLACE CHECK]
+	syntax name(name=stub), NSIM(integer) NPERiods(integer) [COEV(integer 0) GROUPS(integer 0) BEHNAMES(string) REPLACE CHECK]
 	local gpart = cond(`groups' > 0, "_g`groups'", "")
 	local longest "`stub'`gpart'_`nsim'_p`nperiods'"
+	// several behaviors: the variables are stub_<sim>_p<period>_<behavior>
+	local lvar ""
+	foreach bn of local behnames {
+		if ustrlen("`longest'_`bn'") > ustrlen("`lvar'") local lvar "`longest'_`bn'"
+	}
+	if ustrlen("`lvar'") > 32 {
+		di as err "{p 0 0 2}generate(): the stub {bf:`stub'} is too long. The behavior variables are named {it:stub}_{it:simulation}_p{it:period}_{it:behavior} (for example {bf:`lvar'}), and names have at most 32 characters.{p_end}"
+		exit 198
+	}
 	if ustrlen("`longest'") > 32 {
 		di as err "{p 0 0 2}generate(): the stub {bf:`stub'} is too long. The networks are named {it:stub}`=cond(`groups' > 0, "_g{it:group}", "")'_{it:simulation}_p{it:period} (for example {bf:`longest'}), and names have at most 32 characters; use a stub of at most `=32 - ustrlen("`longest'") + ustrlen("`stub'")' characters.{p_end}"
 		exit 198
@@ -36,7 +46,14 @@ program define _nwsaom_genstub
 				di as err "{p 0 0 2}generate(): network {bf:`nm'} already exists. Specify option {bf:replace} to overwrite it, or use another stub.{p_end}"
 				exit 483
 			}
-			if `coev' {
+			foreach bn of local behnames {
+				capture confirm variable `nm'_`bn', exact
+				if _rc == 0 {
+					di as err "{p 0 0 2}generate(): variable {bf:`nm'_`bn'} already exists. Specify option {bf:replace} to overwrite it, or use another stub.{p_end}"
+					exit 110
+				}
+			}
+			if `coev' & "`behnames'" == "" {
 				capture confirm variable `nm', exact
 				if _rc == 0 {
 					di as err "{p 0 0 2}generate(): variable {bf:`nm'} already exists. Specify option {bf:replace} to overwrite it, or use another stub.{p_end}"

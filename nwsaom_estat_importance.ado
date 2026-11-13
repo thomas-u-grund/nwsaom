@@ -16,8 +16,8 @@
 	deviation of the effect's contributions) and the certainty R_H of the
 	actors' choices.
 
-	Available after fits of a one-mode (directed or non-directed) or two-mode network without behavior,
-	endowment/creation effects, missing-data or composition-change options.
+	Available after fits of a one-mode (directed or non-directed) or two-mode network, with or without behaviors (with several
+	behaviors: one table per behavior), without endowment/creation effects, missing-data or composition-change options.
 */
 capture program drop nwsaom_estat_importance
 program define nwsaom_estat_importance, rclass
@@ -58,6 +58,11 @@ program define nwsaom_estat_importance, rclass
 		local gs `gs'`=cond(`pd' > 1, ", ", "")'&`__imp_gname'`pd'
 	}
 	mata: __nwsaom_imp_Gs = (`gs')
+	if e(nbeh) > 1 & e(nbeh) < . {
+		nwsaom_estat_impmb, b(`b') v(`V') names(`names') nper(`nper')
+		return add
+		exit
+	}
 	if `coev' {
 		mata: st_local("pnet", strofreal(__nwsaom_last_M.nparam()))
 		mata: SaomImportanceRunB(__nwsaom_imp_Gs, `nper', __nwsaom_last_M, st_matrix("e(b)")[1, 1..`pnet'], __nwsaom_last_Mbeh, __nwsaom_last_Behwaves, __nwsaom_beh_minval, __nwsaom_beh_maxval, st_matrix("e(b)")[1, (`pnet'+1)..`p'])
@@ -146,4 +151,73 @@ program define nwsaom_imp_table
 	}
 	di
 	di as txt "{hline 13}{c BT}{hline `w'}"
+end
+
+// several behaviors: the network effects and one table per behavior (RSiena's sienaRI() for every dependent variable)
+capture program drop nwsaom_estat_impmb
+program define nwsaom_estat_impmb, rclass
+	syntax , B(name) V(name) NAMES(string) NPER(integer)
+	local pnet = e(p_net)
+	mata: SaomImportanceMB(st_matrix("e(b)"))
+	tempname RI I sg sgs RH RIb Ib sgb sgsb RHb rhb
+	matrix `RI' = __nwsaom_imp_RI
+	matrix `I' = __nwsaom_imp_I
+	matrix `sgs' = __nwsaom_imp_sigmas
+	matrix `sg' = __nwsaom_imp_sigma
+	matrix `RH' = __nwsaom_imp_RH
+	matrix `RIb' = __nwsaom_impb_RI
+	matrix `Ib' = __nwsaom_impb_I
+	matrix `sgsb' = __nwsaom_impb_sigmas
+	matrix `sgb' = __nwsaom_impb_sigma
+	matrix `RHb' = __nwsaom_impb_RH
+	local names_net ""
+	local names_beh ""
+	local p : word count `names'
+	forvalues k = 1/`p' {
+		local nm : word `k' of `names'
+		if `k' <= `pnet' local names_net `names_net' `nm'
+		else local names_beh `names_beh' `nm'
+	}
+	di
+	di as txt "Relative importance of effects" _n "Expected over the actors at the start of each period"
+	di as txt "Network effects"
+	nwsaom_imp_table, names(`names_net') first(1) b(`b') v(`v') sg(`sg') ri(`RI') rh(`RH') nper(`nper')
+	local bnames `e(behavior_names)'
+	local nb = e(nbeh)
+	local first = `pnet' + 1
+	forvalues bb = 1/`nb' {
+		local pb = __nwsaom_impb_pb[1, `bb']
+		local nmb ""
+		forvalues j = 1/`pb' {
+			local nmb `nmb' `: word `=`first' - `pnet' + `j' - 1' of `names_beh''
+		}
+		tempname rib sgbb
+		matrix `rib' = `RIb'[`=`first' - `pnet''..`=`first' - `pnet' + `pb' - 1', 1...]
+		matrix `sgbb' = `sgb'[`=`first' - `pnet''..`=`first' - `pnet' + `pb' - 1', 1...]
+		matrix `rhb' = `RHb'[`bb', 1...]
+		di
+		di as txt "Behavior `: word `bb' of `bnames'' (the options are changing by -1, 0, +1)"
+		nwsaom_imp_table, names(`nmb') first(`first') b(`b') v(`v') sg(`sgbb') ri(`rib') rh(`rhb') nper(`nper')
+		local first = `first' + `pb'
+	}
+	capture matrix drop __nwsaom_impb_pb
+	di as txt "RI: share of the effect in the actors' choices. Semi-std.: estimate x sigma."
+	di as txt "Certainty: RSiena's R_H, the expected certainty of the choices."
+	matrix rownames `RI' = `names_net'
+	matrix rownames `I' = `names_net'
+	matrix rownames `sgs' = `names_net'
+	matrix rownames `RIb' = `names_beh'
+	matrix rownames `Ib' = `names_beh'
+	matrix rownames `sgsb' = `names_beh'
+	matrix rownames `RHb' = `bnames'
+	return matrix ri_beh = `RIb'
+	return matrix importance_beh = `Ib'
+	return matrix sigma_period_beh = `sgsb'
+	return matrix sigma_beh = `sgb'
+	return matrix certainty_beh = `RHb'
+	return matrix ri = `RI'
+	return matrix importance = `I'
+	return matrix sigma_period = `sgs'
+	return matrix sigma = `sg'
+	return matrix certainty = `RH'
 end

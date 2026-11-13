@@ -40,6 +40,7 @@ f nwsaom_estat.ado
 f nwsaom_estat_importance.ado
 f nwsaom_estat_score.ado
 f nwsaom_estat_simulate.ado
+f nwsaom_estat_simmb.ado
 f nwsaom_estat_timetest.ado
 f nwsaom_meta.ado
 f nwsaom_ml.ado
