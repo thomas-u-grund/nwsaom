@@ -2,7 +2,7 @@
 * (nwsaom multinet, also non-directed and two-mode members; nwsaom multiplex in both of its code paths) and SEVERAL BEHAVIORS.
 * Postestimation: per-group estat gof / simulate / importance / timetest with their r(*_g#) results and generated networks
 * stub_g#_s_pP of the group's size; rates() round trip per group; estat after multinet (score/timetest only), refit; the
-* documented refusals (estat mems after groups, estat gof/simulate/mems/importance after multinet, every estat after several
+* documented refusals (estat mems after groups, estat gof/simulate/mems/importance after multinet, estat mems after several
 * behaviors).
 * DRAFT, not yet run. Expected runtime: about 4-6 minutes.
 cscript
@@ -169,7 +169,7 @@ assert r(p_outdegree_g2) < .
 di "PASS gwaves()"
 
 * ---------------------------------------------------------------------------------------------------------------------------
-* 5. several behaviors: the estat commands stop (documented), nwsaom refit works
+* 5. several behaviors: the estat commands work (estat mems stays network-only), nwsaom refit works
 * ---------------------------------------------------------------------------------------------------------------------------
 nwclear
 mata: xt_dir("D", 50, 3, 0.08, 0.04, 101)
@@ -188,11 +188,15 @@ mata: xt_beh("z", 50, 3, 5, 77)
 mata: xt_beh("y", 50, 3, 4, 78)
 nwsaom, waves(dn1 dn2 dn3) outdegree reciprocity behavior(z1 z2 z3 : linear | y1 y2 y3 : linear) k0(10) k3(60) seed(1)
 assert e(nbeh) == 2
-foreach sub in "simulate, nsim(2)" "gof, nsim(10)" "importance" "timetest" "score" {
+foreach sub in "simulate, nsim(2)" "gof, nsim(10)" "importance" "timetest" {
 	capture noisily estat `sub'
-	assert _rc == 198
+	assert _rc == 0
 }
-di "PASS several behaviors: estat refused"
+capture noisily estat score
+assert _rc == 198    // needs a fit with fix()
+capture noisily estat mems, effect(outdegree) macro(xt_mm) nsim(5) seed(1) nodots
+assert _rc == 498
+di "PASS several behaviors: estat works, estat mems refused"
 
 * ---------------------------------------------------------------------------------------------------------------------------
 * 6. nwsaom multinet: stored results, estat score / timetest, the other estat refused, refit; sym1; a two-mode member
