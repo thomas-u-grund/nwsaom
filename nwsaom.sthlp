@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.5.19  12nov2026 author: Thomas Grund}{...}
+{* *! version 1.6.0  13nov2026 author: Thomas Grund}{...}
 {marker topic}
 {helpb nwtopical##analysis_statmodels:[NW-2.6.6] Statistical Estimation of Networks}
 
@@ -1103,4 +1103,4 @@ the release that produced the results is in {cmd:e(version)}; quote it when repo
 	{help nwergm}, {help nwset}, {help nwrandom}
 
 {hline}
-{pstd}{it:nwsaom version 1.5.19, 12 November 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.6.0, 13 November 2026}{p_end}{* nwversion}

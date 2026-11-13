@@ -3,16 +3,16 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.6.0] - 2026-11-13
+
+### Results that change (read before you re-run old analyses)
+- **Composition change in the simulations after a fit.** `estat simulate`, `estat gof` and `estat mems` after a fit with `present()` or `joinat()`/`leaveat()` with `waves()` (any number of waves), with a co-evolving behavior, or with `groups()` let only the actors that are active at the start of a period act in it, as the fit does. Before, these paths simulated every actor as present (only network-only fits with `wave1()`/`wave2()` used the presence, and only that of the first period). Joining and leaving inside a period (`joinat()`/`leaveat()` at fractional times) is not simulated: the actors active at the start of the period stay active to its end. As in RSiena, an active actor may still create a tie to an inactive one (directed and unilateral non-directed models).
+- **`estat simulate, generate()` after a two-mode fit with `actormode(1)`** saves the networks in the layout of the observed waves (the actors in mode 1), so they can be fitted with the same call; before, the actors were put in mode 2.
 
 ### Added
 - **Replay.** `nwsaom` typed without options, or with display options only (`level()`, `detail`), redisplays the results of the last fit, and `estimates replay` works.
 - **`replace` option of `generate()`** in `estat simulate` and `nwsaom simulate`: networks (and, after a co-evolution fit, variables) of the generated names that already exist are overwritten. Without `replace` the command stops before anything is simulated, r(483) for a network, r(110) for a variable.
 - `e(present)`, `e(joinat)`, `e(leaveat)`, `e(missnet)`, `e(missbeh)` (the options as given), `e(actormode)` (two-mode fits) and `e(fitid)`.
-
-### Results that change
-- **Composition change in the simulations after a fit.** `estat simulate`, `estat gof` and `estat mems` after a fit with `present()` or `joinat()`/`leaveat()` with `waves()` (any number of waves), with a co-evolving behavior, or with `groups()` let only the actors that are active at the start of a period act in it, as the fit does. Before, these paths simulated every actor as present (only network-only fits with `wave1()`/`wave2()` used the presence, and only that of the first period). Joining and leaving inside a period (`joinat()`/`leaveat()` at fractional times) is not simulated: the actors active at the start of the period stay active to its end. As in RSiena, an active actor may still create a tie to an inactive one (directed and unilateral non-directed models).
-- **`estat simulate, generate()` after a two-mode fit with `actormode(1)`** saves the networks in the layout of the observed waves (the actors in mode 1), so they can be fitted with the same call; before, the actors were put in mode 2.
 
 ### Fixed
 - **Stata could crash** (it closed without an error message) when a model with the `balance` effect, its endowment or creation split (`endow(balance)`, `creation(balance)`), `instructeq` or `nonpcompress` was fitted with `missnet()` marking at least one tie as missing. The crash depended on memory contents and did not happen on every system; when it did not crash, the estimates were correct and do not change.
@@ -30,7 +30,12 @@ project uses [Semantic Versioning](https://semver.org/).
 - **`estat` after `nwsaom multiplex`** stops with the same message and code (r(321)) on both paths; before, r(301) with a misleading message, or Stata's generic r(321) after `theta01()`/`theta02()`.
 - Help: the columns of `r(periods)` and `r(waves)` of `nwsaom describe` (including `persistence`); `nwsaom simulate` replaces `e()` by its set-up fit.
 
+### Changed
+- Rebuilt for nwcommands 3.22.0; requires core 3.22.0 or later.
+
 The Mata libraries are rebuilt (with Stata 17) and the plugin is updated (the single simulation call reads the rate covariates from the data).
+
+Tested on macOS with Stata 17 BE, Stata 18 BE and StataNow 19.5 MP (the full test suite) and on Windows 11 with StataNow 19.5 MP. Linux: plugins built by CI, not tested in Stata.
 
 ## [1.5.19] - 2026-11-12
 
