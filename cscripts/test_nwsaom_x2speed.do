@@ -68,7 +68,8 @@ forvalues i = 1/4 {
 		forvalues j = 1/`nw' {
 			local want : word `j' of `fx`i''
 			local have : word `j' of `s'
-			assert reldif(`have', `want') < 1e-12
+			* estimates to 1e-12; standard errors (even words) to 1e-9: a near-singular variance matrix amplifies platform rounding
+			assert reldif(`have', `want') < cond(mod(`j', 2) == 0, 1e-9, 1e-12)
 		}
 		di as result "PASS: fit `i' reproduces the stored numbers"
 	}
