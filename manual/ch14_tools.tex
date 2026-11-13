@@ -4,7 +4,7 @@ This chapter describes the commands that describe the data before a fit and work
 
 \section{How the commands are organised}
 
-A property of the data is detected from the data: a two-mode network or a non-directed network is recognised from the way the network was declared and needs no option. An option changes how a model is specified or fitted (\opt{behavior()}, \opt{present()}, \opt{fix()}). A different job is a subcommand (\texttt{nwsaom multinet}, \texttt{nwsaom simulate}) or a postestimation command (\texttt{estat}). \texttt{nwsaom multiplex} is deprecated and forwards to \texttt{nwsaom multinet}.
+A property of the data is detected from the data: a two-mode network or a non-directed network is recognised from the way the network was declared and needs no option. An option changes how a model is specified or fitted (\opt{behavior()}, \opt{present()}, \opt{fix()}). A different job is a subcommand (\texttt{nwsaom multinet}, \texttt{nwsaom simulate}) or a postestimation command (\texttt{estat}). \texttt{nwsaom multiplex} is deprecated and forwards to \texttt{nwsaom multinet}. The \texttt{estat} commands work with the model of the last \texttt{nwsaom} fit, which is kept in memory for that fit only; they stop with r(498) when the estimates in \texttt{e()} are not those of the last fit, for example after \texttt{estimates restore} of an earlier fit (rerun the fit; \texttt{nwsaom refit} reruns it from its estimates).
 
 \section{Describing the data: \texttt{nwsaom describe}}\label{sec:describe}
 
@@ -45,7 +45,7 @@ Directed                            Number of waves   =         3
         2->3 |          18           9          23
 ------------------------------------------------------------------
 \end{lstlisting}
-A period with a Jaccard index below about 0.3 has few stable ties and carries little information about the change process; here the two periods are at 0.33 and 0.38. The results are in \texttt{r(periods)}, \texttt{r(waves)} and \texttt{r(behchange)}. For a two-mode network the ties are the attendances (the cells of the actors-by-events matrix), the density is taken over those cells and the average degree is the mean number of events per actor; the option \opt{actormode(\#)} names the mode of the actors (default 2, as in \texttt{nwsaom}), and \texttt{r(n\_actors)} and \texttt{r(n\_events)} hold the numbers of actors and events. The description of a stacked data set with groups (Chapter~\ref{ch:groups}) is that of the combined network; describe the groups one by one by making a network of each.
+A period with a Jaccard index below about 0.3 has few stable ties and carries little information about the change process; here the two periods are at 0.33 and 0.38. The results are in \texttt{r(periods)} (one row per period with the columns \texttt{kept}, \texttt{created}, \texttt{dissolved}, \texttt{jaccard}, \texttt{hamming} and \texttt{persistence}, the share of the ties at the start of the period that are kept, here 0.504 and 0.569), \texttt{r(waves)} (one row per wave with \texttt{ties}, \texttt{density}, \texttt{avgdegree}, \texttt{structural0} and \texttt{structural1}) and \texttt{r(behchange)}. Undirected waves may be mixed with directed waves whose ties are all reciprocated, as in \texttt{nwsaom}; they are then described as undirected. For a two-mode network the ties are the attendances (the cells of the actors-by-events matrix), the density is taken over those cells and the average degree is the mean number of events per actor; the option \opt{actormode(\#)} names the mode of the actors (default 2, as in \texttt{nwsaom}), and \texttt{r(n\_actors)} and \texttt{r(n\_events)} hold the numbers of actors and events. The description of a stacked data set with groups (Chapter~\ref{ch:groups}) is that of the combined network; describe the groups one by one by making a network of each.
 
 \section{Holding effects fixed: \opt{fix()}}
 
@@ -57,10 +57,12 @@ A period with a Jaccard index below about 0.3 has few stable ties and carries li
    transtrip |   .7747333   .0996184     7.78   0.000
 (output omitted)
 Overall maximum convergence ratio: 0.188 (criterion: below 0.25; met)
-Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for outdegree (0.132) reciprocity (-1.656) transtrip (0.185)
-Convergence is good only if both criteria are met. Refit starting from these estimates with theta0(); see nwsaom.
+Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for
+  outdegree (0.132) reciprocity (-1.656) transtrip (0.185)
+Convergence is good only if both criteria are met.
+To refit starting from these estimates, type nwsaom refit.
 \end{lstlisting}
-The fixed coefficient equals its start value and its variance is 0. The overall maximum convergence ratio leaves out the fixed parameter, but the line of the $t$-ratios checks the $t$-ratios of all parameters, the fixed one included, so it lists \texttt{reciprocity} ($-1.656$); a large $t$-ratio of a fixed parameter is expected and is what the score test below examines. The $t$-ratios of the two free parameters, \texttt{outdegree} (0.132) and \texttt{transtrip} (0.185), are above 0.1 as well, so this fit has not converged by the two criteria; before it is reported it would be restarted from its estimates with \opt{theta0()}, as Chapter~\ref{ch:estimation} explains. Fixing is used for the score test below, for fitting a model with a known part, and for the simulation-only mode.
+The fixed coefficient equals its start value and its variance is 0. The overall maximum convergence ratio leaves out the fixed parameter, but the line of the $t$-ratios checks the $t$-ratios of all parameters, the fixed one included, so it lists \texttt{reciprocity} ($-1.656$); a large $t$-ratio of a fixed parameter is expected and is what the score test below examines. The $t$-ratios of the two free parameters, \texttt{outdegree} (0.132) and \texttt{transtrip} (0.185), are above 0.1 as well, so this fit has not converged by the two criteria; before it is reported it would be restarted from its estimates with \texttt{nwsaom refit}, as Chapter~\ref{ch:estimation} explains. Fixing is used for the score test below, for fitting a model with a known part, and for the simulation-only mode.
 
 \section{Simulation: \texttt{estat simulate} and \texttt{nwsaom simulate}}\label{sec:sim}
 
@@ -80,7 +82,21 @@ Period 1     |
 ------------------------------------
 Sim is the mean over the replications; Obs is the observed end wave.
 \end{lstlisting}
-Options: \opt{theta(\emph{matname})} replaces the coefficients (a row vector in the order of \texttt{e(b)}), \opt{rates()} and \opt{ratesbeh()} replace the rates, \opt{generate(\emph{stub})} saves the simulated networks as networks named \emph{stub}\texttt{\_}\emph{s}\texttt{\_p}\emph{period} (and the behaviors as variables of the same names). The result \texttt{r(sim)} has one row per replication and period (number of ties, mutual dyads, transitive triples, mean behavior), \texttt{r(obs)} the same for the observed end waves.
+Options: \opt{theta(\emph{matname})} replaces the coefficients (a row vector in the order of \texttt{e(b)}), \opt{rates()} and \opt{ratesbeh()} replace the rates, \opt{generate(\emph{stub})} saves the simulated networks as networks named \emph{stub}\texttt{\_}\emph{s}\texttt{\_p}\emph{period} (and the behaviors as variables of the same names). The rates are on the scale of \texttt{e(rates)} and \texttt{e(rate)}, RSiena's scale; after a non-directed fit of the pairwise types (joint, force, agree) they are converted to the per-actor rates of the simulation as the fit does it. The result \texttt{r(sim)} has one row per replication and period (number of ties, mutual dyads, transitive triples, mean behavior), \texttt{r(obs)} the same for the observed end waves; because \texttt{r(sim)} is a Stata matrix, \opt{nsim()} times the number of periods may not exceed \texttt{c(max\_matdim)} (800 in Stata/BE), and a larger request stops before anything is simulated.
+
+\paragraph{Names of the generated networks.} The names have at most 32 characters, so the stub must be short enough for the longest name. Networks (and, after a co-evolution fit, variables) of the generated names that already exist are overwritten only with the option \opt{replace}; without it the command stops with r(483) for a network and r(110) for a variable. Both checks run before anything is simulated, so a refused call creates nothing:
+\begin{lstlisting}
+. estat simulate, nsim(2) seed(5) generate(gx)
+(output omitted)
+. estat simulate, nsim(2) seed(5) generate(gx)
+generate(): network gx_1_p1 already exists. Specify option replace to
+overwrite it, or use another stub.
+r(483);
+. estat simulate, nsim(2) seed(5) generate(gx) replace
+(output omitted)
+\end{lstlisting}
+
+\paragraph{Which model is simulated.} The simulation follows the fit. A non-directed fit is simulated as a non-directed model, with the model type of the fit (\texttt{e(symtype)}, \texttt{e(modeltype)}) at its per-actor rates (\texttt{e(rates\_actor)}, or \texttt{e(rate\_actor)} after a fit with \opt{wave1()}/\opt{wave2()}), so the simulated networks are symmetric. After a fit with \opt{present()}, with \opt{joinat()}/\opt{leaveat()}, or with \opt{groups()}, only the actors that are active at the start of a period act in it, as in the fit; an active actor may still create a tie to an inactive one, as in RSiena. Joining and leaving inside a period (\opt{joinat()}/\opt{leaveat()} at fractional times) is not simulated: the actors active at the start of the period stay active to its end. The same holds for \texttt{estat gof} and \texttt{estat mems}.
 
 \paragraph{Simulation-only mode.} \texttt{nwsaom simulate} simulates at coefficients you choose, without any estimation (RSiena's \texttt{siena07} with \texttt{simOnly = TRUE}). The model is specified exactly as in \texttt{nwsaom}; \opt{theta()} gives one coefficient per network effect in the order of the coefficient table of a fit of the same model (the order in which \nwsaom{} lists the effects, which is not always the order in which you typed them), \opt{behtheta()} one per behavior effect, \opt{rates()} the rate of each period.
 \begin{lstlisting}
@@ -95,7 +111,9 @@ Period 1     |
 ------------------------------------
 Sim is the mean over the replications; Obs is the observed end wave.
 \end{lstlisting}
-Internally the model is set up by a short call of \texttt{nwsaom} with all coefficients fixed, so every data option of \texttt{nwsaom} is understood. Both commands work for a two-mode model: the simulation runs on the actors-by-events network, the table shows the number of ties (attendances) only (the columns for mutual dyads and transitive triples are missing), and \opt{generate()} saves two-mode networks (one row per actor, one column per event). A \opt{theta()} matrix of the wrong shape stops with a message that says what was expected. After a fit with \opt{groups()}, \texttt{estat simulate} is not available.
+Internally the model is set up by a short call of \texttt{nwsaom} with all coefficients fixed, so every data option of \texttt{nwsaom} is understood. This set-up fit replaces the estimation results in \texttt{e()}; store earlier results with \texttt{estimates store} first. \opt{nsim()}, \opt{seed()} and the names of \opt{generate()} are checked before the set-up fit, so these errors leave \texttt{e()} unchanged. The options \opt{generate()} (which may be abbreviated to \opt{gen()}) and \opt{replace} work as in \texttt{estat simulate}.
+
+Both commands work for a two-mode model: the simulation runs on the actors-by-events network, the table shows the number of ties (attendances) only (the columns for mutual dyads and transitive triples are missing), and \opt{generate()} saves two-mode networks in the layout of the observed waves (the actors in the mode given by \opt{actormode()}), so that they can be fitted with the same call. A \opt{theta()} matrix of the wrong shape stops with a message that says what was expected. After a fit with \opt{groups()}, \texttt{estat simulate} simulates one group (\opt{group(\#)}) or all groups in turn, with the actors, waves, rates and covariate constants of each group; \opt{rates()} and \opt{ratesbeh()} then give one rate per period of all groups, in RSiena's numbering (Chapter~\ref{ch:groups}), and \opt{rates()} is checked against the periods of each group.
 
 \section{Score-type tests: \texttt{estat score}}
 
@@ -167,6 +185,7 @@ On the artificial advice network \texttt{crprod} has no evidence in its favour, 
 \begin{lstlisting}
 . nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip k0(100) k3(1000) seed(1)
 . estat timetest
+
 Test of time heterogeneity (score-type test)
 H0: the parameter of each effect is the same in all periods
 
@@ -196,6 +215,7 @@ With $P$ periods there are $P-1$ deviations per effect. In this example there is
 \paragraph{After \texttt{nwsaom multinet}.} The test is also available for the effects of all networks and of the behavior of a multinet fit.
 \begin{lstlisting}
 . estat timetest
+
 Test of time heterogeneity (score-type test)
 H0: the parameter of each effect is the same in all periods
 
@@ -220,6 +240,9 @@ net2_recip~y |         3.592         1             0.0580
 \begin{lstlisting}
 . nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip cycle3 k0(100) k3(500) seed(1)
 . estat importance
+
+Relative importance of effects
+Expected over the actors at the start of each period
 --------------------------------------------------------------------------
       Effect | Estimate  Std. err.    Sigma  Semi-std.     RI p1     RI p2
 -------------+------------------------------------------------------------
@@ -230,13 +253,18 @@ net2_recip~y |         3.592         1             0.0580
 -------------+------------------------------------------------------------
    Certainty |                                            0.2674    0.3548
 --------------------------------------------------------------------------
+RI: share of the effect in the actors' choices. Semi-std.: estimate x sigma.
+Certainty: RSiena's R_H, the expected certainty of the choices.
 \end{lstlisting}
-The command is available after fits of a directed or non-directed one-mode network or of a two-mode network, with or without one co-evolving behavior, without endowment and creation effects, \opt{structural()}, \opt{present()} or missing-data options; RSiena has the same restrictions. It needs the native plugin. All sizes agree with \texttt{sienaRI} to four decimals.
+The command is available after fits of a directed or non-directed one-mode network or of a two-mode network, with or without one co-evolving behavior, without endowment and creation effects and \opt{structural()}; it stops after a fit with \opt{present()}, \opt{joinat()}, \opt{leaveat()}, \opt{missnet()} or \opt{missbeh()}. RSiena has the same restrictions. It needs the native plugin. All sizes agree with \texttt{sienaRI} to four decimals.
 
 \paragraph{Non-directed and two-mode networks.} For a non-directed network the importance is that of the forcing model, as RSiena notes. For a two-mode network the actors choose among the events. With the simulated $40\times20$ data of Section~\ref{sec:twomode}:
 \begin{lstlisting}
 . nwsaom, waves(tm1 tm2 tm3) outdegree cycle4 nodeocov(age) nodeicov(size) seed(1) k3(300)
 . estat importance
+
+Relative importance of effects
+Expected over the actors at the start of each period
 --------------------------------------------------------------------------
       Effect | Estimate  Std. err.    Sigma  Semi-std.     RI p1     RI p2
 -------------+------------------------------------------------------------
@@ -247,11 +275,16 @@ nodeocov_age |   0.0139     0.0909   0.7709     0.0107    0.0136    0.0129
 -------------+------------------------------------------------------------
    Certainty |                                            0.0771    0.0732
 --------------------------------------------------------------------------
+RI: share of the effect in the actors' choices. Semi-std.: estimate x sigma.
+Certainty: RSiena's R_H, the expected certainty of the choices.
 \end{lstlisting}
 \paragraph{Co-evolution.} After a co-evolution fit a second table gives the behavior effects. The options of an actor are to change the behavior by $-1$, $0$ or $+1$; the importance of a behavior effect is again the $L^1$ distance of these choice probabilities with and without the effect. The results are \texttt{r(ri\_beh)}, \texttt{r(importance\_beh)}, \texttt{r(sigma\_beh)}, \opt{r(sigma\_period\_beh)} and \texttt{r(certainty\_beh)}.
 \begin{lstlisting}
 . nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip behavior(smoke1 smoke2 smoke3 : linear quadratic avalt) k0(100) k3(500) seed(1)
 . estat importance
+
+Relative importance of effects
+Expected over the actors at the start of each period
 Network effects
 --------------------------------------------------------------------------
       Effect | Estimate  Std. err.    Sigma  Semi-std.     RI p1     RI p2
@@ -273,13 +306,15 @@ beh_quadra~c |   2.0247     0.4437   0.6712     1.3590    0.1808    0.2095
 -------------+------------------------------------------------------------
    Certainty |                                            0.5814    0.5745
 --------------------------------------------------------------------------
+RI: share of the effect in the actors' choices. Semi-std.: estimate x sigma.
+Certainty: RSiena's R_H, the expected certainty of the choices.
 \end{lstlisting}
 
 \section{Several groups: \texttt{nwsaom meta}}\label{sec:meta}
 
 This section is about the meta-analysis of separate fits. To estimate one model for all groups at once, use the option \opt{groups()} (Chapter~\ref{ch:groups}); Section~\ref{sec:groups-vs-meta} compares the two with the same data.
 
-When the same model is fitted to several networks of the same kind, for example school classes, the group estimates can be combined, which is what RSiena's \texttt{siena08} does. \texttt{nwsaom meta} takes the stored estimates (\texttt{estimates store}) of the same model fitted to each group, with the same effects in the same order. (The name \texttt{nwsaom\_meta}, used by earlier versions, still works.) For every effect it reports the combined mean and its standard error (an iteratively reweighted least squares estimate with a random effect for the group, Snijders and Baerveldt 2003), the estimated standard deviation between groups, a heterogeneity test $Q$, the maximum likelihood estimates of the mean and the between-group standard deviation with profile-likelihood intervals, and Fisher's combination of the one-sided tests.
+When the same model is fitted to several networks of the same kind, for example school classes, the group estimates can be combined, which is what RSiena's \texttt{siena08} does. \texttt{nwsaom meta} takes the stored estimates (\texttt{estimates store}) of the same model fitted to each group, with the same effects in the same order. (The name \texttt{nwsaom\_meta} works as well.) For every effect it reports the combined mean and its standard error (an iteratively reweighted least squares estimate with a random effect for the group, Snijders and Baerveldt 2003), the estimated standard deviation between groups, a heterogeneity test $Q$, the maximum likelihood estimates of the mean and the between-group standard deviation with profile-likelihood intervals, and Fisher's combination of the one-sided tests.
 
 The following example runs with the data of the package. It makes four groups by simulating the model four times from the same start network at known coefficients (Section~\ref{sec:sim}), fits each group on its own, and combines the fits. The combined estimates should be close to the values used for the simulation ($-2.3$, 2 and 0.5).
 \begin{lstlisting}
@@ -290,19 +325,23 @@ The following example runs with the data of the package. It makes four groups by
 .     estimates store grp`s'
 . }
 . nwsaom meta grp1 grp2 grp3 grp4
+
 Meta-analysis of separate fits                  Number of fits    =         4
 
 Estimates with a standard error of 10 or more are excluded;
 tests of the means use a t distribution with N-1 d.f.
+
 IWLS estimates (Snijders and Baerveldt 2003)
-      Effect |   n      Mean  Std. err.       t   P>|t|      SD       Q     P>Q
--------------+-----------------------------------------------------------------
-   outdegree |   4   -2.2509     0.0579  -38.87   0.000  0.1158    2.59   0.460
- reciprocity |   4    1.8694     0.0737   25.37   0.000  0.1473    1.18   0.759
-   transtrip |   4    0.4758     0.0114   41.81   0.000  0.0228    0.14   0.987
+------------------------------------------------------------------------------
+      Effect |  N      Mean Std. err.        t   P>|t|      SD       Q     P>Q
+-------------+----------------------------------------------------------------
+   outdegree |  4   -2.2509    0.0579   -38.87   0.000  0.1158    2.59   0.460
+ reciprocity |  4    1.8694    0.0737    25.37   0.000  0.1473    1.18   0.759
+   transtrip |  4    0.4758    0.0114    41.81   0.000  0.0228    0.14   0.987
+------------------------------------------------------------------------------
 \end{lstlisting}
-The combined means recover the coefficients, and no effect differs between the groups (\texttt{P>Q} between 0.46 and 0.99), as it should for groups simulated from the same model. In a real analysis a small \texttt{P>Q} for an effect means that the groups differ in that effect by more than their standard errors allow, and the estimated between-group standard deviation shows by how much. The full set of results is returned in \texttt{r(meta)}; the option \opt{rates} combines the rate parameters as well, and \opt{bound(\#)} excludes groups with a standard error of at least \# (default 10), as RSiena does. An effect that a group fitted with \opt{fix()} has a standard error of 0 and is left out for that group, as \texttt{siena08} leaves it out (version 1.4 and earlier counted such a group in $n$ and in the degrees of freedom of the tests of that effect, although it did not enter the weights; the estimates and the heterogeneity statistics of the other effects are unchanged). The option \opt{rates} uses the standard errors of the rates, \texttt{e(rates\_se)}, of each fit (version 1.1 took them from a row that does not exist, so that every rate was dropped without a message); the rows are named \texttt{rate\_period1}, \texttt{rate\_period2}, \ldots. The matrices \texttt{r(theta)} and \texttt{r(se)} (one row per stored estimate, one column per effect) carry the names of the stored estimates and of the effects. The results reproduce RSiena's functions to five decimals (Chapter~\ref{ch:validation}).
+The combined means recover the coefficients, and no effect differs between the groups (\texttt{P>Q} between 0.46 and 0.99), as it should for groups simulated from the same model. In a real analysis a small \texttt{P>Q} for an effect means that the groups differ in that effect by more than their standard errors allow, and the estimated between-group standard deviation shows by how much. The output continues with the maximum likelihood estimates and Fisher's tests (omitted here); the full set of results is returned in \texttt{r(meta)}. \opt{bound(\#)} excludes groups with a standard error of at least \# (default 10), as RSiena does. An effect that a group fitted with \opt{fix()} has a standard error of 0 and is left out for that group (it does not count in $n$ or in the degrees of freedom of the tests of that effect), as \texttt{siena08} leaves it out. The option \opt{rates} combines the rate parameters as well, with their standard errors \texttt{e(rates\_se)}; the fits must have the same number of periods, and the rows are named \texttt{rate\_period1}, \texttt{rate\_period2}, \ldots. A fit with \opt{wave1()}/\opt{wave2()}, as in the example, stores its one rate as the scalar \texttt{e(rate)} with the standard error \texttt{e(rate\_se)}; it is combined as \texttt{rate\_period1}. In the example \texttt{nwsaom meta grp1 grp2 grp3 grp4, rates} adds the row \texttt{rate\_period1} with the mean 4.93 (the simulation used the rate 5) and \texttt{P>Q} 0.85. As in RSiena, combine rates only when they are comparable across the groups, for example when the time between the waves is the same. The matrices \texttt{r(theta)} and \texttt{r(se)} (one row per stored estimate, one column per effect) carry the names of the stored estimates and of the effects. The results reproduce RSiena's functions to five decimals (Chapter~\ref{ch:validation}).
 
 \section{What is not available}
 
-After \texttt{nwsaom multinet}, \texttt{estat score} and \texttt{estat timetest} are available, but \texttt{estat gof}, \texttt{estat importance} and \texttt{estat simulate} are not. The same holds after a fit with \opt{groups()} (Chapter~\ref{ch:groups}), where \texttt{estat timetest} also reports a test per group and per period. The generalised method of moments of RSiena is not implemented (Chapter~\ref{ch:missing}). Maximum likelihood and Bayesian estimation are described in Chapter~\ref{ch:estimation}.
+After \texttt{nwsaom multinet}, \texttt{estat score} and \texttt{estat timetest} are available, but \texttt{estat gof}, \texttt{estat importance} and \texttt{estat simulate} are not. After a fit with \opt{groups()} (Chapter~\ref{ch:groups}) every \texttt{estat} command but \texttt{estat mems} works: \texttt{estat timetest} also reports a test per group and per period, and \texttt{estat gof}, \texttt{estat simulate} and \texttt{estat importance} run per group. All \texttt{estat} commands stop after a fit with \opt{tvcov()}, with several behaviors, or with a behavior together with \opt{ratecov()}, \opt{behratecov()} or \opt{behrate()}. The generalised method of moments of RSiena is not implemented (Chapter~\ref{ch:missing}). Maximum likelihood and Bayesian estimation are described in Chapter~\ref{ch:estimation}.

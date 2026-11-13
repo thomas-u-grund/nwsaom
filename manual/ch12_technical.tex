@@ -7,8 +7,8 @@ This chapter is for users who fit large models, who run \nwsaom{} on several pla
 \nwsaom{} consists of three layers.
 \begin{enumerate}[nosep]
   \item The \textbf{ado layer} (\texttt{nwsaom.ado} and a few helper files) parses the options, checks the data and the combinations of options, builds the model description, calls the estimator and posts the results in \texttt{e()}.
-  \item The \textbf{Mata core} (\texttt{unw\_saom.do}, compiled into the library \texttt{lnwcommands.mlib}) contains the model description, the observed statistics, the Robbins--Monro estimator for all phases, the calculation of the covariance matrix and a reference simulator, written in Mata, for the core effects.
-  \item {\sloppy The \textbf{native plugin} (\texttt{native/saom\_sim.c}, compiled for each platform into \opt{lib/plugins/<platform>/}\allowbreak\opt{saom\_sim\_<platform>.plugin}) simulates the ministeps. Almost all of the computing time of a fit is spent in it.\par}
+  \item The \textbf{Mata core} (\texttt{unw\_saom.do}, compiled into the libraries \texttt{lnwsaom1.mlib} and \texttt{lnwsaom2.mlib}) contains the model description, the observed statistics, the Robbins--Monro estimator for all phases, the calculation of the covariance matrix and a reference simulator, written in Mata, for the core effects.
+  \item {\sloppy The \textbf{native plugin} (\texttt{native/saom\_sim.c} with the files it includes, \texttt{saom\_ml.c}, \texttt{saom\_bayes.c} and \texttt{saom\_struct.c}, compiled for each platform into \opt{lib/plugins/<platform>/}\allowbreak\opt{saom\_sim\_<platform>.plugin}) simulates the ministeps and runs the samplers of \opt{ml} and \texttt{nwsaom bayes}. Almost all of the computing time of a fit is spent in it.\par}
 \end{enumerate}
 The Mata layer talks to the plugin through Stata frames. The calls are made once per batch of simulations and not once per ministep: in phases 1 and 3 all replicates of a fit are run in one call, on worker threads. The ministep sampler itself is the multinomial-logit rule of Chapter~\ref{ch:model}: for the acting actor the contribution of every alternative to the objective function is computed, the alternatives are given the choice probabilities, and one is drawn.
 
@@ -32,11 +32,11 @@ The command copies the source from the repository, compiles it with the compiler
 
 \subsection{Rebuilding the Mata libraries}\label{sec:buildmata}
 
-The Mata libraries \texttt{lnwsaom1.mlib} and \texttt{lnwsaom2.mlib} are built with Stata~17. A library built by an older Stata loads in every later Stata; one built by a newer Stata is ignored by an older one (r(3499), ``too new to be run by this version of Stata''). If the library does not load in your Stata, build it with that Stata (nwcommands 3.14 or later):
+The Mata libraries \texttt{lnwsaom1.mlib} and \texttt{lnwsaom2.mlib} are built with Stata~17, the oldest Stata version the package is tested with (the listings of this manual were also produced with Stata/BE~17). A library built by an older Stata loads in every later Stata; one built by a newer Stata is ignored by an older one (r(3499), ``too new to be run by this version of Stata''). If the library does not load in your Stata, build it with that Stata (nwcommands 3.14 or later):
 \begin{lstlisting}
 . nwinstall, buildmata(nwsaom)
 \end{lstlisting}
-The command fetches the Mata source from the repository, compiles it, installs the library and keeps the old file with the extension \texttt{.prev}. The library of \nwsaom{} is compiled against the core library, so if the core library does not load either, use \texttt{nwinstall, buildmata(all)}, which rebuilds the core first and then the installed model packages. The build clears the data and the Mata objects in memory, so save your data first, and restart Stata afterwards.
+The command fetches the Mata source from the repository, compiles it, installs the library and keeps the old file with the extension \texttt{.prev}. The libraries of \nwsaom{} are compiled against the library of the core, \texttt{lnwcommands.mlib}, and need a matching core library: when the Mata library of the core changes, the libraries of \nwsaom{} are rebuilt and released with it (\nwsaom{}~\pkgversion{} requires nwcommands 3.22.0 or later). If the core library does not load either, use \texttt{nwinstall, buildmata(all)}, which rebuilds the core first and then the installed model packages. The build clears the data and the Mata objects in memory, so save your data first, and restart Stata afterwards.
 
 \subsection{Plugin versions}
 
@@ -52,9 +52,11 @@ If you ask for a native-only effect and the native engine cannot be used, \nwsao
 \begin{lstlisting}
 . nwsaom, wave1(glasgow1) wave2(glasgow2) outdegree reciprocity egoplusaltsqx(alcohol1) seed(1)
 \end{lstlisting}
-gives
+gives, after the warning of Section~\ref{sec:fallbackwarn},
 \begin{lstlisting}
-nwsaom: egoplusaltsqx needs the native plugin (a newer plugin version); there is no Mata implementation of this effect.
+nwsaom: egoplusaltsqx needs a newer native plugin (update nwcommands and nwsaom,
+>  or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom));
+>  there is no Mata implementation of this effect.
 \end{lstlisting}
 and the return code is 198. The reverse also holds: a model that consists of effects with a Mata implementation runs without a plugin, correctly but slowly.
 
@@ -76,7 +78,7 @@ The plugin is multi-threaded. In phase 1 and phase 3 all replicates of all perio
 
 \paragraph{The number of threads.} \opt{cores(\#)} sets it; the default 0 uses all physical cores and \opt{cores(1)} runs single-threaded.
 
-\paragraph{Reproducibility.} Every simulated period draws from its own random stream, which is derived from the seed and from its position (replicate and period), and sums over the periods are formed after the threads have joined, in a fixed order. A given \opt{seed()} therefore gives identical results whatever the number of threads. On the two-wave example with \opt{cores(1)} and \opt{cores(4)}: the coefficients were identical to all printed digits (the outdegree coefficient in both runs $-2.2380415$). The results change if the model, the seed or the version of the program changes.
+\paragraph{Reproducibility.} Every simulated period draws from its own random stream, which is derived from the seed and from its position (replicate and period), and sums over the periods are formed after the threads have joined, in a fixed order. A given \opt{seed()} therefore gives identical results whatever the number of threads. On the two-wave example with \opt{cores(1)} and \opt{cores(4)}: the coefficients were identical to all printed digits (the outdegree coefficient in both runs $-2.2641298$). The results change if the model, the seed or the version of the program changes.
 
 \section{Size limits}\label{sec:limits}
 
@@ -119,13 +121,15 @@ A full-length run, with the default \opt{k3()} of 1\,000 and more phase-2 iterat
 
 \subsection{The fallback warning}\label{sec:fallbackwarn}
 
-\textbf{If the compiled plugin cannot be used, the fit runs in Mata, and \nwsaom{} says so before it starts.} Mata is slower by orders of magnitude; the results are the same. The command prints one line, once per fit, before the long computation:
+\textbf{If the compiled plugin cannot be used, the fit runs in Mata, and \nwsaom{} says so before it starts.} Mata is slower by orders of magnitude; the results are the same. The command prints one message, once per fit, before the long computation; with the Mata engine forced by \texttt{NWSAOM\_NONATIVE} it reads
 \begin{lstlisting}
-(Warning: the compiled plugin is not used for this fit (the plugin file
-saom_sim_macos.plugin was not found; reinstall the package with net install
-nwsaom, replace); the Mata fallback is much slower, possibly hours. See Check which engine ran.)
+(Warning: the compiled plugin is not used for this fit (the global
+  NWSAOM_NONATIVE is set); the Mata fallback is much slower, possibly hours.
+  See Check which engine ran. If the plugin of your platform does not work,
+  compile it on this computer: nwinstall, buildplugin(nwsaom).)
 \end{lstlisting}
-The reason in the brackets is one of four: the plugin file for the platform was not found; the installed plugin is older than the model needs; the model contains an effect or an option that the plugin does not cover (it is outside the capacity of the plugin); or the global macro \texttt{NWSAOM\_NONATIVE} is set to 1, a testing switch that forces Mata. Like all output the line is suppressed by \texttt{quietly}; in that case look at \texttt{e(engine)} after the fit. The warning exists because a fit that silently ran in Mata took more than an hour where the plugin takes seconds: until 22 October 2026 the test for ``too many covariate arrays'' used 127 instead of the plugin's real limit of 1\,023, so that a dyadic covariate on 129 or more actors ran in Mata. That is fixed. Effects that exist only in the plugin are refused with an error instead of a fallback.
+and after the table a note repeats the reason, for example ``(simulated in Mata, not the native plugin: no native plugin for this platform)''.
+The reason in the brackets is one of four: the plugin file for the platform was not found; the installed plugin is older than the model needs; the model contains an effect or an option that the plugin does not cover (it is outside the capacity of the plugin); or the global macro \texttt{NWSAOM\_NONATIVE} is set to 1, a testing switch that forces Mata. Like all output the message is suppressed by \texttt{quietly}; in that case look at \texttt{e(engine)} after the fit. The warning exists because a fit that silently runs in Mata can take more than an hour where the plugin takes seconds. Effects that exist only in the plugin are refused with an error instead of a fallback.
 
 \section{Performance}
 
@@ -173,16 +177,18 @@ File & Content \\
 \opt{nwsaom\_multinet.ado} & \texttt{nwsaom multinet}: several dependent networks. \\
 \opt{nwsaom\_multiplex.ado} & \texttt{nwsaom multiplex}: the earlier two-network subcommand with outdegree, reciprocity and the cross-network product. \\
 \opt{\_nwsaom\_postengine.ado}, \opt{\_nwsaom\_rsnotes.ado}, \opt{\_nwsaom\_tconvtable.ado} & Posting of \texttt{e(engine)}, the notes with RSiena's effect names, and the printing of the convergence table. \\
-\texttt{nwsaom\_estat.ado}, \texttt{nwsaom\_meta.ado} & \texttt{estat gof} and \texttt{estat mems}; the meta-analysis. \\
-\texttt{unw\_saom.do} & The Mata core: model, estimator, reference simulator, interface to the plugin. \\
-\texttt{native/saom\_sim.c} & The C plugin source; \texttt{native/Makefile} builds it. \\
+\texttt{nwsaom\_estat.ado}, \opt{nwsaom\_estat\_*.ado} & The \texttt{estat} commands (\texttt{gof}, \texttt{mems}, \texttt{simulate}, \texttt{importance}, \texttt{score}, \texttt{timetest}). \\
+\texttt{nwsaom\_ml.ado}, \texttt{nwsaom\_bayes.ado} & Maximum likelihood (option \opt{ml}) and \texttt{nwsaom bayes}. \\
+\texttt{nwsaom\_refit.ado}, \texttt{nwsaom\_simulate.ado}, \texttt{nwsaom\_meta.ado}, \texttt{nwsaom\_describe.ado} & The subcommands \texttt{refit}, \texttt{simulate}, \texttt{meta} and \texttt{describe}. \\
+\texttt{unw\_saom.do} & The Mata core: model, estimator, reference simulator, interface to the plugin; \texttt{lib/build.do} compiles it into \texttt{lib/lnwsaom1.mlib} and \texttt{lib/lnwsaom2.mlib}. \\
+\texttt{native/saom\_sim.c} & The C plugin source (with \texttt{saom\_ml.c}, \texttt{saom\_bayes.c} and \texttt{saom\_struct.c}); \texttt{native/Makefile} builds it. \\
 \opt{lib/plugins/<platform>/} & The compiled plugins for \texttt{macos}, \texttt{unix} and \texttt{windows}. \\
 \texttt{nwsaom.sthlp}, \opt{nwsaom\_remarks.sthlp} & The help file and its remarks. The help file was split in two because Stata's help Viewer fails on a very long file. \\
-\opt{cscripts/test\_nwsaom\_*.do} & The regression tests, one file per feature, and \opt{cscripts/run\_nwsaom\_tests.sh}, which runs them (\texttt{quick} or \texttt{full}) and accepts the directory of a freshly built plugin. \\
+\opt{cscripts/test\_nwsaom\_*.do} & The regression tests, one file per feature, and \opt{cscripts/run\_tests.sh}, which runs them (\texttt{quick} or \texttt{full}) and accepts the directory of a freshly built plugin. \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\paragraph{Testing.} The tests are run in two modes: in \emph{development mode}, in which the Mata sources are loaded directly (\texttt{do unw\_core.do}, \texttt{do unw\_ergm.do}, \texttt{do unw\_saom.do}, and \texttt{nwclear} --- never \texttt{clear all}, which would delete the loaded Mata functions) and in \emph{production mode} against the compiled library and plugin. The native simulator is compared with the Mata simulator at fixed parameters for statistical equivalence of the simulated statistics (the two do not share a random stream), and the estimates are compared with RSiena as described in the validation chapter.
+\paragraph{Testing.} The tests are run in two modes: in \emph{development mode}, in which the Mata sources are loaded directly (\texttt{do unw\_core.do} of the core and \texttt{do unw\_saom.do}, and \texttt{nwclear} --- never \texttt{clear all}, which would delete the loaded Mata functions) and in \emph{production mode} against the compiled library and plugin. The native simulator is compared with the Mata simulator at fixed parameters for statistical equivalence of the simulated statistics (the two do not share a random stream), and the estimates are compared with RSiena as described in the validation chapter.
 
 \paragraph{A stale plugin.} A plugin from an earlier installation in the PLUS directory can shadow the plugin of a freshly built checkout in some set-ups and silently run an old binary. If a new effect is refused as unknown to the plugin, or the version shown by \texttt{NWSAOM\_TRACE} is older than expected, check which plugin file is used.

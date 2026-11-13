@@ -1,6 +1,8 @@
 \chapter{Estimation and diagnostics}\label{ch:estimation}
 
-This chapter explains what \nwsaom{} does when it fits a model, which options steer the algorithm, how to decide whether a fit has converged, what the error messages mean, and which results are available afterwards. \section{The algorithm in brief}\label{sec:algorithm}
+This chapter explains what \nwsaom{} does when it fits a model, which options steer the algorithm, how to decide whether a fit has converged, what the error messages mean, and which results are available afterwards. All outputs were produced with \nwsaom{}~\pkgversion{} in Stata/BE~17 on the Glasgow data.
+
+\section{The algorithm in brief}\label{sec:algorithm}
 Coefficients are estimated by the method of moments with Robbins--Monro stochastic approximation, which is also the default of RSiena's \texttt{siena07}. It is not maximum likelihood and not a Bayesian method; these two estimators are available as the option \opt{ml} and the subcommand \texttt{nwsaom bayes} and are described at the end of this chapter (Sections~\ref{sec:ml} and~\ref{sec:bayes}). The estimation runs in three phases.
 \begin{description}[leftmargin=0pt,labelindent=0pt]
 \item[Phase 1] estimates the Jacobian, that is, the sensitivity of each expected statistic to each parameter, from \opt{k0()} independent simulated replicates at the starting values (score-function derivative estimator), and ends with a partial quasi-Newton step. The default length is RSiena's, $\max(50, 7+3p)$ replicates for $p$ estimated parameters, so a larger model gets a longer phase 1. Phase 1 is lengthened, and if necessary run with finite differences, when a derivative is not positive (Section~\ref{sec:nonposderiv}).
@@ -41,13 +43,13 @@ Option & Meaning\\
 
 \paragraph{Seeds and threads.} Every simulation draws from its own random stream derived from the seed and the position of the simulation. A given \opt{seed()} therefore gives identical results with \texttt{cores(1)} and with any other number of threads. Results for different seeds differ by simulation noise; when comparing two specifications, fit each with several seeds.
 
-\paragraph{Starting values and restarts.} \opt{theta0()} takes one value per requested effect, in the order shown by \texttt{matrix list e(b)} (outdegree first, then the effects in the order in which their options appear in the help file; if the count is wrong the error message lists the order). Without \opt{theta0()} all parameters start at zero, except that a network-only model starts \opt{outdegree} at RSiena's data-derived value. To continue a fit that has not converged, restart from its estimates with \texttt{nwsaom refit} (new in 1.5.12; RSiena's \texttt{prevAns}):
+\paragraph{Starting values and restarts.} \opt{theta0()} takes one value per requested effect, in the order shown by \texttt{matrix list e(b)} (outdegree first, then the effects in the order in which their options appear in the help file; if the count is wrong the error message lists the order). Without \opt{theta0()} all parameters start at zero, except that a network-only model starts \opt{outdegree} at RSiena's data-derived value. To continue a fit that has not converged, restart from its estimates with \texttt{nwsaom refit} (RSiena's \texttt{prevAns}):
 \begin{lstlisting}
 nwwebuse glasgow, nwclear
 nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip seed(1)
 nwsaom refit, seed(2)
 \end{lstlisting}
-\texttt{nwsaom refit} reruns the command stored in \texttt{e(cmdline)} with \opt{theta0()} and \opt{behtheta0()} set to \texttt{e(b)}, \opt{rate0()} to the rates of an unconditional network-only fit and \opt{ratecovcoef()} to \texttt{e(ratecoefs)}; \opt{k3()}, \opt{seed()}, \opt{cores()} and \opt{firstg()} given to it replace those of the stored command. \opt{maxruns(\#)} repeats the refit until both convergence criteria below are met, at most \# times, and \texttt{e(refit\_runs)} and \texttt{e(refit\_converged)} report what happened. Since 1.5.13 it also works after \texttt{nwsaom multinet}, where \opt{theta0()} gets all coefficients of both networks and the behavior. By hand, the same restart is
+\texttt{nwsaom refit} reruns the command stored in \texttt{e(cmdline)} with \opt{theta0()} and \opt{behtheta0()} set to \texttt{e(b)}, \opt{rate0()} to the rates of an unconditional network-only fit and \opt{ratecovcoef()} to \texttt{e(ratecoefs)}; \opt{k3()}, \opt{seed()}, \opt{cores()} and \opt{firstg()} given to it replace those of the stored command. \opt{maxruns(\#)} repeats the refit until both convergence criteria below are met, at most \# times, and \texttt{e(refit\_runs)} and \texttt{e(refit\_converged)} report what happened. It also works after \texttt{nwsaom multinet}, where \opt{theta0()} gets all coefficients of both networks and the behavior. By hand, the same restart is
 \begin{lstlisting}
 matrix b = e(b)
 nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip ///
@@ -77,7 +79,8 @@ Actors: 50                             Periods: 2
 Rate parameters (estimated, one per inter-wave period):
         rate |    6.4432     5.2473
           se |    1.0683     0.8841
-Convergence t-ratios (criterion: every |t| below 0.1; the overall maximum ratio below 0.25 is a separate criterion):
+Convergence t-ratios (criterion: every |t| below 0.1; the overall maximum
+ratio below 0.25 is a separate criterion):
   outdegree                 -0.005      reciprocity               -0.031
   transtrip                 -0.076
 Overall maximum convergence ratio:  0.123
@@ -95,16 +98,18 @@ under conditional estimation a simulated period that does not reach the observed
 \item[rc 505, ``phase-3 covariance matrix contains missing values'']
 \texttt{theta} stayed within the bound, but the phase-3 Jacobian was too close to singular to invert. This is another symptom of weak identification. Typical causes found in testing are listed below.
 \item[rc 198]
-the combination of options is refused (for example \opt{outdegreeendow} with \opt{outdegreecreation} and an estimated rate, or an effect that the model type does not offer). The message names the reason; nothing is silently coerced.
+{\sloppy the combination of options is refused (for example \opt{outdegreeendow} with \opt{outdegreecreation} and an estimated rate, or an effect that the model type does not offer). The message names the reason; nothing is silently coerced.\par}
 \item[rc 301]
 Stata's own ``last estimates not found'': a postestimation command such as \texttt{estat gof} was issued without a preceding \texttt{nwsaom} fit in memory.
+\item[rc 498, ``the model of the nwsaom estimates in memory is no longer available'']
+the \texttt{estat} commands and \texttt{nwsaom bayes} simulate the model that the last \nwsaom{} call kept in memory, and they first check that this model belongs to the estimates in \texttt{e()} (\texttt{e(fitid)}). The check fails after \texttt{estimates restore} of an earlier fit, or after a later \nwsaom{} call that stopped with an error once it had begun to set up its model. Rerun the fit; \texttt{nwsaom refit} reruns it from the restored estimates. Displaying stored results is not affected: \texttt{estimates replay}, \texttt{estimates table} and the like work as usual.
 \end{description}
 \noindent \texttt{estat gof} of a non-directed fit also stops with rc 498 if the native simulator is unavailable.
 
 \paragraph{Known sources of rc 498 and 505.}
 
 \begin{itemize}
-\item \textbf{Sparse effects.} The transitive-reciprocated-triplet endowment/creation split diverged on some seeds in early versions. After the per-period Jacobian (RSiena's \opt{derivativeFromScoresAndDeviations}, summed over periods) and the phase-1 doubling were adopted, 1 of 50 seeds still diverged, compared with 3 of 200 seeds (1.5\%) for RSiena's \texttt{siena07} on the same model. Divergences of this size are expected for sparse effects in both programs.
+\item \textbf{Sparse effects.} The transitive-reciprocated-triplet endowment/creation split can diverge on some seeds. With the per-period Jacobian (RSiena's \opt{derivativeFromScoresAndDeviations}, summed over periods) and the phase-1 doubling, 1 of 50 seeds diverged, compared with 3 of 200 seeds (1.5\%) for RSiena's \texttt{siena07} on the same model. Divergences of this size are expected for sparse effects in both programs.
 \item \textbf{Collinear effects.} The linear shape effect split into endowment and creation together with the behavior rate, or the outdegree endowment and creation together with the network rate, is not identified, because the two statistics add up to the rate's distance statistic. These combinations are refused (rc 198), as RSiena reports a singular covariance matrix for them. Likewise a constant behavior effect equals minus the behavior-rate statistic, so under unconditional estimation its row is collinear with the behavior rate and the fit ends in rc 505.
 \item \textbf{Covariate effects that reproduce the outdegree.} In a two-mode network, \texttt{sameXInPop} or \texttt{homXOutAct} with a continuous covariate reproduce the outdegree statistic; \texttt{siena07} fits them with arbitrary estimates, \nwsaom{} stops with rc 505.
 \item \textbf{Synthetic or random behavior data.} Random behavior is not identifiable; tests on such data accept rc 0 or rc 498.
@@ -131,11 +136,17 @@ Result & Content\\
 \texttt{e(N)}, \texttt{e(nodes)}, \texttt{e(nwaves)} & Number of actors and waves.\\
 \texttt{e(ngroups)}, \texttt{e(groupn)}, \texttt{e(groupwaves)}, \texttt{e(groupvar)} & With \opt{groups()}: number of groups, actors and waves per group, name of the group variable (\texttt{e(N)} is the total number of actors).\\
 \texttt{e(rates\_group)}, \texttt{e(rates\_period)} & With \opt{groups()}: the group and RSiena's period number of each column of \texttt{e(rates)}; \texttt{e(rates)} has one column per period of each group, named \texttt{period1}, \texttt{period2}, \texttt{period4}, \ldots{} (Chapter~\ref{ch:groups}).\\
-\texttt{e(waves)}, \texttt{e(behavior)}, \texttt{e(symtype)} & Names of the waves and behaviors; model type of a non-directed fit.\\
+\texttt{e(waves)}, \texttt{e(behavior)} & Names of the waves and behaviors.\\
+\texttt{e(symtype)}, \texttt{e(modeltype)} & Non-directed fits: the model type (\texttt{forcing}, \texttt{confirmation}, \texttt{force}, \texttt{agree}, \texttt{joint}) and RSiena's \texttt{modelType} number.\\
+\texttt{e(rate\_actor)}, \texttt{e(rates\_actor)} & Non-directed fits: the per-actor network rate (two-wave path) or one per period (\opt{waves()}); \texttt{estat gof}, \texttt{estat simulate} and \texttt{estat mems} simulate at these rates.\\
+\texttt{e(present)}, \texttt{e(joinat)}, \texttt{e(leaveat)}, \texttt{e(missnet)}, \texttt{e(missbeh)} & The composition-change and missing-data options as given (empty without them).\\
+\texttt{e(actormode)} & Two-mode fits: the mode of the actors (\opt{actormode()}).\\
+\texttt{e(fitid)} & Identifies the fit; the \texttt{estat} commands and \texttt{nwsaom bayes} use it to check that the model kept in memory belongs to the estimates in \texttt{e()}.\\
 \texttt{e(estat\_cmd)} & Postestimation dispatch (\texttt{nwsaom\_estat}).\\
 \bottomrule
 \end{tabular}
 \end{center}
+\nwsaom{} typed without options, or with display options only (\opt{level()}, \opt{detail}), redisplays the results of the last fit, for example \texttt{nwsaom, level(90)}; \texttt{estimates replay} works as well. Estimates kept with \texttt{estimates store} can be restored and displayed at any time, but the \texttt{estat} commands and \texttt{nwsaom bayes} need the model of the last fit: after \texttt{estimates restore} of an earlier fit they stop with r(498) (see above), and the fit has to be run again.
 Stored estimates can be combined across networks with \texttt{nwsaom meta}, the counterpart of RSiena's \texttt{siena08} (Section~\ref{sec:meta}); several groups can also be estimated jointly with \opt{groups()} (Chapter~\ref{ch:groups}).
 
 \section{Goodness of fit: \texttt{estat gof}}
@@ -147,7 +158,7 @@ Stored estimates can be combined across networks with \texttt{nwsaom meta}, the 
 
 \paragraph{Pooling and \texttt{join(off)}.} With three or more waves the statistic vector is pooled (summed) across periods before a single test, RSiena's \texttt{join=TRUE}. \opt{join(off)} runs a separate test and violin per period (RSiena's \texttt{join=FALSE}); the stored results then carry the suffix \texttt{\_p\#}.
 
-\paragraph{Difference from RSiena.} RSiena reuses networks stored during the fit. \nwsaom{} stores none, so \texttt{estat gof} runs fresh simulations from each period's observed start wave. The Mahalanobis test does not depend on how the reference draws were generated, only on their being independent draws at the fitted parameters, so the construction is unchanged. Co-evolution fits simulate network and behavior jointly for every replicate, regardless of the requested statistics. GOF simulates endowment/creation, \opt{structural()}, \opt{ratecov()}, \opt{present()} and non-directed model types in the native plugin when it covers the model. \texttt{estat gof} is refused for fits with several co-evolving behaviors.
+\paragraph{Difference from RSiena.} RSiena reuses networks stored during the fit. \nwsaom{} stores none, so \texttt{estat gof} runs fresh simulations from each period's observed start wave. The Mahalanobis test does not depend on how the reference draws were generated, only on their being independent draws at the fitted parameters, so the construction is unchanged. Co-evolution fits simulate network and behavior jointly for every replicate, regardless of the requested statistics. GOF simulates endowment/creation, \opt{structural()}, \opt{ratecov()}, \opt{present()} and non-directed model types in the native plugin when it covers the model. A non-directed fit is simulated as the non-directed model that was fitted, with its model type (\texttt{e(symtype)}) at the per-actor rates (\texttt{e(rates\_actor)} or \texttt{e(rate\_actor)}), so the simulated networks are symmetric. After a fit with composition change (\opt{present()}, or \opt{joinat()}/\opt{leaveat()} with \opt{waves()}) only the actors that are active at the start of a period act in it, as in the fit; joining and leaving inside a period is not simulated. \texttt{estat gof} is refused for fits with several co-evolving behaviors.
 
 \paragraph{The violin plot.} Each statistic is also drawn as a violin plot built from \texttt{kdensity} and \opt{twoway rarea, horizontal}: the kernel-density shape per category, a thin box for the interquartile range, dashed lines at the 2.5th and 97.5th percentile, and the observed value as a red line, with the $p$-value as the $x$-axis title (as RSiena). Graphs are named \texttt{gof\_outdegree}, \texttt{gof\_indegree}, \texttt{gof\_geodesic}, \texttt{gof\_triad} and \texttt{gof\_behavior}; \opt{name()} changes the stub, and with \opt{join(off)} each period gets its own graph (\texttt{gof\_outdegree\_p1}, \ldots).
 
@@ -164,29 +175,30 @@ Goodness of fit: Mahalanobis distance test
             Geodesic |        23.311    0.000 rejected
 ------------------------------------------------------
 rejected: P < 0.05 (one-tailed); the model does not reproduce this statistic
+Violin plots: gof_outdegree gof_indegree gof_geodesic
 \end{lstlisting}
 This three-effect model on the Glasgow data is deliberately minimal; the output shows how a poorly fitting specification is reported, and that it is a reason to extend the model, not a failure of the command. \opt{nsim()} defaults to 50 (minimum 5); \texttt{nsim(30)} was used here only to be quick.
 
 \paragraph{Stored results.} For each statistic \texttt{estat gof} stores \texttt{r(p\_\emph{stat})} (the $p$-value) and \texttt{r(mhd\_\emph{stat})} (the observed Mahalanobis distance); with \opt{join(off)} the names carry \texttt{\_p1}, \texttt{\_p2}, \ldots.
 
 \section{Micro effects on macro structure: \texttt{estat mems}}
-\texttt{estat mems} is a port of the \texttt{MEMS()} function (SAOM version) of Duxbury's R package \texttt{netmediate}. It asks how much a chosen micro-level effect (one coefficient of the fitted model, named as a column of \texttt{e(b)}) changes a macro-level network summary of your choice. You supply the summary as a Stata program that takes a network name and returns \texttt{r(stat)}.
+\texttt{estat mems} is a port of the \texttt{MEMS()} function (SAOM version) of Duxbury's R package \texttt{netmediate}. It asks how much a chosen micro-level effect (one coefficient of the fitted model, named as a column of \texttt{e(b)}) changes a macro-level network summary of your choice. You supply the summary as a Stata program that takes a network name and returns \texttt{r(stat)}. The program is called once for every simulated network, so prefix commands that display results (here \texttt{nwsummarize, matonly}, which lists the adjacency matrix) with \texttt{quietly}.
 \begin{lstlisting}
 program myDensity, rclass
     args netname
-    nwsummarize `netname', matonly
+    quietly nwsummarize `netname', matonly
     return scalar stat = r(density)
 end
 estat mems, effect(reciprocity) macro(myDensity) nsim(500) seed(42)
 \end{lstlisting}
 The algorithm draws \opt{nsim()} coefficient vectors (default 500) from a multivariate normal whose sample mean and covariance equal \texttt{e(b)} and \texttt{e(V)} exactly (achieved by a Cholesky whitening, not by \texttt{MASS}'s SVD, so the random numbers differ from R's). For each multiplier in \opt{interval()} (default \texttt{0 1}: ``as if the effect did not operate'' versus ``at its fitted strength'') the effect's coefficient is scaled, a network is simulated forward from the fitted model's observed start wave, and the macro statistic is evaluated. The paired difference between the last and first multiplier gives the MEMS estimate, its Monte Carlo standard deviation, a 95\% percentile interval and a Monte Carlo $p$-value (the proportion of draws whose sign is opposite to the mean effect, not doubled). It stores \texttt{r(mems)}, \texttt{r(mems\_sd)}, \texttt{r(mems\_lb)}, \texttt{r(mems\_ub)}, \texttt{r(mems\_p)} and \texttt{r(propchange)} (the difference as a proportion of the macro value at the last multiplier; a point estimate only, as in \texttt{netmediate}).
 
-\paragraph{Scope.} Version~1 handles exactly two waves (\opt{wave1()}/\opt{wave2()}) and network-only fits; co-evolution, \opt{waves()}, \opt{symmetric} and multiplex fits are rejected with a message. The VanderWeele E-value sensitivity bound of \texttt{netmediate} is not implemented. The theta draw is shared across a row's interval values, but each simulation draws fresh randomness (no common random numbers).
+\paragraph{Scope.} \texttt{estat mems} handles network-only fits of exactly two waves (\opt{wave1()}/\opt{wave2()}, or \opt{waves()} with two networks); co-evolution fits, fits with three or more waves, two-mode fits and \texttt{nwsaom multiplex}/\texttt{multinet} fits are rejected with a message. A non-directed fit is simulated with its model type and per-actor rate, as in \texttt{estat gof}, and \opt{macro()} receives undirected networks. The VanderWeele E-value sensitivity bound of \texttt{netmediate} is not implemented. The theta draw is shared across a row's interval values, but each simulation draws fresh randomness (no common random numbers).
 
 \section{Maximum likelihood: \opt{ml}}\label{sec:ml}
 With the option \opt{ml}, \nwsaom{} first runs the method of moments, whose estimates are the starting values, and then estimates the model by maximum likelihood, as \texttt{siena07} does with \texttt{maxlike = TRUE} (Snijders, Koskinen and Schweinberger 2010). The unobserved sequence of ministeps between two waves (who was selected, which tie was considered, including the ministeps without a change) is part of the data that are augmented. It is simulated by Metropolis--Hastings steps: inserting and deleting a ministep that changes nothing, permuting ministeps, and inserting or deleting a pair of ministeps that cancel. The complete-data score of the effects and of the rates is averaged by a Robbins--Monro algorithm, with the same three phases as the method of moments. The estimates and the covariance matrix replace \texttt{e(b)} and \texttt{e(V)}; the standard errors come from the mean complete-data information minus the covariance matrix of the scores. The rates are estimated along and stored in \texttt{e(rates)}; \texttt{e(rates\_ml)} adds the convergence $t$-ratio of every rate, and \texttt{e(tconv\_max\_ml)} is the largest $t$-ratio of all scores (below 0.1 is good).
 
-The estimator covers one directed one-mode network, with or without one co-evolving behavior (its ministeps and its rates are part of the augmented data), and no endowment or creation effects, rate covariates, structural zeros, missing data or composition change. Non-directed and two-mode networks and several networks are not covered. The controls are given in \opt{mloptions()}: \opt{n1(\#)} iterations of phase 1 (default 50), \opt{nsub(\#)} subphases of phase 2 (4) with \opt{nstart2(\#)} iterations in the first (100, then 2.52 times as many in each further subphase), \opt{n3(\#)} iterations of phase 3 (1\,000), \opt{mult(\#)} Metropolis--Hastings steps per iteration as a multiple of the number of tie changes (5), \opt{gain(\#)} the initial gain (0.2) and \opt{seed(\#)}. The same estimates are available after an \nwsaom{} fit as \texttt{nwsaom\_ml}.
+The estimator covers one directed one-mode network, with or without one co-evolving behavior (its ministeps and its rates are part of the augmented data), and no endowment or creation effects, rate covariates, structural zeros, missing data or composition change. Non-directed and two-mode networks and several networks are not covered. A fit with \opt{ml} and \opt{missnet()}, \opt{missbeh()}, \opt{present()}, \opt{joinat()}/\opt{leaveat()}, \opt{structural()} or endowment and creation effects stops with a message (r(198)) before anything is estimated; so do non-directed models, rate covariates, two-mode data and several behaviors. The controls are given in \opt{mloptions()}: \opt{n1(\#)} iterations of phase 1 (default 50), \opt{nsub(\#)} subphases of phase 2 (4) with \opt{nstart2(\#)} iterations in the first (100, then 2.52 times as many in each further subphase), \opt{n3(\#)} iterations of phase 3 (1\,000), \opt{mult(\#)} Metropolis--Hastings steps per iteration as a multiple of the number of tie changes (5), \opt{gain(\#)} the initial gain (0.2) and \opt{seed(\#)}. The same estimates are available after an \nwsaom{} fit as \texttt{nwsaom\_ml}.
 \begin{lstlisting}
 . nwwebuse glasgow, nwclear
 . nwsaom, wave1(glasgow1) wave2(glasgow2) outdegree reciprocity transtrip k3(500) seed(1) ml mloptions(n3(4000) nstart2(200) seed(2))
@@ -224,6 +236,8 @@ The following example uses a short run to keep the time low (about 25 seconds on
 \begin{lstlisting}
 . nwsaom, wave1(glasgow1) wave2(glasgow2) outdegree reciprocity transtrip k3(500) seed(1)
 . nwsaom bayes, nprewarm(20) nwarm(20) nmain(100) nimprovemh(40) seed(1)
+Sampling: 20 pre-warming + 20 warming + 100 main iterations of 20 batches ...
+
 Bayesian SAOM (data augmentation)                Number of actors  =       50
 Waves: glasgow1 glasgow2                         Saved draws       =      100
 Pre-warm 20, warm 20, main 100 x 20              Mean chain length =    306.2
@@ -238,12 +252,17 @@ Chain steps accepted: diagonal 0.751, permute 0.755
    transtrip |     0.6618     0.0988      0.4623      0.8475     0.6545    77
 rate_period1 |     6.0569     0.6129      4.9734      7.2384     6.0627    65
 -----------------------------------------------------------------------------
+Draws (one per main iteration) are in frame nwsaom_bayes_draws:
+  b1..b3 (effects), rate1, nchain, loglik.
+Priors: effects flat unless priorsigeta() (with priormeaneta()) is given;
+rates normal with ratepriormean() and ratepriorsd() (ratepriorsd(0): flat), or
+gamma with gibbsrates/priorrate().
 \end{lstlisting}
-The result replaces the estimates of the fit (\texttt{estimates store} first to keep them): \texttt{e(b)} and \texttt{e(V)} are the posterior means and covariance matrix, \texttt{e(rates)} the posterior mean and standard deviation of the rates, \texttt{e(interval)} the interval limits and median, \texttt{e(ess)} the effective sample sizes, and \texttt{e(post\_frame)} the name of the frame that holds the draws (one row per main iteration). The acceptance rates of all steps are in \texttt{e(accept\_effects)}, \texttt{e(accept\_rates)} and the \texttt{e(accept\_}\emph{step}\texttt{)} results, the tuned scale factors in \texttt{e(scale\_effects)}.
+The result replaces the estimates of the fit (\texttt{estimates store} first to keep them): \texttt{e(b)} and \texttt{e(V)} are the posterior means and covariance matrix, \texttt{e(rates)} the posterior mean and standard deviation of the rates, \texttt{e(interval)} the interval limits and median, \texttt{e(ess)} the effective sample sizes, and \texttt{e(post\_frame)} the name of the frame that holds the draws (one row per main iteration). The acceptance rates of all steps are in \texttt{e(accept\_effects)}, \texttt{e(accept\_rates)} and the \texttt{e(accept\_}\emph{step}\texttt{)} results, the tuned scale factors in \texttt{e(scale\_effects)}, and \texttt{e(priors)} describes the priors by the names of their options, as the note under the table does.
 
 \paragraph{Validation.} On a case with four actors the expected numbers of ministeps of the sampler are 16.249 and 32.385 against the exact values 16.258 and 32.344 from complete enumeration. On the Glasgow data (waves 1 to 3) with outdegree, reciprocity and transitive triplets the posterior means are $-2.656$, $2.256$ and $0.686$ (posterior standard deviations $0.109$, $0.175$, $0.069$), against the maximum likelihood estimates of \texttt{siena07} $-2.661$, $2.224$, $0.713$ (standard errors $0.139$, $0.181$, $0.083$) and $-2.632$, $2.187$, $0.702$ in a second run. With the alcohol covariates the posterior means are within one maximum-likelihood standard error. A run with the default controls takes about five minutes and gives effective sample sizes of 67 to 152 out of 250 draws; for inference increase \opt{nmain()} or \opt{nrunmh()}.
 
-\paragraph{Differences from \texttt{multi\_siena} and limits.} Only one group is supported: there is no group-level mean and covariance matrix, no randomly varying effects and no hierarchical prior (with one group \texttt{multi\_siena} itself keeps the rate prior fixed, which is the default here). The starting values and the proposal covariance come from the \nwsaom{} fit, where \texttt{multi\_siena} first runs a short method-of-moments estimation of its own. The Metropolis--Hastings moves on the sequences were written from the published description, not from the code, and the length of a permuted block is kept fixed in the main run. Not available: several behaviors, several networks or groups, missing data, composition change, rate covariates, endowment and creation effects, and non-directed and two-mode networks. With these limits the posterior of the effects under a flat prior is close to the maximum likelihood estimate and its standard error.
+\paragraph{Differences from \texttt{multi\_siena} and limits.} Only one group is supported: there is no group-level mean and covariance matrix, no randomly varying effects and no hierarchical prior (with one group \texttt{multi\_siena} itself keeps the rate prior fixed, which is the default here). The starting values and the proposal covariance come from the \nwsaom{} fit, where \texttt{multi\_siena} first runs a short method-of-moments estimation of its own. The Metropolis--Hastings moves on the sequences were written from the published description, not from the code, and the length of a permuted block is kept fixed in the main run. Not available: several behaviors, several networks or groups, missing data, composition change, rate covariates, endowment and creation effects, and non-directed and two-mode networks; after a fit with \opt{missnet()}, \opt{missbeh()}, \opt{present()}, \opt{joinat()}/\opt{leaveat()}, \opt{structural()} or endowment and creation effects \texttt{nwsaom bayes} stops with a message (r(198)). It also checks that the model in memory belongs to the estimates in \texttt{e()} and stops with r(498) otherwise, for example after \texttt{estimates restore} of an earlier fit; run the fit again first. With these limits the posterior of the effects under a flat prior is close to the maximum likelihood estimate and its standard error.
 
 \section{Run time}
 With the native engine, fit time grows roughly with the cube of the number of actors above about 1,000 actors. For a plain model (outdegree, reciprocity, transitive triplets; three waves; about ten ties per actor; \texttt{k0(30) k3(200)}) it takes 1.5~s for 250 actors, 2.6~s for 500, 10~s for 1,000, 67~s for 2,000 and 520~s for 4,000; a full-length run costs several times more. Timings on one 18-core machine: the \texttt{s50} three-wave model \opt{outdegree reciprocity transtrip} 0.33~s, and the \texttt{s50} three-wave co-evolution model 0.63~s. Beyond roughly 10,000 actors the model itself (every ministep considers all possible alters) is the limit. Stata's own limits matter for matrices passed to \nwsaom{} (\opt{dyadcov()}, \opt{missnet()}): 800$\times$800 in Stata/BE, 11,000$\times$11,000 in Stata/SE.

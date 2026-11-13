@@ -1,6 +1,6 @@
 \chapter{Several groups: joint estimation}\label{ch:groups}
 
-Many network panels consist of several independent groups of actors: school classes, teams, villages, organizations. Each group is a separate network with its own actors, observed at the same occasions (or at different ones). RSiena offers two ways to analyze such data: fit one model to all groups at once (\texttt{sienaGroupCreate} and \texttt{siena07}), or fit each group separately and combine the estimates (\texttt{siena08}). \nwsaom{} offers both. This chapter is about the first, the option \opt{groups()}; the second is \texttt{nwsaom meta} (Section~\ref{sec:meta}), and Section~\ref{sec:groups-vs-meta} says when to use which. All outputs below were produced with \nwsaom{} 1.5.7 in Stata/BE~18; the data and do-files are described at the end of the chapter.
+Many network panels consist of several independent groups of actors: school classes, teams, villages, organizations. Each group is a separate network with its own actors, observed at the same occasions (or at different ones). RSiena offers two ways to analyze such data: fit one model to all groups at once (\texttt{sienaGroupCreate} and \texttt{siena07}), or fit each group separately and combine the estimates (\texttt{siena08}). \nwsaom{} offers both. This chapter is about the first, the option \opt{groups()}; the second is \texttt{nwsaom meta} (Section~\ref{sec:meta}), and Section~\ref{sec:groups-vs-meta} says when to use which. All outputs below were produced with \nwsaom{}~\pkgversion{} in Stata/BE~17; the data and do-files are described at the end of the chapter.
 
 \section{The idea}\label{sec:groups-idea}
 
@@ -110,7 +110,8 @@ Directed                            Number of waves   =         2
 
 SAOM (Method of Moments, conditional), waves: w1 w2
 Actors: 151                            Periods: 4
-Groups: 4 (variable class), actors per group: 45, 37, 33, 36; waves per group: 2, 2, 2, 2
+Groups: 4 (variable class), actors per group: 45, 37, 33, 36; waves per group:
+2, 2, 2, 2
 
 ------------------------------------------------------------------------------
     w1_to_w2 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
@@ -121,12 +122,12 @@ Groups: 4 (variable class), actors per group: 45, 37, 33, 36; waves per group: 2
 ------------------------------------------------------------------------------
 Rate parameters (estimated, one per inter-wave period):
 
----------------------------------------------------------
+----------------------------------------------------------
              |   period1    period3    period5    period7
--------------+-------------------------------------------
+-------------+--------------------------------------------
         rate |    6.4989     5.3821     2.2893     8.2490
           se |    0.9714     1.4169     0.5299     2.1306
----------------------------------------------------------
+----------------------------------------------------------
 Overall maximum convergence ratio: 0.017 (criterion: below 0.25; met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 \end{lstlisting}
@@ -192,7 +193,7 @@ The three rows are the simple average of the four class estimates, the random-ef
   \item Use the \textbf{meta-analysis} when the question is how much the groups differ, when you want to describe the population of groups (a mean effect and a between-group standard deviation), or when the groups differ in features that are not captured by the model. Each group must be large enough for its own fit to converge.
   \item You can do both: the joint model is the first thing to try, the heterogeneity test of the meta-analysis checks it, and the joint model can then be extended by letting some effects differ. A joint model in which reciprocity may differ for class~2 adds an indicator of the class and its interaction with reciprocity:
 \end{itemize}
-\begin{lstlisting}
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
 . generate byte c2 = (class == 2)
 . nwsaom, waves(w1 w2) groups(class) outdegree reciprocity transtrip egox(c2) interact(egox_c2#reciprocity) seed(5)
 ----------------------------------------------------------------------------------------------
@@ -206,10 +207,12 @@ interact_egox_c2_reciprocity |   1.100587   .4208535     2.62   0.009     .27572
 ----------------------------------------------------------------------------------------------
 (output omitted)
 Overall maximum convergence ratio: 0.193 (criterion: below 0.25; met)
-Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for reciprocity (-0.115)
-Convergence is good only if both criteria are met. Refit starting from these estimates with theta0(); see nwsaom.
+Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for
+  reciprocity (-0.115)
+Convergence is good only if both criteria are met.
+To refit starting from these estimates, type nwsaom refit.
 \end{lstlisting}
-This fit has not converged by the two criteria (the $t$-ratio of \texttt{reciprocity} is $-0.115$); before it is reported it would be restarted from its estimates with \opt{theta0()}, as Chapter~\ref{ch:estimation} explains. The interaction coefficient (1.10, $z=2.6$) is the difference of the reciprocity effect between class~2 and the other classes: pupils in class~2 reciprocate more than the others. (The main effect of the indicator, \texttt{egox\_c2}, is the difference in the tendency to send ties.)
+This fit has not converged by the two criteria (the $t$-ratio of \texttt{reciprocity} is $-0.115$); before it is reported it would be restarted from its estimates with \texttt{nwsaom refit}, as Chapter~\ref{ch:estimation} explains. The interaction coefficient (1.10, $z=2.6$) is the difference of the reciprocity effect between class~2 and the other classes: pupils in class~2 reciprocate more than the others. (The main effect of the indicator, \texttt{egox\_c2}, is the difference in the tendency to send ties.)
 
 \section{Co-evolution of a behavior in several groups}\label{sec:groups-coev}
 
@@ -223,33 +226,35 @@ Actors: 50                             Periods: 6
 Behavior: alc1 alc2 alc3
 Groups: 3 (variable group), actors per group: 15, 20, 15; waves per group: 3, 3, 3
 
-------------------------------------------------------------------------------
-    g1_to_g3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
--------------+----------------------------------------------------------------
-   outdegree |   -2.97652   .2708628   -10.99   0.000    -3.507401   -2.445639
- reciprocity |   2.932225   .4010968     7.31   0.000      2.14609     3.71836
-   transtrip |   .6524343   .1433909     4.55   0.000     .3713933    .9334754
-     behegox |   .0226293   .1657629     0.14   0.891      -.30226    .3475187
-     behaltx |   .0072251   .1742447     0.04   0.967    -.3342883    .3487385
-  beh_linear |   .3868227    .177321     2.18   0.029     .0392798    .7343655
-beh_quadra~c |  -.2763856   .1344151    -2.06   0.040    -.5398343   -.0129369
-   beh_avalt |   .5175959   .3764368     1.37   0.169    -.2202067    1.255399
-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+     g1_to_g3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+--------------+----------------------------------------------------------------
+    outdegree |   -2.97652   .2708628   -10.99   0.000    -3.507401   -2.445639
+  reciprocity |   2.932225   .4010968     7.31   0.000      2.14609     3.71836
+    transtrip |   .6524343   .1433909     4.55   0.000     .3713933    .9334754
+      behegox |   .0226293   .1657629     0.14   0.891      -.30226    .3475187
+      behaltx |   .0072251   .1742447     0.04   0.967    -.3342883    .3487385
+   beh_linear |   .3868227    .177321     2.18   0.029     .0392798    .7343655
+beh_quadratic |  -.2763856   .1344151    -2.06   0.040    -.5398343   -.0129369
+    beh_avalt |   .5175959   .3764368     1.37   0.169    -.2202067    1.255399
+-------------------------------------------------------------------------------
 Rate parameters (estimated, one per inter-wave period):
 
--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
              |   period1    period2    period4    period5    period7    period8
--------------+-----------------------------------------------------------------
+-------------+------------------------------------------------------------------
 network_rate |    3.6424     1.9581     5.6745     2.3518     1.1541     2.3119
           se |    1.2967     0.9412     1.6757     0.6873     0.4610     1.0138
 behavior_r~e |    1.2842     1.4431     1.8853     2.0285     0.6628     1.4247
           se |    0.7216     0.6579     0.6827     0.8332     0.3364     0.6035
--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 Overall maximum convergence ratio: 0.211 (criterion: below 0.25; met)
-Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for rate_period2 (0.101)
-Convergence is good only if both criteria are met. Refit starting from these estimates with theta0(); see nwsaom.
+Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for
+  rate_period2 (0.101)
+Convergence is good only if both criteria are met.
+To refit starting from these estimates, type nwsaom refit.
 \end{lstlisting}
-This fit has not converged by the two criteria (the $t$-ratio of the rate of period~2 is 0.101); before it is reported it would be restarted from its estimates with \opt{theta0()}, as Chapter~\ref{ch:estimation} explains. Six periods, six network rates and six behavior rates: groups 1, 2 and 3 have the periods 1--2, 4--5 and 7--8. The effects are shared. The estimated influence of the friends' alcohol use (\texttt{beh\_avalt} 0.52, $z=1.4$) and the selection effects are not distinguishable from zero in these small groups.
+This fit has not converged by the two criteria (the $t$-ratio of the rate of period~2 is 0.101); before it is reported it would be restarted from its estimates with \texttt{nwsaom refit}, as Chapter~\ref{ch:estimation} explains. Six periods, six network rates and six behavior rates: groups 1, 2 and 3 have the periods 1--2, 4--5 and 7--8. The effects are shared. The estimated influence of the friends' alcohol use (\texttt{beh\_avalt} 0.52, $z=1.4$) and the selection effects are not distinguishable from zero in these small groups.
 
 \paragraph{Groups observed at different waves.} The groups need not have been observed at the same occasions. Suppose that group~1 was observed at all three waves, group~2 only at the first two and group~3 only at the last two. The option \opt{gwaves()} gives the waves of the groups by their position in \opt{waves()}:
 \begin{lstlisting}
@@ -268,12 +273,12 @@ Groups: 3 (variable group), actors per group: 15, 20, 15; waves per group: 3, 2,
 ------------------------------------------------------------------------------
 Rate parameters (estimated, one per inter-wave period):
 
----------------------------------------------------------
+----------------------------------------------------------
              |   period1    period2    period4    period6
--------------+-------------------------------------------
+-------------+--------------------------------------------
         rate |    3.1403     1.6238     5.2689     1.9980
           se |    1.0861     0.6607     1.3756     0.7814
----------------------------------------------------------
+----------------------------------------------------------
 Overall maximum convergence ratio: 0.064 (criterion: below 0.25; met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 
@@ -394,6 +399,7 @@ For example~3b RSiena~1.6.14 itself stops with an error for a group object whose
 \begin{table}[ht]
 \centering\small
 \caption{Tests after the joint fit (example 4): $c$ is the chi-squared statistic, means over ten runs.}\label{tab:groups-tests}
+\setlength{\tabcolsep}{3pt}\scriptsize
 \begin{tabular}{@{}lrrr@{}}
 \toprule
 Test & \nwsaom{} & RSiena & Difference\\
@@ -415,19 +421,20 @@ The following stop with a message when combined with \opt{groups()}:
 \begin{itemize}[nosep]
   \item maximum likelihood (\opt{ml}) and Bayesian estimation (\texttt{nwsaom bayes}), which run in separate parts of the program that do not yet know the group chain;
   \item two-mode networks and \texttt{nwsaom multinet} and \texttt{nwsaom multiplex} (several dependent networks);
-  \item \texttt{estat} after a fit with several behaviors in \opt{behavior()} (as in a single group);
+  \item \texttt{estat mems};
+  \item all \texttt{estat} commands after a fit with several behaviors in \opt{behavior()}, or with a behavior together with \opt{ratecov()}, \opt{behratecov()} or \opt{behrate()} (as in a single group);
   \item \opt{structural()} and the structural codes 10 and 11 in the wave networks (see Section~\ref{sec:structural});
   \item \opt{tvdyadcov()} and the other time-varying dyadic covariates;
-  \item \texttt{estat gof}, \texttt{estat simulate} and \texttt{estat importance} after a fit with \opt{ratecov()} together with a behavior or with \opt{behratecov()}/\opt{behrate()} (\texttt{estat importance} also after \opt{present()}).
+  \item \texttt{estat importance} after a fit with \opt{ratecov()}, \opt{present()}, \opt{joinat()}, \opt{leaveat()}, \opt{missnet()} or \opt{missbeh()}.
 \end{itemize}
-Available with groups since version 1.3: \texttt{estat gof}, \texttt{estat simulate} (and \texttt{nwsaom simulate}) and \texttt{estat importance}, each for one group (\opt{group(\#)}) or for all groups in turn, \texttt{estat gof} also with the p-values of the groups combined (inverse-normal method); the centered degree effects (\opt{inpopc}, \opt{outpopc}, \opt{outactc}, \opt{inactc}), \opt{ownx()} effects and structural equivalence, whose data constants (average degrees, \texttt{structmean}) are, as in RSiena, those of each group; \opt{joinat()}/\opt{leaveat()} (times on the scale of the waves of the actor's group); \opt{behrate()}; and non-directed networks (\opt{symmetric}, \opt{symtype()}). Since version 1.4 several co-evolving behaviors can be given in \opt{behavior()} (\texttt{behavior(a1 a2 a3 : linear quadratic avalt | b1 b2 b3 : linear quadratic avalt)}): every behavior has its own constants in every group (overall mean, similarity mean) and its own rate in every period of every group. Since version 1.5 \opt{netbeh()} works with groups: the network effects of the dependent behavior as the covariate (for example \opt{netbeh(egoxaltx)}, RSiena's \texttt{egoXaltX} of the behavior), with the behavior centred by the mean of its own group, as RSiena does for the data objects of a joint model. Also since version 1.5, joint models with many actors (about 800 or more) and a per-actor behavior covariate such as \opt{behfrom()} run (the model description is handed to the plugin in pieces; this needs the plugin of 1.5.0 or later) and start in seconds: a model of 15 groups and 810 actors starts after about 3 seconds instead of about 4.5 minutes.
+Available with groups: \texttt{estat gof}, \texttt{estat simulate} (and \texttt{nwsaom simulate}) and \texttt{estat importance}, each for one group (\opt{group(\#)}) or for all groups in turn, with the actors, waves, rates and covariate constants of each group. \texttt{estat gof} also reports the p-values of the groups combined (inverse-normal method), and after a fit with a behavior it tests \texttt{behavior} by default, as without groups. \opt{rates()} and \opt{ratesbeh()} of \texttt{estat simulate} give one rate per period of all groups, in RSiena's numbering (also after \opt{gwaves()}). In these simulations only the actors that are active at the start of a period act in it, as in the fit (Section~\ref{sec:sim}). Also available: the centered degree effects (\opt{inpopc}, \opt{outpopc}, \opt{outactc}, \opt{inactc}), \opt{ownx()} effects and structural equivalence, whose data constants (average degrees, \texttt{structmean}) are, as in RSiena, those of each group; \opt{joinat()}/\opt{leaveat()} (times on the scale of the waves of the actor's group); \opt{behrate()}; and non-directed networks (\opt{symmetric}, \opt{symtype()}). Several co-evolving behaviors can be given in \opt{behavior()} (\texttt{behavior(a1 a2 a3 : linear quadratic avalt | b1 b2 b3 : linear quadratic avalt)}): every behavior has its own constants in every group (overall mean, similarity mean) and its own rate in every period of every group. \opt{netbeh()} works with groups: the network effects of the dependent behavior as the covariate (for example \opt{netbeh(egoxaltx)}, RSiena's \texttt{egoXaltX} of the behavior), with the behavior centred by the mean of its own group, as RSiena does for the data objects of a joint model. Joint models with many actors (about 800 or more) and a per-actor behavior covariate such as \opt{behfrom()} start in seconds (a model of 15 groups and 810 actors in about 3 seconds).
 Constraints on effects (\texttt{higher}, \texttt{disjoint}, \texttt{atLeastOne}) are not supported with groups in RSiena either.
 
-\paragraph{Validation since version 1.4.}\ Two co-evolving behaviors (alcohol and smoking) in the three groups of the examples above were compared with RSiena 1.6.14, ten runs of each program: the effects of the network and of both behaviors and all eighteen rates (a network rate and two behavior rates in each of six periods) agree within the simulation error.
+\paragraph{Validation: two behaviors.}\ Two co-evolving behaviors (alcohol and smoking) in the three groups of the examples above were compared with RSiena 1.6.14, ten runs of each program: the effects of the network and of both behaviors and all eighteen rates (a network rate and two behavior rates in each of six periods) agree within the simulation error.
 
-\paragraph{Validation since version 1.5.}\ \opt{groups()} with \opt{netbeh()} was compared with \texttt{siena07} on five classes of the Dutch school data (Baerveldt; Snijders's multi-group example): the largest difference of an estimate is 0.08 of its standard error.
+\paragraph{Validation: \texorpdfstring{\opt{netbeh()}}{netbeh()}.}\ \opt{groups()} with \opt{netbeh()} was compared with \texttt{siena07} on five classes of the Dutch school data (Baerveldt; Snijders's multi-group example): the largest difference of an estimate is 0.08 of its standard error.
 
-\paragraph{Validation since version 1.3.}\ The per-group constants, \opt{joinat()}/\opt{leaveat()}, \opt{behrate()}, non-directed networks (model types 2, 3 and 6) and the postestimation commands were compared with RSiena 1.6.14 (ten runs of each program; \texttt{sienaGOF} for \texttt{estat gof}). For model type 6 several of RSiena\'s own runs did not converge, so that comparison is coarse.
+\paragraph{Validation: constants, composition change, non-directed networks.}\ The per-group constants, \opt{joinat()}/\opt{leaveat()}, \opt{behrate()}, non-directed networks (model types 2, 3 and 6) and the postestimation commands were compared with RSiena 1.6.14 (ten runs of each program; \texttt{sienaGOF} for \texttt{estat gof}). For model type 6 several of RSiena\'s own runs did not converge, so that comparison is coarse.
 
 \paragraph{Missing behavior values and leavers.} With groups, a model with missing behavior values together with the selection effects \opt{behegox} or \opt{behaltx} agrees with RSiena: as in RSiena, a tie does not count in the statistic of these effects when the covariate value was missing at the start of the period (checked with ten seeds on three groups with 20 missing values; every estimate within 0.04 standard errors). The comparison of composition change in groups used actors who join; actors who leave (together with a behavior) were not compared with RSiena.
 
