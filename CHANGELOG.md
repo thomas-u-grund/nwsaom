@@ -89,6 +89,8 @@ The Mata libraries are rebuilt (with Stata 17) and the plugin is updated.
 - **Help files describe the current behaviour only**: references to earlier versions and development notes are removed; deprecated commands that still work (`nwsaom multiplex`, `structural()`) are described by what they do. The help file showed the option `uncentered()` inside the text of `nocenter`.
 
 Results do not change. The Mata libraries are rebuilt (with Stata 17); the core requirement is unchanged.
+- Help: the `fix()` entry said "not with nwsaom multinet", while the multinet section (and the code) take `fix()`; it now says that `fix()` works with `nwsaom multinet`.
+- **A string variable in an effect that uses values as numbers stops with r(109).** `egox()`, `altx()`, `nodecov()`, `simx()`, `ratecov()`, `behavior()` and the other numeric effects read a string variable as missing and fitted without it, without a message. The error names the variable and the effect.
 
 - **Fixed effects are no longer judged by the convergence criterion.** After a fit with `fix()`, the line on the convergence t-ratios could say "not met for indegpopularity (0.319)" although `indegpopularity` was fixed, and `nwsaom refit, maxruns()` counted that t-ratio too. As in RSiena (phase3.r: the largest |t| over the estimated parameters only), a parameter held fixed, by `fix()` or because its phase-1 derivative was not positive, is no longer reported as "not met"; `detail` still lists its t-ratio and names the fixed parameters, and `e(tconv)` keeps it. `e(tconv_max)` already left the fixed parameters out, as RSiena's `tconv.max` does. Estimates are unchanged. New test `test_nwsaom_fixconv`.
 

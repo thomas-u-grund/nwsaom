@@ -424,7 +424,7 @@ nwsaom_remarks{p_end}
 {synopt:{opt fix(namelist)}}Hold the named effects fixed at their {opt theta0()} values (RSiena's {cmd:fix = TRUE}): they are not estimated and have
 no standard error; {cmd:fix(_all)} fixes every effect. As in RSiena, the convergence criteria apply to the estimated parameters only: a fixed
 effect's t-ratio is kept in {bf:e(tconv)} and listed by {opt detail}, but it is never reported as "not met" and is left out of {bf:e(tconv_max)}. Used to fit a restricted model for {help nwsaom_estat##estat_score:estat score}, to simulate at
-chosen coefficients ({cmd:nwsaom simulate}) and to profile models. Works with {opt behavior()}; not with {cmd:nwsaom multinet}{p_end}
+chosen coefficients ({cmd:nwsaom simulate}) and to profile models. Works with {opt behavior()} and with {help nwsaom##multinet:nwsaom multinet}{p_end}
 {synopt:{opth ratecov(varlist)}}Let node covariates raise or lower each actor's own opportunity to make a network change, instead of every actor sharing one constant rate for the
 period - actor i's own rate becomes {it:rate}*exp(sum of {it:b_k}*{it:x_k}[i]) over the variables, one coefficient each (RSiena's RateX effects). The coefficient is estimated
 jointly with every other effect. Works with {opt waves()} (one shared coefficient per variable, as RSiena's RateX), {opt symmetric} and two-mode networks. A name of {opt tvcov()} is a changing
