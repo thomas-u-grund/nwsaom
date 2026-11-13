@@ -660,8 +660,10 @@ behaviors interact only through the network (avAlt and avSim read it; {cmd:behsi
 as RSiena's simX, egoX ... with that behavior as interaction1). The network coefficients of behaviors 2, 3, ... end in {cmd:_}{it:name} ({cmd:behsim_s},
 {cmd:bv_higher_s}). These network effects of behaviors 2, 3, ... need the native plugin and are not available with {opt groups()}.
 Coefficients are named {cmd:beh_}{it:name}{cmd:_}{it:effect}, {it:name} being the first variable without its trailing
-digits; {cmd:e(rates_beh)} has one row per behavior. Not yet combinable with {opt symmetric}, {opt ratecov()},
-{opt present()}, {opt missnet()}/{opt missbeh()}, {opt structural()}, network {opt endow()}/{opt creation()}. After such a fit
+digits; {cmd:e(rates_beh)} has one row per behavior. Several behaviors work with {opt present()}, structural zeros and ones
+(codes 10 and 11 in the waves, or {opt structural()}), the network's {opt endow()}/{opt creation()} effects and a non-directed
+network ({opt symmetric}, every {opt symtype()}), as in RSiena (native plugin). Not yet combinable with {opt ratecov()} and
+{opt missnet()}/{opt missbeh()}. After such a fit
 {cmd:estat gof} (one behavior distribution per behavior), {cmd:estat simulate}, {cmd:estat importance}, {cmd:estat timetest} and
 {cmd:estat score} are available, as in RSiena (native plugin; not with {opt groups()}); {cmd:estat mems} is network-only. Validation against RSiena 1.6.6 (s501-s503, alcohol and smoking from s50a/s50s; outdegree,
 reciprocity, transitive triplets; linear, quadratic and avAlt for each behavior): outdegree -2.65 against -2.65,

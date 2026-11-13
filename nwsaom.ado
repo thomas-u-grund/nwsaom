@@ -2815,19 +2815,14 @@ program nwsaom, eclass
 	}
 
 	// --- several behaviors (protocol 19): behavior 1 was built above; behaviors 2.. are built here, each with its own
-	// SaomBehaviorModel, its wave vectors and its constants. Not in this version: missing data, composition change,
-	// non-directed networks, ratecov(), network endowment/creation, structural().
+	// SaomBehaviorModel, its wave vectors and its constants. Not in this version: missing data, ratecov().
 	local __ns_mbtotal = `__ns_pbeh'
 	if `__ns_mb' {
-		foreach __opt in symmetric ratecov present missnet missbeh structural {
+		foreach __opt in ratecov missnet missbeh {
 			if "``__opt''" != "" {
-				di "{p 0 0 2}{err}several behaviors in {bf:behavior()} cannot yet be combined with {bf:`__opt'()}/{bf:`__opt'}.{p_end}"
+				di "{p 0 0 2}{err}several behaviors in {bf:behavior()} cannot yet be combined with {bf:`__opt'()}.{p_end}"
 				error 198
 			}
-		}
-		if `__ns_hasnetgate' {
-			di "{p 0 0 2}{err}several behaviors in {bf:behavior()} cannot yet be combined with {bf:endow()}/{bf:creation()} of network effects (the behavior effects can have them).{p_end}"
-			error 198
 		}
 		if `__ns_hastimed' {
 			forvalues __b = 1/`__ns_nbehv' {
@@ -3062,6 +3057,7 @@ program nwsaom, eclass
 	if `__ns_mb' {
 		// several co-evolving behaviors (protocol 19): SaomEstimateRMCoevMB() on SaomRMCore()
 		capture mata: mata drop __ns_fit_mb __ns_mbGw
+		mata: __ns_mbsym = `=cond("`symmetric'" != "", "0`__ns_symtypeval'", "0")'
 		if `__ns_multi' mata: __ns_mbGw = __nwsaom_last_Gwaves
 		else mata: __ns_mbGw = (&__nwsaom_last_G1, &__nwsaom_last_G2)
 		mata: __ns_fit_mb = SaomEstimateRMCoevMB(__ns_mbGw, __nwsaom_last_M, __ns_mbBw, __ns_mbmin, ///

@@ -16625,7 +16625,7 @@ void SaomBatchSetupMB(pointer(class SaomGraph scalar) rowvector Gwaves, real sca
 	struct SaomNativeConfig scalar cfg, real rowvector codes, real rowvector fnt, real rowvector pB,
 	pointer(real colvector) matrix Bw, real rowvector bmin, real rowvector bmax, real rowvector bsim,
 	real rowvector bover, | real scalar hastimed, real matrix presentPd, pointer(real matrix) rowvector compEv,
-	real matrix omPd, real matrix smPd) {
+	real matrix omPd, real matrix smPd, real scalar symtype) {
 
 	real matrix E, t, EV, attrmat
 	real scalar n, pd, nattr, nb, b, nrows, i, junk, o, k, sframe, haspres, ntv, grpcol
@@ -16652,7 +16652,7 @@ void SaomBatchSetupMB(pointer(class SaomGraph scalar) rowvector Gwaves, real sca
 	}
 	haspres = (args() >= 13 ? hastimed : 0) | grpcol > 0
 	EV = J(0, 4, 0)
-	if (hastimed) for (pd=1; pd<=P; pd++) if (compEv[pd] != NULL) if (rows(*compEv[pd]) > 0) EV = EV \ (J(rows(*compEv[pd]), 1, pd), *compEv[pd])
+	if (hastimed) for (pd=1; pd<=P; pd++) if (cols(compEv) >= pd) if (compEv[pd] != NULL) if (rows(*compEv[pd]) > 0) EV = EV \ (J(rows(*compEv[pd]), 1, pd), *compEv[pd])
 	nrows = max((rows(E), n, rows(cfg.structpairs), rows(EV), 1))
 
 	names = ("e_pd", "e_i", "e_j")
@@ -16690,7 +16690,7 @@ void SaomBatchSetupMB(pointer(class SaomGraph scalar) rowvector Gwaves, real sca
 	argstr = argstr + " " + strofreal(bmin[1], "%25.17g") + " " + strofreal(bmax[1], "%25.17g") + " " + strofreal(bsim[1], "%25.17g") + " " + strofreal(bover[1], "%25.17g")
 	argstr = argstr + " 0 " + strofreal(haspres) + " " + strofreal(rows(E)) + " 0"
 	argstr = argstr + SaomTrailer11(cfg, cols(cfg.termcodes), fnt[off[1]..(off[2]-1)], sframe)
-	argstr = argstr + " 0 0"
+	argstr = argstr + " " + strofreal(args() >= 17 ? symtype : 0) + " 0"
 	argstr = argstr + " " + strofreal(nb - 1)
 	for (b=2; b<=nb; b++) {
 		argstr = argstr + " " + strofreal(pB[b])
@@ -16792,6 +16792,9 @@ struct SaomMBCtx {
 	real rowvector npresentPd			// time-integrated number of active actors
 	pointer(real matrix) rowvector compEv
 	real matrix overallMeanPd, simMeanPd		// nb x P: the constants of the behaviors of the group of each period (several groups), else the pooled ones
+	real scalar haspres				// present(): actors active at the start of a period only
+	real scalar symtype				// non-directed network: the model type (0 directed)
+	real rowvector fntype				// network endowment/creation: the role of every network term (empty: none)
 }
 
 /* one period of the several-behaviors model with composition change at fractional times (see SaomCoevPeriodTimed()) */
@@ -16995,7 +16998,7 @@ struct SaomMBCtx scalar SaomMBInit(
 	class SaomBehavior scalar Bend
 	class SaomGraph scalar Gend
 	real rowvector ratesNet0, stb
-	real matrix ratesBeh0
+	real matrix ratesBeh0, pm
 	real colvector zero
 	real scalar pd, b, p, why_ok, anyneed35, anyneed36, anyneed43, anyneed154
 	string scalar why
@@ -17025,6 +17028,19 @@ struct SaomMBCtx scalar SaomMBInit(
 	C.npresentPd = J(1, C.P, C.n)
 	C.compEv = J(1, C.P, NULL)
 	C.hastimed = SaomTimedLoad(C.n, C.P, C.presentPd, C.compEv, C.npresentPd)
+	C.haspres = C.hastimed
+	if (!C.hastimed & !SaomGroupsMode()) {
+		// present(): the actors active at the start of every period (as one behavior)
+		pm = _SaomGofExt("__nwsaom_last_presmat", J(0, 0, 0))
+		if (rows(pm) == C.n & cols(pm) == C.P) {
+			C.presentPd = (pm :!= 0)
+			C.npresentPd = colsum(C.presentPd)
+			C.haspres = 1
+		}
+	}
+	C.symtype = _SaomGofExt("__ns_mbsym", 0)
+	C.fntype = _SaomGofExt("__nwsaom_last_fntype", J(1, 0, 0))
+	if (cols(C.fntype) != M.nterms | !any(C.fntype :!= 0)) C.fntype = J(1, 0, 0)
 	C.hastv = SaomModelHasTV(M)
 	C.overallMeanPd = overallMean' * J(1, C.P, 1)
 	C.simMeanPd = simMean' * J(1, C.P, 1)
@@ -17048,6 +17064,7 @@ struct SaomMBCtx scalar SaomMBInit(
 	// native dispatch: every term on every side natively covered, and a plugin that knows several behaviors
 	C.cfg = SaomNativeSetup(M)
 	SaomCfgStruct(C.cfg)
+	if (cols(C.fntype) > 0) C.cfg.fntype = C.fntype
 	C.codes = J(1, 0, 0)
 	C.fnt = J(1, 0, 0)
 	why_ok = C.cfg.eligible
@@ -17076,6 +17093,14 @@ struct SaomMBCtx scalar SaomMBInit(
 	SaomSetEngine(C.use_native, why)
 	if (!C.use_native & SaomHasDynB(M)) {
 		errprintf("{p 0 2 2}nwsaom: network effects of a later behavior need the native plugin of this release (update nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation.{p_end}\n")
+		exit(198)
+	}
+	if (cols(C.fntype) > 0 & SaomStructOn()) {
+		errprintf("{p 0 2 2}nwsaom: several behaviors with network endowment/creation effects are not yet available together with structural zeros and ones (the codes 10 and 11).{p_end}\n")
+		exit(198)
+	}
+	if (!C.use_native & ((C.haspres & !C.hastimed & !SaomGroupsMode()) | C.symtype != 0 | cols(C.fntype) > 0)) {
+		errprintf("{p 0 2 2}nwsaom: several behaviors with present(), a non-directed network or network endowment/creation effects need the native plugin of this release (update nwsaom, or compile the plugin on this computer with: nwinstall, buildplugin(nwsaom)); there is no Mata implementation.{p_end}\n")
 		exit(198)
 	}
 	if (SaomGroupsMode() & !C.use_native) {
@@ -17110,12 +17135,13 @@ struct SaomMBCtx scalar SaomMBInit(
 			ratesBeh0[b,pd] = SaomBehaviorRateStart(*Behwaves[b,pd], *Behwaves[b,pd+1])
 		}
 		C.targetRateNet[pd] = SaomCountDiffering(*Gwaves[pd], Gend)
+		if (cols(C.fntype) > 0) C.target[pd, 1..C.pNet] = SaomNetworkPatchEndowCreation(M, C.fntype, C.target[pd, 1..C.pNet], *Gwaves[pd], Gend)
 		if (SaomStructOn()) SaomStructMBPd(C, M, pd)
 		ratesNet0[pd] = SaomRateStart(C.npresentPd[pd], C.targetRateNet[pd])
 	}
 
 	SaomStructNeedBatch(C.use_native)
-	if (C.use_native) SaomBatchSetupMB(Gwaves, C.P, C.cfg, C.codes, C.fnt, C.pB, Behwaves, behmin, behmax, simMean, overallMean, C.hastimed, C.presentPd, C.compEv, C.overallMeanPd, C.simMeanPd)
+	if (C.use_native) SaomBatchSetupMB(Gwaves, C.P, C.cfg, C.codes, C.fnt, C.pB, Behwaves, behmin, behmax, simMean, overallMean, C.haspres, C.presentPd, C.compEv, C.overallMeanPd, C.simMeanPd, C.symtype)
 	if (SaomStructOn()) SaomStructSend(C.P, C.n)
 	ratesNet0out = ratesNet0
 	ratesBeh0out = rowshape(ratesBeh0, 1)
@@ -17160,6 +17186,19 @@ struct SaomCoevMBFit scalar SaomEstimateRMCoevMB(
 	fit.tconvMax = nf.tconvMax
 	fit.fixed = nf.rmfixed
 	fit.theta_path = nf.theta_path
+	// pairwise non-directed types: the network rates on RSiena's scale, as with one behavior (the behavior rates are unchanged)
+	if (C.symtype >= 1 & C.symtype <= 3) {
+		real scalar pd, m1, rho, d
+		for (pd=1; pd<=C.P; pd++) {
+			m1 = C.npresentPd[pd] - 1
+			rho = fit.ratesNet[pd]
+			d = 1 / (2 * sqrt(rho * m1))
+			fit.ratesNet[pd] = sqrt(rho / m1)
+			fit.ratesNetSE[pd] = fit.ratesNetSE[pd] * d
+			fit.Vfull[p+pd, .] = fit.Vfull[p+pd, .] :* d
+			fit.Vfull[., p+pd] = fit.Vfull[., p+pd] :* d
+		}
+	}
 	return(fit)
 }
 /* postestimation of a fit with several behaviors (estat gof, estat simulate): the context of the last fit (the batch is set up with its model) */
@@ -17194,6 +17233,8 @@ void SaomMBSimFinal(struct SaomMBCtx scalar C, real rowvector par, real scalar p
 	nb = C.nb
 	thetaBeh = par[(C.pNet+1)..p]
 	ratesNet = par[(p+1)..(p+P)]
+	// pairwise non-directed types: e(rates) is on RSiena's scale, the simulation uses the per-actor rates
+	if (C.symtype >= 1 & C.symtype <= 3) ratesNet = ratesNet:^2 :* (C.npresentPd :- 1)
 	ratesBeh = rowshape(par[(p+P+1)..C.ptot], nb)
 	W = 2 + nb
 	names = J(1, W, "")
