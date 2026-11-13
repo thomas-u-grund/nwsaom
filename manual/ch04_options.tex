@@ -16,10 +16,11 @@ nwsaom, waves(netlist)
         [ symmetric symtype(string) ]
         [ unconditional rate0(numlist) theta0(numlist) k0(#) k3(#) firstg(#) seed(#) cores(#) ]
 
+nwsaom [, level(#) detail]
 nwsaom multinet, net1(namelist) net2(namelist) [ eff1() eff2() cross1() cross2() ... ]
-estat gof | estat mems
+estat gof | mems | simulate | score | timetest | importance
 \end{lstlisting}
-Every model needs the waves and the baseline effect \opt{outdegree}. Everything else is optional. Options that take a \emph{varlist} are repeated per variable: one effect with its own coefficient per variable, named \emph{effect}\texttt{\_}\emph{variable} in the spelling you used (for example \opt{samex(smoke1 sport1)} gives \texttt{samex\_smoke1} and \texttt{samex\_sport1}). In \texttt{e(b)}, and thus in \opt{theta0()}, the effect types appear in a fixed order and the variables within a type in the order listed; \texttt{matrix list e(b)} shows it.
+Every model needs the waves and the baseline effect \opt{outdegree}. Everything else is optional. \texttt{nwsaom} typed without options, or with the display options \opt{level(\#)} and \opt{detail} only, redisplays the results of the last fit (as does \texttt{estimates replay}). Options that take a \emph{varlist} are repeated per variable: one effect with its own coefficient per variable, named \emph{effect}\texttt{\_}\emph{variable} in the spelling you used (for example \opt{samex(smoke1 sport1)} gives \texttt{samex\_smoke1} and \texttt{samex\_sport1}). In \texttt{e(b)}, and thus in \opt{theta0()}, the effect types appear in a fixed order and the variables within a type in the order listed; \texttt{matrix list e(b)} shows it.
 
 \section{Observed waves}
 
@@ -47,7 +48,7 @@ Every model needs the waves and the baseline effect \opt{outdegree}. Everything 
 \opt{transtiesendow}, \opt{transtiescreation} & \opt{transties} split. Not yet with \opt{symmetric}. \\
 \bottomrule
 \end{longtable}
-The pairs \opt{outdegreeendow}/\opt{outdegreecreation}, \opt{reciprocityendow}/\ldots, \opt{transtiesendow}/\ldots and \opt{linearendow}/\ldots are the same thing as the \opt{endow()}/\opt{creation()} lists and still work. Endowment and creation effects work with \opt{waves()}, \opt{present()}, \opt{missnet()} and \opt{behavior()}; with \opt{structural()} they are rejected.
+{\sloppy The pairs \opt{outdegreeendow}/\opt{outdegreecreation}, \opt{reciprocityendow}/\ldots, \opt{transtiesendow}/\ldots and \opt{linearendow}/\ldots are the same thing as the \opt{endow()}/\opt{creation()} lists and still work. Endowment and creation effects work with \opt{waves()}, \opt{present()}, \opt{missnet()} and \opt{behavior()}; with \opt{structural()} they are rejected.\par}
 
 \section{Covariate effects}
 
@@ -194,11 +195,12 @@ Two networks on the same actors evolve together (RSiena's two dependent network 
 \begin{description}[nosep,style=nextline]
   \item[\texttt{estat gof}] Goodness of fit with RSiena's Mahalanobis-distance test for the outdegree, indegree and geodesic distributions. Options and the returned \texttt{r()} results are in \texttt{help nwsaom\_estat}.
   \item[\texttt{estat mems}] Micro effects on macro structure sensitivity analysis (Duxbury); \texttt{help nwsaom\_estat}.
-  \item[\texttt{estat score}, \texttt{estat timetest}, \texttt{estat importance}, \texttt{estat simulate}] Score-type tests, the test of time heterogeneity (with \opt{fixrates} as RSiena's \texttt{sienaTimeTest}), relative importance of effects and simulation from the fit; Chapter~\ref{ch:tools}. After a fit with \opt{groups()} only \texttt{estat score} and \texttt{estat timetest} are available (the latter adds a test per group and per period; Section~\ref{sec:groups-after}).
+  \item[\texttt{estat score}, \texttt{estat timetest}, \texttt{estat importance}, \texttt{estat simulate}] Score-type tests, the test of time heterogeneity (with \opt{fixrates} as RSiena's \texttt{sienaTimeTest}), relative importance of effects and simulation from the fit; Chapter~\ref{ch:tools}. After a fit with \opt{groups()} all of them except \texttt{estat mems} are available (\texttt{estat timetest} adds a test per group and per period; Section~\ref{sec:groups-after}); after \texttt{nwsaom multinet} only \texttt{estat score} and \texttt{estat timetest}.
+  \item[\textnormal{\emph{Which model the \texttt{estat} commands use.}}] The \texttt{estat} commands simulate the model of the last \texttt{nwsaom} fit, which is kept in memory for that fit only. They stop with an error (r(498)) when the estimates in \texttt{e()} are not those of the last fit, for example after \texttt{estimates restore} of an earlier fit, or after a later \texttt{nwsaom} call that stopped with an error once it had begun to set up its model; rerun the fit (\texttt{nwsaom refit} reruns it from its estimates). \texttt{nwsaom bayes} makes the same check. All \texttt{estat} commands stop after a fit with \opt{tvcov()}, with several behaviors, or with a behavior together with \opt{ratecov()}, \opt{behratecov()} or \opt{behrate()}.
   \item[\texttt{nwsaom bayes}] Bayesian estimation after a fit; Section~\ref{sec:bayes}.
   \item[\texttt{nwsaom describe}] Description of the waves before a fit; Section~\ref{sec:describe}.
   \item[\texttt{nwsaom meta}] Combines the same model fitted to several networks, the counterpart of RSiena's \texttt{siena08}; Section~\ref{sec:meta} and \texttt{help nwsaom\_meta}. The joint estimation of the groups is the option \opt{groups()}.
-  \item[\texttt{nwsaom version}] Displays the installed release of \nwsaom{}, the version of the \texttt{nwcommands} core, the native plugin in use, the version of RSiena that the results were compared with and the license. It returns \texttt{r(version)}, \texttt{r(date)}, \texttt{r(core)} and \texttt{r(license)}; after estimation by the method of moments, \texttt{e(version)} holds the release that produced the results. Quote it when reporting an analysis. \texttt{nwversion} lists the core and all installed model packages. A specific release is installed from its tag: \opt{net install nwsaom, from(}\url{https://raw.githubusercontent.com/thomas-u-grund/nwsaom/v1.5.1/}\texttt{) replace}.
+  \item[\texttt{nwsaom version}] Displays the installed release of \nwsaom{}, the version of the \texttt{nwcommands} core, the native plugin in use, the version of RSiena that the results were compared with and the license. It returns \texttt{r(version)}, \texttt{r(date)}, \texttt{r(core)} and \texttt{r(license)}; after estimation by the method of moments, \texttt{e(version)} holds the release that produced the results. Quote it when reporting an analysis. \texttt{nwversion} lists the core and all installed model packages. A specific release is installed from its tag: \opt{net install nwsaom, from(}\url{https://raw.githubusercontent.com/thomas-u-grund/nwsaom/v1.6.0/}\texttt{) replace}.
 \end{description}
 
 \section{Combinations that are not available}\label{sec:combinations}
@@ -208,9 +210,11 @@ The following list collects the restrictions that the program enforces and that 
   \item {\sloppy \opt{wave1()}/\opt{wave2()} together with \opt{waves()}; \opt{outdegree} together with \opt{outdegreeendow}/\opt{outdegreecreation}, or any plain effect together with its own endowment/creation split.\par}
   \item \opt{structural()} (deprecated, converted to the codes 10 and 11): no longer restricted; see Section~\ref{sec:structural}. The codes 10 and 11: not yet with \opt{groups()}, \opt{ml}, \texttt{nwsaom multinet}; the postestimation commands know them (Section~\ref{sec:structural}).
   \item \opt{ratecov()}: not with co-evolution; with \opt{symmetric} not together with \opt{present()}, \opt{joinat()} or \opt{leaveat()}, and not with co-evolution.
-  \item \opt{tvcov()}: no missing values; not with \opt{interact()}, \opt{symmetric} or \texttt{estat gof}.
+  \item \opt{tvcov()}: no missing values; not with \opt{interact()} or \opt{symmetric}; no \texttt{estat} command afterwards.
   \item \opt{groups()}: not with \opt{ml}, \texttt{nwsaom bayes}, two-mode networks, \texttt{nwsaom multinet}/\texttt{multiplex}, several behaviors, \opt{structural()} or the structural codes 10 and 11, or the time-varying dyadic covariates; \opt{gwaves()} needs \opt{groups()} (Section~\ref{sec:groups-limits}).
-  \item Several behaviors: not with \opt{symmetric}, \opt{ratecov()}, \opt{present()}, \opt{missnet()}/\opt{missbeh()}, \opt{structural()}, network endowment/creation, or \texttt{estat gof}/\texttt{estat mems}.
+  \item Several behaviors: not with \opt{symmetric}, \opt{ratecov()}, \opt{present()}, \opt{missnet()}/\opt{missbeh()}, \opt{structural()}, network endowment/creation; no \texttt{estat} command afterwards.
+  \item \opt{ml} and \texttt{nwsaom bayes}: one directed one-mode network with at most one behavior; not with \opt{missnet()}, \opt{missbeh()}, \opt{present()}, \opt{joinat()}/\opt{leaveat()}, endowment/creation effects, rate covariates or structural zeros and ones.
+  \item {\sloppy \texttt{estat importance}: not after endowment/creation effects, \opt{present()}, \opt{joinat()}/\opt{leaveat()}, \opt{missnet()} or \opt{missbeh()}, as in RSiena.\par}
   \item \opt{joinat()}/\opt{leaveat()}: not with \opt{behsim} or endowment/creation effects in co-evolution models; not yet with \opt{endow()}/\opt{creation()}; with \opt{symmetric} not with \opt{ratecov()}.
   \item Networks with tie values other than 1 (valued networks with real shares or counts) and networks carrying \texttt{nwset}-style temporal metadata are rejected; a network flagged as valued whose ties are all 1 is accepted.
 \end{itemize}

@@ -49,7 +49,7 @@ No \opt{symmetric} was needed. The engine is native (\texttt{e(engine)} is \text
 \bottomrule
 \end{longtable}
 
-Before 2026-10-01 the default was \texttt{joint} and types 2 and 3 did not exist; old scripts that relied on the default now fit a different model. The five types on the same data (conditional estimation, density and \opt{nodematch(smoke1)}, \texttt{seed(1)}):
+The default is \texttt{forcing}, RSiena's default for a non-directed network; a script that leaves \opt{symtype()} out fits the forcing model. The five types on the same data (conditional estimation, density and \opt{nodematch(smoke1)}, \texttt{seed(1)}):
 
 \begin{center}
 \begin{tabular}{lrrrr}
@@ -68,9 +68,11 @@ The coefficients are not comparable across model types, because a different mech
 
 \paragraph{Scale of the rate.} For \texttt{forcing} and \texttt{confirmation} the rate is the per-actor rate, as in the directed model. For the three pairwise types, RSiena gives each actor the basic rate $\lambda$ and each pair the rate $\lambda^2$, while \nwsaom{} simulates a pairwise ministep as an actor with opportunity rate $\rho$ picking an alter among the other $n-1$ actors. The processes are identical with $\lambda^2 = \rho/(n-1)$, and \texttt{e(rate)} is reported on RSiena's scale (\texttt{e(rate\_actor)} keeps $\rho$). In unconditional estimation \texttt{e(rate)} $=\lambda=\sqrt{\rho/(n-1)}$; in conditional estimation it is the mean time to reach the observed distance at basic rate 1, which is on the scale of $\lambda^2$ (on these data 0.32 and 0.57 for \texttt{joint}; $0.57^2 = 0.32$). \opt{rate0()} is on RSiena's scale too. RSiena's default start for the rate of the pairwise types is on the per-actor scale (5.6 on the Glasgow data) and, from it, unconditional estimation often fails; the references in the help file start at 0.5, so give \opt{rate0(0.5)} if an unconditional pairwise fit stops with ``Unlikely to terminate''.
 
+\paragraph{Simulating a non-directed fit.} A non-directed fit stores its model type in \texttt{e(symtype)} (the name) and \texttt{e(modeltype)} (RSiena's \texttt{modelType} number), and the per-actor rates in \texttt{e(rates\_actor)} (one per period, after \opt{waves()}) or \texttt{e(rate\_actor)} (after \opt{wave1()}/\opt{wave2()}); for \texttt{forcing} and \texttt{confirmation} these equal \texttt{e(rates)} and \texttt{e(rate)}, for the pairwise types they are the $\rho$ above (15.68 and 13.39 for the conditional \texttt{joint} fit of the table). \texttt{estat gof}, \texttt{estat simulate} and \texttt{estat mems} simulate the fitted model: the same model type at these per-actor rates, so the simulated networks are symmetric and \opt{generate()} saves undirected networks. This holds also after a fit with a co-evolving behavior (\texttt{estat gof} and \texttt{estat simulate}; \texttt{estat mems} takes network-only fits). The \opt{rates()} option of \texttt{estat simulate} and \texttt{nwsaom simulate} is on the scale of \texttt{e(rates)} and \texttt{e(rate)}, RSiena's scale, also after the pairwise types \texttt{joint}, \texttt{force} and \texttt{agree}; the values are converted to per-actor rates as the fit does it. Giving the fit's own \texttt{e(rates)} in \opt{rates()} therefore simulates exactly what \texttt{estat simulate} without \opt{rates()} simulates (with the same seed).
+
 \subsection{Effects in a non-directed network}
 
-Several directed-network effects are meaningless when every tie is symmetric and are rejected (\opt{reciprocity} under \opt{symmetric} stops with ``reciprocity is not meaningful under symmetric'', return code 198): \opt{reciprocity}, \opt{cycle3}, \opt{inactivity}, \opt{outpopularity}, \opt{ininass}, \opt{inoutass}, \opt{outoutass}, \opt{antiiso}, \opt{isolatepop}, \opt{transrectrip} and \opt{transtrip}. These are constants, exact duplicates of another effect, or effects RSiena does not offer for a non-directed variable. Available: \opt{outdegree}, \opt{indegpopularity}, \opt{outactivity}, \opt{cycle4}, \opt{isolatenet}, \opt{outiso}, \opt{antiiniso}, \opt{antiiniso2}, \opt{inplus3}, \opt{outinass}, \opt{gwesp()}, \opt{transties}, \opt{balance}, and every covariate effect (\opt{nodecov()}, \opt{nodeicov()}, \opt{nodeocov()}, \opt{nodematch()}, \opt{simcov()} and their RSiena-spelling aliases). In addition the following exist for non-directed relations: \opt{degplus}, \opt{degplusc} and \opt{transtriads}; the \opt{ownx()} and \opt{netx()} families, including the primary-setting effects; dyadic covariates and the \opt{dyadx()} effects; the behavior-as-covariate effects of Chapter~\ref{ch:coevolution}; and time-varying covariates (\opt{tvcov()} with \opt{symmetric} ran in a test for this manual, although the \opt{tvcov()} entry of the help file lists \opt{symmetric} among the exclusions).
+Several directed-network effects are meaningless when every tie is symmetric and are rejected (\opt{reciprocity} under \opt{symmetric} stops with ``reciprocity is not meaningful under symmetric'', return code 198): \opt{reciprocity}, \opt{cycle3}, \opt{inactivity}, \opt{outpopularity}, \opt{ininass}, \opt{inoutass}, \opt{outoutass}, \opt{antiiso}, \opt{isolatepop}, \opt{transrectrip} and \opt{transtrip}. These are constants, exact duplicates of another effect, or effects RSiena does not offer for a non-directed variable. Available: \opt{outdegree}, \opt{indegpopularity}, \opt{outactivity}, \opt{cycle4}, \opt{isolatenet}, \opt{outiso}, \opt{antiiniso}, \opt{antiiniso2}, \opt{inplus3}, \opt{outinass}, \opt{gwesp()}, \opt{transties}, \opt{balance}, and every covariate effect (\opt{nodecov()}, \opt{nodeicov()}, \opt{nodeocov()}, \opt{nodematch()}, \opt{simcov()} and their RSiena-spelling aliases). In addition the following exist for non-directed relations: \opt{degplus}, \opt{degplusc} and \opt{transtriads}; the \opt{ownx()} and \opt{netx()} families, including the primary-setting effects; dyadic covariates and the \opt{dyadx()} effects; the behavior-as-covariate effects of Chapter~\ref{ch:coevolution}; and time-varying covariates (\opt{tvcov()}).
 
 \subsection{Combinations}
 
@@ -80,12 +82,12 @@ nwsaom, waves(sg1 sg2 sg3) outdegree behavior(alcohol1 alcohol2 alcohol3) ///
     linear avalt symtype(joint) seed(1) k3(300)
 \end{lstlisting}
 \begin{lstlisting}
-   outdegree |  -1.327199   .0831625   -15.96   0.000
-  beh_linear |   .3430058   .1375989     2.49   0.013
-   beh_avalt |   .2599666   .2286222     1.14   0.255
-network_rate |    0.5688     0.5253
+   outdegree |  -1.328992   .0691051   -19.23   0.000
+  beh_linear |   .3489124   .1289667     2.71   0.007
+   beh_avalt |   .2585565   .2173576     1.19   0.234
+network_rate |    0.5718     0.5277
 \end{lstlisting}
-(maximum convergence ratio 0.165).
+The maximum convergence ratio is 0.273 and the t-ratios of \texttt{outdegree} and \texttt{beh\_avalt} are above 0.1, so this fit has not converged; before it is reported it would be continued from its estimates with \texttt{nwsaom refit} (Chapter~\ref{ch:estimation}). The network rates are on RSiena's scale of the pairwise types (\texttt{e(rates\_actor)} holds the per-actor rates, 16.02 and 13.64).
 
 \subsection{Validation}
 
@@ -160,7 +162,9 @@ nodeicov_size |  -.1309193   .0747607    -1.75   0.080
        cycle4 |   .0549947   .0336124     1.64   0.102
         rate  |    2.0916     2.0732
 \end{lstlisting}
-\texttt{e(twomode)} is 1, and \texttt{e(n\_actors)} and \texttt{e(n\_events)} give the mode sizes (40 and 20). The header line ``Actors: 60'' counts all nodes. With \opt{actormode(1)} the roles swap (20 actors choose among 40 events). In this implementation the network is embedded in a directed one-mode graph on all nodes in which only actor-to-event dyads are free (all others are structural zeros), so the one-mode sampler, plugin and statistics are used unchanged, and the rate is a per-actor rate. Several waves (\opt{waves()}) are supported.
+\texttt{e(twomode)} is 1, and \texttt{e(n\_actors)} and \texttt{e(n\_events)} give the mode sizes (40 and 20). The header line ``Actors: 60'' counts all nodes. With \opt{actormode(1)} the roles swap (20 actors choose among 40 events). In this implementation the network is embedded in a directed one-mode graph on all nodes in which only actor-to-event dyads are free (all others are structural zeros), so the one-mode sampler, plugin and statistics are used unchanged, and the rate is a per-actor rate. Several waves (\opt{waves()}) are supported. \texttt{e(actormode)} stores the mode of the actors (2 here; 1 after \opt{actormode(1)}).
+
+After a two-mode fit \texttt{estat simulate} simulates the actors-by-events network and its table shows the number of ties (attendances) only. With \opt{generate()} the simulated networks are saved as two-mode networks in the layout of the observed waves, with the actors in the mode given by \opt{actormode()}, also after \opt{actormode(1)}; a simulated network can therefore be fitted with the same \texttt{nwsaom} call as the observed waves. As everywhere, \opt{generate()} refuses to overwrite existing networks unless its \opt{replace} suboption is given. \texttt{estat gof} and \texttt{estat mems} stop after a two-mode fit.
 
 \subsection{Effects available in a two-mode network}
 
@@ -188,7 +192,7 @@ Coefficients carry the option spelling plus the variable (for example \texttt{no
 
 \subsection{A co-evolving behavior of the actors}
 
-An actor behavior may co-evolve with a two-mode network. The events carry no behavior; internally they are generated as \emph{absent actors} (never acting, but remaining among the alters), and their behavior rows are replaced by the actors' mean, so the mean, the range and the centred shape statistics are those of the actors. The network effects that read the behavior are \opt{behegox} and \opt{netbeh(}\opt{egosqx altindist2 totindist2 simegoindist2 sameegoindist2 samexcycle4 crossxoutact avgroupegox totgroupegox}\opt{)}; these nine are the only \opt{netbeh()} effects of a two-mode network (other tokens used to run on dummy values and are now refused). The events mirror the behavior of the actors, as in RSiena, so there must be at least as many actors as events for the last three.
+An actor behavior may co-evolve with a two-mode network. The events carry no behavior; internally they are generated as \emph{absent actors} (never acting, but remaining among the alters), and their behavior rows are replaced by the actors' mean, so the mean, the range and the centred shape statistics are those of the actors. The network effects that read the behavior are \opt{behegox} and \opt{netbeh(}\opt{egosqx altindist2 totindist2 simegoindist2 sameegoindist2 samexcycle4 crossxoutact avgroupegox totgroupegox}\opt{)}; these nine are the only \opt{netbeh()} effects of a two-mode network (other tokens are refused). The events mirror the behavior of the actors, as in RSiena, so there must be at least as many actors as events for the last three.
 
 \begin{lstlisting}
 gen double z1 = 0
@@ -214,7 +218,7 @@ behavior_rate|    0.3717     0.7549
 \item \opt{interact()} is allowed (for example \texttt{egox} with \texttt{altx}). The interactions of \texttt{egoX} with the density and of the density with \texttt{altX} are degenerate in RSiena itself.
 \item The rate may depend on covariates and on the degree: \opt{ratecov()} with constant and changing covariates (the names of \opt{tvcov()}) and with the behavior of the actors as the covariate (this needs \opt{behavior()} and \opt{waves()}), and the structural rate effects \opt{outrate}, \opt{outrateinv} and \opt{outratelog} (Chapter~\ref{ch:rates}). \texttt{inRateInv} and \texttt{inRateLog} do not exist for two-mode networks, because the receivers of the ties are not the actors.
 \item A two-mode network can be one of the two networks of \texttt{nwsaom multinet} (Section~\ref{sec:multinet}).
-\item Speed: the four-cycle statistic is accumulated for the whole row of alternatives in one sweep, which made two-mode fits with \opt{cycle4} 2.5 times as fast as before.
+\item Speed: the four-cycle statistic is accumulated for the whole row of alternatives in one sweep, which keeps two-mode fits with \opt{cycle4} fast.
 \end{itemize}
 
 \subsection{Validation}
@@ -296,45 +300,49 @@ nwsaom multinet, net1(glasgow1 glasgow2 glasgow3) net2(advice1 advice2 advice3) 
 \end{lstlisting}
 \begin{lstlisting}
 Several co-evolving networks (Method of Moments), 3 waves, 50 actors
-            net1_outdegree |  -2.615272   .1180239   -22.16   0.000
-          net1_reciprocity |   2.524563   .2301626    10.97   0.000
-            net1_transtrip |   .6382761   .0973272     6.56   0.000
-        net1_egox_alcohol1 |   .0074951   .0746293     0.10   0.920
-             net1_x_crprod |   -.573532   .3979841    -1.44   0.150
-net1_xc_covnetnet_alcohol1 |   .2316152   .4222422     0.55   0.583
-            net2_outdegree |  -1.876933   .1193721   -15.72   0.000
-          net2_reciprocity |   1.049762   .2890008     3.63   0.000
-               net2_x_from |   .1985325    .318445     0.62   0.533
+            net1_outdegree |  -2.619735   .1207295   -21.70   0.000
+          net1_reciprocity |   2.538052   .2483608    10.22   0.000
+            net1_transtrip |   .6421161   .0936164     6.86   0.000
+        net1_egox_alcohol1 |   .0078235    .071098     0.11   0.912
+             net1_x_crprod |  -.6060412   .4984107    -1.22   0.224
+net1_xc_covnetnet_alcohol1 |   .2489974   .4101878     0.61   0.544
+            net2_outdegree |  -1.877598   .1175724   -15.97   0.000
+          net2_reciprocity |   1.046544   .3024114     3.46   0.001
+               net2_x_from |   .2063599   .3194255     0.65   0.518
 Rates (estimated):
 
----------------------------------
+----------------------------------
              |  period1   period2
--------------+-------------------
-   rate_net1 |    5.703     4.761
-   rate_net2 |    1.729     1.739
----------------------------------
-Overall maximum convergence ratio: 0.341 (criterion: below 0.25; not met)
+-------------+--------------------
+   rate_net1 |    5.599     4.730
+   rate_net2 |    1.745     1.738
+     se_net1 |    1.105     1.044
+     se_net2 |    0.273     0.241
+----------------------------------
+Overall maximum convergence ratio: 0.304 (criterion: below 0.25; not met)
+To refit starting from these estimates, type nwsaom refit.
 \end{lstlisting}
-This fit has not converged by the two criteria (the overall ratio is 0.341); before it is reported it would be restarted from its estimates with \opt{theta0()}, as Chapter~\ref{ch:estimation} explains. Coefficients are named \texttt{net1\_}/\texttt{net2\_} plus the effect; cross effects add \texttt{x\_} (\texttt{net1\_x\_crprod}) or, with a covariate, \texttt{xc\_}\emph{effect}\texttt{\_}\emph{var}. \texttt{e(rates)} has four rows (rate and standard error for each network). On these artificial data \texttt{crprod} is not significant, as expected, and because the advice network is a thinned copy of the friendship network a model with \texttt{crprod} in \emph{both} directions diverged (return code 498) in a trial run: when one network is nearly a subset of the other, the cross effects are close to unidentified.
+This fit has not converged by the two criteria (the overall ratio is 0.304); before it is reported it would be continued from its estimates with \texttt{nwsaom refit} (or restarted with \opt{theta0()}), as Chapter~\ref{ch:estimation} explains. Coefficients are named \texttt{net1\_}/\texttt{net2\_} plus the effect; cross effects add \texttt{x\_} (\texttt{net1\_x\_crprod}) or, with a covariate, \texttt{xc\_}\emph{effect}\texttt{\_}\emph{var}. \texttt{e(rates)} has four rows (rate and standard error for each network). On these artificial data \texttt{crprod} is not significant, as expected, and because the advice network is a thinned copy of the friendship network a model with \texttt{crprod} in \emph{both} directions diverged (return code 498) in a trial run: when one network is nearly a subset of the other, the cross effects are close to unidentified.
 
 \subsection{Non-directed members}
 
-\opt{sym1} / \opt{sym2} declares the first / second network non-directed (tie-symmetric or undirected \texttt{nwset} waves; the actor's choice changes the tie in both directions, the forcing model, RSiena's \texttt{AFORCE}, \texttt{symtype} 4 in the plugin). The rate, the distance (two arcs per tie) and the cross statistics are those of the directed engine, and the default within-network effect is \texttt{outdegree} only.
+\opt{sym1} / \opt{sym2} declares the first / second network non-directed (tie-symmetric or undirected \texttt{nwset} waves; the actor's choice changes the tie in both directions, the forcing model, RSiena's \texttt{AFORCE}). The rate, the distance (two arcs per tie) and the cross statistics are those of the directed engine, and the default within-network effect is \texttt{outdegree} only.
 \begin{lstlisting}
 nwsaom multinet, net1(sg1 sg2 sg3) net2(advice1 advice2 advice3) sym1 ///
     cross1(crprod from) seed(1) k3(300)
 \end{lstlisting}
 \begin{lstlisting}
-  net1_outdegree |  -1.561466   .1349579   -11.57   0.000
-   net1_x_crprod |   .1239251   .4684387     0.26   0.791
-     net1_x_from |   .7701941   .2699889     2.85   0.004
-  net2_outdegree |  -1.843321   .0950933   -19.38   0.000
-net2_reciprocity |   1.120022   .2648287     4.23   0.000
-Overall maximum convergence ratio: 0.284 (criterion: below 0.25; not met)
+  net1_outdegree |  -1.563846    .136211   -11.48   0.000
+   net1_x_crprod |   .1407741   .5002759     0.28   0.778
+     net1_x_from |    .777034   .2604024     2.98   0.003
+  net2_outdegree |  -1.842531   .0953286   -19.33   0.000
+net2_reciprocity |   1.115903   .2690188     4.15   0.000
+Overall maximum convergence ratio: 0.285 (criterion: below 0.25; not met)
+To refit starting from these estimates, type nwsaom refit.
 \end{lstlisting}
-This fit has not converged by the two criteria (the overall ratio is 0.284); before it is reported it would be restarted from its estimates with \opt{theta0()}, as Chapter~\ref{ch:estimation} explains. Twenty cross effects were validated against \texttt{siena07} for a non-directed first network with a directed second one (for example \opt{crprod from fromany to closure clxwx mixedinxw joutmix outpopintn outactintn avdegintn doubleoutact sharedto inpopoutw}).
+This fit has not converged by the two criteria (the overall ratio is 0.285); before it is reported it would be continued from its estimates with \texttt{nwsaom refit}, as Chapter~\ref{ch:estimation} explains. Twenty cross effects were validated against \texttt{siena07} for a non-directed first network with a directed second one (for example \opt{crprod from fromany to closure clxwx mixedinxw joutmix outpopintn outactintn avdegintn doubleoutact sharedto inpopoutw}).
 
-\paragraph{Earlier subcommand.} The older \texttt{nwsaom multiplex} (two directed networks, exactly two waves each, \texttt{outdegree}, \texttt{reciprocity} and the cross effect \texttt{crprod}/\texttt{crprodb} only) still exists but is deprecated and prints a note; use \texttt{nwsaom multinet}, which generalises it and will replace it.
+\paragraph{Earlier subcommand.} The older \texttt{nwsaom multiplex} (two directed networks, exactly two waves each, \texttt{outdegree}, \texttt{reciprocity} and the cross effect \texttt{crprod}/\texttt{crprodb} only) still exists but is deprecated and prints a note; use \texttt{nwsaom multinet}, which generalises it and will replace it. Its coefficients are named as in \texttt{nwsaom multinet}: \texttt{net1\_outdegree}, \texttt{net1\_reciprocity}, \texttt{net1\_x\_crprod} (from \opt{crprod}), \texttt{net2\_outdegree}, \texttt{net2\_reciprocity} and \texttt{net2\_x\_crprod} (from \opt{crprodb}), with and without starting values \opt{theta01()}/\opt{theta02()}. No \texttt{estat} command and no \texttt{nwsaom refit} is available after it (\texttt{estat} stops with return code 321); fit the model with \texttt{nwsaom multinet} to use them.
 
 \subsection{Further cross-network effects}
 Besides the families above, the following cross-network effects exist: \texttt{toany}, \texttt{betweenpop} and \texttt{gwespmix} (equal to \texttt{gwespfbmix}); RSiena's \texttt{from.w.ind} as \texttt{fromwindoo} (the other network for both the agreement and the in-degree weights), \texttt{fromwindow} (agreement in the other network, weights from the own) and \texttt{fromwindwo} (agreement in the own, weights from the other). With a \emph{dyadic covariate}, written \emph{effect}\texttt{:}\emph{matrix}[\texttt{:}\emph{\#}] with a Stata matrix, there are \texttt{tou}, \texttt{sharedtou} and \texttt{avaltutie} (RSiena's \texttt{toU}, \texttt{sharedToU}, \texttt{avAltU.2M.tie}), for example \opt{cross1(sharedtou:W:1)}. As in the current RSiena, \texttt{tou} counts for the ego $i$ and the alter $j$ the actors $q$ with a tie $i\to q$ in the \emph{other} network and a tie $q\to j$ in the own network, each weighted by the covariate value for $(i,q)$. A covariate that changes between waves is declared with \opt{tvcov(a1 a2 a3)}, one variable per period, and used by its stem in the covariate cross effects: \opt{cross1(samewxclosure:a)}; this does not apply to the three similarity effects.
@@ -388,6 +396,7 @@ net2_reciprocity |    1.04886   .2888188     3.63   0.000
      net2_x_from |   .2055701    .346817     0.59   0.553
 (output omitted)
 Overall maximum convergence ratio: 0.255 (criterion: below 0.25; not met)
+To refit starting from these estimates, type nwsaom refit.
 \end{lstlisting}
 This fit has not converged by the overall criterion (the ratio is 0.255); before it is reported it would be restarted from its estimates with \opt{theta0()}, keeping \opt{fix()}, as Chapter~\ref{ch:estimation} explains.
 \texttt{estat gof}, \texttt{estat importance} and \texttt{estat simulate} are not available after a multinet fit.

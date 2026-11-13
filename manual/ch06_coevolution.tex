@@ -27,24 +27,30 @@ nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip behsim
 SAOM co-evolution (Method of Moments), waves: glasgow1 glasgow2 glasgow3
 Actors: 50                             Periods: 2
 Behavior: alcohol1 alcohol2 alcohol3
-------------------------------------------------------------------------------
-glasgow1_t~3 | Coefficient  Std. err.      z    P>|z|
--------------+----------------------------------------------------------------
-   outdegree |   -2.76126   .1590258   -17.36   0.000
- reciprocity |    2.35587   .2176339    10.82   0.000
-   transtrip |    .621357   .0943404     6.59   0.000
-      behsim |   1.460717   .7549667     1.93   0.053
-  beh_linear |   .3948453   .2061589     1.92   0.055
-beh_quadra~c |  -.6002813    .339811    -1.77   0.077
-   beh_avalt |   1.305018   .8184937     1.59   0.111
-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+glasgow1_to~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+--------------+----------------------------------------------------------------
+    outdegree |   -2.76126   .1590258   -17.36   0.000    -3.072944   -2.449575
+  reciprocity |    2.35587   .2176339    10.82   0.000     1.929315    2.782425
+    transtrip |    .621357   .0943404     6.59   0.000     .4364533    .8062607
+       behsim |   1.460717   .7549667     1.93   0.053    -.0189901    2.940425
+   beh_linear |   .3948453   .2061589     1.92   0.055    -.0092187    .7989094
+beh_quadratic |  -.6002813    .339811    -1.77   0.077    -1.266299    .0657359
+    beh_avalt |   1.305018   .8184937     1.59   0.111    -.2991998    2.909237
+-------------------------------------------------------------------------------
+Rate parameters (estimated, one per inter-wave period):
+------------------------------------
              |   period1    period2
+-------------+----------------------
 network_rate |    6.4944     5.1666
+          se |    1.4290     0.9608
 behavior_r~e |    1.3126     1.8015
+          se |    0.3525     0.5662
+------------------------------------
 Overall maximum convergence ratio: 0.166 (criterion: below 0.25; met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 \end{lstlisting}
-(Rate standard errors are omitted here; \texttt{e(rates)}, \texttt{e(rates\_beh)} and \texttt{e(tconv)} hold them and the convergence $t$-ratios.) This fit has converged by the two criteria (the overall ratio is 0.166 and all $t$-ratios are below 0.1). The first four coefficients belong to the network side, the last three to the behavior side. Network coefficients keep their plain names; behavior coefficients start with \texttt{beh\_}. The network effects use the \opt{waves()} and \opt{seed()} options exactly as in Chapter~\ref{ch:start}.
+The rates are stored in \texttt{e(rates)} (network) and \texttt{e(rates\_beh)} (behavior), the convergence $t$-ratios in \texttt{e(tconv)}. This fit has converged by the two criteria (the overall ratio is 0.166 and all $t$-ratios are below 0.1). The first four coefficients belong to the network side, the last three to the behavior side. Network coefficients keep their plain names; behavior coefficients start with \texttt{beh\_}. The network effects use the \opt{waves()} and \opt{seed()} options exactly as in Chapter~\ref{ch:start}.
 
 A comparison with RSiena 1.6.14 on this model, both programs with seed 12345 and the default 1,000 simulations of Phase 3 (estimate, standard error in brackets). With \opt{k3(1000)} \nwsaom{} gives the same estimates as the run above with \opt{k3(300)}; only the standard errors, which come from Phase 3, differ:
 
@@ -103,18 +109,21 @@ nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip ///
     seed(1) k3(300)
 \end{lstlisting}
 \begin{lstlisting}
-    outdegree |  -2.646096   .1242861   -21.29   0.000
-  reciprocity |    2.42636   .2069539    11.72   0.000
-    transtrip |    .608684   .0899488     6.77   0.000
-      behegox |   .0441969   .0930487     0.47   0.635
-      behaltx |  -.0434219   .0867788    -0.50   0.617
-   beh_linear |   .3838098   .1792664     2.14   0.032
-beh_quadratic |  -.0537883   .1159717    -0.46   0.643
-    beh_avsim |   4.085601   2.393857     1.71   0.088
+    outdegree |  -2.646096   .1242861   -21.29   0.000    -2.889693     -2.4025
+  reciprocity |    2.42636   .2069539    11.72   0.000     2.020738    2.831982
+    transtrip |    .608684   .0899488     6.77   0.000     .4323876    .7849805
+      behegox |   .0441969   .0930487     0.47   0.635    -.1381751    .2265689
+      behaltx |  -.0434219   .0867788    -0.50   0.617    -.2135051    .1266614
+   beh_linear |   .3838098   .1792664     2.14   0.032     .0324542    .7351654
+beh_quadratic |  -.0537883   .1159717    -0.46   0.643    -.2810887    .1735121
+    beh_avsim |   4.085601   2.393857     1.71   0.088    -.6062725    8.777474
 (output omitted)
 Overall maximum convergence ratio: 0.258 (criterion: below 0.25; not met)
-Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for outdegree (0.114) transtrip (0.102) beh_linear (0.126) rate_beh_period2 (0.118)
-Convergence is good only if both criteria are met. Refit starting from these estimates with theta0(); see nwsaom.
+Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for
+  outdegree (0.114) transtrip (0.102) beh_linear (0.126)
+  rate_beh_period2 (0.118)
+Convergence is good only if both criteria are met.
+To refit starting from these estimates, type nwsaom refit.
 \end{lstlisting}
 This fit has not converged by the two criteria (the overall ratio is 0.258 and four $t$-ratios are above 0.1); before it is reported it would be restarted from its estimates with \texttt{nwsaom refit}, as Chapter~\ref{ch:estimation} explains.
 
@@ -128,10 +137,10 @@ nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip behsim
     seed(1) k3(300)
 \end{lstlisting}
 \begin{lstlisting}
- beh_avalt_endow |   -2.19999   9.337483    -0.24   0.814
-beh_avalt_creation|   3.119126   12.78062     0.24   0.807
+beh_avalt_e~w |   -2.19999   9.337483    -0.24   0.814    -20.50112    16.10114
+beh_avalt_c~n |   3.119126   12.78062     0.24   0.807    -21.93042    28.16868
 \end{lstlisting}
-Here the fit converges (maximum convergence ratio 0.190, below the 0.25 guideline) but the two roles have standard errors of 9 and 13; the data do not separate them. Such fits can also stop with the \texttt{thetaBound} error or a near-singular covariance matrix; both mean ``use the plain effect''. The split of \opt{linear} (\opt{linearendow}/\opt{linearcreation}) is refused: the sums of increases and decreases add to the behavior-rate statistic, so with an estimated behavior rate the model is not identified (RSiena also reports a singular covariance matrix).
+Here the fit converges (maximum convergence ratio 0.190, below the 0.25 guideline) but the two roles (\texttt{beh\_avalt\_endow} and \texttt{beh\_avalt\_creation}, abbreviated in the table) have standard errors of 9 and 13; the data do not separate them. Such fits can also stop with the \texttt{thetaBound} error or a near-singular covariance matrix; both mean ``use the plain effect''. The split of \opt{linear} (\opt{linearendow}/\opt{linearcreation}) is refused: the sums of increases and decreases add to the behavior-rate statistic, so with an estimated behavior rate the model is not identified (RSiena also reports a singular covariance matrix).
 
 \subsection{Network effects on behavior: beheff, behnet2 and friends}
 
@@ -160,12 +169,12 @@ nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip behsim
     beheff(totalt indeg) behfrom(sport1) seed(1) k3(300)
 \end{lstlisting}
 \begin{lstlisting}
-   beh_linear |   .0709788   .4118153     0.17   0.863
-beh_quadratic |   -.550236   .2640077    -2.08   0.037
-    beh_avalt |   .1543022   2.264936     0.07   0.946
-   beh_totalt |   .3680405   .7861524     0.47   0.640
-    beh_indeg |   .1284015   .1684863     0.76   0.446
-beh_from_sport1|   .2422216   .4565276     0.53   0.596
+   beh_linear |   .0709788   .4118153     0.17   0.863    -.7361644    .8781221
+beh_quadratic |   -.550236   .2640077    -2.08   0.037    -1.067682   -.0327903
+    beh_avalt |   .1543022   2.264936     0.07   0.946    -4.284891    4.593496
+   beh_totalt |   .3680405   .7861524     0.47   0.640     -1.17279    1.908871
+    beh_indeg |   .1284015   .1684863     0.76   0.446    -.2018255    .4586285
+beh_from_sp~1 |   .2422216   .4565276     0.53   0.596     -.652556    1.136999
 (output omitted)
 Overall maximum convergence ratio: 0.237 (criterion: below 0.25; met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): met
@@ -180,10 +189,10 @@ nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity ///
     behavior(alcohol1 alcohol2 alcohol3 : linear) behw(avsimw:DM) seed(1) k3(300)
 \end{lstlisting}
 \begin{lstlisting}
-    outdegree |   -2.35188   .1182981   -19.88   0.000
-  reciprocity |   2.813118   .1978835    14.22   0.000
-   beh_linear |   .3589825   .1613146     2.23   0.026
-beh_avsimw_DM |   3.454459   1.390661     2.48   0.013
+    outdegree |   -2.35188   .1182981   -19.88   0.000     -2.58374    -2.12002
+  reciprocity |   2.813118   .1978835    14.22   0.000     2.425273    3.200962
+   beh_linear |   .3589825   .1613146     2.23   0.026     .0428117    .6751534
+beh_avsimw_DM |   3.454459   1.390661     2.48   0.013     .7288139    6.180104
 \end{lstlisting}
 (This is only a demonstration of the syntax: using the network itself as a dyadic covariate is not a sensible substantive model.)
 
@@ -211,18 +220,20 @@ nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip ///
     seed(1) k3(300)
 \end{lstlisting}
 \begin{lstlisting}
-    outdegree |  -3.014934   .2136443   -14.11   0.000
-  reciprocity |   2.392201   .2273052    10.52   0.000
-    transtrip |   .6092567   .0887855     6.86   0.000
-     bv_samex |   .6691935   .3507814     1.91   0.056
-    bv_egosqx |   .1210067   .0791059     1.53   0.126
-   beh_linear |   .4043015   .2666101     1.52   0.129
-beh_quadratic |  -.5861862   .3763233    -1.56   0.119
-    beh_avalt |   1.310731   .9561009     1.37   0.170
+    outdegree |  -3.014934   .2136443   -14.11   0.000    -3.433669   -2.596199
+  reciprocity |   2.392201   .2273052    10.52   0.000     1.946691    2.837711
+    transtrip |   .6092567   .0887855     6.86   0.000     .4352402    .7832731
+     bv_samex |   .6691935   .3507814     1.91   0.056    -.0183254    1.356712
+    bv_egosqx |   .1210067   .0791059     1.53   0.126    -.0340381    .2760514
+   beh_linear |   .4043015   .2666101     1.52   0.129    -.1182446    .9268476
+beh_quadratic |  -.5861862   .3763233    -1.56   0.119    -1.323766    .1513939
+    beh_avalt |   1.310731   .9561009     1.37   0.170    -.5631924    3.184654
 (output omitted)
 Overall maximum convergence ratio: 0.218 (criterion: below 0.25; met)
-Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for beh_linear (-0.138)
-Convergence is good only if both criteria are met. Refit starting from these estimates with theta0(); see nwsaom.
+Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for
+  beh_linear (-0.138)
+Convergence is good only if both criteria are met.
+To refit starting from these estimates, type nwsaom refit.
 \end{lstlisting}
 This fit has not converged by the two criteria (the overall ratio is 0.218, but one $t$-ratio is above 0.1); before it is reported it would be restarted from its estimates with \texttt{nwsaom refit}, as Chapter~\ref{ch:estimation} explains.
 
@@ -238,25 +249,33 @@ nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip ///
              smoke1 smoke2 smoke3 : linear quadratic avalt) seed(1) k3(300)
 \end{lstlisting}
 \begin{lstlisting}
-SAOM co-evolution of the network and 2 behaviors (Method of Moments)
-            outdegree |  -2.754282   .2418467   -11.39   0.000
-          reciprocity |   2.360833   .2803256     8.42   0.000
-            transtrip |   .6139462   .0867132     7.08   0.000
-               behsim |   1.442482   .8507705     1.70   0.090
-   beh_alcohol_linear |   .3899792   .2499822     1.56   0.119
-beh_alcohol_quadratic |  -.5778837   .3922876    -1.47   0.141
-    beh_alcohol_avalt |   1.258185   1.327251     0.95   0.343
-     beh_smoke_linear |  -1.892423   .9046728    -2.09   0.036
-  beh_smoke_quadratic |   1.984255   1.363699     1.46   0.146
-      beh_smoke_avalt |    1.77957   1.008014     1.77   0.077
+SAOM co-evolution of the network and 2 behaviors (Method of Moments), waves:
+glasgow1 glasgow2 glasgow3
+Actors: 50                             Periods: 2
+Behaviors: alcohol smoke
+-------------------------------------------------------------------------------
+glasgow1_to~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+--------------+----------------------------------------------------------------
+    outdegree |  -2.754282   .2418467   -11.39   0.000    -3.228293   -2.280271
+  reciprocity |   2.360833   .2803256     8.42   0.000     1.811405    2.910261
+    transtrip |   .6139462   .0867132     7.08   0.000     .4439915    .7839009
+       behsim |   1.442482   .8507705     1.70   0.090    -.2249972    3.109962
+beh_alcohol~r |   .3899792   .2499822     1.56   0.119    -.0999769    .8799354
+beh_alcohol~c |  -.5778837   .3922876    -1.47   0.141    -1.346753    .1909859
+beh_alcohol~t |   1.258185   1.327251     0.95   0.343    -1.343181     3.85955
+beh_smoke_l~r |  -1.892423   .9046728    -2.09   0.036    -3.665549   -.1192973
+beh_smoke_q~c |   1.984255   1.363699     1.46   0.146     -.688547    4.657057
+beh_smoke_a~t |    1.77957   1.008014     1.77   0.077    -.1961005     3.75524
 (output omitted)
 Overall maximum convergence ratio: 0.268 (criterion: below 0.25; not met)
-Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for behsim (-0.100) beh_alcohol_linear (-0.105) rate_smoke_period1 (0.142)
-Convergence is good only if both criteria are met. Refit starting from these estimates with theta0(); see nwsaom.
+Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for
+  behsim (-0.100) beh_alcohol_linear (-0.105) rate_smoke_period1 (0.142)
+Convergence is good only if both criteria are met.
+To refit starting from these estimates, type nwsaom refit.
 \end{lstlisting}
-This fit has not converged by the two criteria (the overall ratio is 0.268 and three $t$-ratios are above 0.1); before it is reported it would be restarted from its estimates with \texttt{nwsaom refit}, as Chapter~\ref{ch:estimation} explains. \opt{behsim} is written inside the group of the \emph{first} behavior. (A global \opt{behsim} given outside the groups together with several behaviors was accepted without error but produced no \texttt{behsim} coefficient and the same estimates as the model without it, so always put it inside the first group.)
+This fit has not converged by the two criteria (the overall ratio is 0.268 and three $t$-ratios are above 0.1); before it is reported it would be restarted from its estimates with \texttt{nwsaom refit}, as Chapter~\ref{ch:estimation} explains. \opt{behsim} is written inside the group of the \emph{first} behavior; a global \opt{behsim} outside the groups is not supported together with several behaviors (the fit stops with an error), so always put it inside the first group.
 
-Coefficients are named \texttt{beh\_}\emph{name}\texttt{\_}\emph{effect}, with \emph{name} the first variable without trailing digits. \texttt{e(rates\_beh)} has one row per behavior (values of the model above):
+Coefficients are named \texttt{beh\_}\emph{name}\texttt{\_}\emph{effect}, with \emph{name} the first variable without trailing digits (the table abbreviates long names: \texttt{beh\_alcohol\textasciitilde{}r} is \texttt{beh\_alcohol\_linear}). \texttt{e(rates\_beh)} has one row per behavior (values of the model above):
 \begin{lstlisting}
                 period1    period2
 rate_alcohol  1.3233     1.7980
@@ -271,12 +290,12 @@ nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip ///
              smoke1 smoke2 smoke3 : linear quadratic avalt) behfrom(beh2) seed(1) k3(300)
 \end{lstlisting}
 \begin{lstlisting}
-beh_alcohol_from_beh2 |  -.6804636   1.111647    -0.61   0.540
+beh_alcohol~2 |  -.6804636   1.111647    -0.61   0.540    -2.859251    1.498324
 (output omitted)
 Overall maximum convergence ratio: 0.249 (criterion: below 0.25; met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 \end{lstlisting}
-(smoking as a main effect on drinking; not significant in these data.) This fit has converged by the two criteria (the overall ratio is 0.249).
+(\texttt{beh\_alcohol\_from\_beh2}: smoking as a main effect on drinking; not significant in these data.) This fit has converged by the two criteria (the overall ratio is 0.249).
 
 \section{The rate of the behavior}\label{sec:coev-rate}
 The rate of the behavior can depend on actor covariates, on the behavior itself and on the network position and exposure of the actor: \opt{behratecov()} (RSiena's \texttt{RateX} for the behavior), \opt{behrate()} (\opt{outrate inrate reciprate avexposure totexposure susceptavin infectin infectout \ldots}) and \opt{behratecoef()} for starting values. The options, a complete example and the stored results are in Section~\ref{sec:behrate}.
@@ -287,9 +306,9 @@ A fit with one co-evolving behavior can be re-estimated by maximum likelihood (\
 \section{Co-evolution with other features}
 
 \begin{itemize}[nosep]
-\item \textbf{Non-directed networks.} A symmetric network can co-evolve with a behavior; see Chapter~\ref{ch:networktypes}. It requires the native plugin with the threaded batch path.
+\item \textbf{Non-directed networks.} A symmetric network can co-evolve with a behavior; see Chapter~\ref{ch:networktypes}. It requires the native plugin with the threaded batch path. After the fit, \texttt{estat gof}, \texttt{estat simulate} and \texttt{estat mems} simulate the fitted non-directed model (its model type \texttt{e(symtype)} at the per-actor rates \texttt{e(rates\_actor)}, or \texttt{e(rate\_actor)} after \opt{wave1()}/\opt{wave2()}), so the simulated networks are symmetric.
 \item \textbf{Two-mode networks.} Actors of a two-mode network may carry a behavior; see Chapter~\ref{ch:networktypes}.
-\item \textbf{Composition change.} \opt{joinat()}/\opt{leaveat()} work with one or several behaviors (not with \opt{behsim} or endowment/creation effects), Chapter~\ref{ch:rates}.
+\item \textbf{Composition change.} \opt{joinat()}/\opt{leaveat()} work with one or several behaviors (not with \opt{behsim} or endowment/creation effects), Chapter~\ref{ch:rates}. In the simulations after a co-evolution fit with \opt{present()} or \opt{joinat()}/\opt{leaveat()} (\texttt{estat gof}, \texttt{estat simulate}, \texttt{estat mems}), only the actors that are active at the start of a period act in it, as in the fit; joining and leaving inside a period is not simulated (the actors active at the start of the period stay active to its end). As in RSiena, an active actor may still create a tie to an inactive one. \opt{ml} and \texttt{nwsaom bayes} refuse \opt{present()} together with a behavior.
 \item \textbf{Time-varying covariates.} \opt{tvcov()} works with \opt{behavior()} for the network covariate effects; \opt{behfrom()}, \opt{behx()} and \opt{behavxalt()} accept a \opt{tvcov()} stem.
 \item \textbf{Starting values.} \opt{behtheta0()} gives starting values for the behavior-side parameters.
 \end{itemize}
@@ -309,7 +328,7 @@ The following are things RSiena can do (or that this chapter would naturally wan
 \begin{itemize}
 \item \textbf{Behavior type.} Behaviors are bounded integers, one Stata variable per wave. There is no continuous behavior.
 \item \textbf{Linear endowment/creation is refused} (not identified with an estimated behavior rate; RSiena also yields a singular covariance matrix). Network \opt{outdegreeendow} with \opt{outdegreecreation} is refused too, with or without a behavior. The other endow/creation splits of behavior effects are allowed but weakly identified.
-\item \textbf{Several behaviors.} The following are not combinable with several behaviors: \opt{symmetric}, \opt{present()} (use \opt{joinat()}/\opt{leaveat()} with integer times), \opt{ratecov()}, \opt{missnet()}, \opt{structural()}, network \opt{endow()}/\opt{creation()}, and \texttt{estat gof}/\texttt{estat mems}. \opt{behsim} refers to the first behavior only (\texttt{behsim} inside the group of the second behavior is rejected with return code 198; a global \opt{behsim} with several behaviors is silently ignored, see Section~\ref{sec:multibeh}). The same first-behavior restriction holds for \opt{behegox}, \opt{behaltx}, \opt{behegoplusalt} and \opt{netbeh()}.
+\item \textbf{Several behaviors.} The following are not combinable with several behaviors: \opt{symmetric}, \opt{present()} (use \opt{joinat()}/\opt{leaveat()} with integer times), \opt{ratecov()}, \opt{missnet()}, \opt{structural()}, network \opt{endow()}/\opt{creation()}, and the \texttt{estat} commands (all of them stop after such a fit, as they do after a behavior together with \opt{behratecov()} or \opt{behrate()}). \opt{behsim} refers to the first behavior only (\texttt{behsim} inside the group of the second behavior is rejected with return code 198; a global \opt{behsim} with several behaviors stops with an error, see Section~\ref{sec:multibeh}). The same first-behavior restriction holds for \opt{behegox}, \opt{behaltx}, \opt{behegoplusalt} and \opt{netbeh()}.
 \item \textbf{Cross-behavior effects} exist only through the covariate slot (\texttt{beh2} in \opt{behfrom()}, \opt{behx()}, \opt{behavxalt()} \dots). No other effects between two dependent behaviors are offered.
 \item \textbf{\opt{ratecov()} with \opt{behavior()}} is refused for the rate of the network (``ratecov() is not yet supported for co-evolution models''), and so are the structural rate effects of the network. The rate of the behavior can depend on covariates and on the network through \opt{behratecov()} and \opt{behrate()} (Section~\ref{sec:coev-rate}).
 \item \textbf{\opt{missbeh()} with several behaviors} is not available in the form the design note describes: a call \opt{missbeh(a1 a2 a3 | b1 b2 b3)} is rejected. Note also that \opt{missbeh()} variables are 0/1 flags, not Stata missing values.

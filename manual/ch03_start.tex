@@ -1,6 +1,6 @@
 \chapter{Getting started}\label{ch:start}
 
-This chapter takes you from data to a first fitted model, shows how to read the output and which results are stored. All commands were run with \nwsaom{} 1.5.8 on the Glasgow data of RSiena's tutorial.
+This chapter takes you from data to a first fitted model, shows how to read the output and which results are stored. All commands were run with \nwsaom{}~\pkgversion{} on the Glasgow data of RSiena's tutorial.
 
 \section{The data}
 
@@ -73,12 +73,12 @@ glasgow1_t~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
 ------------------------------------------------------------------------------
 Rate parameters (estimated, one per inter-wave period):
 
------------------------------------
+------------------------------------
              |   period1    period2
--------------+---------------------
+-------------+----------------------
         rate |    6.4432     5.2473
           se |    1.0683     0.8841
------------------------------------
+------------------------------------
 Overall maximum convergence ratio: 0.123 (criterion: below 0.25; met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 \end{lstlisting}
@@ -91,6 +91,8 @@ The fit takes a second or two.
   \item The rate parameters are listed per period below the table. Under conditional estimation the rate is the mean simulated time that the process needs, at rate 1 for every actor, to reproduce the observed amount of change, and the ``se'' is the standard deviation of that time. Under unconditional estimation the rates are estimated like the other parameters.
   \item The convergence $t$-ratios are discussed next.
 \end{itemize}
+
+\paragraph{Redisplaying the results.} \texttt{nwsaom} typed without options redisplays the results of the last fit without fitting again, as other Stata estimation commands do; \texttt{estimates replay} does the same. The display options \opt{level(\#)} (the width of the confidence intervals) and \opt{detail} may be given, for example \texttt{nwsaom, level(90)} or \texttt{nwsaom, detail}. A fit that was stored with \texttt{estimates store} can be redisplayed after \texttt{estimates restore}.
 
 \paragraph{Checking convergence.} All $t$-ratios should be smaller than $0.1$ in absolute value, and the overall maximum convergence ratio smaller than $0.25$. In the example the overall ratio is $0.123$ and all three individual ratios are below $0.1$, so both criteria are met. When they are not, RSiena's advice is to run the estimation again from the current estimates. In \nwsaom{} that is done with \opt{theta0()}, which takes the starting values of the coefficients in the order of \texttt{e(b)}. An example with covariates, where the starting values are taken from the first fit:
 \begin{lstlisting}
@@ -106,17 +108,17 @@ Covariates are selected by options named after RSiena's effects. The first of th
 \begin{lstlisting}
 . nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip samex(smoke1) egox(alcohol1) altx(alcohol1) simx(alcohol1) seed(2) detail
 ...
-------------------------------------------------------------------------------
-glasgow1_t~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
--------------+----------------------------------------------------------------
-   outdegree |  -2.779783   .1599143   -17.38   0.000    -3.093209   -2.466357
- reciprocity |   2.422549   .1902843    12.73   0.000     2.049599    2.795499
-samex_smoke1 |   .1141395   .1806006     0.63   0.527    -.2398312    .4681102
-altx_alcoh~1 |  -.0332311   .0760984    -0.44   0.662    -.1823812    .1159189
-egox_alcoh~1 |   .0600181   .0834505     0.72   0.472    -.1035418     .223578
-   transtrip |   .6238508    .076142     8.19   0.000     .4746151    .7730864
-simx_alcoh~1 |   .5879409   .3007171     1.96   0.051    -.0014538    1.177336
-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+glasgow1_to~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+--------------+----------------------------------------------------------------
+    outdegree |  -2.779783   .1599143   -17.38   0.000    -3.093209   -2.466357
+  reciprocity |   2.422549   .1902843    12.73   0.000     2.049599    2.795499
+ samex_smoke1 |   .1141395   .1806006     0.63   0.527    -.2398312    .4681102
+altx_alcohol1 |  -.0332311   .0760984    -0.44   0.662    -.1823812    .1159189
+egox_alcohol1 |   .0600181   .0834505     0.72   0.472    -.1035418     .223578
+    transtrip |   .6238508    .076142     8.19   0.000     .4746151    .7730864
+simx_alcohol1 |   .5879409   .3007171     1.96   0.051    -.0014538    1.177336
+-------------------------------------------------------------------------------
 ...
 RSiena effect names:
   samex_smoke1                  same smoke1
@@ -157,28 +159,29 @@ SAOM co-evolution (Method of Moments), waves: glasgow1 glasgow2 glasgow3
 Actors: 50                             Periods: 2
 Behavior: alcohol1 alcohol2 alcohol3
 
-------------------------------------------------------------------------------
-glasgow1_t~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
--------------+----------------------------------------------------------------
-   outdegree |   -2.76126   .1460683   -18.90   0.000    -3.047548   -2.474971
- reciprocity |    2.35587   .1982928    11.88   0.000     1.967223    2.744517
-   transtrip |    .621357   .0803867     7.73   0.000      .463802    .7789121
-      behsim |   1.460717   .6218014     2.35   0.019      .242009    2.679426
-  beh_linear |   .3948453   .2135712     1.85   0.064    -.0237465    .8134372
-beh_quadra~c |  -.6002813    .320045    -1.88   0.061    -1.227558    .0269954
-   beh_avalt |   1.305018   .7780128     1.68   0.093    -.2198586    2.829896
-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+glasgow1_to~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+--------------+----------------------------------------------------------------
+    outdegree |   -2.76126   .1460683   -18.90   0.000    -3.047548   -2.474971
+  reciprocity |    2.35587   .1982928    11.88   0.000     1.967223    2.744517
+    transtrip |    .621357   .0803867     7.73   0.000      .463802    .7789121
+       behsim |   1.460717   .6218014     2.35   0.019      .242009    2.679426
+   beh_linear |   .3948453   .2135712     1.85   0.064    -.0237465    .8134372
+beh_quadratic |  -.6002813    .320045    -1.88   0.061    -1.227558    .0269954
+    beh_avalt |   1.305018   .7780128     1.68   0.093    -.2198586    2.829896
+-------------------------------------------------------------------------------
 Rate parameters (estimated, one per inter-wave period):
------------------------------------
+
+------------------------------------
              |   period1    period2
--------------+---------------------
+-------------+----------------------
 network_rate |    6.4944     5.1666
           se |    1.2965     0.8975
 behavior_r~e |    1.3126     1.8015
           se |    0.3471     0.4619
------------------------------------
-...
+------------------------------------
 Overall maximum convergence ratio: 0.138 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 \end{lstlisting}
 The behavior coefficients carry the prefix \texttt{beh\_}; the network coefficients come first in \texttt{e(b)} (their number is \texttt{e(p\_net)}, here 4). The rates of the behavior are in \texttt{e(rates\_beh)}. The co-evolution is the subject of its own chapter.
 
@@ -232,6 +235,11 @@ Result & Content \\
 \texttt{e(covmeans)} & Means used to centre the covariates. \\
 \texttt{e(rsiena\_labels)} & RSiena's names of the coefficients, in the order of \texttt{e(b)}, separated by \texttt{|}. \\
 \texttt{e(conditional)} & 1 for conditional, 0 for unconditional estimation. \\
+\texttt{e(cmdline)}, \texttt{e(version)} & The command as typed (\texttt{nwsaom refit} reruns it) and the release of \nwsaom{} that produced the results. \\
+\texttt{e(present)}, \texttt{e(joinat)}, \texttt{e(leaveat)}, \texttt{e(missnet)}, \texttt{e(missbeh)} & The composition-change and missing-data options as given (empty without them; Chapters~\ref{ch:rates} and~\ref{ch:missing}). \\
+\texttt{e(symtype)}, \texttt{e(modeltype)}, \texttt{e(rate\_actor)}, \texttt{e(rates\_actor)} & Non-directed fits: the model type by name and by RSiena's \texttt{modelType} number, and the rate at which an actor gets an opportunity to change (one per period with \opt{waves()}); the postestimation simulations run at these rates (Section~\ref{sec:symmetric}). \\
+\texttt{e(twomode)}, \texttt{e(n\_actors)}, \texttt{e(n\_events)}, \texttt{e(actormode)} & 1 for a two-mode network; the numbers of actors and events and the mode of the actors. \\
+\texttt{e(fitid)} & Identifies the fit. The \texttt{estat} commands and \texttt{nwsaom bayes} use it to check that the model kept in memory belongs to the estimates in \texttt{e()}. \\
 \texttt{e(engine)} & \texttt{native} or \texttt{mata}: which simulator ran (Chapter~\ref{ch:technical}). \\
 \texttt{e(waves)} & The names of the waves. \\
 \texttt{e(nodes)}, \texttt{e(nwaves)} & Number of actors and of waves. \\
