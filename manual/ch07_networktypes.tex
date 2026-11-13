@@ -96,7 +96,7 @@ For \texttt{forcing}, glasgow waves 1--2 symmetrised, density and density plus \
 \subsection{Limits}\label{sec:sym-limits}
 
 \begin{itemize}
-\item \textbf{Several behaviors} with a non-directed network are refused (return code 198).
+\item \textbf{Several behaviors} work with a non-directed network (\opt{symmetric}, every \opt{symtype()}); they need the native plugin (Section~\ref{sec:multibeh}).
 \item \textbf{Mata engine.} Symmetric co-evolution needs the native batch path; there is no Mata fallback for it.
 \item \textbf{Co-evolution with a symmetric network} is only partly cross-validated against RSiena (see above); the avAlt coefficient and the rate scale of that combination are validated by simulation, not by an RSiena fit.
 \item \textbf{The confirmation step for the no-change option.} RSiena's \texttt{confirmation} model also computes the confirmation step for the no-change option, which changes nothing but adds to the scores behind the derivative estimate; \nwsaom{} leaves it out.

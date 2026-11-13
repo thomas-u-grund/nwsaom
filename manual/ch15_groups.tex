@@ -357,7 +357,7 @@ H0: each effect below equals its fixed value
        Joint |               0.156    2       0.9248
 -----------------------------------------------------------------
 \end{lstlisting}
-The alcohol effects are not needed in the network model ($p=0.92$). In the fit of the restricted model the program prints that the convergence criteria are not met for the two fixed effects: their t-ratios are exactly the quantity the score test examines, not a failure of the estimation.
+The alcohol effects are not needed in the network model ($p=0.92$). The convergence criteria apply to the estimated parameters only, so the two fixed effects are not judged by them; in this fit the criteria are met (overall ratio 0.109).
 
 \section{Agreement with RSiena}\label{sec:groups-rsiena}
 
@@ -422,7 +422,8 @@ The following stop with a message when combined with \opt{groups()}:
   \item maximum likelihood (\opt{ml}) and Bayesian estimation (\texttt{nwsaom bayes}), which run in separate parts of the program that do not yet know the group chain;
   \item two-mode networks and \texttt{nwsaom multinet} and \texttt{nwsaom multiplex} (several dependent networks);
   \item \texttt{estat mems};
-  \item all \texttt{estat} commands after a fit with several behaviors in \opt{behavior()}, or with a behavior together with \opt{ratecov()}, \opt{behratecov()} or \opt{behrate()} (as in a single group);
+  \item all \texttt{estat} commands after a fit with several behaviors in \opt{behavior()} (they work without \opt{groups()}), and after a fit with a behavior together with \opt{ratecov()}, \opt{behratecov()} or \opt{behrate()} (as in a single group);
+  \item the selection effects of the second and later behaviors (\opt{behsim}, \opt{behegox}, \texttt{netbeh:}\emph{effect}, \dots{} in the effect list of those behaviors);
   \item \opt{structural()} and the structural codes 10 and 11 in the wave networks (see Section~\ref{sec:structural});
   \item \opt{tvdyadcov()} and the other time-varying dyadic covariates;
   \item \texttt{estat importance} after a fit with \opt{ratecov()}, \opt{present()}, \opt{joinat()}, \opt{leaveat()}, \opt{missnet()} or \opt{missbeh()}.

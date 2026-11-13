@@ -237,7 +237,7 @@ combined with & \opt{present()} & \opt{joinat()}/\opt{leaveat()} \\
 \midrule
 \opt{waves()} & yes & yes \\
 one co-evolving behavior & yes & yes (not with \opt{behsim}) \\
-several behaviors & no (error 198) & yes (not with \opt{behsim}) \\
+several behaviors & yes & yes (not with \opt{behsim}) \\
 \opt{symmetric} & yes & yes (not with \opt{ratecov()}) \\
 \opt{ratecov()} & yes & yes \\
 \opt{missnet()} & --- & --- \\
@@ -259,7 +259,7 @@ A dash means the combination is not determined.
   \begin{itemize}[nosep]
   \item RSiena's composition-change options 2--4 (other treatments of the data of absent actors) and several intervals per actor are not offered: only RSiena option~1 with one interval per actor.
   \item The ``structural zeros/ones'' alternative documented in RSiena's manual is not a substitute here; joiners and leavers was chosen instead.
-  \item \opt{present()} cannot be used with several behaviors; \opt{joinat()}/\opt{leaveat()} cannot be used with \opt{behsim} or endowment/creation effects, and not (yet) with \opt{endow()}/\opt{creation()}.
+  \item \opt{joinat()}/\opt{leaveat()} cannot be used with \opt{behsim} or endowment/creation effects, and not (yet) with \opt{endow()}/\opt{creation()}.
   \item With \opt{symmetric}, \opt{joinat()}/\opt{leaveat()} cannot be combined with \opt{ratecov()}.
   \item Conditional estimation is not possible with composition change.
   \item The user must code absent actors' tie data consistently (see above); \nwsaom{} neither derives nor checks it.

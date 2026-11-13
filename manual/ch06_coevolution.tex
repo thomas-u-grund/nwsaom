@@ -273,7 +273,7 @@ Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for
 Convergence is good only if both criteria are met.
 To refit starting from these estimates, type nwsaom refit.
 \end{lstlisting}
-This fit has not converged by the two criteria (the overall ratio is 0.268 and three $t$-ratios are above 0.1); before it is reported it would be restarted from its estimates with \texttt{nwsaom refit}, as Chapter~\ref{ch:estimation} explains. \opt{behsim} belongs to the \emph{first} behavior: it is written inside the group of that behavior, and \opt{behsim} given outside the groups means the same.
+This fit has not converged by the two criteria (the overall ratio is 0.268 and three $t$-ratios are above 0.1); before it is reported it would be restarted from its estimates with \texttt{nwsaom refit}, as Chapter~\ref{ch:estimation} explains. \opt{behsim} is written inside the group of the behavior that is the covariate (here the first); Section~\ref{sec:multibeh-sel} gives the selection effects of the other behaviors.
 
 Coefficients are named \texttt{beh\_}\emph{name}\texttt{\_}\emph{effect}, with \emph{name} the first variable without trailing digits (the table abbreviates long names: \texttt{beh\_alcohol\textasciitilde{}r} is \texttt{beh\_alcohol\_linear}). \texttt{e(rates\_beh)} has one row per behavior (values of the model above):
 \begin{lstlisting}
@@ -297,6 +297,193 @@ Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 \end{lstlisting}
 (\texttt{beh\_alcohol\_from\_beh2}: smoking as a main effect on drinking; not significant in these data.) This fit has converged by the two criteria (the overall ratio is 0.249).
 
+\subsection{Selection effects of every behavior}\label{sec:multibeh-sel}
+
+The network effects that take a behavior as the covariate (\opt{behsim}, \opt{behegox}, \opt{behaltx}, \opt{behegoplusalt} and the \opt{netbeh()} effects, written \texttt{netbeh:}\emph{effect}) can be given in the effect list of any behavior. That behavior is then the covariate: this is RSiena's \texttt{simX}, \texttt{egoX}, \texttt{altX}, \dots{} with the behavior as \texttt{interaction1}. The coefficients of the first behavior carry the plain name (\texttt{behsim}); those of the second and later behaviors end in \texttt{\_}\emph{name} (\texttt{behsim\_smoke}, \texttt{behegox\_smoke}, \texttt{bv\_higher\_smoke} and \texttt{natb\_simrecipx\_smoke} for \texttt{netbeh:higher} and \texttt{netbeh:simrecipx}). The effects of the second and later behaviors need the native plugin and are not available with \opt{groups()}. The following model lets the ties select on the similarity of alcohol use and on the similarity and the ego effect of smoking:
+\begin{lstlisting}
+nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip ///
+    behavior(alcohol1 alcohol2 alcohol3 : linear quadratic avalt behsim | ///
+             smoke1 smoke2 smoke3 : linear quadratic avalt behsim behegox) ///
+    seed(1) k3(300)
+\end{lstlisting}
+\begin{lstlisting}
+SAOM co-evolution of the network and 2 behaviors (Method of Moments), waves:
+glasgow1 glasgow2 glasgow3
+Actors: 50                             Periods: 2
+Behaviors: alcohol smoke
+---------------------------------------------------------------------------------
+glasgow1_to_g~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+----------------+----------------------------------------------------------------
+      outdegree |  -2.748496   .1570929   -17.50   0.000    -3.056393     -2.4406
+    reciprocity |   2.322464   .2020096    11.50   0.000     1.926533    2.718395
+      transtrip |   .6001585   .0856238     7.01   0.000     .4323389     .767978
+         behsim |   1.230072   .6207591     1.98   0.048     .0134062    2.446737
+   behsim_smoke |   .5685005   .5675241     1.00   0.316    -.5438262    1.680827
+  behegox_smoke |   .1281269   .1915605     0.67   0.504    -.2473247    .5035786
+beh_alcohol_l~r |   .4040415    .257581     1.57   0.117     -.100808     .908891
+beh_alcohol_q~c |  -.5766406   .3615179    -1.60   0.111    -1.285203    .1319215
+beh_alcohol_a~t |    1.26983   .9147925     1.39   0.165    -.5231305     3.06279
+beh_smoke_lin~r |  -1.748464   .3487975    -5.01   0.000    -2.432094   -1.064833
+beh_smoke_qua~c |   1.810599   .4340862     4.17   0.000     .9598058    2.661392
+beh_smoke_avalt |   1.741692   1.173661     1.48   0.138    -.5586412    4.042025
+---------------------------------------------------------------------------------
+(output omitted)
+Overall maximum convergence ratio: 0.281 (criterion: below 0.25; not met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for
+  rate_smoke_period2 (-0.130)
+Convergence is good only if both criteria are met.
+To refit starting from these estimates, type nwsaom refit.
+\end{lstlisting}
+Alcohol similarity is the only selection effect in these data whose interval excludes zero. This fit has not converged by the two criteria (the overall ratio is 0.281 and the $t$-ratio of the smoking rate of period~2 is $-0.130$); before it is reported it would be restarted from its estimates with \texttt{nwsaom refit}, as Chapter~\ref{ch:estimation} explains. A \opt{behsim} given as an option outside the groups, with several behaviors, is the \opt{behsim} of the first behavior.
+
+Several behaviors also combine with \opt{present()}, with structural zeros and ones (the codes 10 and 11 in the waves, or \opt{structural()}), with the \opt{endow()} and \opt{creation()} effects of the network and with non-directed networks (\opt{symmetric}, every \opt{symtype()}), all with the native plugin. The following model has five pupils who join after the first wave and five who leave after the second (the data are those of Section~\ref{sec:compchange}), reciprocity split into endowment and creation, and two behaviors:
+\begin{lstlisting}
+nwsaom, waves(cc1 cc2 cc3) outdegree transtrip endow(reciprocity) creation(reciprocity) ///
+    present(p1 p2 p3) ///
+    behavior(alcohol1 alcohol2 alcohol3 : linear quadratic avalt | ///
+             smoke1 smoke2 smoke3 : linear quadratic avalt) seed(1) k3(300)
+\end{lstlisting}
+\begin{lstlisting}
+SAOM co-evolution of the network and 2 behaviors (Method of Moments), waves: cc1
+cc2 cc3
+Actors: 50                             Periods: 2
+Behaviors: alcohol smoke
+
+---------------------------------------------------------------------------------
+     cc1_to_cc3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+----------------+----------------------------------------------------------------
+      outdegree |  -2.677165   .2468513   -10.85   0.000    -3.160985   -2.193346
+reciprocityen~w |   2.079694   .6350885     3.27   0.001     .8349432    3.324444
+reciprocitycr~n |   3.364107   .7403044     4.54   0.000     1.913137    4.815077
+      transtrip |   .5503152   .1168216     4.71   0.000     .3213491    .7792812
+beh_alcohol_l~r |   .3883375   .3032493     1.28   0.200    -.2060202    .9826952
+beh_alcohol_q~c |  -.4873667    .355819    -1.37   0.171    -1.184759    .2100257
+beh_alcohol_a~t |   1.142764   1.041279     1.10   0.272    -.8981046    3.183633
+beh_smoke_lin~r |  -1.952822   .7177569    -2.72   0.007      -3.3596   -.5460448
+beh_smoke_qua~c |   2.164186   .7833617     2.76   0.006     .6288249    3.699546
+beh_smoke_avalt |   3.678978   3.952665     0.93   0.352    -4.068104    11.42606
+---------------------------------------------------------------------------------
+(output omitted)
+Overall maximum convergence ratio: 0.280 (criterion: below 0.25; not met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for
+  beh_alcohol_avalt (-0.143) rate_period1 (0.110) rate_smoke_period2 (0.154)
+Convergence is good only if both criteria are met.
+To refit starting from these estimates, type nwsaom refit.
+\end{lstlisting}
+This fit has not converged by the two criteria (the overall ratio is 0.280 and three $t$-ratios are above 0.1); it would be restarted with \texttt{nwsaom refit} before it is reported. Not combinable with several behaviors are \opt{ratecov()}, \opt{missnet()} and \opt{missbeh()}; maximum likelihood and Bayesian estimation remain restricted to one behavior (Section~\ref{sec:coev-limits}).
+
+\subsection{After a fit with several behaviors}\label{sec:multibeh-post}
+
+All postestimation commands but \texttt{estat mems} work after a fit with several behaviors (the native plugin is needed; none of them with \opt{groups()}). They follow RSiena, with one result per behavior:
+\begin{itemize}[nosep]
+\item \texttt{estat gof} tests one behavior distribution per behavior, \texttt{behavior\_}\emph{name}, besides the outdegree, indegree and geodesic distributions (RSiena's \texttt{sienaGOF()} with \texttt{BehaviorDistribution} and \texttt{varName}). The results are \texttt{r(p\_behavior\_}\emph{name}\texttt{)} and \texttt{r(mhd\_behavior\_}\emph{name}\texttt{)}, the graphs \texttt{gof\_behavior\_}\emph{name}.
+\item \texttt{estat simulate} reports the mean of every behavior (the columns \texttt{behmean\_}\emph{name} of \texttt{r(sim)} and \texttt{r(obs)}); \opt{generate(\emph{stub})} saves the simulated behaviors as variables \emph{stub}\texttt{\_}\emph{s}\texttt{\_p}\emph{period}\texttt{\_}\emph{name}; \opt{ratesbeh()} takes one rate per behavior and period (the periods of the first behavior, then those of the second, and so on).
+\item \texttt{estat importance} prints one table per behavior, and \texttt{r(certainty\_beh)} has one row per behavior; the \texttt{\_beh} results stack the effects of all behaviors.
+\item \texttt{estat timetest} and \texttt{estat score} test the effects of the network and of all behaviors.
+\item \texttt{estat mems} stops with r(498), as after one behavior: it is for network-only fits.
+\end{itemize}
+Fitted with the model of the previous subsection:
+\begin{lstlisting}
+. estat gof, nsim(30) seed(1)
+
+Goodness of fit: Mahalanobis distance test
+30 simulations at the estimates, 2 periods pooled
+
+------------------------------------------------------
+           Statistic |   Mahalanobis  P-value      Fit
+---------------------+--------------------------------
+           Outdegree |         8.272    0.433       ok
+            Indegree |         8.770    0.367       ok
+            Geodesic |        23.419    0.000 rejected
+    Behavior alcohol |         1.540    0.867       ok
+      Behavior smoke |         0.060    0.967       ok
+------------------------------------------------------
+rejected: P < 0.05 (one-tailed); the model does not reproduce this statistic
+Violin plots: gof_outdegree gof_indegree gof_geodesic gof_behavior_alcohol
+  gof_behavior_smoke
+
+. estat simulate, nsim(20) seed(5)
+Simulation from the fitted model: 20 replication(s) of 2 period(s), 2 behaviors
+
+------------------------------------
+   Statistic |       Sim       Obs
+-------------+----------------------
+Period 1     |
+        Ties |     119.4       116
+      Mutual |      39.6        35
+  Transitive |     104.8        88
+     alcohol |      3.11      3.10
+       smoke |      1.61      1.52
+Period 2     |
+        Ties |     122.6       122
+      Mutual |      41.2        45
+  Transitive |     128.4       137
+     alcohol |      3.39      3.36
+       smoke |      1.69      1.72
+------------------------------------
+Sim is the mean over the replications; Obs is the observed end wave; behaviors: mean.
+\end{lstlisting}
+(The geodesic distribution is rejected in these data with this model, as in the network-only models of Chapter~\ref{ch:estimation}.) \texttt{estat importance} gives the table of the network effects and one table for each behavior:
+\begin{lstlisting}
+. estat importance
+(output omitted: the table of the network effects)
+
+Behavior alcohol (the options are changing by -1, 0, +1)
+--------------------------------------------------------------------------
+      Effect | Estimate  Std. err.    Sigma  Semi-std.     RI p1     RI p2
+-------------+------------------------------------------------------------
+beh_alcoho~r |   0.4040     0.2576   0.9513     0.3844    0.1823    0.1918
+beh_alcoho~c |  -0.5766     0.3615   1.8694    -1.0780    0.4694    0.4584
+beh_alcoho~t |   1.2698     0.9148   0.8416     1.0687    0.3483    0.3499
+-------------+------------------------------------------------------------
+   Certainty |                                            0.2013    0.2160
+--------------------------------------------------------------------------
+
+Behavior smoke (the options are changing by -1, 0, +1)
+--------------------------------------------------------------------------
+      Effect | Estimate  Std. err.    Sigma  Semi-std.     RI p1     RI p2
+-------------+------------------------------------------------------------
+beh_smoke_~r |  -1.7485     0.3488   0.7517    -1.3143    0.6036    0.5902
+beh_smoke_~c |   1.8106     0.4341   0.6712     1.2153    0.1775    0.2059
+beh_smoke_~t |   1.7417     1.1737   0.4392     0.7650    0.2189    0.2039
+-------------+------------------------------------------------------------
+   Certainty |                                            0.5231    0.5217
+--------------------------------------------------------------------------
+RI: share of the effect in the actors' choices. Semi-std.: estimate x sigma.
+Certainty: RSiena's R_H, the expected certainty of the choices.
+\end{lstlisting}
+\texttt{estat timetest} lists all twelve effects of the model, those of the network first and then those of each behavior, with a joint test on 12 degrees of freedom ($\chi^2=12.76$, $p=0.387$; table omitted). The score test works as after one behavior: fit the model with the effects to be tested held fixed (here the two selection effects of smoking) and call \texttt{estat score}. A fixed effect is not judged by the convergence criteria, so the convergence line lists estimated parameters only:
+\begin{lstlisting}
+. nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip ///
+>     behavior(alcohol1 alcohol2 alcohol3 : linear quadratic avalt behsim | ///
+>              smoke1 smoke2 smoke3 : linear quadratic avalt behsim behegox) ///
+>     fix(behsim_smoke behegox_smoke) seed(1) k3(300)
+(output omitted)
+Overall maximum convergence ratio: 0.250 (criterion: below 0.25; met)
+Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for
+  beh_smoke_quadratic (0.121) rate_period1 (-0.119) rate_smoke_period1 (0.155)
+Convergence is good only if both criteria are met.
+To refit starting from these estimates, type nwsaom refit.
+
+. estat score
+
+Score-type test of fixed effects
+H0: each effect below equals its fixed value
+
+-----------------------------------------------------------------
+      Effect |  Fixed at      chi2   df  Prob > chi2  One-sided z
+-------------+---------------------------------------------------
+behsim_smoke |    0.0000     1.367    1       0.2424        1.169
+behegox_sm~e |    0.0000     0.000    1       0.9901       -0.012
+-------------+---------------------------------------------------
+       Joint |               2.374    2       0.3052
+-----------------------------------------------------------------
+(one-step estimates omitted)
+\end{lstlisting}
+Neither selection effect of smoking is needed ($p=0.31$ jointly). With \opt{generate(gx)}, \texttt{estat simulate} saves the behaviors of the first replication and period as \texttt{gx\_1\_p1\_alcohol} and \texttt{gx\_1\_p1\_smoke}, and \opt{ratesbeh(1.3 1.8 3.1 2.7)} sets the rates of alcohol in the two periods and then those of smoking.
+
+\paragraph{Validation.} The models of this section were compared with RSiena 1.6.14 on the alcohol and smoking data of the Glasgow study (three seeds each; \nwsaom{} first, RSiena in parentheses). The $p$-values of \texttt{estat gof} for the outdegree distribution are 0.43, 0.52 and 0.50 (0.52, 0.58, 0.50), and those of the alcohol distribution 0.91, 0.91 and 0.94 (0.92, 0.91, 0.90). The simulated mean of alcohol in period~2 is 3.337, 3.332 and 3.345 (3.331, 3.338, 3.338). The joint $p$-values of the time test are 0.068, 0.121 and 0.043 (0.076, 0.081, 0.079). The sigmas of \texttt{estat importance} equal those of \texttt{sienaRI()}. For the models with \opt{present()}, structural zeros, endowment and creation, and a symmetrised network, the observed statistics equal the targets of \texttt{siena07} exactly, and the estimates are within one standard error of RSiena's.
+
 \section{The rate of the behavior}\label{sec:coev-rate}
 The rate of the behavior can depend on actor covariates, on the behavior itself and on the network position and exposure of the actor: \opt{behratecov()} (RSiena's \texttt{RateX} for the behavior), \opt{behrate()} (\opt{outrate inrate reciprate avexposure totexposure susceptavin infectin infectout \ldots}) and \opt{behratecoef()} for starting values. The options, a complete example and the stored results are in Section~\ref{sec:behrate}.
 
@@ -308,7 +495,7 @@ A fit with one co-evolving behavior can be re-estimated by maximum likelihood (\
 \begin{itemize}[nosep]
 \item \textbf{Non-directed networks.} A symmetric network can co-evolve with a behavior; see Chapter~\ref{ch:networktypes}. It requires the native plugin with the threaded batch path. After the fit, \texttt{estat gof}, \texttt{estat simulate} and \texttt{estat mems} simulate the fitted non-directed model (its model type \texttt{e(symtype)} at the per-actor rates \texttt{e(rates\_actor)}, or \texttt{e(rate\_actor)} after \opt{wave1()}/\opt{wave2()}), so the simulated networks are symmetric.
 \item \textbf{Two-mode networks.} Actors of a two-mode network may carry a behavior; see Chapter~\ref{ch:networktypes}.
-\item \textbf{Composition change.} \opt{joinat()}/\opt{leaveat()} work with one or several behaviors (not with \opt{behsim} or endowment/creation effects), Chapter~\ref{ch:rates}. In the simulations after a co-evolution fit with \opt{present()} or \opt{joinat()}/\opt{leaveat()} (\texttt{estat gof}, \texttt{estat simulate}, \texttt{estat mems}), only the actors that are active at the start of a period act in it, as in the fit; joining and leaving inside a period is not simulated (the actors active at the start of the period stay active to its end). As in RSiena, an active actor may still create a tie to an inactive one. \opt{ml} and \texttt{nwsaom bayes} refuse \opt{present()} together with a behavior.
+\item \textbf{Composition change.} \opt{present()} and \opt{joinat()}/\opt{leaveat()} work with one or several behaviors (\opt{joinat()}/\opt{leaveat()} not with \opt{behsim} or endowment/creation effects), Chapter~\ref{ch:rates}. In the simulations after a co-evolution fit with \opt{present()} or \opt{joinat()}/\opt{leaveat()} (\texttt{estat gof}, \texttt{estat simulate}, \texttt{estat mems}), only the actors that are active at the start of a period act in it, as in the fit; joining and leaving inside a period is not simulated (the actors active at the start of the period stay active to its end). As in RSiena, an active actor may still create a tie to an inactive one. \opt{ml} and \texttt{nwsaom bayes} refuse \opt{present()} together with a behavior.
 \item \textbf{Time-varying covariates.} \opt{tvcov()} works with \opt{behavior()} for the network covariate effects; \opt{behfrom()}, \opt{behx()} and \opt{behavxalt()} accept a \opt{tvcov()} stem.
 \item \textbf{Starting values.} \opt{behtheta0()} gives starting values for the behavior-side parameters.
 \end{itemize}
@@ -328,10 +515,10 @@ The following are things RSiena can do (or that this chapter would naturally wan
 \begin{itemize}
 \item \textbf{Behavior type.} Behaviors are bounded integers, one Stata variable per wave. There is no continuous behavior.
 \item \textbf{Linear endowment/creation is refused} (not identified with an estimated behavior rate; RSiena also yields a singular covariance matrix). Network \opt{outdegreeendow} with \opt{outdegreecreation} is refused too, with or without a behavior. The other endow/creation splits of behavior effects are allowed but weakly identified.
-\item \textbf{Several behaviors.} The following are not combinable with several behaviors: \opt{symmetric}, \opt{present()} (use \opt{joinat()}/\opt{leaveat()} with integer times), \opt{ratecov()}, \opt{missnet()}, \opt{structural()}, network \opt{endow()}/\opt{creation()}, and the \texttt{estat} commands (all of them stop after such a fit, as they do after a behavior together with \opt{behratecov()} or \opt{behrate()}). \opt{behsim} refers to the first behavior only (\texttt{behsim} inside the group of the second behavior is rejected with return code 198; \opt{behsim} outside the groups is that of the first behavior, see Section~\ref{sec:multibeh}). The same first-behavior restriction holds for \opt{behegox}, \opt{behaltx}, \opt{behegoplusalt} and \opt{netbeh()}.
+\item \textbf{Several behaviors.} Not combinable with several behaviors are \opt{ratecov()}, \opt{missnet()} and \opt{missbeh()} (see the next item), \opt{ml} and \texttt{nwsaom bayes}, and, for the selection effects of the second and later behaviors, \opt{groups()}. \texttt{estat mems} is for network-only fits. All of this needs the native plugin where the text says so (Sections~\ref{sec:multibeh-sel} and~\ref{sec:multibeh-post}).
 \item \textbf{Cross-behavior effects} exist only through the covariate slot (\texttt{beh2} in \opt{behfrom()}, \opt{behx()}, \opt{behavxalt()} \dots). No other effects between two dependent behaviors are offered.
 \item \textbf{\opt{ratecov()} with \opt{behavior()}} is refused for the rate of the network (``ratecov() is not yet supported for co-evolution models''), and so are the structural rate effects of the network. The rate of the behavior can depend on covariates and on the network through \opt{behratecov()} and \opt{behrate()} (Section~\ref{sec:coev-rate}).
-\item \textbf{\opt{missbeh()} with several behaviors} is not available in the form the design note describes: a call \opt{missbeh(a1 a2 a3 | b1 b2 b3)} is rejected. Note also that \opt{missbeh()} variables are 0/1 flags, not Stata missing values.
+\item \textbf{\opt{missbeh()} with several behaviors} is not available: a call \opt{missbeh(a1 a2 a3 | b1 b2 b3)} is rejected. Note that \opt{missbeh()} variables are 0/1 flags, not Stata missing values.
 \item \textbf{Native plugin only.} Almost everything on this page after \opt{avsim} (\opt{beheff()} tokens beyond the first 20, \opt{behnet2()}, \opt{behx()}, \opt{behw()}, \opt{tvbehw()}, \opt{netbeh()}, \opt{behshape()}, \opt{behavxalt()} and relatives) needs the C plugin. The Linux and Windows plugins can lag behind the macOS one.
 \item \textbf{Degenerate or unestimable effects.} \opt{behshape(constant)} cannot be estimated (it is confounded with the behavior rate, and RSiena reports a standard error of NA). The five double-degree behavior effects \opt{ffdeg bbdeg fbdeg frdeg brdeg} together are not identified, in RSiena as well. For a number of effects \texttt{siena07} itself is unstable or degenerate (\opt{beheff()}: \opt{outisolate totaltpop maxalt avaltpop avattlower totattlower totsim}; \opt{behw()} with parameter 2; some \opt{netbeh()} effects), so no reference estimate exists. In a non-directed network \texttt{degabsdiffx} and \texttt{degposdiffx} with the behavior as covariate agree with \texttt{siena07} in their statistics but are badly determined in both programs, and \texttt{higher} with the behavior as covariate equals the density statistic and is not identified (\texttt{siena07} gives a standard error of NA, \nwsaom{} stops).
 \item \textbf{Symmetric co-evolution} is only partly validated against RSiena, because RSiena's own fit of the model is unstable on the test data. The agreement is by simulation from known parameters.

@@ -25,7 +25,7 @@ Where the two programs differ in a way that matters to a user, the manual says s
   \item \textbf{Directed one-mode networks}, with two or more waves. With three or more waves the effects are pooled over the periods between consecutive waves and each period has its own rate.
   \item \textbf{Non-directed (symmetric) networks}, with RSiena's model types for non-directed relations (\opt{symtype()}).
   \item \textbf{Two-mode networks}, in which one set of nodes (the actors) chooses its ties to the other set (the events).
-  \item \textbf{Behavior co-evolution}: a bounded integer behavior (an attitude, a count of cigarettes) evolves together with the network, so that selection and influence can be separated in one model; several behaviors are possible.
+  \item \textbf{Behavior co-evolution}: a bounded integer behavior (an attitude, a count of cigarettes) evolves together with the network, so that selection and influence can be separated in one model; several behaviors can co-evolve with the network, with the selection and influence effects of each.
   \item \textbf{Several dependent networks} that evolve together on the same actors, with cross-network effects, through \texttt{nwsaom multinet}.
   \item \textbf{Several groups}: one model estimated jointly for several independent groups of actors (school classes, organizations) with the option \opt{groups()}, RSiena's \texttt{sienaGroupCreate} and \texttt{siena07} (Chapter~\ref{ch:groups}); or the separate fits combined afterwards with \texttt{nwsaom meta}.
   \item \textbf{Composition change}: actors that join or leave the network, either between waves (\opt{present()}) or at fractional times inside a period (\opt{joinat()}, \opt{leaveat()}).
@@ -65,7 +65,7 @@ The core must be version 3.22.0 or later (the listings of this manual were check
 
 \paragraph{Versions.} \texttt{nwsaom version} reports the installed release of \nwsaom{}, the version of the \texttt{nwcommands} core, the native plugin in use, the version of RSiena that the results were compared with and the license. \texttt{nwversion} lists the core and all installed model packages. \texttt{net install nwsaom} installs the state of the main branch. A specific release is installed from its tag, for example
 \begin{lstlisting}
-. net install nwsaom, from(https://raw.githubusercontent.com/thomas-u-grund/nwsaom/v1.6.0/) replace
+. net install nwsaom, from(https://raw.githubusercontent.com/thomas-u-grund/nwsaom/v1.7.0/) replace
 \end{lstlisting}
 
 \paragraph{License.} \nwsaom{} is free software under the GNU General Public License, version~3. It is derived from RSiena (Ripley, Snijders, Boda, V\"or\"os and others; GPL-2 or GPL-3) and, for the Bayesian estimator, from the algorithm of the multiSiena package (Snijders, Koskinen and Ripley; GPL-3). The source code is public; the file \texttt{NOTICE.md} of the repository lists the sources and the version of RSiena that each part was compared with.

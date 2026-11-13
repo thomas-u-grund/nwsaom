@@ -58,11 +58,11 @@ A period with a Jaccard index below about 0.3 has few stable ties and carries li
 (output omitted)
 Overall maximum convergence ratio: 0.188 (criterion: below 0.25; met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): not met for
-  outdegree (0.132) reciprocity (-1.656) transtrip (0.185)
+  outdegree (0.132) transtrip (0.185)
 Convergence is good only if both criteria are met.
 To refit starting from these estimates, type nwsaom refit.
 \end{lstlisting}
-The fixed coefficient equals its start value and its variance is 0. The overall maximum convergence ratio leaves out the fixed parameter, but the line of the $t$-ratios checks the $t$-ratios of all parameters, the fixed one included, so it lists \texttt{reciprocity} ($-1.656$); a large $t$-ratio of a fixed parameter is expected and is what the score test below examines. The $t$-ratios of the two free parameters, \texttt{outdegree} (0.132) and \texttt{transtrip} (0.185), are above 0.1 as well, so this fit has not converged by the two criteria; before it is reported it would be restarted from its estimates with \texttt{nwsaom refit}, as Chapter~\ref{ch:estimation} explains. Fixing is used for the score test below, for fitting a model with a known part, and for the simulation-only mode.
+The fixed coefficient equals its start value and its variance is 0. The convergence criteria apply to the estimated parameters only: the fixed parameter is left out of the overall maximum convergence ratio and of the line of the $t$-ratios, and its own $t$-ratio (large when the fixed value is far from what the data suggest, and what the score test below examines) is kept in \texttt{e(tconv)} and listed by \opt{detail}. The $t$-ratios of the two free parameters, \texttt{outdegree} (0.132) and \texttt{transtrip} (0.185), are above 0.1 as well, so this fit has not converged by the two criteria; before it is reported it would be restarted from its estimates with \texttt{nwsaom refit}, as Chapter~\ref{ch:estimation} explains. Fixing is used for the score test below, for fitting a model with a known part, and for the simulation-only mode.
 
 \section{Simulation: \texttt{estat simulate} and \texttt{nwsaom simulate}}\label{sec:sim}
 
@@ -83,6 +83,8 @@ Period 1     |
 Sim is the mean over the replications; Obs is the observed end wave.
 \end{lstlisting}
 Options: \opt{theta(\emph{matname})} replaces the coefficients (a row vector in the order of \texttt{e(b)}), \opt{rates()} and \opt{ratesbeh()} replace the rates, \opt{generate(\emph{stub})} saves the simulated networks as networks named \emph{stub}\texttt{\_}\emph{s}\texttt{\_p}\emph{period} (and the behaviors as variables of the same names). The rates are on the scale of \texttt{e(rates)} and \texttt{e(rate)}, RSiena's scale; after a non-directed fit of the pairwise types (joint, force, agree) they are converted to the per-actor rates of the simulation as the fit does it. The result \texttt{r(sim)} has one row per replication and period (number of ties, mutual dyads, transitive triples, mean behavior), \texttt{r(obs)} the same for the observed end waves; because \texttt{r(sim)} is a Stata matrix, \opt{nsim()} times the number of periods may not exceed \texttt{c(max\_matdim)} (800 in Stata/BE), and a larger request stops before anything is simulated.
+
+After a fit with several behaviors the table has one column of means per behavior, \opt{generate()} saves each behavior as a variable \emph{stub}\texttt{\_}\emph{s}\texttt{\_p}\emph{period}\texttt{\_}\emph{name}, and \opt{ratesbeh()} takes one rate per behavior and period (Section~\ref{sec:multibeh-post}).
 
 \paragraph{Names of the generated networks.} The names have at most 32 characters, so the stub must be short enough for the longest name. Networks (and, after a co-evolution fit, variables) of the generated names that already exist are overwritten only with the option \opt{replace}; without it the command stops with r(483) for a network and r(110) for a variable. Both checks run before anything is simulated, so a refused call creates nothing:
 \begin{lstlisting}
@@ -256,7 +258,7 @@ Expected over the actors at the start of each period
 RI: share of the effect in the actors' choices. Semi-std.: estimate x sigma.
 Certainty: RSiena's R_H, the expected certainty of the choices.
 \end{lstlisting}
-The command is available after fits of a directed or non-directed one-mode network or of a two-mode network, with or without one co-evolving behavior, without endowment and creation effects and \opt{structural()}; it stops after a fit with \opt{present()}, \opt{joinat()}, \opt{leaveat()}, \opt{missnet()} or \opt{missbeh()}. RSiena has the same restrictions. It needs the native plugin. All sizes agree with \texttt{sienaRI} to four decimals.
+The command is available after fits of a directed or non-directed one-mode network or of a two-mode network, with or without co-evolving behaviors (one table per behavior), without endowment and creation effects and \opt{structural()}; it stops after a fit with \opt{present()}, \opt{joinat()}, \opt{leaveat()}, \opt{missnet()} or \opt{missbeh()}. RSiena has the same restrictions. It needs the native plugin. All sizes agree with \texttt{sienaRI} to four decimals.
 
 \paragraph{Non-directed and two-mode networks.} For a non-directed network the importance is that of the forcing model, as RSiena notes. For a two-mode network the actors choose among the events. With the simulated $40\times20$ data of Section~\ref{sec:twomode}:
 \begin{lstlisting}
@@ -344,4 +346,4 @@ The combined means recover the coefficients, and no effect differs between the g
 
 \section{What is not available}
 
-After \texttt{nwsaom multinet}, \texttt{estat score} and \texttt{estat timetest} are available, but \texttt{estat gof}, \texttt{estat importance} and \texttt{estat simulate} are not. After a fit with \opt{groups()} (Chapter~\ref{ch:groups}) every \texttt{estat} command but \texttt{estat mems} works: \texttt{estat timetest} also reports a test per group and per period, and \texttt{estat gof}, \texttt{estat simulate} and \texttt{estat importance} run per group. All \texttt{estat} commands stop after a fit with \opt{tvcov()}, with several behaviors, or with a behavior together with \opt{ratecov()}, \opt{behratecov()} or \opt{behrate()}. The generalised method of moments of RSiena is not implemented (Chapter~\ref{ch:missing}). Maximum likelihood and Bayesian estimation are described in Chapter~\ref{ch:estimation}.
+After \texttt{nwsaom multinet}, \texttt{estat score} and \texttt{estat timetest} are available, but \texttt{estat gof}, \texttt{estat importance} and \texttt{estat simulate} are not. After a fit with \opt{groups()} (Chapter~\ref{ch:groups}) every \texttt{estat} command but \texttt{estat mems} works: \texttt{estat timetest} also reports a test per group and per period, and \texttt{estat gof}, \texttt{estat simulate} and \texttt{estat importance} run per group. All \texttt{estat} commands stop after a fit with \opt{tvcov()} or with a behavior together with \opt{ratecov()}, \opt{behratecov()} or \opt{behrate()}. The generalised method of moments of RSiena is not implemented (Chapter~\ref{ch:missing}). Maximum likelihood and Bayesian estimation are described in Chapter~\ref{ch:estimation}.
