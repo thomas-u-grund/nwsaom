@@ -74,26 +74,32 @@ program define nwsaom_estat_score, rclass
 	di as txt "H0: each effect below equals its fixed value"
 	tempname sep
 	matrix `sep' = __nwsaom_score_res
+	// the effect column is as wide as the longest effect name (12 at least)
+	local sw 12
+	foreach w of local names {
+		local sw = max(`sw', ustrlen("`w'"))
+	}
+	local sw1 = `sw' + 1
 	di
-	di as txt "{hline 13}{c TT}{hline 51}"
-	di as txt %12s "Effect" " {c |}" %10s "Fixed at" %10s "chi2" %5s "df" %13s "Prob > chi2" %13s "One-sided z"
-	di as txt "{hline 13}{c +}{hline 51}"
+	di as txt "{hline `sw1'}{c TT}{hline 51}"
+	di as txt %`sw's "Effect" " {c |}" %10s "Fixed at" %10s "chi2" %5s "df" %13s "Prob > chi2" %13s "One-sided z"
+	di as txt "{hline `sw1'}{c +}{hline 51}"
 	if `df' == 1 {
 		local w : word 1 of `tested'
 		local pos : list posof "`w'" in names
-		di as txt %12s abbrev("`w'", 12) " {c |}" as res %10.4f `b'[1, `pos'] %10.3f `c' %5.0f 1 %13.4f `pv' %13.3f scalar(__nwsaom_score_oneS)
+		di as txt %`sw's "`w'" " {c |}" as res %10.4f `b'[1, `pos'] %10.3f `c' %5.0f 1 %13.4f `pv' %13.3f scalar(__nwsaom_score_oneS)
 	}
 	else {
 		local j 0
 		foreach w of local tested {
 			local ++j
 			local pos : list posof "`w'" in names
-			di as txt %12s abbrev("`w'", 12) " {c |}" as res %10.4f `b'[1, `pos'] %10.3f `sep'[`j', 1] %5.0f 1 %13.4f chi2tail(1, `sep'[`j', 1]) %13.3f `sep'[`j', 2]
+			di as txt %`sw's "`w'" " {c |}" as res %10.4f `b'[1, `pos'] %10.3f `sep'[`j', 1] %5.0f 1 %13.4f chi2tail(1, `sep'[`j', 1]) %13.3f `sep'[`j', 2]
 		}
-		di as txt "{hline 13}{c +}{hline 51}"
-		di as txt %12s "Joint" " {c |}" as res %10s "" %10.3f `c' %5.0f `df' %13.4f `pv'
+		di as txt "{hline `sw1'}{c +}{hline 51}"
+		di as txt %`sw's "Joint" " {c |}" as res %10s "" %10.3f `c' %5.0f `df' %13.4f `pv'
 	}
-	di as txt "{hline 13}{c BT}{hline 51}"
+	di as txt "{hline `sw1'}{c BT}{hline 51}"
 	tempname os
 	matrix `os' = __nwsaom_score_onestep
 	local onames `names'
@@ -103,14 +109,19 @@ program define nwsaom_estat_score, rclass
 	matrix colnames `os' = `onames'
 	di
 	di as txt "One-step estimates (restricted estimates plus the one-step correction)"
-	di as txt "{hline 13}{c TT}{hline 51}"
-	di as txt %12s "Effect" " {c |}" %12s "Estimate"
-	di as txt "{hline 13}{c +}{hline 51}"
+	local sw 12
+	foreach nm of local onames {
+		local sw = max(`sw', ustrlen("`nm'"))
+	}
+	local sw1 = `sw' + 1
+	di as txt "{hline `sw1'}{c TT}{hline 51}"
+	di as txt %`sw's "Effect" " {c |}" %12s "Estimate"
+	di as txt "{hline `sw1'}{c +}{hline 51}"
 	forvalues i = 1/`nall' {
 		local nm : word `i' of `onames'
-		di as txt %12s abbrev("`nm'", 12) " {c |}" as res %12.4f `os'[1, `i']
+		di as txt %`sw's "`nm'" " {c |}" as res %12.4f `os'[1, `i']
 	}
-	di as txt "{hline 13}{c BT}{hline 51}"
+	di as txt "{hline `sw1'}{c BT}{hline 51}"
 	capture scalar drop __nwsaom_score_have __nwsaom_score_nfix __nwsaom_score_same
 	return scalar chi2 = `c'
 	return scalar df = `df'

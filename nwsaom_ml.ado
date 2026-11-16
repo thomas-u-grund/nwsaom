@@ -149,10 +149,10 @@ program nwsaom_ml, eclass
 		_nwsaom_tabopts __t, `tabopts'
 		ereturn display, `__t'
 		di as txt "Rate parameters (one per inter-wave period):"
-		matlist e(rates_ml), format(%9.4f) border(top bottom)
+		_nwsaom_matlist e(rates_ml), format(%9.4f) border(top bottom)
 		if `coev' {
 			di as txt "Behavior rate parameters:"
-			matlist e(rates_beh_ml), format(%9.4f) border(top bottom)
+			_nwsaom_matlist e(rates_beh_ml), format(%9.4f) border(top bottom)
 		}
 		di as txt "Overall maximum t-ratio of the scores: " as res %5.3f `tmax' as txt cond(`tmax' < 0.1, " (good; below 0.1)", cond(`tmax' < 0.25, " (acceptable)", " (poor; increase n3() and nstart2())"))
 		if !`ok' di as txt "{p 0 0 2}(the information matrix was not positive definite: the standard errors are those of the complete-data information, too small){p_end}"

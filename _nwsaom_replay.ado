@@ -75,7 +75,7 @@ program define _nwsaom_replay, rclass
 		}
 		matrix rownames `tab' = `rn'
 		di as text "Rate parameters (estimated, one per inter-wave period):"
-		matlist `tab', format(%9.4f) border(top bottom)
+		_nwsaom_matlist `tab', format(%9.4f) border(top bottom)
 	}
 	if "`e(symtype)'" != "" di as text "(non-directed relation, model type " as result "`e(symtype)'" as text " = RSiena modelType " as result e(modeltype) as text ")"
 	capture confirm matrix e(ratecoefs)

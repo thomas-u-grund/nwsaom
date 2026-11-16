@@ -3429,8 +3429,10 @@ program nwsaom, eclass
 
 	local __ns_depname : word 1 of `__ns_wavelist'
 	local __ns_lastwave : word `=cond(`__ns_isgrp', `__ns_gW', `__ns_nwaves')' of `__ns_wavelist'
-	// Stata names have at most 32 characters: with long wave names each part is cut to 14 (the label of the equation only)
-	mata: st_local("__ns_depname", SaomDepName("`__ns_depname'", "`__ns_lastwave'"))
+	// the label in the corner of the coefficient table: the waves are named in the header above the table, and Stata
+	// cuts a longer label (glasgow1_to_glasgow2) to the width of the name column, so the label is short ("SAOM" in all
+	// the tables of nwsaom)
+	local __ns_depname SAOM
 
 	// harmonisation unit 18: e(V), real RSiena's own sandwich-formula
 	// covariance matrix (verified against RSiena's actual R source, see
@@ -3587,7 +3589,7 @@ program nwsaom, eclass
 		_nwsaom_tabopts __ns_t, `__ns_tabopts'
 		ereturn display, `__ns_t'
 		di as text "{p 0 0 2}Rate parameters (estimated, one per inter-wave period; network, then each behavior):{p_end}"
-		matlist `ratetab', format(%9.4f) border(top bottom)
+		_nwsaom_matlist `ratetab', format(%9.4f) border(top bottom)
 
 		mata: st_numscalar("__ns_r1", __ns_fit_mb.ratesNet[1])
 		ereturn scalar rate = scalar(__ns_r1)
@@ -3664,7 +3666,7 @@ program nwsaom, eclass
 		_nwsaom_tabopts __ns_t, `__ns_tabopts'
 		ereturn display, `__ns_t'
 		di as text "Rate parameters (estimated, one per inter-wave period):"
-		matlist `ratetab', format(%9.4f) border(top bottom)
+		_nwsaom_matlist `ratetab', format(%9.4f) border(top bottom)
 
 		ereturn matrix rates = `ratesnet'
 		ereturn matrix rate_tratios = `ratetrnet'
@@ -3774,7 +3776,7 @@ program nwsaom, eclass
 		_nwsaom_tabopts __ns_t, `__ns_tabopts'
 		ereturn display, `__ns_t'
 		di as text "Rate parameters (estimated, one per inter-wave period):"
-		matlist `ratetab', format(%9.4f) border(top bottom)
+		_nwsaom_matlist `ratetab', format(%9.4f) border(top bottom)
 		if `__ns_iscond' & "`detail'" != "" di as text "(conditional: rate = mean time to reach the observed distance, se = its SD)"
 
 		ereturn matrix rates = `rates'

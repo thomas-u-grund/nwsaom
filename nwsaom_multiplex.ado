@@ -147,7 +147,7 @@ program define nwsaom_multiplex, eclass
 	matrix colnames `V' = `__mp_coefnames'
 	matrix rownames `V' = `__mp_coefnames'
 
-	ereturn post `b' `V', obs(`nodes')
+	ereturn post `b' `V', depname(SAOM) obs(`nodes')
 	ereturn scalar rate1 = __nwsaom_mp_rate1
 	ereturn scalar rate2 = __nwsaom_mp_rate2
 	ereturn scalar rate1_se = __nwsaom_mp_rate1_se

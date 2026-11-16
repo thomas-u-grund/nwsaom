@@ -463,7 +463,7 @@ program define nwsaom_multinet, eclass
 	matrix colnames `V' = `__cn'
 	matrix rownames `V' = `__cn'
 	matrix colnames `tg' = `__cn'
-	ereturn post `b' `V', obs(`nodes')
+	ereturn post `b' `V', depname(SAOM) obs(`nodes')
 	ereturn matrix target = `tg'
 	ereturn scalar nwaves = `nw1'
 	ereturn scalar twomode1 = `__tm1'
@@ -496,7 +496,7 @@ program define nwsaom_multinet, eclass
 	_nwsaom_tabopts __mn_t, `__mn_tabopts'
 	ereturn display, `__mn_t'
 	di as text "Rates (estimated):"
-	matlist e(rates), format(%8.3f) border(top bottom)
+	_nwsaom_matlist e(rates), format(%8.3f) border(top bottom)
 	di as text "Overall maximum convergence ratio: " as result %5.3f e(tconv_max) as text " (criterion: below 0.25; " cond(e(tconv_max) < 0.25, "met", "{bf:not met}") ")"
 	if e(tconv_max) >= 0.25 di as text "To refit starting from these estimates, type {bf:nwsaom refit}."
 end
