@@ -509,8 +509,8 @@ estimates; they work as well when the results are redisplayed, and with {cmd:nws
 {synopt:{opt crprod}}effect of a tie in B on the same tie in A (coefficient {bf:net1_x_crprod}){p_end}
 {synopt:{opt crprodb}}effect of a tie in A on the same tie in B (coefficient {bf:net2_x_crprod}){p_end}
 {syntab:Estimation}
-{synopt:{opt theta01(numlist)}}starting values for network A's effects, in the order {bf:outdegree}, {bf:reciprocity}, {bf:crprod}; default 0{p_end}
-{synopt:{opt theta02(numlist)}}starting values for network B's effects, in the order {bf:outdegree}, {bf:reciprocity}, {bf:crprodb}; default 0{p_end}
+{synopt:{opt theta01(numlist)}}starting values for network A's effects, in the order {bf:outdegree}, {bf:reciprocity}, {bf:crprod}; default 0; one value per effect: three with {opt crprod}, two without{p_end}
+{synopt:{opt theta02(numlist)}}starting values for network B's effects, in the order {bf:outdegree}, {bf:reciprocity}, {bf:crprodb}; default 0; three values with {opt crprodb}, two without (another number of values stops with r(198)){p_end}
 {synopt:{opt k0(#)}}Phase 1 simulations; default, as RSiena, max(50, 7 + 3{it:p}){p_end}
 {synopt:{opt k3(#)}}Phase 3 simulations; default 1,000{p_end}
 {synopt:{opt firstg(#)}}initial Robbins-Monro gain; default 0.2{p_end}

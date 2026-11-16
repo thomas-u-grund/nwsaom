@@ -115,6 +115,17 @@ program define nwsaom_multiplex, eclass
 				confirm number `__x'
 				local `__t' = cond("``__t''" == "", "`__x'", "``__t'', `__x'")
 			}
+			// one starting value per effect of the network: a vector of another length does not fit the model (the engine
+			// went on with it and stopped in phase 1 with Mata error 3301, subscript invalid)
+			local __want = 2 + cond("`__t'" == "theta01", `wantcrprod', `wantcrprodb')
+			local __have : word count `__v'
+			if `__have' != `__want' {
+				local __net = cond("`__t'" == "theta01", "A", "B")
+				local __eff = cond(`__want' == 3, "outdegree, reciprocity and crprod" + cond("`__net'" == "B", "b", ""), "outdegree and reciprocity")
+				di "{p 0 0 2}{err}{bf:`__t'()} has `__have' values, but the model of network `__net' has `__want' effects (`__eff'): one starting value per effect" ///
+					cond(`__want' == 2, "; the cross-network effect is part of the model only with " + cond("`__net'" == "A", "{bf:crprod}", "{bf:crprodb}"), "") ".{p_end}"
+				error 198
+			}
 		}
 	}
 	if "`theta01'" == "" local theta01 = cond(`wantcrprod', "0, 0, 0", "0, 0")
