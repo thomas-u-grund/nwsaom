@@ -12,7 +12,13 @@
 capture program drop _nwsaom_replay
 program define _nwsaom_replay, rclass
 	// r(done) = 0: the options are not display options only, so this is a fit (nwsaom goes on)
-	capture syntax [, Level(cilevel) DETail]
+	capture syntax [, DETail *]
+	if _rc {
+		return scalar done = 0
+		exit
+	}
+	// display options of ereturn display (ci, level(), noci, nopvalues, cformat(), ...); any other option: a fit
+	capture _nwsaom_tabopts __t check, `options'
 	if _rc {
 		return scalar done = 0
 		exit
@@ -51,7 +57,8 @@ program define _nwsaom_replay, rclass
 	if e(ngroups) < . di as text "Groups: " as result e(ngroups)
 	if e(twomode) == 1 di as text "Two-mode network: " as result e(n_actors) as text " actors choose among " as result e(n_events) as text " events"
 	di
-	ereturn display, level(`level')
+	_nwsaom_tabopts __t, `options'
+	ereturn display, `__t'
 	if `hasrates' {
 		tempname tab
 		matrix `tab' = e(rates) \ e(rates_se)

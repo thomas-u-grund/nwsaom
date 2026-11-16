@@ -48,7 +48,10 @@ program define nwsaom_multiplex, eclass
 	version 14
 	_nwsaom_libcheck
 	syntax , NETAWAVE1(string) NETAWAVE2(string) NETBWAVE1(string) NETBWAVE2(string) ///
-		[ THETA01(string) THETA02(string) K0(integer 0) K3(integer 1000) FIRSTG(real 0.2) seed(integer -1) CRPROD CRPRODB DETail ]
+		[ THETA01(string) THETA02(string) K0(integer 0) K3(integer 1000) FIRSTG(real 0.2) seed(integer -1) CRPROD CRPRODB DETail * ]
+	// display options of the coefficient table (ci, level(), noci, nopvalues, cformat(), ...)
+	local __mp_tabopts `"`options'"'
+	_nwsaom_tabopts __mp_t check, `__mp_tabopts'
 
 	di as text "{p 0 0 2}note: {bf:nwsaom multiplex} is deprecated; use {bf:nwsaom multinet} (net1() net2() ...), which includes everything multiplex does.{p_end}"
 	// the estimates of multiplex and multinet agree (same model, same engine); forward unless start values are given
@@ -57,7 +60,7 @@ program define nwsaom_multiplex, eclass
 		local __c2 ""
 		if "`crprod'" != "" local __c1 "cross1(crprod)"
 		if "`crprodb'" != "" local __c2 "cross2(crprod)"
-		nwsaom_multinet , net1(`netawave1' `netawave2') net2(`netbwave1' `netbwave2') `__c1' `__c2' k0(`k0') k3(`k3') firstg(`firstg') seed(`seed')
+		nwsaom_multinet , net1(`netawave1' `netawave2') net2(`netbwave1' `netbwave2') `__c1' `__c2' k0(`k0') k3(`k3') firstg(`firstg') seed(`seed') `__mp_tabopts'
 		// the results nwsaom multiplex always returned (two waves: one rate per network)
 		tempname __r
 		matrix `__r' = e(rates)
@@ -163,7 +166,8 @@ program define nwsaom_multiplex, eclass
 	if `wantcrprod' | `wantcrprodb' di as text "Multiplex SAOM (Stage 2: crprod cross-network effect), Method of Moments"
 	else di as text "Multiplex SAOM (Stage 1: within-network effects only), Method of Moments"
 	di
-	ereturn display
+	_nwsaom_tabopts __mp_t, `__mp_tabopts'
+	ereturn display, `__mp_t'
 	di as text "Rates (estimated): net1 " as result %6.3f e(rate1) as text " (" as result %5.3f e(rate1_se) as text "), net2 " as result %6.3f e(rate2) as text " (" as result %5.3f e(rate2_se) as text ")"
 	_nwsaom_tconvtable, `detail'
 end

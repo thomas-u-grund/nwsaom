@@ -153,7 +153,11 @@ program define nwsaom_multinet, eclass
 	}
 	local __mn_cmdline `"nwsaom multinet, `__mn_cmdline'"'
 	syntax , NET1(string) NET2(string) [ EFF1(string) EFF2(string) CROSS1(string) CROSS2(string) SYM1 SYM2 BEHavior(string) BEHEFF1(string) BEHEFF2(string) BEHEFF12(string) BEHEFF21(string) MISSBEH(string) BEHINT(string) THETA0(numlist) FIX(string) TVCOV(string) ///
-		K0(integer 0) K3(integer 1000) FIRSTG(real 0.2) seed(integer -1) ACTORmode(integer 2) ]
+		K0(integer 0) K3(integer 1000) FIRSTG(real 0.2) seed(integer -1) ACTORmode(integer 2) * ]
+	// display options of the coefficient table (ci, level(), noci, nopvalues, cformat(), ...); any other option is
+	// refused here with Stata's usual message
+	local __mn_tabopts `"`options'"'
+	_nwsaom_tabopts __mn_t check, `__mn_tabopts'
 
 	if `seed' != -1 set seed `seed'
 	capture mata: mata drop __nwsaom_fixmask
@@ -489,7 +493,8 @@ program define nwsaom_multinet, eclass
 	if `__tmany' di as text "{p 0 0 2}Several co-evolving networks (Method of Moments), `nw1' waves, `__nA1' actors and `=`nodes'-`__nA1'' events (network " cond(`__tm1', "1", "2") " is two-mode){p_end}"
 	else di as text "{p 0 0 2}Several co-evolving networks (Method of Moments), `nw1' waves, `nodes' actors{p_end}"
 	di
-	ereturn display
+	_nwsaom_tabopts __mn_t, `__mn_tabopts'
+	ereturn display, `__mn_t'
 	di as text "Rates (estimated):"
 	matlist e(rates), format(%8.3f) border(top bottom)
 	di as text "Overall maximum convergence ratio: " as result %5.3f e(tconv_max) as text " (criterion: below 0.25; " cond(e(tconv_max) < 0.25, "met", "{bf:not met}") ")"

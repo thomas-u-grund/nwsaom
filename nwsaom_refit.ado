@@ -8,7 +8,11 @@
 program nwsaom_refit, eclass
 	version 14
 	syntax [, MAXRUNS(integer 1) TCONV(real 0.1) TMAX(real 0.25) ///
-		K3(integer -1) SEED(integer -1) CORES(integer -1) FIRSTG(real -1) noDISPlay]
+		K3(integer -1) SEED(integer -1) CORES(integer -1) FIRSTG(real -1) noDISPlay *]
+	// display options of the coefficient table (ci, level(), noci, nopvalues, cformat(), ...): given here, they replace
+	// the display options of the stored command line
+	local diopts `"`options'"'
+	_nwsaom_tabopts __chk check, `diopts'
 	if !inlist("`e(cmd)'", "nwsaom", "nwsaom_multinet") {
 		di "{p 0 0 2}{err}nwsaom refit needs the results of {bf:nwsaom} or {bf:nwsaom multinet} in memory (e(cmd) is " ///
 			cond("`e(cmd)'" == "", "empty", "`e(cmd)'") ").{p_end}"
@@ -86,6 +90,10 @@ program nwsaom_refit, eclass
 		if `seed' >= 0 local add `"`add' seed(`seed')"'
 		if `cores' >= 0 local add `"`add' cores(`cores')"'
 		if `firstg' >= 0 local add `"`add' firstg(`firstg')"'
+		if `"`diopts'"' != "" {
+			mata: st_local("cmd", _nwsaom_refit_stripdi(st_local("cmd")))
+			local add `"`add' `diopts'"'
+		}
 		if strpos(`"`cmd'"', ",") == 0 local cmd `"`cmd' ,"'
 		local cmd `"`cmd'`add'"'
 		local prevmax = e(tconv_max)
@@ -154,6 +162,65 @@ string scalar _nwsaom_refit_strip(string scalar cmd, string rowvector drop)
 				break
 			}
 		}
+	}
+	return(stritrim(strtrim(out)))
+}
+
+// remove the display options of ereturn display (ci, level(), noci, cformat(), ..., also abbreviated) from the options
+// of a command line (after the first comma outside parentheses and quotes)
+string scalar _nwsaom_refit_stripdi(string scalar cmd)
+{
+	real scalar i, n, depth, inq, start, j, k, keep
+	string scalar c, opts, out, tok, nm
+	string rowvector full
+	real rowvector minl
+
+	full = ("level", "vsquish", "noallbaselevels", "allbaselevels", "nobaselevels", "baselevels", "nocnsreport",
+		"fullcnsreport", "noemptycells", "emptycells", "noomitted", "omitted", "nolstretch", "lstretch", "coeflegend",
+		"selegend", "cformat", "sformat", "pformat", "fvwrap", "fvwrapon", "nofvlabel", "fvlabel", "noci", "nopvalues",
+		"markdown", "citype", "noabbrev", "abbrev", "ci")
+	minl = (1, 7, 9, 7, 6, 4, 6, 8, 7, 5, 6, 4, 10, 8, 5, 8, 7, 7, 7, 6, 8, 8, 5, 4, 4, 8, 6, 8, 6, 2)
+	n = strlen(cmd)
+	depth = inq = start = 0
+	for (i = 1; i <= n; i++) {
+		c = substr(cmd, i, 1)
+		if (c == `"""') inq = !inq
+		if (inq) continue
+		if (c == "(") depth++
+		else if (c == ")") depth--
+		else if (c == "," & depth == 0) {
+			start = i
+			break
+		}
+	}
+	if (start == 0) return(cmd)
+	out = substr(cmd, 1, start)
+	opts = substr(cmd, start + 1, .)
+	n = strlen(opts)
+	i = 1
+	while (i <= n) {
+		if (substr(opts, i, 1) == " ") {
+			i++
+			continue
+		}
+		// one option: up to the next blank outside parentheses and quotes
+		depth = inq = 0
+		for (j = i; j <= n; j++) {
+			c = substr(opts, j, 1)
+			if (c == `"""') inq = !inq
+			if (inq) continue
+			if (c == "(") depth++
+			else if (c == ")") depth--
+			else if (c == " " & depth == 0) break
+		}
+		tok = substr(opts, i, j - i)
+		nm = strlower(strpos(tok, "(") ? substr(tok, 1, strpos(tok, "(") - 1) : tok)
+		keep = 1
+		for (k = 1; k <= cols(full); k++) {
+			if (strlen(nm) >= minl[k] & strlen(nm) <= strlen(full[k]) & substr(full[k], 1, strlen(nm)) == nm) keep = 0
+		}
+		if (keep) out = out + " " + tok
+		i = j
 	}
 	return(stritrim(strtrim(out)))
 }

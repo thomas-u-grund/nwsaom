@@ -35,7 +35,7 @@
 Redisplay the results of the last fit (also {cmd:estimates replay}):
 
 {p 8 17 2}
-{cmd:nwsaom} [{cmd:,} {opt level(#)} {opt det:ail}]
+{cmd:nwsaom} [{cmd:,} {opt ci} {opt level(#)} {opt det:ail} {it:display_options}]
 
 {pstd}
 Two networks that change together ({help nwsaom##multiplex:nwsaom multiplex}):
@@ -488,6 +488,11 @@ number of threads. Applies to fits with the native backend; see {help nwsaom_rem
 the conditional rate, and the convergence t-ratio of every parameter. By default only the overall maximum convergence ratio is shown, with any
 estimated parameter whose t-ratio is 0.1 or more in absolute value (fixed parameters are not judged, as in RSiena); the full information is always stored in {bf:e(rsiena_labels)}, {bf:e(covmeans)} and
 {bf:e(tconv)}{p_end}
+{synopt:{opt ci}}Show the confidence intervals in the coefficient table. By default the table shows the coefficient names in full, and the intervals are left out (as with {opt noci}) at a {cmd:set linesize} below 100, where names of up to 32 characters do not fit next to them. With {opt ci} the intervals are shown and long names are cut (e.g. {cmd:indegpopula~y}){p_end}
+{synopt:{opt level(#)}}Confidence level of the intervals; giving it also shows them, as {opt ci}; default {cmd:level(95)} or as set by {cmd:set level}{p_end}
+{synopt:{it:{help estimation_options##display_options:display_options}}}{opt noci}, {opt nopvalues}, {opt cformat(%fmt)}, {opt pformat(%fmt)}, {opt sformat(%fmt)} and the other display
+options of Stata's estimation commands. These options (with {opt ci} and {opt level()}) apply to the coefficient table, with {opt ml} also to the table of the maximum likelihood
+estimates; they work as well when the results are redisplayed, and with {cmd:nwsaom multinet}, {cmd:nwsaom multiplex}, {cmd:nwsaom_ml} and {cmd:nwsaom refit}{p_end}
 {synoptline}
 {p2colreset}{...}
 
@@ -597,7 +602,7 @@ between-group standard deviation of every effect, heterogeneity test, Fisher's c
 {cmd:nwsaom multinet,} {opt net1(namelist)} {opt net2(namelist)} [{opt eff1(effects)} {opt eff2(effects)} {opt cross1(effects)} {opt cross2(effects)} [{opt sym1}] [{opt sym2}] [{opt actor:mode(#)}]
 [{opt tvcov(groups)}]
 [{opt beh:avior(namelist)} {opt beheff1(effects)} {opt beheff2(effects)} {opt beheff12(effects)} {opt beheff21(effects)} {opt behint(interactions)} {opt missbeh(namelist)}] [{opt theta0(numlist)}
-{opt fix(namelist)}] {opt k0(#)} {opt k3(#)} {opt firstg(#)} {opt seed(#)}]
+{opt fix(namelist)}] {opt k0(#)} {opt k3(#)} {opt firstg(#)} {opt seed(#)} {opt ci} {opt level(#)} {it:display_options}]
 
 {p 4 4 2}
 Two one-mode networks (directed, or undirected with {opt sym1}/{opt sym2}) on the same actors evolve together (RSiena: two dependent network variables; unconditional Method of Moments, rates per
@@ -697,7 +702,7 @@ checked before the set-up fit; an error after it leaves the set-up fit in {cmd:e
 {title:Refitting from the last estimates: nwsaom refit}
 
 {p 8 17 2}
-{cmd:nwsaom refit} [{cmd:,} {opt maxruns(#)} {opt k3(#)} {opt seed(#)} {opt cores(#)} {opt firstg(#)} {opt tconv(#)} {opt tmax(#)} {opt nodisp:lay}]
+{cmd:nwsaom refit} [{cmd:,} {opt maxruns(#)} {opt k3(#)} {opt seed(#)} {opt cores(#)} {opt firstg(#)} {opt tconv(#)} {opt tmax(#)} {opt nodisp:lay} {opt ci} {opt level(#)} {it:display_options}]
 
 {pstd}
 Runs the last {cmd:nwsaom} fit again, starting from its estimates: the counterpart of RSiena's {cmd:prevAns}. The command
@@ -716,6 +721,7 @@ Co-evolution models start their rates from the closed form, as with {opt theta0(
 {synopt:{opt tconv(#)}}convergence criterion of {opt maxruns()}: every |t| below #; default 0.1, as in RSiena{p_end}
 {synopt:{opt tmax(#)}}convergence criterion of {opt maxruns()}: overall maximum convergence ratio below #; default 0.25, as in RSiena{p_end}
 {synopt:{opt nodisp:lay}}show one line per run instead of the full output{p_end}
+{synopt:{opt ci}, {opt level(#)}, {it:display_options}}display options of the coefficient table ({opt ci}, {opt nopvalues}, {opt cformat()}, ...); given here, they replace those of the stored command{p_end}
 
 {pstd}
 Besides the results of the new fit, {cmd:e(refit_runs)} holds the number of runs and {cmd:e(refit_converged)} whether the last one met both

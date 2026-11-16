@@ -164,7 +164,11 @@ program nwsaom, eclass
 		RATECOV(string) RATECOVCOEF(string) BEHRATECOV(string) BEHRATE(string) BEHRATECOEF(string) SYMMETRIC SYMTYPE(string) ///
 		RATE0(numlist >0) THETA0(string) FIX(string) K0(integer 0) K3(integer 1000) ///
 		FIRSTG(real 0.2) SEED(integer -1) CORES(integer 0) UNCONDitional NOCENTER UNCENTERED(string) ///
-		ENDOW(string) CREATION(string) ACTORMODE(integer 0) TVCOV(string) DETail GROUPS(string) GWAVES(string) ]
+		ENDOW(string) CREATION(string) ACTORMODE(integer 0) TVCOV(string) DETail GROUPS(string) GWAVES(string) * ]
+	// display options of the coefficient table (ci, level(), noci, nopvalues, cformat(), ...); any other option is
+	// refused here with Stata's usual message. With ml they also apply to the table of nwsaom_ml.
+	local __ns_tabopts `"`options'"'
+	_nwsaom_tabopts __ns_t check, `__ns_tabopts'
 	set more off
 	mata: SaomRatesReset()
 
@@ -3580,7 +3584,8 @@ program nwsaom, eclass
 		di as text "Behaviors:" as result "`__ns_allbeh'"
 		if `__ns_isgrp' _nwsaom_groups show, groups(`groups') w(`__ns_gW')
 		di
-		ereturn display
+		_nwsaom_tabopts __ns_t, `__ns_tabopts'
+		ereturn display, `__ns_t'
 		di as text "{p 0 0 2}Rate parameters (estimated, one per inter-wave period; network, then each behavior):{p_end}"
 		matlist `ratetab', format(%9.4f) border(top bottom)
 
@@ -3656,7 +3661,8 @@ program nwsaom, eclass
 		di as text "Behavior: " as result "`=cond(`__ns_isgrp', "`__ns_gbehorig'", "`behavior'")'"
 		if `__ns_isgrp' _nwsaom_groups show, groups(`groups') w(`__ns_gW')
 		di
-		ereturn display
+		_nwsaom_tabopts __ns_t, `__ns_tabopts'
+		ereturn display, `__ns_t'
 		di as text "Rate parameters (estimated, one per inter-wave period):"
 		matlist `ratetab', format(%9.4f) border(top bottom)
 
@@ -3708,7 +3714,8 @@ program nwsaom, eclass
 		di as text "Actors: " as result `nodes' _col(40) as text "Network rate: " as result %6.3f `__ns_rate' as text " (" as result %5.3f `__ns_ratese' as text ")"
 		di as text "Behavior: " as result "`behavior'" _col(40) as text "Behavior rate: " as result %6.3f `__ns_ratebeh' as text " (" as result %5.3f `__ns_ratebehse' as text ")"
 		di
-		ereturn display
+		_nwsaom_tabopts __ns_t, `__ns_tabopts'
+		ereturn display, `__ns_t'
 		if "`symmetric'" != "" _nwsaom_sympost, val(`__ns_symtypeval') src(__nwsaom_fit_coev.rateNetActor) scalar
 	}
 	else if `__ns_multi' {
@@ -3764,7 +3771,8 @@ program nwsaom, eclass
 		if `__ns_isgrp' _nwsaom_groups show, groups(`groups') w(`__ns_gW')
 		if `__ns_tm' di as text "Two-mode network: " as result `__ns_tm_na' as text " actors choose among " as result `__ns_tm_ne' as text " events"
 		di
-		ereturn display
+		_nwsaom_tabopts __ns_t, `__ns_tabopts'
+		ereturn display, `__ns_t'
 		di as text "Rate parameters (estimated, one per inter-wave period):"
 		matlist `ratetab', format(%9.4f) border(top bottom)
 		if `__ns_iscond' & "`detail'" != "" di as text "(conditional: rate = mean time to reach the observed distance, se = its SD)"
@@ -3874,7 +3882,8 @@ program nwsaom, eclass
 		di as text "Actors: " as result `nodes' _col(40) as text "Estimated rate: " as result %6.3f `__ns_rate' as text " (" as result %5.3f `__ns_ratese' as text ")"
 		if `__ns_tm' di as text "Two-mode network: " as result `__ns_tm_na' as text " actors choose among " as result `__ns_tm_ne' as text " events"
 		di
-		ereturn display
+		_nwsaom_tabopts __ns_t, `__ns_tabopts'
+		ereturn display, `__ns_t'
 		if `__ns_iscond' & "`detail'" != "" di as text "(conditional: rate = mean time to reach the observed distance, se = its SD)"
 		if "`symmetric'" != "" di as text "(non-directed relation, model type " as result "`__ns_symtypenm'" as text " = RSiena modelType " as result "`__ns_mtnum'" as text ")"
 		if "`symmetric'" != "" & inlist(0`__ns_symtypeval', 1, 2, 3) {
@@ -3896,7 +3905,7 @@ program nwsaom, eclass
 	// in e(rsiena_labels), e(covmeans) and e(tconv); shown with detail
 	if "`detail'" != "" _nwsaom_rsnotes
 	_nwsaom_tconvtable, `detail'
-	if "`ml'" != "" nwsaom_ml, `mloptions'
+	if "`ml'" != "" nwsaom_ml, `mloptions' `__ns_tabopts'
 end
 
 
