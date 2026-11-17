@@ -64,9 +64,20 @@ foreach f in nwsaom*.ado _nwsaom*.ado {
 * no other copy of the plugin may be reachable through the adopath
 mata: st_local("pf", SaomNativePluginFilename())
 capture findfile `pf'
-while _rc == 0 {
+local __guard 0
+while _rc == 0 & `__guard' < 20 {
+	local ++__guard
 	local d = substr(`"`r(fn)'"', 1, length(`"`r(fn)'"') - length("`pf'") - 1)
-	adopath - `"`d'"'
+	capture adopath - `"`d'"'
+	if _rc {
+		* the plugin was found through a subdirectory of PLUS (installed layout): leave the PLUS folder out of the search
+		local __plus : sysdir PLUS
+		capture adopath - `"`__plus'"'
+		tempfile __emptyplus
+		local __ep `"`__emptyplus'_plus"'
+		capture mkdir `"`__ep'"'
+		sysdir set PLUS `"`__ep'"'
+	}
 	capture findfile `pf'
 }
 adopath ++ `"`scr'"'
