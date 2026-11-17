@@ -3,12 +3,17 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.8.0] - 2026-11-17
 
 ### Changed
-- **`nwsaom multiplex` with `theta01()`/`theta02()`** (the deprecated own estimator) stopped in phase 1 with Mata error 3301 (subscript invalid) when a start vector did not have one value per effect of its network (for example `crprod` with `theta02(-1 0 0)`: network B has two effects without `crprodb`). Such a vector is now refused with r(198) and a message that names the number of effects (three with `crprod`/`crprodb`, two without). Fits with a vector of the right length are unchanged.
 - Coefficient tables show the coefficient names in full by default: the confidence intervals are left out, as with `noci`, at a `linesize` below 100 (where names of up to 32 characters do not fit next to them); before, long names were cut (e.g. `nodematch_o~e`). The new option `ci`, or `level(#)` given explicitly, shows the intervals as before. The display options of Stata's estimation commands (`noci`, `nopvalues`, `cformat()`, `pformat()`, `sformat()` and the others of `ereturn display`) are accepted in fits, the replay (`nwsaom` alone, `estimates replay`), `nwsaom multinet`, `nwsaom multiplex`, `nwsaom_ml` (also through `ml`) and `nwsaom refit` (where they replace those of the stored command line). Tables whose names all fit, and all output outside the coefficient tables, are unchanged.
 - No more cut labels in the model tables: the rate tables (`matlist`, new helper `_nwsaom_matlist`) and the tables of `estat score` print effect and rate names in full (e.g. `behavior_rate`, `indegpopularity`) instead of cutting them to 12 characters (`behavior_r~e`); the columns are widened to the longest name, and with names of up to 12 characters the output is unchanged. The label in the corner of the coefficient tables is now `SAOM` in all tables of `nwsaom` (also `nwsaom multinet` and `nwsaom multiplex`): the waves are named in the header above, and Stata cut the former label (`glasgow1_to_glasgow2`) to the width of the name column (`glasgow1_t~3`). `e(depvar)` is `SAOM` accordingly.
+- The corner label of the coefficient tables reads `SAOM` and `e(depvar)` is `SAOM` (Stata cuts a long label to the width of the name column). The coefficient tables of `nwsaom`, `nwsaom ml`, `nwsaom multinet`, `nwsaom multiplex` and `nwsaom refit`, also on replay and after `estimates replay`, follow the rules above; `ci` together with `noci` stops with r(198). The other custom tables (`estat importance`, `estat timetest`, `estat gof`, `estat simulate`, `nwsaom meta`, `nwsaom bayes`) still cut long effect names to 12 or 20 characters.
+
+### Fixed
+- **`nwsaom multiplex` with `theta01()`/`theta02()`** (the deprecated own estimator) stopped in phase 1 with Mata error 3301 (subscript invalid) when a start vector did not have one value per effect of its network (for example `crprod` with `theta02(-1 0 0)`: network B has two effects without `crprodb`). Such a vector is now refused with r(198) and a message that names the number of effects (three with `crprod`/`crprodb`, two without). Fits with a vector of the right length are unchanged.
+
+Tested on macOS with Stata 17 BE, Stata 18 BE and StataNow 19.5 MP (the full test suite). Windows and Linux: not tested for this version; the package has no native or Mata change since 1.7.1.
 
 ## [1.7.1] - 2026-11-13
 
