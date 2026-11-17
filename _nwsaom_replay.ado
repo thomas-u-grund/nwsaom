@@ -65,12 +65,28 @@ program define _nwsaom_replay, rclass
 		local rn "rate se"
 		capture confirm matrix e(rates_beh)
 		if _rc == 0 {
-			matrix `tab' = `tab' \ e(rates_beh)
-			local rn "`rn' rate_beh"
+			// the labels of the table printed after the fit: network_rate / behavior_rate for one behavior,
+			// rate_<behavior> for several; each rate row is followed by its standard errors
+			local rn "network_rate se"
+			tempname rb rbse
+			matrix `rb' = e(rates_beh)
+			local nbeh = rowsof(`rb')
 			capture confirm matrix e(rates_beh_se)
-			if _rc == 0 {
-				matrix `tab' = `tab' \ e(rates_beh_se)
-				local rn "`rn' se_beh"
+			local hasbse = (_rc == 0)
+			if `hasbse' matrix `rbse' = e(rates_beh_se)
+			local bnames : rownames `rb'
+			forvalues b = 1/`nbeh' {
+				matrix `tab' = `tab' \ `rb'[`b', 1...]
+				if `nbeh' == 1 local rn "`rn' behavior_rate"
+				else {
+					local bn : word `b' of `bnames'
+					local bn = subinstr("`bn'", "rate_", "", 1)
+					local rn "`rn' rate_`bn'"
+				}
+				if `hasbse' {
+					matrix `tab' = `tab' \ `rbse'[`b', 1...]
+					local rn "`rn' se"
+				}
 			}
 		}
 		matrix rownames `tab' = `rn'

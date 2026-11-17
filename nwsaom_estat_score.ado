@@ -103,8 +103,37 @@ program define nwsaom_estat_score, rclass
 	tempname os
 	matrix `os' = __nwsaom_score_onestep
 	local onames `names'
-	forvalues i = `=`p'+1'/`nall' {
-		local onames `onames' rate`=`i'-`p''
+	// the rate parameters: the network rates of the periods first, then the rates of each behavior (named as in the rate
+	// table of the fit); another layout (several groups, for example) keeps the plain numbering
+	local nrates = `nall' - `p'
+	local np = e(nwaves) - 1
+	local nbeh 0
+	capture confirm matrix e(rates_beh)
+	if _rc == 0 {
+		tempname rbm
+		matrix `rbm' = e(rates_beh)
+		local nbeh = rowsof(`rbm')
+		local bnames : rownames `rbm'
+	}
+	if `np' >= 1 & `np' < . & `nrates' == `np' * (1 + `nbeh') {
+		forvalues k = 1/`np' {
+			local onames `onames' network_rate`k'
+		}
+		forvalues b = 1/`nbeh' {
+			if `nbeh' == 1 local bl "behavior_rate"
+			else {
+				local bn : word `b' of `bnames'
+				local bl "rate_`=subinstr("`bn'", "rate_", "", 1)'"
+			}
+			forvalues k = 1/`np' {
+				local onames `onames' `bl'`k'
+			}
+		}
+	}
+	else {
+		forvalues i = `=`p'+1'/`nall' {
+			local onames `onames' rate`=`i'-`p''
+		}
 	}
 	matrix colnames `os' = `onames'
 	di
