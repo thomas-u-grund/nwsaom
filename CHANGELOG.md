@@ -3,11 +3,13 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.8.1] - 2026-11-18
 
 ### Fixed
 - The rate table of a replayed fit (`nwsaom` without arguments, `nwsaom, ci`) uses the labels of the table printed after the fit: `network_rate`, `behavior_rate` (one behavior) or `rate_<behavior>` (several), each row followed by `se`. Before, the replay said `rate`, `rate_beh` and `se_beh`, and listed the standard errors after the rates. The numbers are unchanged.
 - `estat score`: the rate rows of the one-step table are named `network_rate1`, `network_rate2`, ... and `behavior_rate1`, ... (`rate_<behavior>1`, ... for several behaviors) instead of `rate1` to `rate4`; other layouts (several groups) keep the numbering.
+
+Tested on macOS with Stata 17 BE (the quick tests). Windows and Linux: not tested for this version; the package has no native or Mata change since 1.7.1.
 
 ## [1.8.0] - 2026-11-17
 

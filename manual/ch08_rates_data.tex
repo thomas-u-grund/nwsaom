@@ -97,8 +97,8 @@ Validation (s50, conditional estimation, two \texttt{siena07} seeds): all nine e
 The structural rate effects \opt{outrate}, \opt{outrateinv} and \opt{outratelog} are also available for non-directed and two-mode networks, where they are the only degree versions, as in RSiena. In a two-mode network \opt{ratecov()} is available as well, with constant covariates, with changing covariates (the stems declared in \opt{tvcov()} are written inside \opt{ratecov()}) and with the behavior of the actors as the covariate (this needs \opt{behavior()} and \opt{waves()}). The simulated $40\times20$ data of Section~\ref{sec:twomode}:
 \begin{lstlisting}
 . nwsaom, waves(tm1 tm2 tm3) outdegree cycle4 ratecov(age) outrate seed(1) k0(100) k3(1000)
-   outdegree |  -.9831879    .140031    -7.02   0.000    -1.257644   -.7087321
-      cycle4 |   .0823168   .0345298     2.38   0.017     .0146396    .1499941
+   outdegree |  -.9831879    .140031    -7.02   0.000
+      cycle4 |   .0823168   .0345298     2.38   0.017
 Rate parameters (estimated, one per inter-wave period):
         rate |    3.0559     3.3033
           se |    0.4330     0.4677
@@ -115,14 +115,14 @@ In a co-evolution model the rate of the behavior can depend on actor characteris
 \begin{lstlisting}
 . nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip behavior(smoke1 smoke2 smoke3 : linear quadratic avalt) behratecov(alcohol1) behrate(outrate) k0(100) k3(1000) seed(1)
 Rate parameters (estimated, one per inter-wave period):
------------------------------------
-             |   period1    period2
--------------+---------------------
-network_rate |    6.5112     5.3081
-          se |    1.4385     0.9347
-behavior_r~e |    1.2519     1.2129
-          se |    1.3106     1.0362
------------------------------------
+-------------------------------------
+              |   period1    period2
+--------------+----------------------
+ network_rate |    6.5112     5.3081
+           se |    1.4385     0.9347
+behavior_rate |    1.2519     1.2129
+           se |    1.3106     1.0362
+-------------------------------------
 Rate effect of the behavior (alcohol1):  0.4195 (se 0.4656)
 Rate effect of the behavior (outrate):  0.3039 (se 0.2800)
 Overall maximum convergence ratio: 0.180 (criterion: below 0.25; met)

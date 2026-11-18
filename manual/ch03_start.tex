@@ -64,13 +64,13 @@ The classical first model has three effects: the outdegree (density) effect, the
 SAOM (Method of Moments, conditional), waves: glasgow1 glasgow2 glasgow3
 Actors: 50                             Periods: 2
 
-------------------------------------------------------------------------------
-glasgow1_t~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
--------------+----------------------------------------------------------------
-   outdegree |  -2.675306   .1130571   -23.66   0.000    -2.896894   -2.453718
- reciprocity |   2.453519   .1841138    13.33   0.000     2.092662    2.814375
-   transtrip |   .6151182    .075624     8.13   0.000     .4668978    .7633385
-------------------------------------------------------------------------------
+-----------------------------------------------------
+        SAOM | Coefficient  Std. err.      z    P>|z|
+-------------+---------------------------------------
+   outdegree |  -2.675306   .1130571   -23.66   0.000
+ reciprocity |   2.453519   .1841138    13.33   0.000
+   transtrip |   .6151182    .075624     8.13   0.000
+-----------------------------------------------------
 Rate parameters (estimated, one per inter-wave period):
 
 ------------------------------------
@@ -87,12 +87,12 @@ The fit takes a second or two.
 \paragraph{Reading the output.}
 \begin{itemize}[nosep]
   \item The first line says that the model is estimated by the method of moments and, for a network-only model, conditionally (Section~\ref{sec:convergence}). \texttt{Periods: 2} are the periods between the three waves. With a two-wave model the line shows the estimated rate instead.
-  \item The coefficient table contains the parameters of the objective function with the standard errors from phase 3, the $z$-ratios and the confidence intervals. The label in the upper left corner shortens the name of the dependent network. A negative outdegree coefficient is typical: ties are rare, and an actor creates one only if the other effects make it worthwhile. The positive reciprocity coefficient says that actors prefer to reciprocate ties; the positive transitive triplets coefficient that they prefer to befriend friends of friends.
+  \item The coefficient table contains the parameters of the objective function with the standard errors from phase 3, the $z$-ratios. The label in the upper left corner is \texttt{SAOM}, and the coefficient names are shown in full. At a line size below 100 (Stata's default is 80) the confidence intervals are left out so that long names fit; the option \opt{ci} shows them (and cuts long names), as does \opt{level(\#)}. A negative outdegree coefficient is typical: ties are rare, and an actor creates one only if the other effects make it worthwhile. The positive reciprocity coefficient says that actors prefer to reciprocate ties; the positive transitive triplets coefficient that they prefer to befriend friends of friends.
   \item The rate parameters are listed per period below the table. Under conditional estimation the rate is the mean simulated time that the process needs, at rate 1 for every actor, to reproduce the observed amount of change, and the ``se'' is the standard deviation of that time. Under unconditional estimation the rates are estimated like the other parameters.
   \item The convergence $t$-ratios are discussed next.
 \end{itemize}
 
-\paragraph{Redisplaying the results.} \texttt{nwsaom} typed without options redisplays the results of the last fit without fitting again, as other Stata estimation commands do; \texttt{estimates replay} does the same. The display options \opt{level(\#)} (the width of the confidence intervals) and \opt{detail} may be given, for example \texttt{nwsaom, level(90)} or \texttt{nwsaom, detail}. A fit that was stored with \texttt{estimates store} can be redisplayed after \texttt{estimates restore}.
+\paragraph{Redisplaying the results.} \texttt{nwsaom} typed without options redisplays the results of the last fit without fitting again, as other Stata estimation commands do; \texttt{estimates replay} does the same. The display options \opt{ci} (show the confidence intervals), \opt{level(\#)} (their level; giving it also shows them), \opt{detail} and the display options of Stata's estimation commands (\opt{noci}, \opt{nopvalues}, \opt{cformat()}, \opt{pformat()}, \opt{sformat()}, \ldots) may be given, for example \texttt{nwsaom, ci level(90)} or \texttt{nwsaom, detail}. A fit that was stored with \texttt{estimates store} can be redisplayed after \texttt{estimates restore}.
 
 \paragraph{Checking convergence.} All $t$-ratios should be smaller than $0.1$ in absolute value, and the overall maximum convergence ratio smaller than $0.25$. In the example the overall ratio is $0.123$ and all three individual ratios are below $0.1$, so both criteria are met. When they are not, RSiena's advice is to run the estimation again from the current estimates. In \nwsaom{} that is done with \opt{theta0()}, which takes the starting values of the coefficients in the order of \texttt{e(b)}. An example with covariates, where the starting values are taken from the first fit:
 \begin{lstlisting}
@@ -108,17 +108,17 @@ Covariates are selected by options named after RSiena's effects. The first of th
 \begin{lstlisting}
 . nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip samex(smoke1) egox(alcohol1) altx(alcohol1) simx(alcohol1) seed(2) detail
 ...
--------------------------------------------------------------------------------
-glasgow1_to~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
---------------+----------------------------------------------------------------
-    outdegree |  -2.779783   .1599143   -17.38   0.000    -3.093209   -2.466357
-  reciprocity |   2.422549   .1902843    12.73   0.000     2.049599    2.795499
- samex_smoke1 |   .1141395   .1806006     0.63   0.527    -.2398312    .4681102
-altx_alcohol1 |  -.0332311   .0760984    -0.44   0.662    -.1823812    .1159189
-egox_alcohol1 |   .0600181   .0834505     0.72   0.472    -.1035418     .223578
-    transtrip |   .6238508    .076142     8.19   0.000     .4746151    .7730864
-simx_alcohol1 |   .5879409   .3007171     1.96   0.051    -.0014538    1.177336
--------------------------------------------------------------------------------
+------------------------------------------------------
+         SAOM | Coefficient  Std. err.      z    P>|z|
+--------------+---------------------------------------
+    outdegree |  -2.779783   .1599143   -17.38   0.000
+  reciprocity |   2.422549   .1902843    12.73   0.000
+ samex_smoke1 |   .1141395   .1806006     0.63   0.527
+altx_alcohol1 |  -.0332311   .0760984    -0.44   0.662
+egox_alcohol1 |   .0600181   .0834505     0.72   0.472
+    transtrip |   .6238508    .076142     8.19   0.000
+simx_alcohol1 |   .5879409   .3007171     1.96   0.051
+------------------------------------------------------
 ...
 RSiena effect names:
   samex_smoke1                  same smoke1
@@ -139,12 +139,12 @@ Two waves can be given as \opt{wave1()} and \opt{wave2()}. The rate is then a sc
 SAOM (Method of Moments, conditional), waves: glasgow1 -> glasgow2
 Actors: 50                             Estimated rate:  5.552 (0.856)
 
-------------------------------------------------------------------------------
-glasgow1_t~2 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
--------------+----------------------------------------------------------------
-   outdegree |   -2.26413    .127996   -17.69   0.000    -2.514997   -2.013262
- reciprocity |    2.50883   .2328995    10.77   0.000     2.052355    2.965304
-------------------------------------------------------------------------------
+-----------------------------------------------------
+        SAOM | Coefficient  Std. err.      z    P>|z|
+-------------+---------------------------------------
+   outdegree |   -2.26413    .127996   -17.69   0.000
+ reciprocity |    2.50883   .2328995    10.77   0.000
+-----------------------------------------------------
 Overall maximum convergence ratio: 0.178 (criterion: below 0.25; met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 \end{lstlisting}
@@ -159,27 +159,27 @@ SAOM co-evolution (Method of Moments), waves: glasgow1 glasgow2 glasgow3
 Actors: 50                             Periods: 2
 Behavior: alcohol1 alcohol2 alcohol3
 
--------------------------------------------------------------------------------
-glasgow1_to~3 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
---------------+----------------------------------------------------------------
-    outdegree |   -2.76126   .1460683   -18.90   0.000    -3.047548   -2.474971
-  reciprocity |    2.35587   .1982928    11.88   0.000     1.967223    2.744517
-    transtrip |    .621357   .0803867     7.73   0.000      .463802    .7789121
-       behsim |   1.460717   .6218014     2.35   0.019      .242009    2.679426
-   beh_linear |   .3948453   .2135712     1.85   0.064    -.0237465    .8134372
-beh_quadratic |  -.6002813    .320045    -1.88   0.061    -1.227558    .0269954
-    beh_avalt |   1.305018   .7780128     1.68   0.093    -.2198586    2.829896
--------------------------------------------------------------------------------
+------------------------------------------------------
+         SAOM | Coefficient  Std. err.      z    P>|z|
+--------------+---------------------------------------
+    outdegree |   -2.76126   .1460683   -18.90   0.000
+  reciprocity |    2.35587   .1982928    11.88   0.000
+    transtrip |    .621357   .0803867     7.73   0.000
+       behsim |   1.460717   .6218014     2.35   0.019
+   beh_linear |   .3948453   .2135712     1.85   0.064
+beh_quadratic |  -.6002813    .320045    -1.88   0.061
+    beh_avalt |   1.305018   .7780128     1.68   0.093
+------------------------------------------------------
 Rate parameters (estimated, one per inter-wave period):
 
-------------------------------------
-             |   period1    period2
--------------+----------------------
-network_rate |    6.4944     5.1666
-          se |    1.2965     0.8975
-behavior_r~e |    1.3126     1.8015
-          se |    0.3471     0.4619
-------------------------------------
+-------------------------------------
+              |   period1    period2
+--------------+----------------------
+ network_rate |    6.4944     5.1666
+           se |    1.2965     0.8975
+behavior_rate |    1.3126     1.8015
+           se |    0.3471     0.4619
+-------------------------------------
 Overall maximum convergence ratio: 0.138 (criterion: below 0.25; met)
 Convergence t-ratios (criterion: all below 0.1 in absolute value): met
 \end{lstlisting}

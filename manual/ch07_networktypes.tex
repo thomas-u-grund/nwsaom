@@ -342,7 +342,7 @@ To refit starting from these estimates, type nwsaom refit.
 \end{lstlisting}
 This fit has not converged by the two criteria (the overall ratio is 0.285); before it is reported it would be continued from its estimates with \texttt{nwsaom refit}, as Chapter~\ref{ch:estimation} explains. Twenty cross effects were validated against \texttt{siena07} for a non-directed first network with a directed second one (for example \opt{crprod from fromany to closure clxwx mixedinxw joutmix outpopintn outactintn avdegintn doubleoutact sharedto inpopoutw}).
 
-\paragraph{Earlier subcommand.} The older \texttt{nwsaom multiplex} (two directed networks, exactly two waves each, \texttt{outdegree}, \texttt{reciprocity} and the cross effect \texttt{crprod}/\texttt{crprodb} only) still exists but is deprecated and prints a note; use \texttt{nwsaom multinet}, which generalises it and will replace it. Its coefficients are named as in \texttt{nwsaom multinet}: \texttt{net1\_outdegree}, \texttt{net1\_reciprocity}, \texttt{net1\_x\_crprod} (from \opt{crprod}), \texttt{net2\_outdegree}, \texttt{net2\_reciprocity} and \texttt{net2\_x\_crprod} (from \opt{crprodb}), with and without starting values \opt{theta01()}/\opt{theta02()}. No \texttt{estat} command and no \texttt{nwsaom refit} is available after it (\texttt{estat} stops with return code 321); fit the model with \texttt{nwsaom multinet} to use them.
+\paragraph{Earlier subcommand.} The older \texttt{nwsaom multiplex} (two directed networks, exactly two waves each, \texttt{outdegree}, \texttt{reciprocity} and the cross effect \texttt{crprod}/\texttt{crprodb} only) still exists but is deprecated and prints a note; use \texttt{nwsaom multinet}, which generalises it and will replace it. Its coefficients are named as in \texttt{nwsaom multinet}: \texttt{net1\_outdegree}, \texttt{net1\_reciprocity}, \texttt{net1\_x\_crprod} (from \opt{crprod}), \texttt{net2\_outdegree}, \texttt{net2\_reciprocity} and \texttt{net2\_x\_crprod} (from \opt{crprodb}), with and without starting values \opt{theta01()}/\opt{theta02()}. A starting vector needs one value per effect of its network (three with \opt{crprod}/\opt{crprodb}, two without); another length stops with return code 198. No \texttt{estat} command and no \texttt{nwsaom refit} is available after it (\texttt{estat} stops with return code 321); fit the model with \texttt{nwsaom multinet} to use them.
 
 \subsection{Further cross-network effects}
 Besides the families above, the following cross-network effects exist: \texttt{toany}, \texttt{betweenpop} and \texttt{gwespmix} (equal to \texttt{gwespfbmix}); RSiena's \texttt{from.w.ind} as \texttt{fromwindoo} (the other network for both the agreement and the in-degree weights), \texttt{fromwindow} (agreement in the other network, weights from the own) and \texttt{fromwindwo} (agreement in the own, weights from the other). With a \emph{dyadic covariate}, written \emph{effect}\texttt{:}\emph{matrix}[\texttt{:}\emph{\#}] with a Stata matrix, there are \texttt{tou}, \texttt{sharedtou} and \texttt{avaltutie} (RSiena's \texttt{toU}, \texttt{sharedToU}, \texttt{avAltU.2M.tie}), for example \opt{cross1(sharedtou:W:1)}. As in the current RSiena, \texttt{tou} counts for the ego $i$ and the alter $j$ the actors $q$ with a tie $i\to q$ in the \emph{other} network and a tie $q\to j$ in the own network, each weighted by the covariate value for $(i,q)$. A covariate that changes between waves is declared with \opt{tvcov(a1 a2 a3)}, one variable per period, and used by its stem in the covariate cross effects: \opt{cross1(samewxclosure:a)}; this does not apply to the three similarity effects.
@@ -360,14 +360,14 @@ One of the two networks may be two-mode (declared with \texttt{nwset, bipartite}
 \begin{lstlisting}
 . nwsaom multinet, net1(tm1 tm2 tm3) net2(fr1 fr2 fr3) eff1(outdegree) eff2(outdegree reciprocity) cross1(to) seed(1) k0(100) k3(1000)
 Several co-evolving networks (Method of Moments), 3 waves, 40 actors and 20 events (network 1 is two-mode)
------------------------------------------------------------------------------------
-                  | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
-------------------+----------------------------------------------------------------
-   net1_outdegree |  -.8501347   .1316513    -6.46   0.000    -1.108167   -.5921028
-        net1_x_to |   .2510078   .1819668     1.38   0.168    -.1056406    .6076562
-   net2_outdegree |  -1.146603   .0953186   -12.03   0.000    -1.333424   -.9597825
- net2_reciprocity |   .3832283   .2964688     1.29   0.196      -.19784    .9642965
------------------------------------------------------------------------------------
+----------------------------------------------------------
+              SAOM | Coefficient  Std. err.      z    P>|z|
+------------------+---------------------------------------
+   net1_outdegree |  -.8501347   .1316513    -6.46   0.000
+        net1_x_to |   .2510078   .1819668     1.38   0.168
+   net2_outdegree |  -1.146603   .0953186   -12.03   0.000
+ net2_reciprocity |   .3832283   .2964688     1.29   0.196
+----------------------------------------------------------
 Rates (estimated):
 
 ---------------------------------
