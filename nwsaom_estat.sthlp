@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.8.1  18nov2026 author: Thomas Grund}{...}
+{* *! version 1.9.0  20nov2026 author: Thomas Grund}{...}
 
 {title:Title}
 
@@ -62,7 +62,7 @@ with {opt join(off)} each period gets its own graph instead, e.g. {it:name}{cmd:
 {synopt:{opt join(off)}}Run a SEPARATE Mahalanobis test (and violin) per wave-period instead of the default pooled/summed one - real RSiena's own {cmd:join=FALSE} (non-default); omit for the default
 pooled behavior ({cmd:join=TRUE}){p_end}
 {synopt:{opt saving(filename)}}Save every violin graph as a {cmd:.gph} file; with several graphs, and always after {opt groups()}, the graph name is put before the extension (e.g. {cmd:gof.gph} gives {cmd:gof_gof_outdegree.gph}){p_end}
-{synopt:{opt export(filename [, options])}}Export every violin graph with {help graph export} (the extension of the file name sets the format; same naming as {opt saving()}){p_end}
+{synopt:{opt export(filename [, options])}}Export every violin graph with {help graph export} (the extension of the file name sets the format; same naming as {opt saving()}); {opt saving()}, {opt export()} and graph options need nwcommands 3.29.0 or later{p_end}
 {synopt:{it:graph_options}}Any {help twoway_options}, for example {cmd:title()} or {cmd:scheme()}; they are passed to every violin graph{p_end}
 {synoptline}
 
@@ -286,7 +286,7 @@ per effect and period the one-step estimate of the deviation with its separate t
 {opt plot} draws RSiena's {cmd:plot.sienaTimeTest}: one panel per tested effect with the parameter value in each period, that is the estimate of the fit (period 1) and the
 estimate plus the one-step deviation (later periods), with the 90, 95 and 97.5 percent intervals of the deviation (from its one-step standard error); the horizontal line is the estimate of the fit and a period with
 a deviation at P < 0.05 is drawn in red. {opt name()} names the combined graph (default {cmd:timetest}), {opt saving()} saves it, {opt export()} exports it with {help graph export}, and further graph options go to
-{help graph combine}. They need {opt plot} (r(198)).
+{help graph combine}. They need {opt plot} (r(198)); the plot options need nwcommands 3.29.0 or later.
 
 {pstd}
 By default the rate parameters are treated as estimated, so the tests are the score tests of the models that add one fixed period dummy to the fit
@@ -318,7 +318,7 @@ Lists the t-ratios for convergence of the last method-of-moments fit ({cmd:e(tco
 RSiena calls the estimation converged when every t-ratio is below 0.1 in absolute value and the overall ratio below 0.25. {opt plot} draws the t-ratios as a dot chart with the
 limits of 0.1 (RSiena prints the ratios in its table only, so the graph is an extension); {opt name()} names the graph (default {cmd:convergence}), {opt saving()} saves it,
 {opt export()} exports it and graph options go to {help twoway}. Returns {cmd:r(tconv_max)}, {cmd:r(n_notconverged)} and {cmd:r(tconv)}. It needs the estimates only, not the model in memory;
-it stops with r(498) after an estimate without convergence t-ratios (maximum likelihood, Bayesian).
+it stops with r(498) after an estimate without convergence t-ratios (maximum likelihood, Bayesian). The plot options need nwcommands 3.29.0 or later.
 
 
 {marker estat_importance}{...}
@@ -428,4 +428,4 @@ Duxbury, S.W., Zhao, X. {cmd:netmediate}: Micro-Macro Analysis for Social Networ
 	{help nwsaom}
 
 {hline}
-{pstd}{it:nwsaom version 1.8.1, 18 November 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.9.0, 20 November 2026}{p_end}{* nwversion}

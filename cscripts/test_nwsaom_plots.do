@@ -12,6 +12,34 @@ adopath ++ `"`nwcore'"'
 adopath ++ `"`c(pwd)'"'
 local out `"`c(tmpdir)'/nwsaom_plots_test"'
 capture mkdir `"`out'"'
+
+* ---- default pictures of estat gof unchanged: identical PNG files with the released nwsaom (reference directory from NWSAOM_PLOT_REF)
+* Produce the reference with the released main after `cscript`: global NWP_OUT <dir>, do cscripts/nwsaom_plots_defaults.do
+local ref : env NWSAOM_PLOT_REF
+if `"`ref'"' == "" {
+	di as text "  SKIPPED: default pictures vs released nwsaom (set NWSAOM_PLOT_REF)"
+}
+else {
+	global NWP_OUT `"`out'/defaults"'
+	do cscripts/nwsaom_plots_defaults.do
+	local nfail 0
+	local files gof_outdegree gof_indegree gof_geodesic gof_named gof_gg_g1 gof_gg_g2 gof_gg_g3
+	foreach f of local files {
+		quietly checksum `"`ref'/`f'.png"'
+		local c0 = r(checksum)
+		local s0 = r(filelen)
+		quietly checksum `"$NWP_OUT/`f'.png"'
+		if `c0' != r(checksum) | `s0' != r(filelen) {
+			di as error "  FAIL: default picture `f' differs from the released nwsaom"
+			local ++nfail
+		}
+	}
+	if `nfail' > 0 exit 9
+	di as text "  PASS: default gof pictures identical to the released nwsaom (`: word count `files'' files)"
+	nwclear
+	nwwebuse glasgow
+	nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip k0(15) k3(40) seed(12345)
+}
 nwclear
 nwwebuse glasgow
 nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip k0(15) k3(40) seed(12345)
@@ -123,4 +151,19 @@ graph describe cv2
 capture estat timetest, plot
 assert _rc == 198
 di as text "  PASS: error paths"
+* ---- an older core (no _nw_gfinish): a clear message and r(199) at plot time; the commands without plot options still work
+capture program drop _nw_gfinish
+program define _nw_gfinish
+	exit 199
+end
+nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip k0(15) k3(40) seed(12345)
+estat convergence
+capture estat convergence, plot
+assert _rc == 199
+capture estat timetest, plot
+assert _rc == 199
+capture estat gof, nsim(5) seed(1)
+assert _rc == 199
+capture program drop _nw_gfinish
+di as text "  PASS: old core message and r(199)"
 di as text "ALL TESTS PASSED"

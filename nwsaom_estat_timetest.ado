@@ -1,4 +1,4 @@
-*! version 1.8.1  18nov2026 nwcommands: estat timetest after nwsaom
+*! version 1.9.0  20nov2026 nwcommands: estat timetest after nwsaom
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -26,9 +26,16 @@ program define nwsaom_estat_timetest, rclass
 	_nwsaom_libcheck
 	syntax [, EFFects(string) FIXRates PLOT NAME(string) SAVing(string) EXPort(string asis) *]
 	local __gopts `"`options'"'
-	if "`plot'" == "" & (`"`saving'`export'`__gopts'"' != "" | "`name'" != "") {
-		di as err "{p 0 0 2}name(), saving(), export() and graph options need {bf:plot}.{p_end}"
-		exit 198
+	// the plot options need the shared graph helper of the core (3.29.0 or later); without them the command works with an older core
+	if "`plot'" != "" | `"`name'`saving'`export'`__gopts'"' != "" {
+		capture _nw_gfinish version
+		if _rc | r(api) < 1 {
+			di as err `"{p 0 0 2}estat timetest, plot needs nwcommands 3.29.0 or later (the installed core is older). Update: {stata ado update nwcommands:ado update nwcommands}, or run nwinstall.{p_end}"'
+			exit 199
+		}
+		_nw_gfinish check, plot(`plot') name(`"`name'"') saving(`"`saving'"') export(`"`export'"') gopts(`"`__gopts'"') default(timetest) cmd(estat timetest)
+		local name `"`r(name)'"'
+		local saving `"`r(saving)'"'
 	}
 
 	if !inlist(`"`e(cmd)'"', "nwsaom", "nwsaom_multinet") {
@@ -160,7 +167,6 @@ capture program drop nwsaom_tt_plot
 program define nwsaom_tt_plot
 	syntax , IND(name) IDX(name) B(name) NPER(integer) [NAME(string) SAVing(string) EXPort(string asis) *]
 	local __opts `"`options'"'
-	if "`name'" == "" local name "timetest"
 	local names : colnames `b'
 	local ne = colsof(`idx')
 	local graphs ""
@@ -212,12 +218,12 @@ program define nwsaom_tt_plot
 		drop lo1 hi1 lo2 hi2 lo3 hi3
 		local graphs "`graphs' `g'"
 	}
-	local ttl `"title("Time heterogeneity: parameter value by period", size(medium))"'
-	if strpos(`"`__opts'"', "title(") local ttl
+	_nw_gfinish title "Time heterogeneity: parameter value by period", gopts(`"`__opts'"')
+	local ttl `"`r(t)'"'
 	graph combine `graphs', cols(`=min(`ne', cond(`ne' > 4, 3, 2))') `ttl' note("grey/red bars: 90, 95 and 97.5% intervals of the one-step deviation; red: P < 0.05; line: estimate of the model", size(vsmall)) name(`name', replace) `__opts'
 	foreach g of local graphs {
 		capture graph drop `g'
 	}
 	restore
-	_nwsaom_gfin `name', saving(`saving') export(`export')
+	_nw_gfinish save, name(`name') saving(`"`saving'"') export(`"`export'"')
 end

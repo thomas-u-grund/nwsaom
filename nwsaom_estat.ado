@@ -1,4 +1,4 @@
-*! version 1.8.1  18nov2026 nwcommands: post-estimation for nwsaom (harmonisation units 21+26, RSiena-faithful GOF + co-evolution, N-wave)
+*! version 1.9.0  20nov2026 nwcommands: post-estimation for nwsaom (harmonisation units 21+26, RSiena-faithful GOF + co-evolution, N-wave)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -248,6 +248,13 @@ capture program drop nwsaom_estat_gof
 program define nwsaom_estat_gof, rclass
 	syntax [, NSIM(integer 50) SEED(integer -1) STATS(string) MAXDEG(integer 15) ///
 		MAXDIST(integer 6) TWOTAILED NAME(string) JOIN(string) GRP(integer 0) SAVing(string) EXPort(string asis) *]
+	capture _nw_gfinish version
+	if _rc | r(api) < 1 {
+		di as err `"{p 0 0 2}estat gof needs nwcommands 3.29.0 or later (the installed core is older). Update: {stata ado update nwcommands:ado update nwcommands}, or run nwinstall.{p_end}"'
+		exit 199
+	}
+	_nw_gfinish check, always name(`"`name'"') saving(`"`saving'"') export(`"`export'"') gopts(`"`options'"') default(gof) cmd(estat gof)
+	local saving `"`r(saving)'"'
 	// graph options go to every violin plot (they are read by nwsaom_estat_gofviolin)
 	mata: __nwsaom_gofopts = st_local("options")
 
@@ -682,7 +689,7 @@ program define nwsaom_estat_gof, rclass
 		local __gof_line "`__gof_line' `__g'"
 	}
 	di as txt "`__gof_line'"
-	_nwsaom_gfin `__gof_graphs', saving(`saving') export(`export') `=cond(e(ngroups) < ., "always", "")'
+	_nw_gfinish save, graphs(`__gof_graphs') saving(`"`saving'"') export(`"`export'"') `=cond(e(ngroups) < ., "always", "")'
 
 	capture mata: mata drop __nwsaom_gof_cfg
 	foreach __gof_s of local stats {
@@ -712,6 +719,13 @@ capture program drop nwsaom_estat_gofmb
 program define nwsaom_estat_gofmb, rclass
 	syntax [, NSIM(integer 50) SEED(integer -1) STATS(string) MAXDEG(integer 15) ///
 		MAXDIST(integer 6) TWOTAILED NAME(string) JOIN(string) GRP(integer 0) SAVing(string) EXPort(string asis) *]
+	capture _nw_gfinish version
+	if _rc | r(api) < 1 {
+		di as err `"{p 0 0 2}estat gof needs nwcommands 3.29.0 or later (the installed core is older). Update: {stata ado update nwcommands:ado update nwcommands}, or run nwinstall.{p_end}"'
+		exit 199
+	}
+	_nw_gfinish check, always name(`"`name'"') saving(`"`saving'"') export(`"`export'"') gopts(`"`options'"') default(gof) cmd(estat gof)
+	local saving `"`r(saving)'"'
 	// graph options go to every violin plot (they are read by nwsaom_estat_gofviolin)
 	mata: __nwsaom_gofopts = st_local("options")
 	if !inlist("`join'", "", "off") {
@@ -813,7 +827,7 @@ program define nwsaom_estat_gofmb, rclass
 		local line "`line' `g'"
 	}
 	di as txt "`line'"
-	_nwsaom_gfin `graphs', saving(`saving') export(`export') `=cond(e(ngroups) < ., "always", "")'
+	_nw_gfinish save, graphs(`graphs') saving(`"`saving'"') export(`"`export'"') `=cond(e(ngroups) < ., "always", "")'
 	foreach k of local keys {
 		capture mata: mata drop __nwsaom_gof_obs_`k' __nwsaom_gof_sim_`k'
 		forvalues pd = 1/`nper' {
@@ -1303,10 +1317,11 @@ program define nwsaom_estat_gofviolin
 	// needs `horizontal'; every other layer is plotted in its normal,
 	// default (y, x) orientation - a fixed category position on X, the
 	// actual statistic value on Y.
-	local __gv_ttl `"title("`title'", size(small))"'
 	local __gv_opts ""
 	capture mata: st_local("__gv_opts", __nwsaom_gofopts)
-	if strpos(`"`__gv_opts'"', "title(") local __gv_ttl
+	// released look kept: plain title in size small (noblack); a title() of the user replaces it
+	_nw_gfinish title `"`title'"', gopts(`"`__gv_opts'"') noblack size(small)
+	local __gv_ttl `"`r(t)'"'
 	twoway (rarea vxlo vxhi vy, horizontal fcolor(gs14) lcolor(gs10) lwidth(vthin)) ///
 		(rcap bp75 bp25 cat, lcolor(black) lwidth(medium)) ///
 		(scatter bmedian cat, msymbol(diamond) mcolor(black) msize(small)) ///

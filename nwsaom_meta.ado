@@ -1,4 +1,4 @@
-*! version 1.8.1  18nov2026 nwcommands: multi-group meta-analysis of separate nwsaom fits (RSiena's siena08)
+*! version 1.9.0  20nov2026 nwcommands: multi-group meta-analysis of separate nwsaom fits (RSiena's siena08)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -16,9 +16,16 @@ program nwsaom_meta, rclass
 	_nwsaom_libcheck
 	syntax namelist(min=2) [, BOUND(real 10) ALPHA(real 0.05) MAXIT(integer 20) RATES NOTABLE PLOT NAME(string) SAVing(string) EXPort(string asis) *]
 	local __gopts `"`options'"'
-	if "`plot'" == "" & (`"`saving'`export'`__gopts'"' != "" | "`name'" != "") {
-		di "{p 0 0 2}{err}name(), saving(), export() and graph options need {bf:plot}.{p_end}"
-		error 198
+	// the plot options need the shared graph helper of the core (3.29.0 or later); without them the command works with an older core
+	if "`plot'" != "" | `"`name'`saving'`export'`__gopts'"' != "" {
+		capture _nw_gfinish version
+		if _rc | r(api) < 1 {
+			di as err `"{p 0 0 2}nwsaom meta, plot needs nwcommands 3.29.0 or later (the installed core is older). Update: {stata ado update nwcommands:ado update nwcommands}, or run nwinstall.{p_end}"'
+			exit 199
+		}
+		_nw_gfinish check, plot(`plot') name(`"`name'"') saving(`"`saving'"') export(`"`export'"') gopts(`"`__gopts'"') default(meta) cmd(nwsaom meta)
+		local name `"`r(name)'"'
+		local saving `"`r(saving)'"'
 	}
 	if `alpha' <= 0 | `alpha' >= 1 {
 		di "{err}{bf:alpha()} must be between 0 and 1."
@@ -176,7 +183,6 @@ capture program drop nwsaom_meta_plot
 program define nwsaom_meta_plot
 	syntax , THETA(name) SE(name) BOUND(real) [NAME(string) SAVing(string) EXPort(string asis) *]
 	local __opts `"`options'"'
-	if "`name'" == "" local name "meta"
 	local cn : colnames `theta'
 	local ne = colsof(`theta')
 	local ng = rowsof(`theta')
@@ -210,13 +216,13 @@ program define nwsaom_meta_plot
 		di as err "no effect has a group with a standard error below bound()"
 		exit 498
 	}
-	local ttl `"title("Meta-analysis: estimates and standard errors of the groups", size(medium))"'
-	if strpos(`"`__opts'"', "title(") local ttl
+	_nw_gfinish title "Meta-analysis: estimates and standard errors of the groups", gopts(`"`__opts'"')
+	local ttl `"`r(t)'"'
 	local np : word count `graphs'
 	graph combine `graphs', cols(`=min(`np', 3)') `ttl' note("dashed: estimate = +-1.96 standard errors", size(vsmall)) name(`name', replace) `__opts'
 	foreach g of local graphs {
 		capture graph drop `g'
 	}
 	restore
-	_nwsaom_gfin `name', saving(`saving') export(`export')
+	_nw_gfinish save, name(`name') saving(`"`saving'"') export(`"`export'"')
 end

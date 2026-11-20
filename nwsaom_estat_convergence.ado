@@ -1,4 +1,4 @@
-*! version 1.8.1  18nov2026 nwcommands: estat convergence after nwsaom (convergence t-ratios of the estimation, with a plot)
+*! version 1.9.0  20nov2026 nwcommands: estat convergence after nwsaom (convergence t-ratios of the estimation, with a plot)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -18,9 +18,17 @@ program define nwsaom_estat_convergence, rclass
 		di as err "last nwsaom estimates not found"
 		exit 301
 	}
-	if "`plot'" == "" & (`"`saving'`export'`__gopts'"' != "" | "`name'" != "") {
-		di as err "{p 0 0 2}name(), saving(), export() and graph options need {bf:plot}.{p_end}"
-		exit 198
+	// the plot options need the shared graph helper of the core (3.29.0 or later); without them the command works with an older core
+	if "`plot'" != "" | `"`name'`saving'`export'`__gopts'"' != "" {
+		capture _nw_gfinish version
+		if _rc | r(api) < 1 {
+			di as err `"{p 0 0 2}estat convergence, plot needs nwcommands 3.29.0 or later (the installed core is older). Update: {stata ado update nwcommands:ado update nwcommands}, or run nwinstall.{p_end}"'
+			exit 199
+		}
+		_nw_gfinish check, plot(`plot') name(`"`name'"') saving(`"`saving'"') export(`"`export'"') gopts(`"`__gopts'"') default(convergence) cmd(estat convergence)
+		local name `"`r(name)'"'
+		local nameopt `"`r(nameopt)'"'
+		local saving `"`r(saving)'"'
 	}
 	capture confirm matrix e(tconv)
 	if _rc {
@@ -53,7 +61,6 @@ program define nwsaom_estat_convergence, rclass
 	di as txt "{hline `w1'}{c BT}{hline 22}"
 	di as txt "Overall maximum convergence ratio: " as res %6.3f `tmax' as txt cond(`tmax' < 0.25 & `nbad' == 0, " (converged: every |t| < 0.1 and overall < 0.25)", cond(`tmax' < 0.25, " (overall < 0.25, but not every |t| < 0.1)", " (not converged: overall >= 0.25)"))
 	if "`plot'" != "" {
-		if "`name'" == "" local name "convergence"
 		preserve
 		quietly drop _all
 		quietly set obs `K'
@@ -70,16 +77,16 @@ program define nwsaom_estat_convergence, rclass
 		quietly summarize t, meanonly
 		local xhi = max(0.12, abs(r(min)) * 1.1, abs(r(max)) * 1.1)
 		local xlo = -`xhi'
-		local ttl `"title("Convergence t-ratios")"'
-		if strpos(`"`__gopts'"', "title(") local ttl
+		_nw_gfinish title "Convergence t-ratios", gopts(`"`__gopts'"')
+		local ttl `"`r(t)'"'
 		twoway (rspike zero t pos if !bad, horizontal lcolor(gs10)) (rspike zero t pos if bad, horizontal lcolor(red)) ///
 			(scatter pos t if !bad, mcolor(black) msymbol(circle)) (scatter pos t if bad, mcolor(red) msymbol(circle)), ///
 			xline(-0.1 0.1, lpattern(dash) lcolor(gs8)) xline(0, lcolor(gs12)) ylabel(`yl', angle(0) valuelabel nogrid labsize(small)) yscale(reverse) ///
 			xscale(range(`xlo' `xhi')) xtitle("t-ratio for convergence (dashed: |t| = 0.1)") ytitle("") legend(off) ///
 			note("Overall maximum convergence ratio `=string(`tmax', "%5.3f")' (RSiena: below 0.25)", size(small)) ///
-			`ttl' name(`name', replace) `__gopts'
+			`ttl' `nameopt' `__gopts'
 		restore
-		_nwsaom_gfin `name', saving(`saving') export(`export')
+		_nw_gfinish save, name(`name') saving(`"`saving'"') export(`"`export'"')
 	}
 	return scalar tconv_max = `tmax'
 	return scalar n_notconverged = `nbad'

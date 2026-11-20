@@ -1,4 +1,4 @@
-*! version 1.8.1  18nov2026 nwcommands: e() results of nwsaom posted after the fit (options as given, fit identifier)
+*! version 1.9.0  20nov2026 nwcommands: e() results of nwsaom posted after the fit (options as given, fit identifier)
 * Copyright (C) 2026 Thomas U. Grund
 * This file is part of nwsaom, a Stata package derived from the R package 'RSiena' (Ripley, R. M., Snijders, T. A. B., Boda, Z., Voros, A., Preciado, P. and contributors; GPL-2 | GPL-3).
 * nwsaom is free software: you can redistribute it and/or modify it under the terms of the GNU General

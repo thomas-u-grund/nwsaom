@@ -3,9 +3,9 @@ d nwsaom. Stochastic actor-oriented models (SAOM; Snijders) for network and beha
 d Thomas U. Grund, RWTH Aachen University, www.grund.co.uk
 d email: thomas.u.grund@gmail.com
 d GPL-3. Requires the core package nwcommands.
-d Requires nwcommands (core), version 3.24.0 or later
-d Version: 1.8.1
-d Distribution-Date: 18nov2026
+d Requires nwcommands (core), version 3.29.0 or later
+d Version: 1.9.0
+d Distribution-Date: 20nov2026
 f _nwsaom_chkbin.ado
 f _nwsaom_dlgprep.ado
 f _nwsaom_getrates.ado
@@ -47,8 +47,6 @@ f nwsaom_estat_simulate.ado
 f nwsaom_estat_simmb.ado
 f nwsaom_estat_timetest.ado
 f nwsaom_estat_convergence.ado
-f _nwsaom_gfin.ado
-f _nwsaom_fnsuffix.ado
 f nwsaom_meta.ado
 f nwsaom_ml.ado
 f nwsaom_multinet.ado

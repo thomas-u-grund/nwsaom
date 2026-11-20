@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.8.1  18nov2026 author: Thomas Grund}{...}
+{* *! version 1.9.0  20nov2026 author: Thomas Grund}{...}
 {vieweralsosee "nwsaom" "help nwsaom"}{...}
 {vieweralsosee "nwsaom_estat" "help nwsaom_estat"}{...}
 
@@ -21,7 +21,7 @@
 {pstd}
 {opt plot} draws RSiena's {cmd:plot.sienaMeta}: for every effect the estimates of the groups against their standard errors, with the lines estimate = +-1.96 standard errors (a group outside the lines differs from
 zero at the 5 percent level); groups with a standard error of {opt bound()} or more are left out. {opt name()} names the combined graph (default {cmd:meta}), {opt saving()} saves it as a {cmd:.gph} file,
-{opt export()} exports it with {help graph export}, and further graph options go to {help graph combine}. They need {opt plot} (r(198)).
+{opt export()} exports it with {help graph export}, and further graph options go to {help graph combine}. They need {opt plot} (r(198)); the plot options need nwcommands 3.29.0 or later.
 
 {title:Dialog box}
 
@@ -100,4 +100,4 @@ fisher_right_p, fisher_left, fisher_left_p, level{p_end}
 {pstd}Snijders, T.A.B. and Baerveldt, C. (2003). A multilevel network study of the effects of delinquent behavior on friendship evolution. {it:Journal of Mathematical Sociology} 27: 123-151.{p_end}
 
 {hline}
-{pstd}{it:nwsaom version 1.8.1, 18 November 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.9.0, 20 November 2026}{p_end}{* nwversion}

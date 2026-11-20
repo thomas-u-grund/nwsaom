@@ -3,14 +3,15 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.9.0] - 2026-11-20
 
 ### Added
 - `estat timetest, plot` draws RSiena's `plot.sienaTimeTest`: one panel per tested effect with the parameter value in each period (the estimate of the fit and the estimate plus the one-step deviation) and its 90, 95 and 97.5 percent intervals.
 - `nwsaom meta, plot` draws RSiena's `plot.sienaMeta`: for every effect the estimates of the groups against their standard errors with the lines estimate = +-1.96 standard errors.
 - `estat convergence` lists the t-ratios for convergence of the last method-of-moments fit and the overall maximum convergence ratio (RSiena prints them in its table); `plot` draws them with the limit of 0.1. RSiena has no such plot: an extension.
 - `saving()`, `export()` and graph options for the violin plots of `estat gof` (one file per graph, the graph name is part of the file name with several graphs and after `groups()`), for `estat timetest, plot`, `estat convergence, plot` and `nwsaom meta, plot`. The options of the plots without the plot option are an error (r(198)).
-- Test `cscripts/test_nwsaom_plots.do`.
+- The plot options use the shared graph helper of the core and need nwcommands 3.29.0 or later (`Requires nwcommands (core), version 3.29.0 or later`); an older core stops at plot time with a message and r(199), commands without plot options keep working. The default pictures of `estat gof` are unchanged (identical PNG files).
+- Test `cscripts/test_nwsaom_plots.do` (with a comparison of the default `estat gof` pictures against the released version, `cscripts/nwsaom_plots_defaults.do`).
 
 ## [1.8.1] - 2026-11-18
 
