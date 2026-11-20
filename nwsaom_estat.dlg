@@ -17,28 +17,33 @@ BEGIN
   RADIO rb_estat_score 610 10 290 ., label("score - score-type test") middle
   RADIO rb_estat_timetest 10 31 290 ., label("timetest - time heterogeneity") middle
   RADIO rb_estat_importance 310 31 290 ., label("importance - effect importance") middle
-  RADIO rb_estat_simulate 610 31 290 ., label("simulate - the last fit") last
-  TEXT tx_n6_1 10 58 910 ., label("Operates on the nwsaom fit currently in memory - no network is selected here. Choose the statistic on the first tab.")
-  TEXT tx_h7_1 10 85 900 ., label("-- Auxiliary statistics (stats(); default outdegree indegree geodesic) --")
-  CHECKBOX cx_estat_stat_outdegree 10 106 301 ., label("outdegree - out-degree distribution") tooltip("RSiena: density")
-  CHECKBOX cx_estat_stat_indegree 316 106 301 ., label("indegree - in-degree distribution")
-  CHECKBOX cx_estat_stat_geodesic 622 106 301 ., label("geodesic - geodesic distances")
-  CHECKBOX cx_estat_stat_triad 10 127 301 ., label("triad - 16-category triad census")
-  CHECKBOX cx_estat_stat_behavior 316 127 301 ., label("behavior - co-evolution fits only")
-  TEXT tx_estat_gof_nsim 10 148 215 ., label("nsim() - replicates (default 50)")
-  EDIT ed_estat_gof_nsim 230 148 225 ., nomem option(nsim)
-  TEXT tx_estat_gof_seed 470 148 215 ., label("seed()")
-  EDIT ed_estat_gof_seed 690 148 225 ., nomem option(seed)
-  TEXT tx_estat_gof_maxdeg 10 169 430 ., label("maxdeg() - degree cap (default 15)")
-  EDIT ed_estat_gof_maxdeg 450 169 470 ., nomem option(maxdeg)
-  TEXT tx_estat_gof_maxdist 10 190 430 ., label("maxdist() - geodesic cap (default 6)")
-  EDIT ed_estat_gof_maxdist 450 190 470 ., nomem option(maxdist)
-  TEXT tx_estat_gof_name 10 211 215 ., label("name() - graph name stub")
-  EDIT ed_estat_gof_name 230 211 225 ., nomem option(name)
-  TEXT tx_estat_gof_grp 10 232 430 ., label("grp() - one group of a groups() fit (0 = all)")
-  EDIT ed_estat_gof_grp 450 232 470 ., nomem option(grp)
-  CHECKBOX cx_estat_gof_twotailed 10 253 301 ., label("twotailed - two-tailed test")
-  CHECKBOX cx_estat_joinoff 316 253 301 ., label("join(off) - separate test per wave-period")
+  RADIO rb_estat_simulate 610 31 290 ., label("simulate - the last fit") middle
+  RADIO rb_estat_convergence 10 52 290 ., label("convergence - convergence t-ratios") last
+  TEXT tx_n7_1 10 79 910 ., label("Operates on the nwsaom fit currently in memory - no network is selected here. Choose the statistic on the first tab.")
+  TEXT tx_h8_1 10 106 900 ., label("-- Auxiliary statistics (stats(); default outdegree indegree geodesic) --")
+  CHECKBOX cx_estat_stat_outdegree 10 127 301 ., label("outdegree - out-degree distribution") tooltip("RSiena: density")
+  CHECKBOX cx_estat_stat_indegree 316 127 301 ., label("indegree - in-degree distribution")
+  CHECKBOX cx_estat_stat_geodesic 622 127 301 ., label("geodesic - geodesic distances")
+  CHECKBOX cx_estat_stat_triad 10 148 301 ., label("triad - 16-category triad census")
+  CHECKBOX cx_estat_stat_behavior 316 148 301 ., label("behavior - co-evolution fits only")
+  TEXT tx_estat_gof_nsim 10 169 215 ., label("nsim() - replicates (default 50)")
+  EDIT ed_estat_gof_nsim 230 169 225 ., nomem option(nsim)
+  TEXT tx_estat_gof_seed 470 169 215 ., label("seed()")
+  EDIT ed_estat_gof_seed 690 169 225 ., nomem option(seed)
+  TEXT tx_estat_gof_maxdeg 10 190 430 ., label("maxdeg() - degree cap (default 15)")
+  EDIT ed_estat_gof_maxdeg 450 190 470 ., nomem option(maxdeg)
+  TEXT tx_estat_gof_maxdist 10 211 430 ., label("maxdist() - geodesic cap (default 6)")
+  EDIT ed_estat_gof_maxdist 450 211 470 ., nomem option(maxdist)
+  TEXT tx_estat_gof_name 10 232 215 ., label("name() - graph name stub")
+  EDIT ed_estat_gof_name 230 232 225 ., nomem option(name)
+  TEXT tx_estat_gof_saving 10 253 430 ., label("saving() - save the graphs (.gph; name is added)")
+  EDIT ed_estat_gof_saving 450 253 470 ., nomem option(saving)
+  TEXT tx_estat_gof_export 10 274 430 ., label("export() - export the graphs: filename[, options]")
+  EDIT ed_estat_gof_export 450 274 470 ., nomem option(export)
+  TEXT tx_estat_gof_grp 10 295 430 ., label("grp() - one group of a groups() fit (0 = all)")
+  EDIT ed_estat_gof_grp 450 295 470 ., nomem option(grp)
+  CHECKBOX cx_estat_gof_twotailed 10 316 301 ., label("twotailed - two-tailed test")
+  CHECKBOX cx_estat_joinoff 316 316 301 ., label("join(off) - separate test per wave-period")
 END
 
 DIALOG mems_sim, tabtitle("Mems, sim")
@@ -80,7 +85,22 @@ BEGIN
   TEXT tx_estat_tt_effects 10 79 430 ., label("effects() - effects to test (default all)")
   EDIT ed_estat_tt_effects 450 79 470 ., nomem option(effects)
   CHECKBOX cx_estat_tt_fixrates 10 100 301 ., label("fixrates - keep the rates fixed")
-  TEXT tx_h7_3 10 127 900 ., label("-- estat importance has only the option grp() (first tab) --")
+  CHECKBOX cx_estat_tt_plot 316 100 301 ., label("plot - draw the parameter by period")
+  TEXT tx_estat_tt_name 10 121 215 ., label("name() - graph name (needs plot)")
+  EDIT ed_estat_tt_name 230 121 225 ., nomem option(name)
+  TEXT tx_estat_tt_saving 10 142 430 ., label("saving() - save the graph (needs plot)")
+  EDIT ed_estat_tt_saving 450 142 470 ., nomem option(saving)
+  TEXT tx_estat_tt_export 10 163 430 ., label("export() - export the graph (needs plot)")
+  EDIT ed_estat_tt_export 450 163 470 ., nomem option(export)
+  TEXT tx_h14_3 10 190 900 ., label("-- estat convergence --")
+  CHECKBOX cx_estat_cv_plot 10 211 301 ., label("plot - draw the t-ratios")
+  TEXT tx_estat_cv_name 10 232 215 ., label("name() - graph name (needs plot)")
+  EDIT ed_estat_cv_name 230 232 225 ., nomem option(name)
+  TEXT tx_estat_cv_saving 10 253 430 ., label("saving() - save the graph (needs plot)")
+  EDIT ed_estat_cv_saving 450 253 470 ., nomem option(saving)
+  TEXT tx_estat_cv_export 10 274 430 ., label("export() - export the graph (needs plot)")
+  EDIT ed_estat_cv_export 450 274 470 ., nomem option(export)
+  TEXT tx_h22_3 10 301 900 ., label("-- estat importance has only the option grp() (first tab) --")
 END
 
 PROGRAM command
@@ -102,6 +122,9 @@ BEGIN
 	}
 	if statistic.rb_estat_simulate {
 		put "estat simulate"
+	}
+	if statistic.rb_estat_convergence {
+		put "estat convergence"
 	}
 	beginoptions
 		put /program opt_part1
@@ -137,6 +160,16 @@ BEGIN
 			if statistic.rb_estat_gof {
 				if statistic.ed_estat_gof_name.isneq("") {
 					optionarg /asis statistic.ed_estat_gof_name
+				}
+			}
+			if statistic.rb_estat_gof {
+				if statistic.ed_estat_gof_saving.isneq("") {
+					optionarg /asis statistic.ed_estat_gof_saving
+				}
+			}
+			if statistic.rb_estat_gof {
+				if statistic.ed_estat_gof_export.isneq("") {
+					optionarg /asis statistic.ed_estat_gof_export
 				}
 			}
 			if statistic.rb_estat_gof | statistic.rb_estat_simulate | statistic.rb_estat_importance {
@@ -204,6 +237,10 @@ BEGIN
 					optionarg /asis mems_sim.ed_estat_sim_rates
 				}
 			}
+END
+
+PROGRAM opt_part2
+BEGIN
 			if statistic.rb_estat_simulate {
 				if mems_sim.ed_estat_sim_ratesbeh.isneq("") {
 					optionarg /asis mems_sim.ed_estat_sim_ratesbeh
@@ -214,10 +251,6 @@ BEGIN
 					optionarg /asis mems_sim.ed_estat_sim_generate
 				}
 			}
-END
-
-PROGRAM opt_part2
-BEGIN
 			if statistic.rb_estat_score {
 				if score_tt.ed_estat_score_tested.isneq("") {
 					optionarg /asis score_tt.ed_estat_score_tested
@@ -231,6 +264,46 @@ BEGIN
 			if statistic.rb_estat_timetest {
 				if score_tt.cx_estat_tt_fixrates {
 					put " fixrates"
+				}
+			}
+			if statistic.rb_estat_timetest {
+				if score_tt.cx_estat_tt_plot {
+					put " plot"
+				}
+			}
+			if statistic.rb_estat_timetest {
+				if score_tt.ed_estat_tt_name.isneq("") {
+					optionarg /asis score_tt.ed_estat_tt_name
+				}
+			}
+			if statistic.rb_estat_timetest {
+				if score_tt.ed_estat_tt_saving.isneq("") {
+					optionarg /asis score_tt.ed_estat_tt_saving
+				}
+			}
+			if statistic.rb_estat_timetest {
+				if score_tt.ed_estat_tt_export.isneq("") {
+					optionarg /asis score_tt.ed_estat_tt_export
+				}
+			}
+			if statistic.rb_estat_convergence {
+				if score_tt.cx_estat_cv_plot {
+					put " plot"
+				}
+			}
+			if statistic.rb_estat_convergence {
+				if score_tt.ed_estat_cv_name.isneq("") {
+					optionarg /asis score_tt.ed_estat_cv_name
+				}
+			}
+			if statistic.rb_estat_convergence {
+				if score_tt.ed_estat_cv_saving.isneq("") {
+					optionarg /asis score_tt.ed_estat_cv_saving
+				}
+			}
+			if statistic.rb_estat_convergence {
+				if score_tt.ed_estat_cv_export.isneq("") {
+					optionarg /asis score_tt.ed_estat_cv_export
 				}
 			}
 			if statistic.rb_estat_gof {

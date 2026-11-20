@@ -12,11 +12,16 @@
 {title:Syntax}
 
 {p 8 16 2}
-{cmd:nwsaom meta} {it:name1 name2} [{it:name3} ...] [{cmd:,} {opt bound(#)} {opt alpha(#)} {opt maxit(#)} {opt rates} {opt notable}]{p_end}
+{cmd:nwsaom meta} {it:name1 name2} [{it:name3} ...] [{cmd:,} {opt bound(#)} {opt alpha(#)} {opt maxit(#)} {opt rates} {opt notable} {opt plot} {opt name(string)} {opt sav:ing(filename)} {opt exp:ort(filename [, options])} {it:graph_options}]{p_end}
 
 {pstd}
 {it:name1 name2 ...} are stored estimates ({cmd:estimates store}) of the {it:same} {cmd:nwsaom} model fitted to several networks (groups, for example school classes): same effects in the same order.
 
+
+{pstd}
+{opt plot} draws RSiena's {cmd:plot.sienaMeta}: for every effect the estimates of the groups against their standard errors, with the lines estimate = +-1.96 standard errors (a group outside the lines differs from
+zero at the 5 percent level); groups with a standard error of {opt bound()} or more are left out. {opt name()} names the combined graph (default {cmd:meta}), {opt saving()} saves it as a {cmd:.gph} file,
+{opt export()} exports it with {help graph export}, and further graph options go to {help graph combine}. They need {opt plot} (r(198)).
 
 {title:Dialog box}
 

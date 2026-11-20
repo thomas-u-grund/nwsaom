@@ -26,6 +26,7 @@ The following postestimation command is available after {helpb nwsaom}:
 {p2col: {cmd:estat score}}Score-type test of the effects held fixed with {opt fix()}{p_end}
 {p2col: {cmd:estat timetest}}Test of time heterogeneity of the effects (RSiena's {cmd:sienaTimeTest}){p_end}
 {p2col: {cmd:estat importance}}Relative importance of the effects (RSiena's {cmd:sienaRI}){p_end}
+{p2col: {cmd:estat convergence}}Convergence t-ratios of the estimation, with a plot{p_end}
 {p2colreset}{...}
 
 {pstd}
@@ -41,7 +42,7 @@ They also stop when the estimates in memory are not those of the last {cmd:nwsao
 {title:estat gof}
 
 {p 8 17 2}
-{cmd:estat gof} [{cmd:,} {opt nsim(int)} {opt seed(int)} {opt stats(namelist)} {opt maxdeg(int)} {opt maxdist(int)} {opt twotailed} {opt name(string)} {opt join(off)}]
+{cmd:estat gof} [{cmd:,} {opt nsim(int)} {opt seed(int)} {opt stats(namelist)} {opt maxdeg(int)} {opt maxdist(int)} {opt twotailed} {opt name(string)} {opt join(off)} {opt sav:ing(filename)} {opt exp:ort(filename [, options])} {it:graph_options}]
 
 {synoptset 20 tabbed}{...}
 {synopthdr}
@@ -60,6 +61,9 @@ relative to what the fitted model simulates){p_end}
 with {opt join(off)} each period gets its own graph instead, e.g. {it:name}{cmd:_outdegree_p1}/{it:name}{cmd:_outdegree_p2}){p_end}
 {synopt:{opt join(off)}}Run a SEPARATE Mahalanobis test (and violin) per wave-period instead of the default pooled/summed one - real RSiena's own {cmd:join=FALSE} (non-default); omit for the default
 pooled behavior ({cmd:join=TRUE}){p_end}
+{synopt:{opt saving(filename)}}Save every violin graph as a {cmd:.gph} file; with several graphs, and always after {opt groups()}, the graph name is put before the extension (e.g. {cmd:gof.gph} gives {cmd:gof_gof_outdegree.gph}){p_end}
+{synopt:{opt export(filename [, options])}}Export every violin graph with {help graph export} (the extension of the file name sets the format; same naming as {opt saving()}){p_end}
+{synopt:{it:graph_options}}Any {help twoway_options}, for example {cmd:title()} or {cmd:scheme()}; they are passed to every violin graph{p_end}
 {synoptline}
 
 {pstd}
@@ -268,7 +272,7 @@ behavior are estimated along.
 {title:estat timetest}
 
 {p 8 17 2}
-{cmd:estat timetest} [{cmd:,} {opt eff:ects(namelist)} {opt fixr:ates}]
+{cmd:estat timetest} [{cmd:,} {opt eff:ects(namelist)} {opt fixr:ates} {opt plot} {opt name(string)} {opt sav:ing(filename)} {opt exp:ort(filename [, options])} {it:graph_options}]
 
 {pstd}
 Tests whether the effects of a fit with at least three waves have the same parameter in every period
@@ -277,6 +281,12 @@ to P), and a score-type test of "no deviation" is computed from the phase-3 simu
 second fit is needed. Reported: a joint test of all deviations, a test per effect (degrees of freedom P - 1), and
 per effect and period the one-step estimate of the deviation with its separate test. Returns {cmd:r(chi2)},
 {cmd:r(df)}, {cmd:r(p)}, {cmd:r(effect)} and {cmd:r(individual)}.
+
+{pstd}
+{opt plot} draws RSiena's {cmd:plot.sienaTimeTest}: one panel per tested effect with the parameter value in each period, that is the estimate of the fit (period 1) and the
+estimate plus the one-step deviation (later periods), with the 90, 95 and 97.5 percent intervals of the deviation (from its one-step standard error); the horizontal line is the estimate of the fit and a period with
+a deviation at P < 0.05 is drawn in red. {opt name()} names the combined graph (default {cmd:timetest}), {opt saving()} saves it, {opt export()} exports it with {help graph export}, and further graph options go to
+{help graph combine}. They need {opt plot} (r(198)).
 
 {pstd}
 By default the rate parameters are treated as estimated, so the tests are the score tests of the models that add one fixed period dummy to the fit
@@ -295,6 +305,20 @@ actors, waves, rates and covariate constants of one group ({opt group(#)}; by de
 inverse-normal method. They also work after a fit with one behavior, or with {opt ratecov()} and {opt present()}; {cmd:estat importance} stops after {opt ratecov()} or {opt present()}, and all
 stop after a fit that combines a behavior with {opt ratecov()}, {opt behratecov()} or {opt behrate()}.
 After a fit with a behavior and {opt groups()}, {cmd:estat gof} tests the three network statistics and {bf:behavior} by default, as without groups.
+
+
+{marker estat_convergence}{...}
+{title:estat convergence}
+
+{p 8 17 2}
+{cmd:estat convergence} [{cmd:,} {opt plot} {opt name(string)} {opt sav:ing(filename)} {opt exp:ort(filename [, options])} {it:graph_options}{cmd:]}
+
+{pstd}
+Lists the t-ratios for convergence of the last method-of-moments fit ({cmd:e(tconv)}: one per coefficient and rate) and the overall maximum convergence ratio ({cmd:e(tconv_max)}).
+RSiena calls the estimation converged when every t-ratio is below 0.1 in absolute value and the overall ratio below 0.25. {opt plot} draws the t-ratios as a dot chart with the
+limits of 0.1 (RSiena prints the ratios in its table only, so the graph is an extension); {opt name()} names the graph (default {cmd:convergence}), {opt saving()} saves it,
+{opt export()} exports it and graph options go to {help twoway}. Returns {cmd:r(tconv_max)}, {cmd:r(n_notconverged)} and {cmd:r(tconv)}. It needs the estimates only, not the model in memory;
+it stops with r(498) after an estimate without convergence t-ratios (maximum likelihood, Bayesian).
 
 
 {marker estat_importance}{...}

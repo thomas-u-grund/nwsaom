@@ -7,7 +7,7 @@
 * or FITNESS FOR A PARTICULAR PURPOSE. See the file LICENSE for the full text.
 capture program drop nwsaom_estat_gofgroups
 program define nwsaom_estat_gofgroups, rclass
-	syntax [, NSIM(integer 50) SEED(integer -1) STATS(string) MAXDEG(integer 15) MAXDIST(integer 6) TWOTAILED NAME(string) JOIN(string) GROUP(integer 0)]
+	syntax [, NSIM(integer 50) SEED(integer -1) STATS(string) MAXDEG(integer 15) MAXDIST(integer 6) TWOTAILED NAME(string) JOIN(string) GROUP(integer 0) SAVing(string) EXPort(string asis) *]
 	local G = e(ngroups)
 	if `group' < 0 | `group' > `G' {
 		di as err "group() must be between 1 and `G'."
@@ -25,7 +25,11 @@ program define nwsaom_estat_gofgroups, rclass
 	forvalues g = `=cond(`group' > 0, `group', 1)'/`=cond(`group' > 0, `group', `G')' {
 		di
 		di as txt "Group `g' of `G' (" as res `gsz'[1, `g'] as txt " actors)"
-		capture noisily nwsaom_estat gof, `opts' name(`=cond("`name'" == "", "gof_g`g'", "`name'_g`g'")') grp(`g')
+		local gsv ""
+		if `"`saving'"' != "" local gsv `"saving(`"`saving'"')"'
+		local gex ""
+		if `"`export'"' != "" local gex `"export(`export')"'
+		capture noisily nwsaom_estat gof, `opts' name(`=cond("`name'" == "", "gof_g`g'", "`name'_g`g'")') grp(`g') `gsv' `gex' `options'
 		local rc = _rc
 		foreach s of local stats {
 			if "`join'" == "off" | `rc' continue

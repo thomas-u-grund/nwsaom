@@ -46,6 +46,9 @@ f nwsaom_estat_score.ado
 f nwsaom_estat_simulate.ado
 f nwsaom_estat_simmb.ado
 f nwsaom_estat_timetest.ado
+f nwsaom_estat_convergence.ado
+f _nwsaom_gfin.ado
+f _nwsaom_fnsuffix.ado
 f nwsaom_meta.ado
 f nwsaom_ml.ado
 f nwsaom_multinet.ado

@@ -4,7 +4,7 @@ VERSION 10
 SYNCHRONOUS_ONLY
 INCLUDE _std_mlarge
 DEFINE _dlgwd 940
-DEFINE _dlght 260
+DEFINE _dlght 299
 INCLUDE header
 
 HELP hlp1, view("help nwsaom_meta")
@@ -23,6 +23,13 @@ BEGIN
   EDIT ed_meta_maxit 450 94 470 ., nomem option(maxit)
   CHECKBOX cx_meta_rates 10 115 301 ., label("rates - also combine the rate parameters")
   CHECKBOX cx_meta_notable 316 115 301 ., label("notable - suppress the output")
+  CHECKBOX cx_meta_plot 622 115 301 ., label("plot - draw estimates vs. se")
+  TEXT tx_meta_name 10 136 215 ., label("name() - graph name (needs plot)")
+  EDIT ed_meta_name 230 136 225 ., nomem option(name)
+  TEXT tx_meta_saving 10 157 430 ., label("saving() - save the graph as .gph (needs plot)")
+  EDIT ed_meta_saving 450 157 470 ., nomem option(saving)
+  TEXT tx_meta_export 10 178 430 ., label("export() - export the graph: filename[, options]")
+  EDIT ed_meta_export 450 178 470 ., nomem option(export)
 END
 
 PROGRAM command
@@ -53,5 +60,17 @@ BEGIN
 			}
 			if meta.cx_meta_notable {
 				put " notable"
+			}
+			if meta.cx_meta_plot {
+				put " plot"
+			}
+			if meta.ed_meta_name.isneq("") {
+				optionarg /asis meta.ed_meta_name
+			}
+			if meta.ed_meta_saving.isneq("") {
+				optionarg /asis meta.ed_meta_saving
+			}
+			if meta.ed_meta_export.isneq("") {
+				optionarg /asis meta.ed_meta_export
 			}
 END

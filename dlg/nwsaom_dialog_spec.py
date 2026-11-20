@@ -793,10 +793,11 @@ E('ed_meta_names', 'meta', 'edit', '_namelist', 'Stored estimates (2 or more, sa
   ctx='meta', arg='names')
 MT.tab('Meta').append(dict(t='hdr', text='Combine the stored estimates (estimates store) of the same model fitted to several groups'))
 MT.tab('Meta').append(dict(t='field', e='ed_meta_names', ctl='edit', lst=None, prefix=True))
-auto_dialog(MT, META_OPTS, OrderedDict([('Meta', ['bound', 'alpha', 'maxit', 'rates', 'notable'])]),
+auto_dialog(MT, META_OPTS, OrderedDict([('Meta', ['bound', 'alpha', 'maxit', 'rates', 'notable', 'plot', 'name', 'saving', 'export'])]),
             {'bound': 'bound() - exclude groups with se >= bound (default 10)', 'alpha': 'alpha() - level of the profile intervals (default 0.05)',
              'maxit': 'maxit() - maximum IWLS iterations (default 20)', 'rates': 'rates - also combine the rate parameters',
-             'notable': 'notable - suppress the output'}, ctx='meta', help_='nwsaom_meta')
+             'notable': 'notable - suppress the output', 'plot': 'plot - draw estimates vs. se',
+             'name': 'name() - graph name (needs plot)', 'saving': 'saving() - save the graph as .gph (needs plot)', 'export': 'export() - export the graph: filename[, options]'}, ctx='meta', help_='nwsaom_meta')
 
 # --- describe
 DS = Dlg('describe', 'nwsaom describe - data description before a SAOM fit', 'nwsaom', 'nwsaom describe')
@@ -841,7 +842,7 @@ field(SM, T, 'grp', 'grp', 'grp() - one group of a groups() fit (0 = all)', mode
 ES = Dlg('estat', 'nwsaom postestimation - estat', 'nwsaom_estat', 'estat')
 ES.modes = [('gof', 'gof - goodness of fit'), ('mems', 'mems - Mahalanobis/moment contributions'), ('score', 'score - score-type test'),
             ('timetest', 'timetest - time heterogeneity'), ('importance', 'importance - effect importance'),
-            ('simulate', 'simulate - the last fit')]
+            ('simulate', 'simulate - the last fit'), ('convergence', 'convergence - convergence t-ratios')]
 ES.sub_prefix = {m: 'estat ' + m for m, _ in ES.modes}
 T = 'Statistic'
 note(ES, T, 'Operates on the nwsaom fit currently in memory - no network is selected here. Choose the statistic on the first tab.', 1)
@@ -856,6 +857,8 @@ E('wr_stats', 'estat', 'wrapper', 'stats', 'stats() - auxiliary statistics', T, 
 for o, lab, ctl in (('nsim', 'nsim() - replicates (default 50)', 'edit'), ('seed', 'seed()', 'edit'), ('maxdeg', 'maxdeg() - degree cap (default 15)', 'edit'),
                     ('maxdist', 'maxdist() - geodesic cap (default 6)', 'edit'), ('name', 'name() - graph name stub', 'edit')):
     field(ES, T, 'gof_' + o, o, lab, ctl, modes=['gof'], help='nwsaom_estat', ctx='est')
+field(ES, T, 'gof_saving', 'saving', 'saving() - save the graphs (.gph; name is added)', 'edit', modes=['gof'], help='nwsaom_estat', ctx='est')
+field(ES, T, 'gof_export', 'export', 'export() - export the graphs: filename[, options]', 'edit', modes=['gof'], help='nwsaom_estat', ctx='est')
 field(ES, T, 'gof_grp', 'grp', 'grp() - one group of a groups() fit (0 = all)', modes=['gof', 'simulate', 'importance'], help='nwsaom_estat', ctx='est')
 flag(ES, T, 'gof_twotailed', 'twotailed', 'twotailed - two-tailed test', modes=['gof'], help='nwsaom_estat', ctx='est')
 e = E('cx_estat_joinoff', 'estat', 'flag', 'join', 'join(off) - separate test per wave-period', T, cmd=' join(off)', modes=['gof'], help='nwsaom_estat', ctx='est')
@@ -877,6 +880,15 @@ field(ES, T, 'score_tested', 'tested', 'tested() - effects of the full model to 
 hdr(ES, T, 'estat timetest')
 field(ES, T, 'tt_effects', 'effects', 'effects() - effects to test (default all)', modes=['timetest'], help='nwsaom_estat', ctx='est')
 flag(ES, T, 'tt_fixrates', 'fixrates', 'fixrates - keep the rates fixed', modes=['timetest'], help='nwsaom_estat', ctx='est')
+flag(ES, T, 'tt_plot', 'plot', 'plot - draw the parameter by period', modes=['timetest'], help='nwsaom_estat', ctx='est')
+field(ES, T, 'tt_name', 'name', 'name() - graph name (needs plot)', modes=['timetest'], help='nwsaom_estat', ctx='est', companion='plot')
+field(ES, T, 'tt_saving', 'saving', 'saving() - save the graph (needs plot)', modes=['timetest'], help='nwsaom_estat', ctx='est', companion='plot')
+field(ES, T, 'tt_export', 'export', 'export() - export the graph (needs plot)', modes=['timetest'], help='nwsaom_estat', ctx='est', companion='plot')
+hdr(ES, T, 'estat convergence')
+flag(ES, T, 'cv_plot', 'plot', 'plot - draw the t-ratios', modes=['convergence'], help='nwsaom_estat', ctx='est')
+field(ES, T, 'cv_name', 'name', 'name() - graph name (needs plot)', modes=['convergence'], help='nwsaom_estat', ctx='est', companion='plot')
+field(ES, T, 'cv_saving', 'saving', 'saving() - save the graph (needs plot)', modes=['convergence'], help='nwsaom_estat', ctx='est', companion='plot')
+field(ES, T, 'cv_export', 'export', 'export() - export the graph (needs plot)', modes=['convergence'], help='nwsaom_estat', ctx='est', companion='plot')
 hdr(ES, T, 'estat importance has only the option grp() (first tab)')
 E('rb_estat_importance_note', 'estat', 'note', 'importance', 'importance - option grp() on the first tab only', None, cmd='', modes=['importance'], help='nwsaom_estat', ctx='est')
 

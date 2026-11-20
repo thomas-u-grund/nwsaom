@@ -124,6 +124,13 @@
 capture program drop nwsaom_estat
 program define nwsaom_estat, rclass
 	_nwsaom_libcheck
+	// estat convergence needs the estimates only (e(tconv)), not the model kept in Mata
+	gettoken __es_sub __es_rest : 0, parse(" ,")
+	if lower(`"`__es_sub'"') == "convergence" {
+		nwsaom_estat_convergence `__es_rest'
+		return add
+		exit
+	}
 	// the Mata model kept for postestimation must belong to the estimates in memory (not after estimates restore of an
 	// earlier fit, or after a later nwsaom call that was refused or failed after it had started to replace the model)
 	if `"`e(cmd)'"' == "nwsaom" & e(fitid) < . {
@@ -138,6 +145,7 @@ program define nwsaom_estat, rclass
 	local __es_frame = c(frame)
 	capture noisily nwsaom_estat_run `0'
 	local __es_rc = _rc
+	capture mata: mata drop __nwsaom_gofopts
 	// an error inside a simulation can leave the user in the plugin's data frame
 	if `"`c(frame)'"' != `"`__es_frame'"' {
 		frame change `__es_frame'
@@ -231,7 +239,7 @@ program define nwsaom_estat_run, rclass
 		return add
 	}
 	else {
-		di as err "{p 0 0 2}estat `subcmd' not allowed after nwsaom - only {bf:gof}, {bf:mems}, {bf:simulate}, {bf:score}, {bf:timetest} and {bf:importance} are currently supported.{p_end}"
+		di as err "{p 0 0 2}estat `subcmd' not allowed after nwsaom - only {bf:gof}, {bf:mems}, {bf:simulate}, {bf:score}, {bf:timetest}, {bf:importance} and {bf:convergence} are currently supported.{p_end}"
 		exit 321
 	}
 end
@@ -239,7 +247,9 @@ end
 capture program drop nwsaom_estat_gof
 program define nwsaom_estat_gof, rclass
 	syntax [, NSIM(integer 50) SEED(integer -1) STATS(string) MAXDEG(integer 15) ///
-		MAXDIST(integer 6) TWOTAILED NAME(string) JOIN(string) GRP(integer 0)]
+		MAXDIST(integer 6) TWOTAILED NAME(string) JOIN(string) GRP(integer 0) SAVing(string) EXPort(string asis) *]
+	// graph options go to every violin plot (they are read by nwsaom_estat_gofviolin)
+	mata: __nwsaom_gofopts = st_local("options")
 
 	// harmonisation unit 162: real RSiena's own `join=FALSE' (sienaGOF()'s
 	// non-default option) - a SEPARATE MHD test per wave-period instead of
@@ -672,6 +682,7 @@ program define nwsaom_estat_gof, rclass
 		local __gof_line "`__gof_line' `__g'"
 	}
 	di as txt "`__gof_line'"
+	_nwsaom_gfin `__gof_graphs', saving(`saving') export(`export') `=cond(e(ngroups) < ., "always", "")'
 
 	capture mata: mata drop __nwsaom_gof_cfg
 	foreach __gof_s of local stats {
@@ -700,7 +711,9 @@ end
 capture program drop nwsaom_estat_gofmb
 program define nwsaom_estat_gofmb, rclass
 	syntax [, NSIM(integer 50) SEED(integer -1) STATS(string) MAXDEG(integer 15) ///
-		MAXDIST(integer 6) TWOTAILED NAME(string) JOIN(string) GRP(integer 0)]
+		MAXDIST(integer 6) TWOTAILED NAME(string) JOIN(string) GRP(integer 0) SAVing(string) EXPort(string asis) *]
+	// graph options go to every violin plot (they are read by nwsaom_estat_gofviolin)
+	mata: __nwsaom_gofopts = st_local("options")
 	if !inlist("`join'", "", "off") {
 		di as err "{p 0 0 2}join() only accepts {bf:off}.{p_end}"
 		exit 198
@@ -800,6 +813,7 @@ program define nwsaom_estat_gofmb, rclass
 		local line "`line' `g'"
 	}
 	di as txt "`line'"
+	_nwsaom_gfin `graphs', saving(`saving') export(`export') `=cond(e(ngroups) < ., "always", "")'
 	foreach k of local keys {
 		capture mata: mata drop __nwsaom_gof_obs_`k' __nwsaom_gof_sim_`k'
 		forvalues pd = 1/`nper' {
@@ -1289,6 +1303,10 @@ program define nwsaom_estat_gofviolin
 	// needs `horizontal'; every other layer is plotted in its normal,
 	// default (y, x) orientation - a fixed category position on X, the
 	// actual statistic value on Y.
+	local __gv_ttl `"title("`title'", size(small))"'
+	local __gv_opts ""
+	capture mata: st_local("__gv_opts", __nwsaom_gofopts)
+	if strpos(`"`__gv_opts'"', "title(") local __gv_ttl
 	twoway (rarea vxlo vxhi vy, horizontal fcolor(gs14) lcolor(gs10) lwidth(vthin)) ///
 		(rcap bp75 bp25 cat, lcolor(black) lwidth(medium)) ///
 		(scatter bmedian cat, msymbol(diamond) mcolor(black) msize(small)) ///
@@ -1297,7 +1315,7 @@ program define nwsaom_estat_gofviolin
 		(connected obsval cat, lcolor(red) mcolor(red) msymbol(circle) lwidth(medthin)), ///
 		xlabel(`__gv_xlabopt', angle(0) labsize(vsmall)) ///
 		ytitle("Statistic") xtitle("`__gv_xtitle'") ///
-		title("`title'", size(small)) legend(off) name(`graphname', replace)
+		`__gv_ttl' legend(off) name(`graphname', replace) `__gv_opts'
 	restore
 
 end

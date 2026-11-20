@@ -14,7 +14,12 @@
 program nwsaom_meta, rclass
 	version 14
 	_nwsaom_libcheck
-	syntax namelist(min=2) [, BOUND(real 10) ALPHA(real 0.05) MAXIT(integer 20) RATES NOTABLE]
+	syntax namelist(min=2) [, BOUND(real 10) ALPHA(real 0.05) MAXIT(integer 20) RATES NOTABLE PLOT NAME(string) SAVing(string) EXPort(string asis) *]
+	local __gopts `"`options'"'
+	if "`plot'" == "" & (`"`saving'`export'`__gopts'"' != "" | "`name'" != "") {
+		di "{p 0 0 2}{err}name(), saving(), export() and graph options need {bf:plot}.{p_end}"
+		error 198
+	}
 	if `alpha' <= 0 | `alpha' >= 1 {
 		di "{err}{bf:alpha()} must be between 0 and 1."
 		error 198
@@ -154,8 +159,64 @@ program nwsaom_meta, rclass
 		di as text "{hline 13}{c BT}{hline 64}"
 		di as text "Correlations of estimates and standard errors are in {bf:r(meta)}."
 	}
+	if "`plot'" != "" {
+		nwsaom_meta_plot, theta(`B') se(`R') bound(`bound') name(`name') saving(`saving') export(`export') `__gopts'
+	}
 	return matrix meta = `M'
 	return matrix theta = `B'
 	return matrix se = `R'
 	return scalar groups = `ng'
+end
+
+
+// nwsaom meta, plot: RSiena's plot.sienaMeta. For every effect the estimates of the groups against their standard errors; the lines are
+// estimate = +-1.96 standard errors, so a group outside them differs from 0 at the 5 percent level. Groups with a missing estimate or a
+// standard error of bound() or more (the exclusion rule of the meta-analysis) are not drawn.
+capture program drop nwsaom_meta_plot
+program define nwsaom_meta_plot
+	syntax , THETA(name) SE(name) BOUND(real) [NAME(string) SAVing(string) EXPort(string asis) *]
+	local __opts `"`options'"'
+	if "`name'" == "" local name "meta"
+	local cn : colnames `theta'
+	local ne = colsof(`theta')
+	local ng = rowsof(`theta')
+	local graphs ""
+	preserve
+	quietly drop _all
+	quietly set obs `ng'
+	quietly gen double est = .
+	quietly gen double se = .
+	forvalues j = 1/`ne' {
+		local nm : word `j' of `cn'
+		forvalues i = 1/`ng' {
+			quietly replace est = `theta'[`i', `j'] in `i'
+			quietly replace se = `se'[`i', `j'] in `i'
+		}
+		quietly replace est = . if se >= `bound'
+		quietly summarize se, meanonly
+		if r(N) == 0 continue
+		local smax = r(max) * 1.05
+		quietly summarize est, meanonly
+		local emax = max(abs(r(min)), abs(r(max)), 1.96 * `smax')
+		local g "__nwsaom_mt`j'"
+		quietly twoway (function y = 1.96 * x, range(0 `smax') lcolor(gs10) lpattern(dash)) (function y = -1.96 * x, range(0 `smax') lcolor(gs10) lpattern(dash)) ///
+			(scatter est se, mcolor(black) msymbol(circle)), yline(0, lcolor(gs12)) xscale(range(0 `smax')) yscale(range(`=-`emax'' `emax')) ///
+			xtitle("standard error") ytitle("estimate", size(small)) title("`nm'", size(medsmall)) legend(off) ylabel(, angle(horizontal) labsize(small)) ///
+			name(`g', replace) nodraw
+		local graphs "`graphs' `g'"
+	}
+	if "`graphs'" == "" {
+		restore
+		di as err "no effect has a group with a standard error below bound()"
+		exit 498
+	}
+	local ttl `"title("Meta-analysis: estimates and standard errors of the groups", size(medium))"'
+	if strpos(`"`__opts'"', "title(") local ttl
+	local np : word count `graphs'
+	graph combine `graphs', cols(`=min(`np', 3)') `ttl' note("dashed: estimate = +-1.96 standard errors", size(vsmall)) name(`name', replace) `__opts'
+	foreach g of local graphs {
+		capture graph drop `g'
+	}
+	restore
+	_nwsaom_gfin `name', saving(`saving') export(`export')
 end
