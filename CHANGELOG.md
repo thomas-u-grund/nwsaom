@@ -5,8 +5,12 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.9.1] - 2026-11-20
+
 ### Changed
-- The dialog test `dlg/cmd_assembly_test.py` also checks the command that the dialogs build for the plot options of `estat gof`, `estat timetest`, `estat convergence` and `nwsaom meta` (`plot`, `name()`, `saving()`, `export()`).
+- The dialog assembly test `dlg/cmd_assembly_test.py` covers the plot options of `estat gof`, `estat timetest`, `estat convergence` and `nwsaom meta` (`plot`, `name()`, `saving()`, `export()`).
+
+Tested on macOS with Stata 17 BE: the dialog assembly test (20 cases), `test_nwsaom_plots` and `test_nwsaom_ado`. Linux, Windows and Stata 18 were not run for this version: there is no code change.
 
 ## [1.9.0] - 2026-11-20
 
