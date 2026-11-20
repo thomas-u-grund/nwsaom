@@ -68,6 +68,27 @@ After the coefficient table, \nwsaom{} prints the rate table and the convergence
 \end{itemize}
 If either condition fails, run the model again from the estimates with \texttt{nwsaom refit}, as shown above. If after one or two restarts the overall ratio stays near 0.25 while the estimates hardly change from one restart to the next, the remaining excess is mostly noise in the phase-3 estimate of the ratio: restart once more with a longer phase 3, for example \opt{k3(3000)}, rather than restarting again and again with the default length. The $t$-ratios of the coefficients in \texttt{e(b)} are in \texttt{e(tratio)}; all of them, with the rates, are in \texttt{e(tconv)}.
 
+\paragraph{\texttt{estat convergence}.}\label{sec:convergence-estat} After a fit by the method of moments, \texttt{estat convergence} lists the convergence $t$-ratios (\texttt{e(tconv)}, one per coefficient and rate) next to the criterion $|t|<0.1$ and the overall maximum convergence ratio \texttt{e(tconv\_max)}, and says whether both criteria are met; RSiena prints these numbers in its table. It needs the estimates only. It returns \texttt{r(tconv\_max)}, \texttt{r(n\_notconverged)} and \texttt{r(tconv)}, and stops with r(498) after an estimate that has no convergence $t$-ratios (maximum likelihood, Bayesian). The option \opt{plot} draws the $t$-ratios as a dot chart with the limits $\pm0.1$; RSiena has no such picture, so it is an extension. \opt{name()} names the graph (default \texttt{convergence}), \opt{saving()} saves it as a \texttt{.gph} file, \opt{export()} exports it with \texttt{graph export}, and further graph options go to \texttt{twoway}. These options need \opt{plot}; without it they are an error (r(198)).
+\begin{lstlisting}
+. nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip seed(1)
+. estat convergence
+Convergence of the estimation (t-ratios for convergence)
+------------------------------------
+   Parameter |     t-ratio |t| < 0.1
+-------------+----------------------
+   outdegree |      -0.005       yes
+ reciprocity |      -0.031       yes
+   transtrip |      -0.076       yes
+------------------------------------
+Overall maximum convergence ratio:  0.123 (converged: every |t| < 0.1 and overall < 0.25)
+. estat convergence, plot export(fig_convergence.pdf)
+\end{lstlisting}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.7\textwidth]{fig/fig_convergence.pdf}
+\caption{The convergence $t$-ratios of the fit above, drawn by \texttt{estat convergence, plot}.}\label{fig:conv}
+\end{figure}
+
 A real run on the Glasgow data (RSiena's \texttt{s50}, three waves) illustrates the output. All three $t$-ratios are below 0.1 in absolute value, and the overall ratio of 0.123 is below 0.25 (the two criteria are separate, and the detail listing is shown):
 \begin{lstlisting}
 . nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip seed(1) detail
@@ -160,7 +181,7 @@ Stored estimates can be combined across networks with \texttt{nwsaom meta}, the 
 
 \paragraph{Difference from RSiena.} RSiena reuses networks stored during the fit. \nwsaom{} stores none, so \texttt{estat gof} runs fresh simulations from each period's observed start wave. The Mahalanobis test does not depend on how the reference draws were generated, only on their being independent draws at the fitted parameters, so the construction is unchanged. Co-evolution fits simulate network and behavior jointly for every replicate, regardless of the requested statistics. GOF simulates endowment/creation, \opt{structural()}, \opt{ratecov()}, \opt{present()} and non-directed model types in the native plugin when it covers the model. A non-directed fit is simulated as the non-directed model that was fitted, with its model type (\texttt{e(symtype)}) at the per-actor rates (\texttt{e(rates\_actor)} or \texttt{e(rate\_actor)}), so the simulated networks are symmetric. After a fit with composition change (\opt{present()}, or \opt{joinat()}/\opt{leaveat()} with \opt{waves()}) only the actors that are active at the start of a period act in it, as in the fit; joining and leaving inside a period is not simulated.
 
-\paragraph{The violin plot.} Each statistic is also drawn as a violin plot built from \texttt{kdensity} and \opt{twoway rarea, horizontal}: the kernel-density shape per category, a thin box for the interquartile range, dashed lines at the 2.5th and 97.5th percentile, and the observed value as a red line, with the $p$-value as the $x$-axis title (as RSiena). Graphs are named \texttt{gof\_outdegree}, \texttt{gof\_indegree}, \texttt{gof\_geodesic}, \texttt{gof\_triad} and \texttt{gof\_behavior} (\texttt{gof\_behavior\_}\emph{name} with several behaviors); \opt{name()} changes the stub, and with \opt{join(off)} each period gets its own graph (\texttt{gof\_outdegree\_p1}, \ldots).
+\paragraph{The violin plot.} Each statistic is also drawn as a violin plot built from \texttt{kdensity} and \opt{twoway rarea, horizontal}: the kernel-density shape per category, a thin box for the interquartile range, dashed lines at the 2.5th and 97.5th percentile, and the observed value as a red line, with the $p$-value as the $x$-axis title (as RSiena). Section~\ref{sec:gofplot} shows the plots. Graphs are named \texttt{gof\_outdegree}, \texttt{gof\_indegree}, \texttt{gof\_geodesic}, \texttt{gof\_triad} and \texttt{gof\_behavior} (\texttt{gof\_behavior\_}\emph{name} with several behaviors); \opt{name()} changes the stub, and with \opt{join(off)} each period gets its own graph (\texttt{gof\_outdegree\_p1}, \ldots).
 
 \begin{lstlisting}
 . estat gof, nsim(30) seed(1)
@@ -178,6 +199,20 @@ rejected: P < 0.05 (one-tailed); the model does not reproduce this statistic
 Violin plots: gof_outdegree gof_indegree gof_geodesic
 \end{lstlisting}
 This three-effect model on the Glasgow data is deliberately minimal; the output shows how a poorly fitting specification is reported, and that it is a reason to extend the model, not a failure of the command. \opt{nsim()} defaults to 50 (minimum 5); \texttt{nsim(30)} was used here only to be quick.
+
+\subsection{Saving and exporting the plots}\label{sec:gofplot}
+The violin plots are drawn whenever \texttt{estat gof} runs; the options \opt{name()}, \opt{saving()} and \opt{export()} and any graph options act on them. \opt{saving(\emph{filename})} saves every violin graph as a \texttt{.gph} file, and \opt{export(\emph{filename} [, \emph{options}])} exports every violin graph with \texttt{graph export}: the extension of the file name sets the format (\texttt{.pdf}, \texttt{.png}, \ldots) and the options, such as \opt{width()}, are those of \texttt{graph export}. There is one file per graph, and the graph name is put before the extension: with the stub \opt{name(gof)} the call \opt{export(fig.pdf)} writes \texttt{fig\_gof\_outdegree.pdf}, \texttt{fig\_gof\_indegree.pdf} and \texttt{fig\_gof\_geodesic.pdf}. The same holds when \opt{groups()} was used in the fit, where each graph also carries the group (for example \texttt{gof\_g1\_outdegree}). Further graph options, for example \opt{title()} or \opt{scheme()}, are passed to every violin graph. The options \opt{saving()}, \opt{export()} and the graph options need the core 3.29.0 or later.
+\begin{lstlisting}
+. nwsaom, waves(glasgow1 glasgow2 glasgow3) outdegree reciprocity transtrip seed(1)
+. estat gof, seed(1) name(gof) export(fig.pdf)
+\end{lstlisting}
+Figure~\ref{fig:gof} shows two of the three plots of this call. The red line is the observed distribution and the violins are the simulated ones; the observed outdegree distribution follows the simulated one closely, while the observed share of unreachable pairs (the last category, NR) is far above everything the model simulates, which is the rejection in the table.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.48\textwidth]{fig/fig_gof_outdegree.pdf}\hfill
+\includegraphics[width=0.48\textwidth]{fig/fig_gof_geodesic.pdf}
+\caption{Violin plots of \texttt{estat gof} for the three-effect model of the Glasgow data: outdegree distribution (left) and geodesic distances (right).}\label{fig:gof}
+\end{figure}
 
 \paragraph{Stored results.} For each statistic \texttt{estat gof} stores \texttt{r(p\_\emph{stat})} (the $p$-value) and \texttt{r(mhd\_\emph{stat})} (the observed Mahalanobis distance); with \opt{join(off)} the names carry \texttt{\_p1}, \texttt{\_p2}, \ldots; with several behaviors the behavior statistics are \texttt{r(p\_behavior\_}\emph{name}\texttt{)} and \texttt{r(mhd\_behavior\_}\emph{name}\texttt{)}.
 

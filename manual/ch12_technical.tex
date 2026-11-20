@@ -36,7 +36,7 @@ The Mata libraries \texttt{lnwsaom1.mlib} and \texttt{lnwsaom2.mlib} are built w
 \begin{lstlisting}
 . nwinstall, buildmata(nwsaom)
 \end{lstlisting}
-The command fetches the Mata source from the repository, compiles it, installs the library and keeps the old file with the extension \texttt{.prev}. The libraries of \nwsaom{} are compiled against the library of the core, \texttt{lnwcommands.mlib}, and need a matching core library: when the Mata library of the core changes, the libraries of \nwsaom{} are rebuilt and released with it (\nwsaom{}~\pkgversion{} requires nwcommands 3.22.0 or later). If the core library does not load either, use \texttt{nwinstall, buildmata(all)}, which rebuilds the core first and then the installed model packages. The build clears the data and the Mata objects in memory, so save your data first, and restart Stata afterwards.
+The command fetches the Mata source from the repository, compiles it, installs the library and keeps the old file with the extension \texttt{.prev}. The libraries of \nwsaom{} are compiled against the library of the core, \texttt{lnwcommands.mlib}, and need a matching core library: when the Mata library of the core changes, the libraries of \nwsaom{} are rebuilt and released with it (\nwsaom{}~\pkgversion{} requires nwcommands 3.29.0 or later). If the core library does not load either, use \texttt{nwinstall, buildmata(all)}, which rebuilds the core first and then the installed model packages. The build clears the data and the Mata objects in memory, so save your data first, and restart Stata afterwards.
 
 \subsection{Plugin versions}
 
@@ -177,7 +177,7 @@ File & Content \\
 \opt{nwsaom\_multinet.ado} & \texttt{nwsaom multinet}: several dependent networks. \\
 \opt{nwsaom\_multiplex.ado} & \texttt{nwsaom multiplex}: the earlier two-network subcommand with outdegree, reciprocity and the cross-network product. \\
 \opt{\_nwsaom\_postengine.ado}, \opt{\_nwsaom\_rsnotes.ado}, \opt{\_nwsaom\_tconvtable.ado} & Posting of \texttt{e(engine)}, the notes with RSiena's effect names, and the printing of the convergence table. \\
-\texttt{nwsaom\_estat.ado}, \opt{nwsaom\_estat\_*.ado} & The \texttt{estat} commands (\texttt{gof}, \texttt{mems}, \texttt{simulate}, \texttt{importance}, \texttt{score}, \texttt{timetest}). \\
+\texttt{nwsaom\_estat.ado}, \opt{nwsaom\_estat\_*.ado} & The \texttt{estat} commands (\texttt{gof}, \texttt{mems}, \texttt{simulate}, \texttt{importance}, \texttt{score}, \texttt{timetest}, \texttt{convergence}). \\
 \texttt{nwsaom\_ml.ado}, \texttt{nwsaom\_bayes.ado} & Maximum likelihood (option \opt{ml}) and \texttt{nwsaom bayes}. \\
 \texttt{nwsaom\_refit.ado}, \texttt{nwsaom\_simulate.ado}, \texttt{nwsaom\_meta.ado}, \texttt{nwsaom\_describe.ado} & The subcommands \texttt{refit}, \texttt{simulate}, \texttt{meta} and \texttt{describe}. \\
 \texttt{unw\_saom.do} & The Mata core: model, estimator, reference simulator, interface to the plugin; \texttt{lib/build.do} compiles it into \texttt{lib/lnwsaom1.mlib} and \texttt{lib/lnwsaom2.mlib}. \\

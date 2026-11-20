@@ -212,6 +212,16 @@ Period-specific deviations (one-step estimates) and separate tests
 \end{lstlisting}
 With $P$ periods there are $P-1$ deviations per effect. In this example there is no evidence that the effects change between the two periods. The tests are most informative when the deviation of an effect is the question: the deviation is reported as the one-step estimate of the difference between the period and the first period. \opt{effects(\emph{names})} restricts the test to some effects.
 
+\paragraph{The plot.} The option \opt{plot} draws RSiena's \texttt{plot.sienaTimeTest}: one panel per tested effect with the parameter value in each period, that is the estimate of the fit (period 1) and the estimate plus the one-step deviation (the later periods), together with the 90, 95 and 97.5 percent intervals of the deviation, computed from its one-step standard error. The horizontal line is the estimate of the fit, and a period whose deviation has $P<0.05$ is drawn in red. \opt{name()} names the combined graph (default \texttt{timetest}), \opt{saving()} saves it as a \texttt{.gph} file, \opt{export()} exports it with \texttt{graph export} (the extension sets the format), and further graph options, for example \opt{title()}, go to \texttt{graph combine}. These options need \opt{plot}; without it they are an error (r(198)). They need the core 3.29.0 or later.
+\begin{lstlisting}
+. estat timetest, plot export(fig_timetest.pdf)
+\end{lstlisting}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\textwidth]{fig/fig_timetest.pdf}
+\caption{\texttt{estat timetest, plot} after the three-wave fit of this section. With two periods each panel has two points; the bars around the second are the intervals of the deviation.}\label{fig:timetest}
+\end{figure}
+
 \paragraph{Treatment of the rates.} By default the rate parameters are treated as estimated, so that the test equals the score test of a model that adds one fixed period dummy to the fit (what RSiena's \texttt{score.Test} gives after such a fit). The option \opt{fixrates} treats the rates as known, which is what RSiena's \texttt{sienaTimeTest} does. The two agree closely except for effects whose statistic is strongly correlated with the rate, typically the outdegree effect of a network whose changes are close to random; there the default gives the larger value. In the example above they are identical to four decimals; \opt{estat timetest, fixrates} gives the same table.
 
 \paragraph{After \texttt{nwsaom multinet}.} The test is also available for the effects of all networks and of the behavior of a multinet fit.
@@ -343,6 +353,16 @@ IWLS estimates (Snijders and Baerveldt 2003)
 ------------------------------------------------------------------------------
 \end{lstlisting}
 The combined means recover the coefficients, and no effect differs between the groups (\texttt{P>Q} between 0.46 and 0.99), as it should for groups simulated from the same model. In a real analysis a small \texttt{P>Q} for an effect means that the groups differ in that effect by more than their standard errors allow, and the estimated between-group standard deviation shows by how much. The output continues with the maximum likelihood estimates and Fisher's tests (omitted here); the full set of results is returned in \texttt{r(meta)}. \opt{bound(\#)} excludes groups with a standard error of at least \# (default 10), as RSiena does. An effect that a group fitted with \opt{fix()} has a standard error of 0 and is left out for that group (it does not count in $n$ or in the degrees of freedom of the tests of that effect), as \texttt{siena08} leaves it out. The option \opt{rates} combines the rate parameters as well, with their standard errors \texttt{e(rates\_se)}; the fits must have the same number of periods, and the rows are named \texttt{rate\_period1}, \texttt{rate\_period2}, \ldots. A fit with \opt{wave1()}/\opt{wave2()}, as in the example, stores its one rate as the scalar \texttt{e(rate)} with the standard error \texttt{e(rate\_se)}; it is combined as \texttt{rate\_period1}. In the example \texttt{nwsaom meta grp1 grp2 grp3 grp4, rates} adds the row \texttt{rate\_period1} with the mean 4.93 (the simulation used the rate 5) and \texttt{P>Q} 0.85. As in RSiena, combine rates only when they are comparable across the groups, for example when the time between the waves is the same. The matrices \texttt{r(theta)} and \texttt{r(se)} (one row per stored estimate, one column per effect) carry the names of the stored estimates and of the effects. The results reproduce RSiena's functions to five decimals (Chapter~\ref{ch:validation}).
+
+\paragraph{The plot.} The option \opt{plot} draws RSiena's \texttt{plot.sienaMeta}: for every effect, the estimates of the groups against their standard errors, with the lines estimate $=\pm1.96$ standard errors; a group outside the lines differs from zero at the 5 percent level. Groups with a standard error of \opt{bound()} or more are left out, as in the table. \opt{name()} names the combined graph (default \texttt{meta}), \opt{saving()} saves it as a \texttt{.gph} file, \opt{export()} exports it with \texttt{graph export}, and further graph options go to \texttt{graph combine}. These options need \opt{plot}; without it they are an error (r(198)). They need the core 3.29.0 or later. Figure~\ref{fig:meta} is the plot of the four groups above.
+\begin{lstlisting}
+. nwsaom meta grp1 grp2 grp3 grp4, plot export(fig_meta.pdf)
+\end{lstlisting}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\textwidth]{fig/fig_meta.pdf}
+\caption{\texttt{nwsaom meta, plot} for the four simulated groups: the four estimates of each effect against their standard errors.}\label{fig:meta}
+\end{figure}
 
 \section{What is not available}
 

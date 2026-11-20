@@ -4,9 +4,9 @@
 
 ## Bumping the version
 
-The manual's title and citation carry no version number; the title page states the series it describes (`\manualseries`, valid for 1.5.x). The exact version and date of the release that produced the listings are two more macros in `nwsaom_manual.tex` (written by `tools/set_version.py`):
+The manual's title and citation carry no version number; the title page states the series it describes (`\manualseries`, valid for 1.9.x). The exact version and date of the release that produced the listings are two more macros in `nwsaom_manual.tex` (written by `tools/set_version.py`):
 
-    \newcommand{\manualseries}{1.5}
+    \newcommand{\manualseries}{1.9}
     \newcommand{\pkgversion}{1.2.0}
     \newcommand{\pkgdate}{26 October 2026}
 
@@ -21,3 +21,7 @@ The listings are pasted from runs of the Glasgow examples (and abridged by hand 
 ## The DOI
 
 `\manualdoi` holds 10.5281/zenodo.23623807, the DOI of all versions of the Zenodo record. `ZENODO.md` holds the metadata of the record and the steps for the upload.
+
+## Figures
+
+`fig/mkfigs.do` makes the figures of the plot examples (violin plots of `estat gof`, `estat convergence, plot`, `estat timetest, plot`, `nwsaom meta, plot`; Glasgow data) as PDF files in `fig/`; run it with the environment variables `NWCORE`, `NWSAOM` and `PLUSDIR` as described in its first lines, from the directory `fig/`.
