@@ -10,7 +10,7 @@ project uses [Semantic Versioning](https://semver.org/).
 ### Changed
 - The dialog assembly test `dlg/cmd_assembly_test.py` covers the plot options of `estat gof`, `estat timetest`, `estat convergence` and `nwsaom meta` (`plot`, `name()`, `saving()`, `export()`).
 
-Tested on macOS with Stata 17 BE: the dialog assembly test (20 cases), `test_nwsaom_plots` and `test_nwsaom_ado`. Linux, Windows and Stata 18 were not run for this version: there is no code change.
+Tested on macOS with Stata 17 BE: the dialog assembly test (20 cases), `test_nwsaom_plots` and `test_nwsaom_ado`; on Linux (Ubuntu 22.04) and Windows 11 (both StataNow 19.5 MP): `test_nwsaom_plots` passes. There is no code change. Stata 18 on the Mac: not run.
 
 ## [1.9.0] - 2026-11-20
 
