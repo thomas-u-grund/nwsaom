@@ -3,6 +3,11 @@
 All notable changes to nwsaom are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+- The dialog test `dlg/cmd_assembly_test.py` also checks the command that the dialogs build for the plot options of `estat gof`, `estat timetest`, `estat convergence` and `nwsaom meta` (`plot`, `name()`, `saving()`, `export()`).
+
 ## [1.9.0] - 2026-11-20
 
 ### Added
