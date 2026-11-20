@@ -1074,6 +1074,13 @@ Without {opt theta01()}/{opt theta02()} the model is fitted by {cmd:nwsaom multi
 {synopt:{bf:e(tconv)}}convergence t-ratios{p_end}
 
 
+{title:Manual}
+
+{pstd}
+A user manual (PDF in the {cmd:manual} folder of the package source) is archived at Zenodo, {browse "https://doi.org/10.5281/zenodo.23623807":doi:10.5281/zenodo.23623807}, all versions. Please cite it by that address and report the package version printed by {cmd:nwsaom version}.
+{p_end}
+
+
 {title:References}
 
 {pstd}
