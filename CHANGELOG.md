@@ -13,6 +13,8 @@ project uses [Semantic Versioning](https://semver.org/).
 - The plot options use the shared graph helper of the core and need nwcommands 3.29.0 or later (`Requires nwcommands (core), version 3.29.0 or later`); an older core stops at plot time with a message and r(199), commands without plot options keep working. The default pictures of `estat gof` are unchanged (identical PNG files).
 - Test `cscripts/test_nwsaom_plots.do` (with a comparison of the default `estat gof` pictures against the released version, `cscripts/nwsaom_plots_defaults.do`).
 
+Tested on macOS with Stata 17 BE (the plot test and the ado test, against core 3.29.0); on Linux and on Windows with StataNow 19.5 MP (the plot tests and the package tests of this version). Stata 18 on the Mac was not run for this version. The package has no native change; the plugin is the one of 1.8.1.
+
 ## [1.8.1] - 2026-11-18
 
 ### Fixed
