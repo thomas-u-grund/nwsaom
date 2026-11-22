@@ -5,6 +5,11 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.9.2] - 2026-11-22
+
+### Changed
+- Rebuilt for nwcommands 3.36.0; requires core 3.36.0 or later. No other change.
+
 ## [1.9.1] - 2026-11-20
 
 ### Changed

@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.9.1  20nov2026 author: Thomas Grund}{...}
+{* *! version 1.9.2  22nov2026 author: Thomas Grund}{...}
 {vieweralsosee "nwsaom" "help nwsaom"}{...}
 {vieweralsosee "nwsaom_estat" "help nwsaom_estat"}{...}
 
@@ -100,4 +100,4 @@ fisher_right_p, fisher_left, fisher_left_p, level{p_end}
 {pstd}Snijders, T.A.B. and Baerveldt, C. (2003). A multilevel network study of the effects of delinquent behavior on friendship evolution. {it:Journal of Mathematical Sociology} 27: 123-151.{p_end}
 
 {hline}
-{pstd}{it:nwsaom version 1.9.1, 20 November 2026}{p_end}{* nwversion}
+{pstd}{it:nwsaom version 1.9.2, 22 November 2026}{p_end}{* nwversion}
